@@ -1,0 +1,24 @@
+# Dependencies
+mess-manager-server/node_modules/
+mess-manager-client/node_modules/
+
+# Build output
+mess-manager-client/dist/
+mess-manager-client/dist-ssr/
+
+# Environment files (secrets)
+mess-manager-server/.env
+mess-manager-client/.env
+mess-manager-client/.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
