@@ -7,7 +7,7 @@ import { UserCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LoginForm = ({ onSuccess }) => {
-    const { login } = useAuth();
+    const { login, notification, setNotification } = useAuth();
     const navigate = useNavigate();
     const [role, setRole] = useState('admin'); // 'admin' | 'member'
     const [userId, setUserId] = useState('');
@@ -78,6 +78,32 @@ const LoginForm = ({ onSuccess }) => {
                     Member
                 </button>
             </div>
+
+            <AnimatePresence>
+                {notification && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                        className="mb-8 p-6 bg-amber-500/10 border border-amber-500/20 backdrop-blur-xl rounded-[2rem] flex flex-col items-center text-center gap-4 relative overflow-hidden group"
+                    >
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-110 transition-transform"></div>
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 rotate-3">
+                            <AlertCircle className="text-white" size={24} />
+                        </div>
+                        <div>
+                            <p className="text-amber-500 text-sm font-black uppercase tracking-widest mb-1">Security Alert</p>
+                            <p className="text-slate-600 dark:text-slate-300 font-bold text-sm tracking-tight">{notification.message}</p>
+                        </div>
+                        <button
+                            onClick={() => setNotification(null)}
+                            className="px-6 py-2.5 bg-amber-500/20 hover:bg-amber-500 hover:text-white text-amber-600 dark:text-amber-400 font-black text-[10px] uppercase tracking-widest rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-500/10"
+                        >
+                            Login Again
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <AnimatePresence mode="wait">
                 <motion.form

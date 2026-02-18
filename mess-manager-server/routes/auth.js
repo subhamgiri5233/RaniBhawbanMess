@@ -24,11 +24,18 @@ router.post('/login', async (req, res) => {
 
             // Always verify credentials against the database
             if (admin.username.toLowerCase() === userId.toLowerCase() && admin.password === password) {
+                // Generate a unique session token for single-device login
+                const sessionToken = require('crypto').randomBytes(32).toString('hex');
+
+                // Store session token in DB — invalidates any previous session
+                await Admin.findByIdAndUpdate(admin._id, { sessionToken });
+
                 const token = generateToken({
                     id: admin._id,
                     username: admin.username,
                     role: 'admin',
-                    name: 'Mess Admin'
+                    name: 'Mess Admin',
+                    sessionToken
                 });
 
                 return res.json({

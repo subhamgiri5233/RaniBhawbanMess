@@ -13,6 +13,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
+    const [notification, setNotification] = useState(null);
 
     // User object: { id, name, role: 'admin' | 'member', avatar? }
     const [user, setUser] = useState(() => {
@@ -41,8 +42,7 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             setToken(null);
             if (message) {
-                // Show alert after a tiny delay so state updates first
-                setTimeout(() => alert(message), 100);
+                setNotification({ message, type: 'error' });
             }
         };
         window.addEventListener('auth:logout', handleForceLogout);
@@ -88,7 +88,17 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, login, setUser, logout, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{
+            user,
+            token,
+            isLoading,
+            notification,
+            setNotification,
+            login,
+            setUser,
+            logout,
+            isAuthenticated: !!user
+        }}>
             {children}
         </AuthContext.Provider>
     );
