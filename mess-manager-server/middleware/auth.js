@@ -1,18 +1,29 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-// Verify JWT token
-const auth = (req, res, next) => {
+// Verify JWT token + single-device session for members
+const auth = async (req, res, next) => {
     try {
-        // Get token from header
         const token = req.header('Authorization')?.replace('Bearer ', '');
 
         if (!token) {
             return res.status(401).json({ message: 'No token, authorization denied' });
         }
 
-        // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
+
+        // For members: validate sessionToken to enforce single-device login
+        if (decoded.role === 'member' && decoded.sessionToken) {
+            const user = await User.findById(decoded.id).select('sessionToken');
+            if (!user || user.sessionToken !== decoded.sessionToken) {
+                return res.status(401).json({
+                    message: 'Session expired. You have been logged in on another device.',
+                    code: 'SESSION_REPLACED'
+                });
+            }
+        }
+
         next();
     } catch (err) {
         res.status(401).json({ message: 'Token is not valid' });

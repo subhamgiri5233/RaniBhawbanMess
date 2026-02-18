@@ -36,13 +36,17 @@ router.get('/summary', auth, async (req, res) => {
     }
 });
 
-// Get all members - Requires authentication
+// Get all members - Requires authentication (admin gets passwords too)
 router.get('/', auth, async (req, res) => {
     try {
-        // Return members (excluding admin ideally, but 'role' filter works)
-        const members = await User.find({
+        const query = User.find({
             $or: [{ role: 'member' }, { role: { $exists: false } }, { role: null }]
-        }).select('-password');
+        });
+        // Admin can see passwords, members cannot
+        if (req.user.role !== 'admin') {
+            query.select('-password');
+        }
+        const members = await query;
         res.json(members);
     } catch (err) {
         res.status(500).json({ message: err.message });

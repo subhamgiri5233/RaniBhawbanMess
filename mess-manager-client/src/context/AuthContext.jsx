@@ -34,6 +34,21 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(false);
     }, []);
 
+    // Listen for forced logout events (e.g. session replaced by another device)
+    useEffect(() => {
+        const handleForceLogout = (e) => {
+            const message = e.detail?.message;
+            setUser(null);
+            setToken(null);
+            if (message) {
+                // Show alert after a tiny delay so state updates first
+                setTimeout(() => alert(message), 100);
+            }
+        };
+        window.addEventListener('auth:logout', handleForceLogout);
+        return () => window.removeEventListener('auth:logout', handleForceLogout);
+    }, []);
+
     useEffect(() => {
         if (user) {
             localStorage.setItem('mess_user', JSON.stringify(user));

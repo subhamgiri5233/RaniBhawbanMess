@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     deposit: { type: Number, default: 0 },
     joinedAt: { type: String },
     dateOfBirth: { type: String },
+    sessionToken: { type: String, default: null }, // For single-device login
     createdAt: { type: Date, default: Date.now }
 });
 

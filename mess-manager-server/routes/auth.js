@@ -47,7 +47,6 @@ router.post('/login', async (req, res) => {
 
         } else {
             // Member login
-
             let user;
             try {
                 user = await User.findOne({ userId: userId });
@@ -60,17 +59,20 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ success: false, message: 'User not found' });
             }
 
-
-
             if (user.password === password) {
+                // Generate a unique session token for single-device login
+                const sessionToken = require('crypto').randomBytes(32).toString('hex');
+
+                // Store session token in DB — this invalidates any previous session
+                await User.findByIdAndUpdate(user._id, { sessionToken });
+
                 const token = generateToken({
                     id: user._id,
                     userId: user.userId,
                     role: 'member',
-                    name: user.name
+                    name: user.name,
+                    sessionToken // embed in JWT so middleware can validate
                 });
-
-
 
                 return res.json({
                     success: true,
@@ -84,7 +86,6 @@ router.post('/login', async (req, res) => {
                     }
                 });
             }
-
 
             return res.status(401).json({ success: false, message: 'Invalid password' });
         }
