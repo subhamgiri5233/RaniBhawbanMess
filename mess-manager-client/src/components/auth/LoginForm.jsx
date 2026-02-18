@@ -157,11 +157,7 @@ const LoginForm = ({ onSuccess }) => {
                 </motion.form>
             </AnimatePresence>
 
-            {role === 'admin' && !error && (
-                <p className="text-xs text-center text-slate-400 mt-8 font-medium tracking-wide">
-                    DEMO ACCESS: ADMIN / ADMIN@123
-                </p>
-            )}
+
         </div>
     );
 };
