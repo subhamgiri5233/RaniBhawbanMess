@@ -19,6 +19,7 @@ const Members = () => {
     const [editingPassword, setEditingPassword] = useState(null);
     const [newPasswordValue, setNewPasswordValue] = useState('');
     const [passwordChangeStatus, setPasswordChangeStatus] = useState({});
+    const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, name }
 
     const handleChangePassword = async (memberId) => {
         if (!newPasswordValue || newPasswordValue.length < 4) {
@@ -104,6 +105,7 @@ const Members = () => {
 
     const handleDelete = (memberId) => {
         removeMember(memberId);
+        setDeleteConfirm(null);
     };
 
     return (
@@ -112,6 +114,56 @@ const Members = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {deleteConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setDeleteConfirm(null)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                            className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-2xl border border-slate-200 dark:border-white/10 max-w-sm w-full"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* Icon */}
+                            <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center mx-auto mb-6 border border-red-100 dark:border-red-500/20">
+                                <Trash2 size={28} className="text-red-500" />
+                            </div>
+                            {/* Text */}
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white text-center tracking-tight mb-2">
+                                Delete Member?
+                            </h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-8">
+                                Are you sure you want to remove{' '}
+                                <span className="font-black text-slate-800 dark:text-slate-200">{deleteConfirm.name}</span>
+                                ? This action cannot be undone.
+                            </p>
+                            {/* Buttons */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setDeleteConfirm(null)}
+                                    className="flex-1 px-6 py-3.5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(deleteConfirm.id)}
+                                    className="flex-1 px-6 py-3.5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white bg-red-500 hover:bg-red-600 active:scale-95 transition-all shadow-lg shadow-red-500/30"
+                                >
+                                    Yes, Delete
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Header with clean light mode / dark mode variants */}
             <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 shadow-sm border border-slate-200/50 dark:border-white/5 group border-l-8 border-l-indigo-600">
                 {/* Decorative Elements */}
@@ -389,7 +441,7 @@ const Members = () => {
                                         <td className="p-6 text-right">
                                             <button
                                                 className="p-3 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/5 transition-all rounded-2xl opacity-0 group-hover:opacity-100"
-                                                onClick={() => handleDelete(member._id)}
+                                                onClick={() => setDeleteConfirm({ id: member._id, name: member.name })}
                                             >
                                                 <Trash2 size={20} />
                                             </button>
