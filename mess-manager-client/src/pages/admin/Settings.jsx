@@ -173,7 +173,7 @@ const Settings = () => {
                 </h2>
                 <div className="space-y-2 text-sm font-bold">
                     <p><span className="text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-widest block mb-1">Logged in as</span> <span className="text-slate-900 dark:text-slate-100">{user?.name || 'Admin'}</span></p>
-                    <p><span className="text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-widest block mb-1">User ID</span> <span className="text-slate-700 dark:text-slate-300 font-mono text-xs">{user?.id || user?._id}</span></p>
+                    <p><span className="text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-widest block mb-1">Username</span> <span className="text-slate-700 dark:text-slate-300 font-mono text-xs">{user?.username || 'Admin'}</span></p>
                     <p className="text-[10px] text-primary-600 dark:text-primary-400 mt-6 uppercase tracking-widest font-black">
                         ⚠️ Keep your passwords secure and change them regularly
                     </p>
