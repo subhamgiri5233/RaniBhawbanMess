@@ -53,7 +53,7 @@ const MealRow = React.memo(({ member, type, days, getStatus, todayStr, calculate
         )}>
             <td className="p-4 border-r border-slate-50 dark:border-white/5 font-black text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-950 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">
                 <div className="flex flex-col">
-                    <span className={cn("truncate max-w-[140px]", !isLunch && "opacity-40")}>{member.name}</span>
+                    <span className="truncate max-w-[140px]">{member.name}</span>
                     <span className={cn(
                         "text-[8px] uppercase tracking-widest mt-1 flex items-center gap-1",
                         isLunch ? "text-primary-500 dark:text-primary-400" : "text-indigo-500 dark:text-indigo-400"
