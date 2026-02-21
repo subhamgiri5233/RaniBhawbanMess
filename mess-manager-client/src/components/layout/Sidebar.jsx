@@ -59,6 +59,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     const adminLinks = [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { to: '/members', icon: Users, label: 'Members' },
+        { to: '/market', icon: ShoppingBag, label: 'Market Schedule' },
         { to: '/add-expense', icon: CreditCard, label: 'Finance' }, // New Admin Finance Link
         { to: '/meals', icon: Utensils, label: 'Meals' },
         { to: '/expenses', icon: Receipt, label: 'Expenses' },

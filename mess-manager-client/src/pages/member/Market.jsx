@@ -53,7 +53,10 @@ const Market = () => {
 
     // Manager View Logic
     const currentManagerId = managerAllocation[monthKey];
-    const isManager = user.role === 'admin' || (currentManagerId && user.id === currentManagerId);
+    const isAdmin = user.role === 'admin';
+    // isManager controls ACTION capabilities (approvals, manual assigns)
+    const isManager = currentManagerId && user.id === currentManagerId;
+    const isReadOnlyAdmin = isAdmin && !isManager;
 
     // Helper to see who has a date
     const getDayInfo = (date) => {
@@ -90,8 +93,13 @@ const Market = () => {
             return;
         }
 
+        // Admin view is read-only unless they are the active manager
+        if (isReadOnlyAdmin) {
+            return;
+        }
+
         if (isManager) {
-            // Managers/Admins assign directly
+            // Managers assign directly
             allocateMarketDay(dateStr, user.id, 'manual_assign');
         } else {
             // Members request
@@ -139,7 +147,13 @@ const Market = () => {
                     <p className="text-[10px] md:text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Reserve your dates for mess collection</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    {!isManager && (
+                    {isAdmin && !isManager && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 border border-slate-500/20 rounded-2xl">
+                            <Lock size={16} className="text-slate-500" />
+                            <span className="text-xs font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Admin Read-Only</span>
+                        </div>
+                    )}
+                    {!isAdmin && (
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Monthly Quota</span>
                             <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
@@ -252,7 +266,7 @@ const Market = () => {
                         )}
                     </div>
                     <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-center md:justify-end">
-                        {!isManager && (
+                        {!isAdmin && (
                             <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 px-3 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl border border-amber-200 dark:border-amber-500/30">
                                 Requests: <span className="text-sm md:text-lg leading-none align-middle ml-1">{myRequestsThisMonth}</span>/4
                             </div>
