@@ -13,14 +13,16 @@ const Payments = () => {
     const [processingPayment, setProcessingPayment] = useState(null);
 
     // 1. Get payment notifications for this user
-    const paymentNotifications = notifications.filter(n =>
-        (n.userId === user.id || n.userId === user._id) && n.type === 'payment'
-    ).map(n => ({ ...n, itemType: 'notification' }));
+    const paymentNotifications = notifications.filter(n => {
+        const notifUserId = String(n.userId || n.user?._id || n.user);
+        const currentUserId = String(user.id || user._id);
+        return notifUserId === currentUserId && n.type === 'payment';
+    }).map(n => ({ ...n, itemType: 'notification' }));
 
     // 2. Get payment expenses (deposits/bills) for this user, excluding market logs
-    const myId = user.id || user.userId || user._id;
+    const myId = String(user.id || user.userId || user._id);
     const paymentExpenses = expenses.filter(e =>
-        e.paidBy === myId && e.category !== 'market'
+        String(e.paidBy) === myId && e.category !== 'market'
     ).map(e => ({
         ...e,
         itemType: 'expense',

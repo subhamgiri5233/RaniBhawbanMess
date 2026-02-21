@@ -9,7 +9,7 @@ router.get('/', auth, async (req, res) => {
     try {
         let query = {};
         if (req.user.role !== 'admin') {
-            query = { $or: [{ userId: req.user.userId }, { userId: 'all' }] };
+            query = { $or: [{ userId: req.user.id || req.user.userId }, { userId: 'all' }] };
         }
         const notifications = await Notification.find(query);
         res.json(notifications);
@@ -22,7 +22,7 @@ router.get('/', auth, async (req, res) => {
 router.get('/:userId', auth, async (req, res) => {
     try {
         // Security check: must be admin or the requested user
-        if (req.user.role !== 'admin' && req.user.userId !== req.params.userId) {
+        if (req.user.role !== 'admin' && (req.user.id || req.user.userId) !== req.params.userId) {
             return res.status(403).json({ message: 'Access denied' });
         }
 

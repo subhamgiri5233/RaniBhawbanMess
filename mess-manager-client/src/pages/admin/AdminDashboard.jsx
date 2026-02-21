@@ -256,6 +256,12 @@ const AdminDashboard = () => {
                             </div>
                             <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight text-base md:text-xl">Admin Spends</h2>
                         </div>
+                        <button
+                            onClick={() => navigate('/expenses')}
+                            className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl transition-all"
+                        >
+                            View All <ArrowUpRight size={14} />
+                        </button>
                     </div>
                     <div className="overflow-x-auto scrollbar-hide">
                         <table className="w-full text-left border-collapse">
@@ -268,7 +274,7 @@ const AdminDashboard = () => {
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                                 {expenses.filter(e => e.paidBy === 'admin').length > 0 ? (
-                                    expenses.filter(e => e.paidBy === 'admin').slice(0, 5).map((expense) => (
+                                    expenses.filter(e => e.paidBy === 'admin').map((expense) => (
                                         <AdminExpenseRow key={expense._id || expense.id} expense={expense} />
                                     ))
                                 ) : (
