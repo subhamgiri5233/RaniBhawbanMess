@@ -139,6 +139,10 @@ app.use('/api/daily', dailyRoutes);
 const gitaRoutes = require('./routes/gita');
 app.use('/api/gita', gitaRoutes);
 
+const jarvisRoutes = require('./routes/jarvis');
+app.use('/api/jarvis', jarvisRoutes);
+
+
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error('Error:', err);

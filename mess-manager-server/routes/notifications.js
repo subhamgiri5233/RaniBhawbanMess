@@ -91,7 +91,8 @@ router.post('/payment/bulk', auth, requireAdmin, async (req, res) => {
 router.put('/mark-read/:userId', auth, async (req, res) => {
     try {
         // Security check: must be admin or the user themselves
-        if (req.user.role !== 'admin' && req.user.userId !== req.params.userId) {
+        const requesterId = req.user.id || req.user.userId;
+        if (req.user.role !== 'admin' && requesterId !== req.params.userId) {
             return res.status(403).json({ message: 'Access denied' });
         }
 
