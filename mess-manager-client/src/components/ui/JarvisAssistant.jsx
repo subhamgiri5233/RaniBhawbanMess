@@ -53,6 +53,26 @@ const JarvisAssistant = () => {
     const panelRef = useRef(null);
     const transcriptRef = useRef(''); // Added to fix stale closure in events
 
+    // ── JARVIS Logic ──────────────────────────────────────────────────────────
+    const askJarvis = useCallback(async () => {
+        const q = transcriptRef.current;
+        if (!q?.trim()) { setPhase('idle'); return; }
+
+        setPhase('thinking');
+
+        try {
+            const res = await api.post('/jarvis', { question: q });
+            const answer = res.data.answer;
+            setResponse(answer);
+            setPhase('speaking');
+            speak(answer, () => setPhase('idle'));
+        } catch (err) {
+            const msg = err.response?.data?.error || 'JARVIS encountered an error. Please try again.';
+            setError(msg);
+            setPhase('idle');
+        }
+    }, []);
+
     // ── Voice recognition ──────────────────────────────────────────────────────
     const startListening = useCallback(() => {
         if (!SpeechRecognition) {
@@ -99,26 +119,7 @@ const JarvisAssistant = () => {
         };
 
         rec.start();
-    }, []); // eslint-disable-line
-
-    const askJarvis = useCallback(async () => {
-        const q = transcriptRef.current;
-        if (!q?.trim()) { setPhase('idle'); return; }
-
-        setPhase('thinking');
-
-        try {
-            const res = await api.post('/jarvis', { question: q });
-            const answer = res.data.answer;
-            setResponse(answer);
-            setPhase('speaking');
-            speak(answer, () => setPhase('idle'));
-        } catch (err) {
-            const msg = err.response?.data?.error || 'JARVIS encountered an error. Please try again.';
-            setError(msg);
-            setPhase('idle');
-        }
-    }, []);
+    }, [askJarvis]);
 
     const handleOrbClick = () => {
         if (phase === 'idle') {

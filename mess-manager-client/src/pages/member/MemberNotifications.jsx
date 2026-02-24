@@ -19,6 +19,7 @@ const MemberNotifications = () => {
 
     const myNotifications = notifications
         .filter(n => n.userId === (user.id || user._id || user.userId) || n.userId === 'all')
+        .filter(n => n.type !== 'market_request')
         .slice()
         .reverse();
 

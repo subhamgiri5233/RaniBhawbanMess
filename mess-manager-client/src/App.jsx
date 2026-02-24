@@ -21,7 +21,7 @@ const Settings = lazy(() => import('./pages/admin/Settings'));
 const Management = lazy(() => import('./pages/admin/Management'));
 
 // Member Pages
-const Market = lazy(() => import('./pages/member/Market'));
+const Market = lazy(() => import('./pages/member/MarketDuty'));
 const AddExpense = lazy(() => import('./pages/member/AddExpense'));
 const Payments = lazy(() => import('./pages/member/Payments'));
 const MemberNotifications = lazy(() => import('./pages/member/MemberNotifications'));

@@ -32,7 +32,8 @@ export const AuthProvider = ({ children }) => {
 
     // Mark initial loading as complete
     useEffect(() => {
-        setIsLoading(false);
+        const timer = setTimeout(() => setIsLoading(false), 0);
+        return () => clearTimeout(timer);
     }, []);
 
     // Listen for forced logout events (e.g. session replaced by another device)

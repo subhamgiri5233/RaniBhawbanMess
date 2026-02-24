@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { format } from 'date-fns';
 import api from '../lib/api';
 import { useAuth } from './AuthContext';
 import { getDailyInfo } from '../utils/dailyUtils';
@@ -26,13 +25,6 @@ export const DataProvider = ({ children }) => {
     const [dailyInfo, setDailyInfo] = useState(null);
     const [loadingDaily, setLoadingDaily] = useState(true);
     const { isAuthenticated } = useAuth();
-
-    // Fetch Initial Data
-    useEffect(() => {
-        if (isAuthenticated) {
-            refreshData();
-        }
-    }, [isAuthenticated]);
 
     const refreshData = useCallback(async () => {
         try {
@@ -77,6 +69,16 @@ export const DataProvider = ({ children }) => {
             console.error('Refresh critically failed', e);
         }
     }, []);
+
+    // Fetch Initial Data
+    useEffect(() => {
+        if (isAuthenticated) {
+            const loadData = async () => {
+                await refreshData();
+            };
+            loadData();
+        }
+    }, [isAuthenticated, refreshData]);
 
     // Admin Actions
     const addMember = async (member) => {

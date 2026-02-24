@@ -52,7 +52,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     // Logic: user sees notifications where userId is their ID OR 'all'
     const currentUserId = user?.id || user?._id || user?.userId;
     const unreadCount = notifications ? notifications.filter(n =>
-        (n.userId === currentUserId || n.userId === 'all') && !n.isRead
+        (n.userId === currentUserId || n.userId === 'all') && !n.isRead && n.type !== 'market_request'
     ).length : 0;
 
     if (!user) return null;
@@ -60,7 +60,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     const adminLinks = [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { to: '/members', icon: Users, label: 'Members' },
-        { to: '/market', icon: ShoppingBag, label: 'Market Schedule' },
+        { to: '/market', icon: ShoppingBag, label: 'Market Duty' },
         { to: '/add-expense', icon: CreditCard, label: 'Finance' }, // New Admin Finance Link
         { to: '/meals', icon: Utensils, label: 'Meals' },
         { to: '/expenses', icon: Receipt, label: 'Expenses' },
@@ -73,7 +73,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     const memberLinks = [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { to: '/member-meals', icon: Utensils, label: 'Meals' },
-        { to: '/market', icon: ShoppingBag, label: 'Market' },
+        { to: '/market', icon: ShoppingBag, label: 'Market Duty' },
         { to: '/add-expense', icon: Receipt, label: 'Add Expense' },
         { to: '/payments', icon: CreditCard, label: 'Payments' },
         { to: '/spices-others', icon: ShoppingBag, label: 'Spices & Others' },

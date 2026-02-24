@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import api from '../../lib/api';
@@ -6,7 +6,6 @@ import Card from '../../components/ui/Card';
 import Clock from '../../components/ui/Clock';
 import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, TrendingUp, ArrowUpRight, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '../../lib/utils';
 
 const AdminDashboard = () => {
     const { members, expenses, meals } = useData();
@@ -15,18 +14,21 @@ const AdminDashboard = () => {
     const [editingId, setEditingId] = useState(null);
     const [tempDeposit, setTempDeposit] = useState('');
 
-    const fetchSummary = async () => {
+    const fetchSummary = useCallback(async () => {
         try {
             const res = await api.get('/members/summary');
             setMemberSummary(res.data);
         } catch (err) {
             console.error("Failed to fetch member summary:", err);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        fetchSummary();
-    }, []);
+        const load = async () => {
+            await fetchSummary();
+        };
+        load();
+    }, [fetchSummary]);
 
     const startEditing = (member) => {
         setEditingId(member._id);

@@ -9,7 +9,7 @@ import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
 const Notifications = () => {
-    const { members, sendNotification, notifications, approveMarketRequest, rejectMarketRequest, updateNotification, deleteNotification, markAllAsRead, refreshData } = useData();
+    const { members, sendNotification, notifications, deleteNotification, markAllAsRead, refreshData } = useData();
     const { user } = useAuth();
     const [selectedUser, setSelectedUser] = useState('');
     const [message, setMessage] = useState('');
@@ -49,7 +49,7 @@ const Notifications = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8">
                 {/* Send Notification Card */}
                 <Card className="p-8 shadow-premium border-white/5 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -93,189 +93,109 @@ const Notifications = () => {
                     </form>
                 </Card>
 
-                {/* Market Requests Notifications */}
-                <Card className="p-0 overflow-hidden shadow-premium border-white/5 h-fit flex flex-col">
-                    <div className="p-6 border-b border-white/10 bg-amber-500/10 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/40 rounded-xl">
-                                <Bell size={18} className="text-amber-600" />
+                {/* General History Record */}
+                <Card className="p-0 overflow-hidden shadow-premium border-white/5 bg-white dark:bg-slate-900/40">
+                    <div className="p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-indigo-100 dark:bg-indigo-950/40 rounded-2xl shadow-sm">
+                                <Bell size={20} className="text-indigo-600 dark:text-indigo-400" />
                             </div>
-                            <h3 className="font-black text-amber-900 dark:text-amber-500 uppercase tracking-[0.2em] text-[10px]">Supply Chain Validation</h3>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Transmission Ledger</h3>
+                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Audit log of system-wide broadcasts</p>
+                            </div>
                         </div>
-                        <span className="px-3 py-1 bg-amber-500 text-white rounded-lg text-[8px] font-black uppercase tracking-widest">Pending Sync</span>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
+                                {notifications.filter(n => n.type !== 'market_request').length} Records
+                            </span>
+                        </div>
                     </div>
-                    <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[500px] overflow-y-auto scrollbar-hide bg-white dark:bg-slate-900/40">
-                        {notifications.filter(n => n.type === 'market_request').length > 0 ? (
+                    <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto scrollbar-hide">
+                        {notifications.filter(n => n.type !== 'market_request').length > 0 ? (
                             <AnimatePresence mode="popLayout">
-                                {notifications.filter(n => n.type === 'market_request').slice().reverse().map((n, idx) => (
+                                {notifications.filter(n => n.type !== 'market_request').slice().reverse().map((n, idx) => (
                                     <motion.div
                                         key={n._id || n.id}
                                         layout
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: idx * 0.05 }}
-                                        className="p-6 hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
+                                        initial={{ opacity: 0, scale: 0.98 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: idx * 0.03 }}
+                                        className="p-8 hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
                                     >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="font-black text-xs text-amber-600 dark:text-amber-500 uppercase tracking-widest">
-                                                {getMemberName(n.metadata?.requesterId)} - MARKET REQUEST
-                                            </span>
-                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{n.date}</span>
-                                        </div>
-                                        <p className="text-slate-600 dark:text-slate-300 text-sm font-bold mb-4 leading-relaxed">{n.message}</p>
-
-                                        <div className="mt-2">
-                                            {!n.status ? (
-                                                <div className="flex gap-3">
-                                                    <Button
-                                                        size="xs"
-                                                        className="bg-emerald-600 hover:bg-emerald-700 text-white border-none py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20"
-                                                        onClick={async () => {
-                                                            const date = n.metadata?.date;
-                                                            if (date) {
-                                                                await updateNotification(n._id, { status: 'approved' });
-                                                                await approveMarketRequest(date, false);
-                                                                refreshData();
-                                                            }
-                                                        }}
-                                                    >
-                                                        Validate
-                                                    </Button>
-                                                    <Button
-                                                        size="xs"
-                                                        className="bg-rose-500 hover:bg-rose-600 text-white border-none py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-500/20"
-                                                        onClick={async () => {
-                                                            const date = n.metadata?.date;
-                                                            if (date) {
-                                                                await rejectMarketRequest(date, false);
-                                                                await deleteNotification(n._id);
-                                                                refreshData();
-                                                            }
-                                                        }}
-                                                    >
-                                                        Decline
-                                                    </Button>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/40 dark:to-indigo-950/60 flex items-center justify-center font-black text-sm text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/10 group-hover:rotate-6 transition-all duration-500">
+                                                    {getMemberName(n.userId).charAt(0)}
                                                 </div>
-                                            ) : (
-                                                <div className={cn(
-                                                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm",
-                                                    n.status === 'approved' ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-rose-500/10 text-rose-500 border border-rose-500/20"
-                                                )}>
-                                                    <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", n.status === 'approved' ? "bg-emerald-500" : "bg-rose-500")}></div>
-                                                    {n.status === 'approved' ? 'Synchronized' : 'Revoked'}
+                                                <div>
+                                                    <span className="font-black text-indigo-600 dark:text-indigo-400 text-sm uppercase tracking-tight">
+                                                        {getMemberName(n.userId)}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{n.date}</span>
+                                                        {n.type && (
+                                                            <span className="text-[8px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest rounded-md border border-slate-200/50 dark:border-white/5">
+                                                                {n.type}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            )}
+                                            </div>
+                                            <button
+                                                onClick={() => deleteNotification(n._id || n.id)}
+                                                className="opacity-0 group-hover:opacity-100 p-2 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all active:scale-90 flex-shrink-0"
+                                                title="Delete notification"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
                                         </div>
+                                        <p className="text-slate-700 dark:text-slate-200 text-sm font-bold leading-relaxed">{n.message}</p>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
                         ) : (
-                            <div className="p-16 text-center">
-                                <div className="w-16 h-16 bg-amber-50 dark:bg-amber-950/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-dashed border-amber-200 dark:border-amber-500/30">
-                                    <Bell size={24} className="text-amber-300 dark:text-amber-800" />
+                            <div className="p-24 text-center">
+                                <div className="w-20 h-20 bg-slate-50 dark:bg-slate-950/40 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-slate-200 dark:border-white/10">
+                                    <Bell size={32} className="text-slate-300 dark:text-slate-800" />
                                 </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Zero active requests</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ledger empty</p>
                             </div>
                         )}
                     </div>
-                </Card>
-            </div>
 
-            {/* General History Record */}
-            <Card className="p-0 overflow-hidden shadow-premium border-white/5 bg-white dark:bg-slate-900/40">
-                <div className="p-8 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-indigo-100 dark:bg-indigo-950/40 rounded-2xl shadow-sm">
-                            <Bell size={20} className="text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Transmission Ledger</h3>
-                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Audit log of system-wide broadcasts</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
-                            {notifications.length} Records
-                        </span>
-                    </div>
-                </div>
-                <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto scrollbar-hide">
-                    {notifications.filter(n => n.type !== 'market_request').length > 0 ? (
-                        <AnimatePresence mode="popLayout">
-                            {notifications.filter(n => n.type !== 'market_request').slice().reverse().map((n, idx) => (
-                                <motion.div
-                                    key={n._id || n.id}
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.98 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: idx * 0.03 }}
-                                    className="p-8 hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
-                                >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/40 dark:to-indigo-950/60 flex items-center justify-center font-black text-sm text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/10 group-hover:rotate-6 transition-all duration-500">
-                                                {getMemberName(n.userId).charAt(0)}
-                                            </div>
-                                            <div>
-                                                <span className="font-black text-indigo-600 dark:text-indigo-400 text-sm uppercase tracking-tight">
-                                                    {getMemberName(n.userId)}
-                                                </span>
-                                                <div className="flex items-center gap-2 mt-0.5">
-                                                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{n.date}</span>
-                                                    {n.type && (
-                                                        <span className="text-[8px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest rounded-md border border-slate-200/50 dark:border-white/5">
-                                                            {n.type}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p className="text-slate-700 dark:text-slate-200 text-sm font-bold leading-relaxed">{n.message}</p>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    ) : (
-                        <div className="p-24 text-center">
-                            <div className="w-20 h-20 bg-slate-50 dark:bg-slate-950/40 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-slate-200 dark:border-white/10">
-                                <Bell size={32} className="text-slate-300 dark:text-slate-800" />
-                            </div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ledger empty</p>
+                    {/* Audit Purge */}
+                    {notifications.length > 0 && (
+                        <div className="p-6 bg-slate-50/50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-white/5">
+                            <button
+                                onClick={async () => {
+                                    const password = prompt('Enter protocol password to purge transmission history:');
+                                    if (password === null) return;
+                                    if (window.confirm(`ERASE ALL ${notifications.length} TRANSMISSION RECORDS? THIS IS IRREVERSIBLE.`)) {
+                                        try {
+                                            const response = await api.delete('/notifications/admin/clear-all', {
+                                                data: { password }
+                                            });
+                                            if (response.status === 200) {
+                                                alert(`Successfully purged ${response.data.deletedCount} records.`);
+                                                refreshData();
+                                            }
+                                        } catch (error) {
+                                            const message = error.response?.data?.message || 'Purge Failure.';
+                                            alert(`Protocol Error: ${message}`);
+                                            console.error(error);
+                                        }
+                                    }
+                                }}
+                                className="w-full py-4 px-6 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-[1.5rem] transition-all flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest border border-rose-500/20 active:scale-95 shadow-lg shadow-rose-500/10"
+                            >
+                                <Trash2 size={16} />
+                                Purge System Ledger
+                            </button>
                         </div>
                     )}
-                </div>
-
-                {/* Audit Purge */}
-                {notifications.length > 0 && (
-                    <div className="p-6 bg-slate-50/50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-white/5">
-                        <button
-                            onClick={async () => {
-                                const password = prompt('Enter protocol password to purge transmission history:');
-                                if (password === null) return;
-                                if (window.confirm(`ERASE ALL ${notifications.length} TRANSMISSION RECORDS? THIS IS IRREVERSIBLE.`)) {
-                                    try {
-                                        const response = await api.delete('/notifications/admin/clear-all', {
-                                            data: { password }
-                                        });
-                                        if (response.status === 200) {
-                                            alert(`Successfully purged ${response.data.deletedCount} records.`);
-                                            refreshData();
-                                        }
-                                    } catch (error) {
-                                        const message = error.response?.data?.message || 'Purge Failure.';
-                                        alert(`Protocol Error: ${message}`);
-                                        console.error(error);
-                                    }
-                                }
-                            }}
-                            className="w-full py-4 px-6 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-[1.5rem] transition-all flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest border border-rose-500/20 active:scale-95 shadow-lg shadow-rose-500/10"
-                        >
-                            <Trash2 size={16} />
-                            Purge System Ledger
-                        </button>
-                    </div>
-                )}
-            </Card>
+                </Card>
+            </div>
         </motion.div >
     );
 };

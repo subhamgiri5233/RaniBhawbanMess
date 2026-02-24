@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
@@ -23,29 +23,32 @@ const Management = () => {
     const [selectedManager, setSelectedManager] = useState('');
 
     // Fetch cooking records
-    const fetchCookingRecords = async () => {
+    const fetchCookingRecords = useCallback(async () => {
         try {
             const response = await api.get('/cooking');
             setCookingRecords(response.data);
         } catch (error) {
             console.error('Error fetching cooking records:', error);
         }
-    };
+    }, []);
 
     // Fetch manager records
-    const fetchManagerRecords = async () => {
+    const fetchManagerRecords = useCallback(async () => {
         try {
             const response = await api.get('/managers');
             setManagerRecords(response.data);
         } catch (error) {
             console.error('Error fetching manager records:', error);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        fetchCookingRecords();
-        fetchManagerRecords();
-    }, []);
+        const load = async () => {
+            await fetchCookingRecords();
+            await fetchManagerRecords();
+        };
+        load();
+    }, [fetchCookingRecords, fetchManagerRecords]);
 
     // Add cooking record
     const handleAddCooking = async () => {

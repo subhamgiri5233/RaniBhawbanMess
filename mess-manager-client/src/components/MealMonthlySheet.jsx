@@ -65,7 +65,7 @@ const MealRow = React.memo(({ member, type, days, getStatus, todayStr, calculate
             </td>
             {days.map(day => (
                 <MealCell
-                    key={`${type}-${day.dayNum}`}
+                    key={`${type} -${day.dayNum} `}
                     day={day}
                     memberId={mId}
                     type={type}
@@ -111,7 +111,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
         const map = new Map();
         (meals || []).forEach(m => {
             if (m && m.memberId && m.date && m.type) {
-                const key = `${m.memberId}|${m.date}|${m.type}`;
+                const key = `${m.memberId}| ${m.date}| ${m.type} `;
                 map.set(key, true);
             }
         });
@@ -119,7 +119,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
     }, [meals]);
 
     const getStatus = (memberId, dateStr, type) => {
-        return mealsMap.has(`${memberId}|${dateStr}|${type}`);
+        return mealsMap.has(`${memberId}| ${dateStr}| ${type} `);
     };
 
     // 4. Calculate Totals - Memoized per month/year

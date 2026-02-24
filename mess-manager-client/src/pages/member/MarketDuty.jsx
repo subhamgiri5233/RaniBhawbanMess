@@ -7,7 +7,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils'; // Assuming cn is imported from utils
 
-const Market = () => {
+const MarketDuty = () => {
     const { marketSchedule, allocateMarketDay, approveMarketRequest, rejectMarketRequest, members, managerAllocation, refreshData } = useData();
     const { user, isLoading } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -54,9 +54,11 @@ const Market = () => {
     // Manager View Logic
     const currentManagerId = managerAllocation[monthKey];
     const isAdmin = user.role === 'admin';
-    // isManager controls ACTION capabilities (approvals, manual assigns)
-    const isManager = currentManagerId && user.id === currentManagerId;
-    const isReadOnlyAdmin = isAdmin && !isManager;
+    // isManager: actual assigned manager OR admin (both can approve/reject requests)
+    const isAssignedManager = currentManagerId && user.id === currentManagerId;
+    const isManager = isAssignedManager || isAdmin;
+    // isReadOnlyAdmin: admin who is NOT the actual manager cannot manually assign days on calendar
+    const isReadOnlyAdmin = isAdmin && !isAssignedManager;
 
     // Helper to see who has a date
     const getDayInfo = (date) => {
@@ -425,9 +427,9 @@ const Market = () => {
                         <TrendingUp size={16} className="text-indigo-600 dark:text-indigo-400" />
                         <h3 className="font-black text-indigo-900 dark:text-white uppercase tracking-[0.3em] text-[10px]">Mess Protocol</h3>
                     </div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Market Responsibility</h2>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Market Duty</h2>
                     <p className="text-sm text-slate-500 dark:text-indigo-100/70 font-bold leading-relaxed max-w-lg">
-                        Ensure all market requests are coordinated with the monthly <span className="text-indigo-600 dark:text-white underline decoration-indigo-400 decoration-2 underline-offset-4">Mess Manager</span>. Approved duties are final and essential for system transparency.
+                        Ensure all market duty requests are coordinated with the monthly <span className="text-indigo-600 dark:text-white underline decoration-indigo-400 decoration-2 underline-offset-4">Mess Manager</span>. Approved duties are final and essential for system transparency.
                     </p>
                 </div>
 
@@ -441,4 +443,4 @@ const Market = () => {
     );
 };
 
-export default Market;
+export default MarketDuty;

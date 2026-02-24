@@ -1,8 +1,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import Card from './Card';
-import { formatBengaliDate, toBengaliNumber } from '../../utils/bengaliCalendar';
-import { getDailyInfo } from '../../utils/dailyUtils';
+import { formatBengaliDate } from '../../utils/bengaliCalendar';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import AnalogClock from './AnalogClock';
@@ -33,6 +32,57 @@ const styles = {
     `
 };
 
+// ==================== SUB-COMPONENTS ====================
+
+// ClockCard component (Generic wrapper for Analog/Digital variants)
+const ClockCard = memo(({ variant = 'english', timeValues, digitalTime, dateInfo, bengaliDate }) => {
+    const isEnglish = variant === 'english';
+    const theme = {
+        container: isEnglish
+            ? 'from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 border-indigo-100 dark:border-white/5 shadow-premium'
+            : 'from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-500/10 dark:via-amber-500/10 dark:to-yellow-500/10 border-orange-100 dark:border-white/5 shadow-premium',
+        text: isEnglish ? 'text-indigo-700 dark:text-indigo-400' : 'text-orange-700 dark:text-orange-400',
+        border: isEnglish ? 'border-indigo-200 dark:border-indigo-500/30' : 'border-orange-200 dark:border-orange-500/30',
+        centerDot: isEnglish ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-orange-600 dark:bg-orange-400',
+        mainMarker: isEnglish ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-orange-600 dark:bg-orange-400',
+        secondaryMarker: isEnglish ? 'bg-indigo-200 dark:bg-indigo-500/20' : 'border-orange-200 dark:bg-orange-500/20',
+        hourHand: isEnglish ? 'bg-indigo-700 dark:bg-indigo-400' : 'bg-orange-700 dark:bg-orange-400',
+        minuteHand: isEnglish ? 'bg-purple-700 dark:bg-purple-400' : 'bg-amber-700 dark:bg-amber-400',
+        secondHand: isEnglish ? 'bg-pink-500 dark:bg-pink-400' : 'bg-yellow-500 dark:bg-yellow-400',
+        hourColor: isEnglish ? 'text-indigo-700 dark:text-indigo-400' : 'text-orange-700 dark:text-orange-400',
+        minuteColor: isEnglish ? 'text-purple-600 dark:text-purple-400' : 'text-amber-600 dark:text-amber-400',
+        secondColor: isEnglish ? 'text-pink-600 dark:text-pink-400' : 'text-yellow-600 dark:text-yellow-400',
+        ampmColor: isEnglish ? 'text-indigo-500 dark:text-indigo-500' : 'text-orange-500 dark:text-orange-500',
+        pulseColor: isEnglish ? 'text-indigo-600 dark:text-indigo-500' : 'text-orange-600 dark:text-orange-500',
+        pulseColor2: isEnglish ? 'text-purple-600 dark:text-purple-500' : 'text-amber-600 dark:text-amber-500'
+    };
+
+    return (
+        <Card className={`p-6 bg-gradient-to-br ${theme.container} border-2`}>
+            <h3 className={`text-xs font-black ${theme.text} mb-4 text-center uppercase tracking-widest`}>
+                {isEnglish ? 'English Calendar' : 'বাংলা পঞ্জিকা'}
+            </h3>
+            <div className="flex items-center justify-between gap-6 flex-wrap">
+                <AnalogClock
+                    hourAngle={timeValues.hourAngle}
+                    minuteAngle={timeValues.minuteAngle}
+                    secondAngle={timeValues.secondAngle}
+                    theme={theme}
+                />
+                <DigitalClock
+                    digitalTime={digitalTime}
+                    dateInfo={dateInfo}
+                    bengaliDate={bengaliDate}
+                    variant={variant}
+                    theme={theme}
+                />
+            </div>
+        </Card>
+    );
+});
+
+ClockCard.displayName = 'ClockCard';
+
 // ==================== COMPONENT ====================
 const Clock = ({ showGita = false }) => {
     const { members, dailyInfo, loadingDaily: loadingInfo } = useData();
@@ -47,7 +97,6 @@ const Clock = ({ showGita = false }) => {
     const dateEffect = dailyInfo?.effects || null;
 
     const timerRef = useRef(null);
-    const particleTimerRef = useRef(null);
 
     // Optimized time update - updates 'time' every second, but 'today' only at midnight
     useEffect(() => {
@@ -207,9 +256,11 @@ const Clock = ({ showGita = false }) => {
     // Generate particles effect
     useEffect(() => {
         if (!combinedDateEffect) {
-            setShowParticles(false);
-            setParticles([]);
-            return;
+            const timer = setTimeout(() => {
+                setShowParticles(false);
+                setParticles([]);
+            }, 0);
+            return () => clearTimeout(timer);
         }
 
         const generated = Array.from({ length: combinedDateEffect.count || 20 }, (_, i) => ({
@@ -272,54 +323,7 @@ const Clock = ({ showGita = false }) => {
     }, [showParticles, particles]);
 
 
-    // ClockCard component (Generic wrapper for Analog/Digital variants)
-    const ClockCard = memo(({ variant = 'english' }) => {
-        const isEnglish = variant === 'english';
-        const theme = {
-            container: isEnglish
-                ? 'from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 border-indigo-100 dark:border-white/5 shadow-premium'
-                : 'from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-500/10 dark:via-amber-500/10 dark:to-yellow-500/10 border-orange-100 dark:border-white/5 shadow-premium',
-            text: isEnglish ? 'text-indigo-700 dark:text-indigo-400' : 'text-orange-700 dark:text-orange-400',
-            border: isEnglish ? 'border-indigo-200 dark:border-indigo-500/30' : 'border-orange-200 dark:border-orange-500/30',
-            centerDot: isEnglish ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-orange-600 dark:bg-orange-400',
-            mainMarker: isEnglish ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-orange-600 dark:bg-orange-400',
-            secondaryMarker: isEnglish ? 'bg-indigo-200 dark:bg-indigo-500/20' : 'border-orange-200 dark:bg-orange-500/20',
-            hourHand: isEnglish ? 'bg-indigo-700 dark:bg-indigo-400' : 'bg-orange-700 dark:bg-orange-400',
-            minuteHand: isEnglish ? 'bg-purple-700 dark:bg-purple-400' : 'bg-amber-700 dark:bg-amber-400',
-            secondHand: isEnglish ? 'bg-pink-500 dark:bg-pink-400' : 'bg-yellow-500 dark:bg-yellow-400',
-            hourColor: isEnglish ? 'text-indigo-700 dark:text-indigo-400' : 'text-orange-700 dark:text-orange-400',
-            minuteColor: isEnglish ? 'text-purple-600 dark:text-purple-400' : 'text-amber-600 dark:text-amber-400',
-            secondColor: isEnglish ? 'text-pink-600 dark:text-pink-400' : 'text-yellow-600 dark:text-yellow-400',
-            ampmColor: isEnglish ? 'text-indigo-500 dark:text-indigo-500' : 'text-orange-500 dark:text-orange-500',
-            pulseColor: isEnglish ? 'text-indigo-600 dark:text-indigo-500' : 'text-orange-600 dark:text-orange-500',
-            pulseColor2: isEnglish ? 'text-purple-600 dark:text-purple-500' : 'text-amber-600 dark:text-amber-500'
-        };
 
-        return (
-            <Card className={`p-6 bg-gradient-to-br ${theme.container} border-2`}>
-                <h3 className={`text-xs font-black ${theme.text} mb-4 text-center uppercase tracking-widest`}>
-                    {isEnglish ? 'English Calendar' : 'বাংলা পঞ্জিকা'}
-                </h3>
-                <div className="flex items-center justify-between gap-6 flex-wrap">
-                    <AnalogClock
-                        hourAngle={timeValues.hourAngle}
-                        minuteAngle={timeValues.minuteAngle}
-                        secondAngle={timeValues.secondAngle}
-                        theme={theme}
-                    />
-                    <DigitalClock
-                        digitalTime={digitalTime}
-                        dateInfo={dateInfo}
-                        bengaliDate={bengaliDate}
-                        variant={variant}
-                        theme={theme}
-                    />
-                </div>
-            </Card>
-        );
-    });
-
-    ClockCard.displayName = 'ClockCard';
 
     return (
         <div className="space-y-6 relative">
@@ -329,8 +333,20 @@ const Clock = ({ showGita = false }) => {
 
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <ClockCard variant="english" />
-                <ClockCard variant="bengali" />
+                <ClockCard
+                    variant="english"
+                    timeValues={timeValues}
+                    digitalTime={digitalTime}
+                    dateInfo={dateInfo}
+                    bengaliDate={bengaliDate}
+                />
+                <ClockCard
+                    variant="bengali"
+                    timeValues={timeValues}
+                    digitalTime={digitalTime}
+                    dateInfo={dateInfo}
+                    bengaliDate={bengaliDate}
+                />
             </div>
 
             {showGita && (
