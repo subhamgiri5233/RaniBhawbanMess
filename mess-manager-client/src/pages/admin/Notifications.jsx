@@ -16,7 +16,8 @@ const Notifications = () => {
 
     useEffect(() => {
         if (user) {
-            markAllAsRead(user.id);
+            const userId = user.id || user._id || user.userId;
+            if (userId) markAllAsRead(userId);
         }
     }, [user, notifications.length]); // Re-run if new notifications arrive (simple check)
 

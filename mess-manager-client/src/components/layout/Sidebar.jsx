@@ -50,8 +50,9 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     // Calculate unread notifications
     // Logic: user sees notifications where userId is their ID OR 'all'
+    const currentUserId = user?.id || user?._id || user?.userId;
     const unreadCount = notifications ? notifications.filter(n =>
-        (n.userId === user?.id || n.userId === 'all') && !n.isRead
+        (n.userId === currentUserId || n.userId === 'all') && !n.isRead
     ).length : 0;
 
     if (!user) return null;

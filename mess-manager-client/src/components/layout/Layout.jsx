@@ -3,6 +3,7 @@ import Sidebar from './Sidebar';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import AnimatedRoutes from '../transitions/AnimatedRoutes';
+import JarvisAssistant from '../ui/JarvisAssistant';
 
 import { useState } from 'react';
 import { Menu, Sun, Moon } from 'lucide-react';
@@ -46,6 +47,9 @@ const Layout = () => {
                     </AnimatedRoutes>
                 </div>
             </main>
+
+            {/* JARVIS — Global AI Voice Assistant */}
+            <JarvisAssistant />
         </div>
     );
 };

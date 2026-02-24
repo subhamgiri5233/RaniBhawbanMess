@@ -12,12 +12,13 @@ const MemberNotifications = () => {
 
     useEffect(() => {
         if (user) {
-            markAllAsRead(user.id);
+            const userId = user.id || user._id || user.userId;
+            if (userId) markAllAsRead(userId);
         }
     }, [user, notifications.length]);
 
     const myNotifications = notifications
-        .filter(n => n.userId === user.id || n.userId === user._id || n.userId === 'all')
+        .filter(n => n.userId === (user.id || user._id || user.userId) || n.userId === 'all')
         .slice()
         .reverse();
 
