@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react';
 
 const CultureSection = () => {
     return (
-        <section className="container mx-auto px-6 mb-32">
+        <section id="culture" className="container mx-auto px-6 mb-32">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}

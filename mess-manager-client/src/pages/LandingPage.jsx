@@ -9,6 +9,7 @@ import HeroComponent from '../components/landing/Hero';
 import FeaturesComponent from '../components/landing/Features';
 import CultureSectionComponent from '../components/landing/CultureSection';
 import BenefitsComponent from '../components/landing/Benefits';
+import ContactComponent from '../components/landing/Contact';
 import FooterComponent from '../components/landing/Footer';
 
 // Memoized Components
@@ -17,6 +18,7 @@ const Hero = memo(HeroComponent);
 const Features = memo(FeaturesComponent);
 const CultureSection = memo(CultureSectionComponent);
 const Benefits = memo(BenefitsComponent);
+const Contact = memo(ContactComponent);
 const Footer = memo(FooterComponent);
 
 const LandingPage = () => {
@@ -50,6 +52,9 @@ const LandingPage = () => {
 
                 {/* Bento Style Benefits */}
                 <Benefits />
+
+                {/* Contact */}
+                <Contact onLoginClick={handleLoginClick} />
             </main>
 
             <Footer />
