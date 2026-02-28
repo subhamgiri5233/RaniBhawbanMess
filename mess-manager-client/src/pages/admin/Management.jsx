@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2 } from 'lucide-react';
+import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../lib/api';
@@ -340,6 +340,60 @@ const Management = () => {
                     </div>
                 </Card>
             </div>
+
+            {/* Market Duty - Coming Soon */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="relative overflow-hidden rounded-[1.5rem] md:rounded-[2rem] border-2 border-dashed border-indigo-200 dark:border-indigo-500/20 bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/80 dark:from-indigo-950/30 dark:via-slate-900 dark:to-purple-950/30 p-8 md:p-10"
+            >
+                {/* Background decoration */}
+                <div className="absolute -top-16 -right-16 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                    {/* Icon Block */}
+                    <div className="flex-shrink-0">
+                        <div className="relative w-20 h-20 rounded-3xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shadow-xl shadow-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20">
+                            <ShoppingCart size={36} className="text-indigo-500 dark:text-indigo-400" />
+                            <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg">
+                                <Lock size={12} className="text-white" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Text Content */}
+                    <div className="flex-1 text-center md:text-left">
+                        <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Market Duty</h2>
+                            <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-indigo-500/30">
+                                <Rocket size={10} />
+                                Version 3.0
+                            </span>
+                        </div>
+                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                            Comprehensive market duty management for members — track, assign, and monitor who goes to the market, all from one place.
+                        </p>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                            {['Per-member duty calendar', 'Monthly duty history', 'Duty swap requests', 'Smart auto-assignment'].map(feature => (
+                                <span key={feature} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800/60 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-sm">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 inline-block" />
+                                    {feature}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Coming Soon Badge */}
+                    <div className="flex-shrink-0">
+                        <div className="px-6 py-3 rounded-2xl bg-white dark:bg-slate-800/60 border-2 border-indigo-200 dark:border-indigo-500/30 shadow-xl shadow-indigo-500/10 text-center">
+                            <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-0.5">Coming Soon</p>
+                            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight">v3.0</p>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
         </motion.div>
     );
 };

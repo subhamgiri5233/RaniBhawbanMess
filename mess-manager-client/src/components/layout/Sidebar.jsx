@@ -114,7 +114,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     </div>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-1">
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
                     {links.map((link) => (
                         <NavLink
                             key={link.to}

@@ -61,7 +61,7 @@ const Hero = ({ onLoginClick }) => {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-bold mb-8 backdrop-blur-md"
                     >
                         <Sparkles size={16} />
-                        Version 2.0 is now live
+                        🚀 Version 3.0 is now live
                     </motion.div>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
