@@ -6,6 +6,7 @@ const guestMealSchema = new mongoose.Schema({
     memberName: { type: String, required: true },
     guestMealType: { type: String, enum: ['fish', 'egg', 'veg', 'meat'], required: true },
     mealTime: { type: String, enum: ['lunch', 'dinner'], required: true },
+    amount: { type: Number, default: 0 }, // Price at time of creation
     createdAt: { type: Date, default: Date.now }
 });
 

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useData } from '../../context/DataContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { Settings as SettingsIcon, Lock, Shield, Key, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { Settings as SettingsIcon, Lock, Shield, Key, RefreshCw, Eye, EyeOff, Database, Trash2, Calendar, AlertTriangle } from 'lucide-react';
 import api from '../../lib/api';
 
 const Settings = () => {
@@ -24,9 +25,38 @@ const Settings = () => {
     const [adminConfirmPassword, setAdminConfirmPassword] = useState('');
     const [adminUpdating, setAdminUpdating] = useState(false);
 
+    // Monthly data deletion state
+    const { globalMonth, clearMonthlyData, getMonthlyDataPreview } = useData();
+    const [deleteMonth, setDeleteMonth] = useState(globalMonth);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deleting, setDeleting] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [previewStats, setPreviewStats] = useState(null);
+    const [loadingPreview, setLoadingPreview] = useState(false);
+
     useEffect(() => {
         fetchSettings();
     }, []);
+
+    useEffect(() => {
+        if (deleteMonth) {
+            fetchPreview();
+        }
+    }, [deleteMonth]);
+
+    const fetchPreview = async () => {
+        try {
+            setLoadingPreview(true);
+            const result = await getMonthlyDataPreview(deleteMonth);
+            if (result.success) {
+                setPreviewStats(result.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch preview:', error);
+        } finally {
+            setLoadingPreview(false);
+        }
+    };
 
     const fetchSettings = async () => {
         try {
@@ -88,22 +118,12 @@ const Settings = () => {
     };
 
     const getSettingLocation = (key) => {
-        const locations = {
-            'clear_notifications_password': 'Notifications page → Purge System Ledger button',
-            'clear_guests_password': 'Meals page → Clear All Guests button',
-            'clear_all_meals_password': 'Meals page → Clear All Meals button',
-            'clear_expenses_password': 'Expenses page → Clear All History button'
-        };
+        const locations = {};
         return locations[key] || 'System';
     };
 
     const getSettingDisplayName = (key) => {
-        const names = {
-            'clear_notifications_password': 'Clear Notification History',
-            'clear_guests_password': 'Clear Guest Meals',
-            'clear_all_meals_password': 'Clear All Meals',
-            'clear_expenses_password': 'Clear Expense History'
-        };
+        const names = {};
         return names[key] || key;
     };
 
@@ -145,6 +165,34 @@ const Settings = () => {
             alert(`Failed to update credentials: ${error.response?.data?.message || 'Unknown error'}`);
         } finally {
             setAdminUpdating(false);
+        }
+    };
+
+    const handleClearMonthData = async () => {
+        if (!deletePassword) {
+            alert('Please enter your admin password');
+            return;
+        }
+
+        if (!window.confirm(`⚠️ CRITICAL WARNING: You are about to PERMANENTLY DELETE all data for ${deleteMonth}.\n\nThis includes:\n- Regular Meals\n- Guest Meals\n- Expenses\n- Market Requests\n- Cooking Records\n- Manager Records\n\nARE YOU ABSOLUTELY SURE?`)) {
+            return;
+        }
+
+        try {
+            setDeleting(true);
+            const result = await clearMonthlyData(deleteMonth, deletePassword);
+            if (result.success) {
+                alert(`Successfully cleared all data for ${deleteMonth}!\nTotal records deleted: ${result.data.totalDeleted}`);
+                setDeletePassword('');
+                setShowDeleteConfirm(false);
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+        } catch (error) {
+            console.error('Deletion error:', error);
+            alert('An unexpected error occurred during deletion.');
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -253,167 +301,137 @@ const Settings = () => {
                 </div>
             </Card>
 
-            {/* Password-Protected Features */}
-            <div>
-                <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight mb-6">Password-Protected Features</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {settings.map((setting) => (
-                        <Card key={setting.key} className="p-6 border-indigo-100/50 dark:border-white/5 bg-white/70 dark:bg-slate-900/40 backdrop-blur-lg shadow-sm">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl scale-110">
-                                        {getSettingIcon(setting.category)}
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                                            {setting.description || setting.key}
-                                        </h3>
+            {/* Monthly Data Management */}
+            <Card className="p-6 border-l-4 border-l-rose-500 bg-white/90 dark:bg-slate-900/40 border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
+                <h2 className="text-lg font-black text-slate-900 dark:text-rose-50 tracking-tight mb-4 flex items-center gap-2">
+                    <Database size={20} className="text-rose-600 dark:text-rose-400" />
+                    Monthly Data Management
+                </h2>
+                <div className="space-y-4">
+                    <p className="text-sm font-bold text-slate-600 dark:text-rose-400 mb-6 font-mono border-b border-rose-100/30 pb-2">
+                        Use this feature to clear all records for a specific business month. This is useful for monthly resets or data cleanup.
+                    </p>
 
-                                        {/* Current Password Display */}
-                                        <div className="mt-3">
-                                            <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Current Password</p>
-                                            <div className="flex items-center gap-2 bg-[#f4f7ff] dark:bg-slate-900/80 px-4 py-2 rounded-xl border border-indigo-100/50 dark:border-white/5 w-fit">
-                                                <code className="text-sm font-black font-mono text-primary-600 dark:text-primary-400">
-                                                    {showPasswords[setting.key] ? setting.value : '••••••••'}
-                                                </code>
-                                                <button
-                                                    onClick={() => toggleShowPassword(setting.key)}
-                                                    className="text-slate-400 hover:text-primary-600 transition-colors ml-2"
-                                                    title={showPasswords[setting.key] ? 'Hide password' : 'Show password'}
-                                                >
-                                                    {showPasswords[setting.key] ? (
-                                                        <EyeOff size={16} />
-                                                    ) : (
-                                                        <Eye size={16} />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-4 space-y-1">
-                                            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                                                <span className="uppercase tracking-widest opacity-50">Used in:</span> {getSettingLocation(setting.key)}
-                                            </p>
-                                            <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                                Updated {new Date(setting.updatedAt).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                {editingKey !== setting.key && (
-                                    <button
-                                        onClick={() => setEditingKey(setting.key)}
-                                        className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-primary-100 dark:bg-primary-950/30 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-600 hover:text-white transition-all transform hover:scale-105"
-                                    >
-                                        Edit
-                                    </button>
-                                )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Select Target Month</label>
+                            <div className="relative group">
+                                <Calendar size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                <input
+                                    type="month"
+                                    value={deleteMonth}
+                                    onChange={(e) => setDeleteMonth(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-rose-500/10 transition-all shadow-sm"
+                                />
                             </div>
+                        </div>
 
-                            {editingKey === setting.key && (
-                                <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-950/20 rounded-2xl border-2 border-primary-200 dark:border-primary-800/50">
-                                    <div className="space-y-4">
-                                        <Input
-                                            label="Verify Current Password"
-                                            type="password"
-                                            value={currentPassword}
-                                            onChange={(e) => setCurrentPassword(e.target.value)}
-                                            required
-                                        />
-                                        <Input
-                                            label="New Password"
-                                            type="password"
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            required
-                                        />
-                                        <div className="flex gap-2">
-                                            <Button
-                                                onClick={() => handleUpdatePassword(setting.key)}
-                                                disabled={updating}
-                                                className="flex-1"
-                                            >
-                                                {updating ? 'Updating...' : 'Save New Password'}
-                                            </Button>
-                                            <Button
-                                                onClick={() => {
-                                                    setEditingKey(null);
-                                                    setNewPassword('');
-                                                    setCurrentPassword('');
-                                                }}
-                                                variant="outline"
-                                                className="flex-1 bg-white dark:bg-slate-800"
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </div>
-                                    </div>
+                        <Input
+                            label="Admin Password to Confirm"
+                            type="password"
+                            value={deletePassword}
+                            onChange={(e) => setDeletePassword(e.target.value)}
+                            placeholder="Enter password..."
+                        />
+                    </div>
+
+                    {/* Preview Stats */}
+                    {deleteMonth && (
+                        <div className="mt-6 p-6 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100 dark:border-white/5 overflow-hidden relative">
+                            {loadingPreview && (
+                                <div className="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                    <RefreshCw className="animate-spin text-primary-500" size={20} />
                                 </div>
                             )}
-                        </Card>
-                    ))}
-                </div>
-            </div>
 
-            {/* Sensitive Information Vault */}
-            <div>
-                <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight mb-6 flex items-center gap-3">
-                    <Shield size={24} className="text-red-600 dark:text-red-400" />
-                    Sensitive Information Vault
-                </h2>
-                <Card className="p-0 overflow-hidden border-l-4 border-l-red-500 bg-white/90 dark:bg-slate-900/40 border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
-                    <div className="p-4 bg-indigo-50/30 dark:bg-red-500/10 border-b border-indigo-100/50 dark:border-red-900/30">
-                        <p className="text-[10px] text-slate-500 dark:text-red-400 font-black flex items-center gap-2 uppercase tracking-widest">
-                            <Lock size={14} />
-                            ⚠️ Critical Security Information - Keep these passwords confidential!
-                        </p>
-                    </div>
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Month Snapshot: {deleteMonth}</h3>
+                                <div className="flex items-center gap-4">
+                                    <div className="text-right">
+                                        <div className="text-[10px] font-black text-rose-500 uppercase tracking-widest leading-none mb-1">Items Found</div>
+                                        <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{previewStats?.totalItems || 0}</div>
+                                    </div>
+                                    <div className="h-8 w-[1px] bg-slate-200 dark:bg-white/10" />
+                                    <div className="text-right">
+                                        <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Space to Free</div>
+                                        <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{previewStats?.totalSizeFormatted || '0 KB'}</div>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-indigo-50/20 dark:bg-red-950/40 text-[10px] uppercase font-black tracking-widest text-slate-500 dark:text-red-300 border-b border-indigo-100/50 dark:border-red-900/50">
-                                    <th className="p-5 font-black">Feature Area</th>
-                                    <th className="p-5 font-black">Secure Password</th>
-                                    <th className="p-5 font-black">System Location</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-red-900/20 font-bold">
-                                {settings.map((setting) => (
-                                    <tr key={setting.key} className="hover:bg-slate-50 dark:hover:bg-red-500/5 transition-all">
-                                        <td className="p-5">
-                                            <span className="text-slate-700 dark:text-slate-100">{getSettingDisplayName(setting.key)}</span>
-                                        </td>
-                                        <td className="p-5">
-                                            <div className="flex items-center gap-2">
-                                                <code className="px-4 py-1.5 bg-[#f4f7ff] dark:bg-slate-900 border border-indigo-100/50 dark:border-red-800 rounded-xl font-black font-mono text-sm text-red-600 dark:text-red-400 shadow-sm">
-                                                    {showVaultPasswords[setting.key] ? (setting.value || '••••••••') : '••••••••'}
-                                                </code>
-                                                <button
-                                                    onClick={() => setShowVaultPasswords(prev => ({ ...prev, [setting.key]: !prev[setting.key] }))}
-                                                    className="text-slate-400 hover:text-red-600 transition-colors"
-                                                    title={showVaultPasswords[setting.key] ? 'Hide password' : 'Show password'}
-                                                >
-                                                    {showVaultPasswords[setting.key] ? <EyeOff size={16} /> : <Eye size={16} />}
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td className="p-5">
-                                            <span className="text-xs text-slate-400 dark:text-slate-400 italic">Used in {getSettingLocation(setting.key)}</span>
-                                        </td>
-                                    </tr>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                {previewStats?.stats.map((stat) => (
+                                    <div key={stat.name} className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
+                                        <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate">
+                                            {stat.name.replace(/([A-Z])/g, ' $1').trim()}
+                                        </div>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-sm font-black text-slate-700 dark:text-slate-200">{stat.count}</span>
+                                            <span className="text-[9px] font-bold text-slate-400">rec.</span>
+                                        </div>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                        {!showDeleteConfirm ? (
+                            <Button
+                                onClick={() => {
+                                    if (!deletePassword) {
+                                        alert('Please enter your admin password first');
+                                        return;
+                                    }
+                                    setShowDeleteConfirm(true);
+                                }}
+                                className="bg-rose-600 hover:bg-rose-700 font-black uppercase tracking-widest text-[10px] py-4 shadow-xl shadow-rose-500/20 flex items-center justify-center gap-2 px-8"
+                            >
+                                <Trash2 size={16} />
+                                Initialize Month Cleanup
+                            </Button>
+                        ) : (
+                            <div className="flex flex-col sm:flex-row gap-3 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                <Button
+                                    onClick={handleClearMonthData}
+                                    disabled={deleting}
+                                    className="bg-red-700 hover:bg-red-800 font-black uppercase tracking-widest text-[10px] py-4 shadow-xl shadow-red-500/40 flex items-center justify-center gap-2 flex-[2]"
+                                >
+                                    {deleting ? (
+                                        <>
+                                            <RefreshCw size={16} className="animate-spin" />
+                                            Wiping Data...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <AlertTriangle size={16} />
+                                            CONFIRM PERMANENT DELETE FOR {deleteMonth}
+                                        </>
+                                    )}
+                                </Button>
+                                <Button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    variant="secondary"
+                                    className="flex-1 font-black uppercase tracking-widest text-[10px] py-4"
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="p-4 bg-slate-50 dark:bg-orange-950/20 border-t border-slate-100 dark:border-orange-900/30">
-                        <p className="text-[10px] text-slate-500 dark:text-orange-400 font-black uppercase tracking-widest flex items-center gap-2">
-                            💡 Tip: These passwords are required for critical system deletions. You can change them using the Edit button above.
+                    <div className="mt-6 p-4 bg-rose-100/50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 rounded-xl">
+                        <p className="text-[11px] text-rose-800 dark:text-rose-300 font-bold leading-relaxed flex gap-3 italic">
+                            <AlertTriangle size={24} className="shrink-0 text-rose-500" />
+                            <span>
+                                <strong>Safety Warning:</strong> This operation will clear all meals, guest records, market assignments, cooking duties, and expenses for the selected month. The members themselves and their profiles will NOT be deleted.
+                            </span>
                         </p>
                     </div>
-                </Card>
-            </div>
+                </div>
+            </Card>
+
+            {/* Sensitive Information Vault - REMOVED for safety */}
 
             {/* Info Card */}
             <Card className="p-6 bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/30">

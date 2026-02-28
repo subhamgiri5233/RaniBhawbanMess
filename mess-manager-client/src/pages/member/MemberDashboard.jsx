@@ -12,7 +12,7 @@ import api from '../../lib/api';
 
 const MemberDashboard = () => {
     const { user } = useAuth();
-    const { meals, expenses, members, marketSchedule, guestMeals } = useData();
+    const { members, expenses, meals, guestMeals, marketSchedule, addExpense, globalMonth } = useData();
     const MIN_MEALS = MESS_CONFIG.MIN_MEALS_PER_MONTH;
 
     // Password change state
@@ -52,27 +52,49 @@ const MemberDashboard = () => {
     };
 
     // Mock calculations for member
-    const myMeals = useMemo(() => meals.filter(m => m.memberId === user.id).length, [meals, user.id]);
-    const currentMember = useMemo(() => members.find(m => (m._id === user.id || m.id === user.id)), [members, user.id]);
+    const myMeals = useMemo(() => {
+        if (!Array.isArray(meals)) return 0;
+        return meals.filter(m => m.memberId === user?.id || m.memberId === user?._id).length;
+    }, [meals, user?.id, user?._id]);
 
-    // Calculate market history - get all approved market days for this member
+    const currentMember = useMemo(() => {
+        if (!Array.isArray(members)) return null;
+        return members.find(m => (m._id === user?.id || m.id === user?.id || m.userId === user?.id));
+    }, [members, user?.id]);
+
+    const myMonthlyDeposit = useMemo(() => {
+        if (!Array.isArray(expenses)) return 0;
+        return expenses
+            .filter(e => e.category === 'deposit' && (e.paidBy === user?.name || e.paidBy === user?.id || e.paidBy === currentMember?._id))
+            .reduce((sum, e) => sum + e.amount, 0);
+    }, [expenses, user?.id, user?.name, currentMember?._id]);
+
+    // Calculate market history - get approved market days for this member SPECIFIC to globalMonth
     const myMarketDays = useMemo(() => {
-        const days = [];
-        Object.entries(marketSchedule || {}).forEach(([monthKey, schedule]) => {
-            const approvedDays = schedule.filter(
-                day => day.assignedMemberId === user.id && day.status === 'approved'
-            );
-            days.push(...approvedDays);
-        });
-        return days;
-    }, [marketSchedule, user.id]);
+        return (marketSchedule[globalMonth] || []).filter(
+            day => day.assignedMemberId === user?.id && day.status === 'approved'
+        );
+    }, [marketSchedule, user?.id, globalMonth]);
+
+    const monthLabel = useMemo(() => {
+        if (!globalMonth || typeof globalMonth !== 'string' || !globalMonth.includes('-')) {
+            return format(new Date(), 'MMMM yyyy');
+        }
+        const [year, month] = globalMonth.split('-');
+        return format(new Date(year, month - 1), 'MMMM yyyy');
+    }, [globalMonth]);
 
     // Calculate total market expenses for this member (approved market expenses)
-    const myMarketExpenses = useMemo(() => (expenses || []).filter(
-        e => (e.paidBy === user.id || e.paidBy === user._id) && e.category === 'market' && e.status === 'approved'
-    ), [expenses, user.id, user._id]);
+    const myMarketExpenses = useMemo(() => {
+        if (!Array.isArray(expenses)) return [];
+        return expenses.filter(
+            e => (e.paidBy === user?.id || e.paidBy === user?._id) && e.category === 'market' && e.status === 'approved'
+        );
+    }, [expenses, user?.id, user?._id]);
 
-    const totalMarketAmount = useMemo(() => myMarketExpenses.reduce((sum, e) => sum + e.amount, 0), [myMarketExpenses]);
+    const totalMarketAmount = useMemo(() => {
+        return myMarketExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    }, [myMarketExpenses]);
 
     // Calculate guest meals for this member
     const myGuestMeals = useMemo(() => (guestMeals || []).filter(g => g.memberId === user.id), [guestMeals, user.id]);
@@ -81,6 +103,18 @@ const MemberDashboard = () => {
     const guestMealPrices = MESS_CONFIG.GUEST_CONFIG.PRICES;
 
     const totalGuestAmount = useMemo(() => myGuestMeals.reduce((sum, g) => sum + (guestMealPrices[g.guestMealType] || 0), 0), [myGuestMeals, guestMealPrices]);
+
+    // Calculate total bill payments (Gas, Wifi, Electric) for this member SPECIFIC to globalMonth
+    const myBillPayments = useMemo(() => {
+        if (!Array.isArray(expenses)) return 0;
+        return expenses
+            .filter(e =>
+                (e.paidBy === user?.id || e.paidBy === user?._id) &&
+                ['gas', 'wifi', 'electric'].includes(e.category) &&
+                e.status === 'approved'
+            )
+            .reduce((sum, e) => sum + (e.amount || 0), 0);
+    }, [expenses, user?.id, user?._id]);
 
     return (
         <motion.div
@@ -93,7 +127,9 @@ const MemberDashboard = () => {
                     <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
                         Namaste, <span className="text-indigo-600 dark:text-indigo-400">{user.name}</span>
                     </h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Your mess activity overview for this month</p>
+                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
+                        Activity overview for <span className="text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/30">{monthLabel}</span>
+                    </p>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
                     <Star size={16} className="text-indigo-500" />
@@ -132,8 +168,9 @@ const MemberDashboard = () => {
                         </div>
                         <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Current Balance</p>
-                    <h3 className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 tracking-tight">₹{currentMember?.deposit || 0}</h3>
+                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Credit (Dep + Bills)</p>
+                    <h3 className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 tracking-tight">₹{myMonthlyDeposit + myBillPayments}</h3>
+                    <p className="text-[10px] font-black text-emerald-500/60 dark:text-emerald-400/60 mt-1 uppercase tracking-widest italic">Gen: ₹{myMonthlyDeposit}</p>
                 </Card>
 
                 <Card className="p-8 group hover:-translate-y-1 transition-all duration-500">

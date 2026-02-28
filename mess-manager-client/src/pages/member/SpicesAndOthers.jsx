@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 const SpicesAndOthers = () => {
-    const { expenses } = useData();
+    const { expenses, globalMonth } = useData();
 
     // Filter for spices and other expenses logged by admin
     const sharedExpenses = expenses.filter(e =>
@@ -24,7 +24,9 @@ const SpicesAndOthers = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 shadow-premium p-8 rounded-[2rem] border border-slate-100 dark:border-white/5">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Spices & Shared Funds</h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Global expenses managed by admin</p>
+                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
+                        Admin management for <span className="text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/30 font-black">{globalMonth}</span>
+                    </p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">

@@ -9,14 +9,15 @@ import { cn } from '../../lib/utils';
 
 const Payments = () => {
     const { user } = useAuth();
-    const { notifications, markPaymentAsPaid, members, expenses } = useData();
+    const { notifications, markPaymentAsPaid, members, expenses, globalMonth } = useData();
     const [processingPayment, setProcessingPayment] = useState(null);
 
-    // 1. Get payment notifications for this user
+    // 1. Get payment notifications for this user, filtered by globalMonth
     const paymentNotifications = notifications.filter(n => {
         const notifUserId = String(n.userId || n.user?._id || n.user);
         const currentUserId = String(user.id || user._id);
-        return notifUserId === currentUserId && n.type === 'payment';
+        const isCorrectMonth = n.date && n.date.startsWith(globalMonth);
+        return notifUserId === currentUserId && n.type === 'payment' && isCorrectMonth;
     }).map(n => ({ ...n, itemType: 'notification' }));
 
     // 2. Get payment expenses (deposits/bills) for this user, excluding market logs
@@ -67,7 +68,9 @@ const Payments = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/90 dark:bg-slate-900 shadow-sm p-8 rounded-[2rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Financial Hub</h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Monitor your deposits and clear pending dues</p>
+                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
+                        Activity for <span className="text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/30 font-black">{globalMonth}</span>
+                    </p>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
                     <CreditCard size={16} className="text-emerald-500" />

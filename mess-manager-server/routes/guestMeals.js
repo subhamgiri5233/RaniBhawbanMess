@@ -28,7 +28,7 @@ router.get('/', auth, async (req, res) => {
 // POST /api/guest-meals - Add a guest meal - Requires auth
 router.post('/', auth, async (req, res) => {
     try {
-        const { date, memberId, guestMealType, mealTime } = req.body;
+        const { date, memberId, guestMealType, mealTime, amount } = req.body;
 
         // Security: Members can only add their own guest meals
         if (req.user.role === 'member' && memberId !== req.user.id && memberId !== req.user.userId) {
@@ -54,7 +54,8 @@ router.post('/', auth, async (req, res) => {
             memberId,
             memberName: user.name,
             guestMealType,
-            mealTime
+            mealTime,
+            amount: Number(amount) || 0
         });
 
         await guestMeal.save();

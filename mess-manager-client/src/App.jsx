@@ -19,6 +19,7 @@ const Notifications = lazy(() => import('./pages/admin/Notifications'));
 const Calculator = lazy(() => import('./pages/admin/Calculator'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const Management = lazy(() => import('./pages/admin/Management'));
+const MonthlySummary = lazy(() => import('./pages/admin/MonthlySummary'));
 
 // Member Pages
 const Market = lazy(() => import('./pages/member/MarketDuty'));
@@ -120,6 +121,7 @@ function App() {
                   <Route path="/calculator" element={<AdminRoute><Calculator /></AdminRoute>} />
                   <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
                   <Route path="/management" element={<AdminRoute><Management /></AdminRoute>} />
+                  <Route path="/monthly-summary" element={<AdminRoute><MonthlySummary /></AdminRoute>} />
 
                   {/* Shared Routes - both admin and members can add expenses */}
                   <Route path="/add-expense" element={<AddExpense />} />

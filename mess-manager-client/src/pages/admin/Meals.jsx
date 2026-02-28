@@ -10,7 +10,11 @@ import { cn } from '../../lib/utils';
 import { MESS_CONFIG } from '../../config';
 
 const Meals = () => {
-    const { members, meals, guestMeals, addMeal, removeMeal, addGuestMeal, removeGuestMeal, clearAllGuestMeals, clearAllMeals, refreshData } = useData();
+    const {
+        members, meals, guestMeals, addMeal, removeMeal,
+        addGuestMeal, removeGuestMeal,
+        refreshData, globalMonth, setGlobalMonth
+    } = useData();
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [showGuestDialog, setShowGuestDialog] = useState(false);
     const [selectedMember, setSelectedMember] = useState('');
@@ -18,6 +22,23 @@ const Meals = () => {
     const [guestMealTime, setGuestMealTime] = useState('lunch');
     const [guestDate, setGuestDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [filterByMember, setFilterByMember] = useState('all');
+
+    // Sync selectedDate with globalMonth
+    useEffect(() => {
+        if (!selectedDate.startsWith(globalMonth)) {
+            // If the selected date is not in the global month, 
+            // set it to the first day of the global month
+            setSelectedDate(`${globalMonth}-01`);
+        }
+    }, [globalMonth, selectedDate]);
+
+    const handleDateChange = (newDate) => {
+        setSelectedDate(newDate);
+        const newMonth = newDate.substring(0, 7);
+        if (newMonth !== globalMonth) {
+            setGlobalMonth(newMonth);
+        }
+    };
 
     // Handle Meal Toggling from Monthly Sheet
     const handleToggleMeal = (memberId, dateStr, type, shouldAdd) => {
@@ -63,47 +84,9 @@ const Meals = () => {
         }
     };
 
-    const handleClearAllGuests = async () => {
-        const password = prompt('Enter password to clear ALL guest meals:');
-        if (password === null) return;
 
-        if (window.confirm(`⚠️ WARNING: Delete ALL ${allGuestMeals.length} guest meals? This cannot be undone!`)) {
-            try {
-                const result = await clearAllGuestMeals(password);
-                if (result.success) {
-                    alert(`✅ Successfully deleted ${result.deletedCount} guest meals!`);
-                } else {
-                    alert(`❌ Error: ${result.error}`);
-                }
-            } catch (error) {
-                alert('Failed to clear guest meals');
-                console.error(error);
-            }
-        }
-    };
-
-    const handleClearAllMeals = async () => {
-        const password = prompt('⚠️ DANGER: This will delete ALL meals (regular + guest meals)!\n\nEnter password to continue:');
-        if (password === null) return;
-
-        const totalCount = meals.length + guestMeals.length;
-        if (window.confirm(`🚨 FINAL WARNING: Delete ALL ${totalCount} meal records?\n\nThis includes:\n- ${meals.length} regular meals\n- ${guestMeals.length} guest meals\n\nThis action CANNOT be undone!`)) {
-            try {
-                const result = await clearAllMeals(password);
-                if (result.success) {
-                    alert(`✅ Successfully deleted ${result.deletedCount} meal records!`);
-                } else {
-                    alert(`❌ Error: ${result.error}`);
-                }
-            } catch (error) {
-                alert('Failed to clear all meals');
-                console.error(error);
-            }
-        }
-    };
-
-    // Get guest meals for current month from context - Memoized
-    const currentMonth = useMemo(() => format(new Date(selectedDate), 'yyyy-MM'), [selectedDate]);
+    // Get guest meals for current month from context - now global
+    const currentMonth = globalMonth;
 
     const allGuestMeals = useMemo(() =>
         (guestMeals || []).filter(m => m?.date && m.date.startsWith(currentMonth))
@@ -172,20 +155,11 @@ const Meals = () => {
                         <input
                             type="date"
                             value={selectedDate}
-                            onChange={(e) => setSelectedDate(e.target.value)}
+                            onChange={(e) => handleDateChange(e.target.value)}
                             className="bg-transparent outline-none text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight"
                         />
                     </div>
 
-                    {(meals.length > 0 || guestMeals.length > 0) && (
-                        <button
-                            onClick={handleClearAllMeals}
-                            className="p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all border border-red-500/20 active:scale-90"
-                            title="Purge Meal Database"
-                        >
-                            <Trash2 size={20} />
-                        </button>
-                    )}
                 </div>
             </div>
 
@@ -249,14 +223,6 @@ const Meals = () => {
                             <Plus size={16} /> Add Guest
                         </Button>
 
-                        {allGuestMeals.length > 0 && (
-                            <button
-                                onClick={handleClearAllGuests}
-                                className="p-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all border border-red-500/20 active:scale-90"
-                            >
-                                <Trash size={18} />
-                            </button>
-                        )}
                     </div>
                 </div>
 
@@ -308,16 +274,23 @@ const Meals = () => {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-8">
-                                                <div className="text-right">
-                                                    <p className="font-black text-primary-600 dark:text-primary-400 text-lg">₹{guestMealPrices[guest.guestMealType]}</p>
-                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Charge Applied</p>
+                                                <div className="text-right flex items-center gap-4">
+                                                    <div>
+                                                        <p className="font-black text-primary-600 dark:text-primary-400 text-lg">₹{guestMealPrices[guest.guestMealType]}</p>
+                                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Charge Applied</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm('Do you want to delete?')) {
+                                                                removeGuestMeal(guest._id || guest.id);
+                                                            }
+                                                        }}
+                                                        className="p-2 bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-rose-500/10"
+                                                        title="Delete Record"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => removeGuestMeal(guest._id || guest.id)}
-                                                    className="opacity-0 group-hover:opacity-100 transition-all text-slate-300 hover:text-red-500 p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-90"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
                                             </div>
                                         </motion.div>
                                     ))}

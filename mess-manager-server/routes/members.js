@@ -25,8 +25,7 @@ router.get('/summary', auth, async (req, res) => {
                 _id: member._id,
                 userId: member.userId,
                 name: member.name,
-                totalMeals: mealCount,
-                deposit: member.deposit || 0
+                totalMeals: mealCount
             };
         }));
 
@@ -55,7 +54,7 @@ router.get('/', auth, async (req, res) => {
 
 // Add Member - Admin only
 router.post('/', auth, requireAdmin, async (req, res) => {
-    const { name, email, userId, password, mobile, deposit, dateOfBirth } = req.body;
+    const { name, email, userId, password, mobile, dateOfBirth } = req.body;
 
     try {
         const newMember = new User({
@@ -65,7 +64,6 @@ router.post('/', auth, requireAdmin, async (req, res) => {
             password: password?.trim(),
             mobile: mobile?.trim(),
             dateOfBirth,
-            deposit,
             joinedAt: new Date().toISOString().split('T')[0],
             role: 'member'
         });
@@ -80,12 +78,11 @@ router.post('/', auth, requireAdmin, async (req, res) => {
 router.put('/:id', auth, requireAdmin, async (req, res) => {
     try {
         // Whitelist allowed fields to prevent mass assignment (e.g. role escalation)
-        const { name, email, mobile, deposit, dateOfBirth } = req.body;
+        const { name, email, mobile, dateOfBirth } = req.body;
         const updateData = {};
         if (name !== undefined) updateData.name = name;
         if (email !== undefined) updateData.email = email;
         if (mobile !== undefined) updateData.mobile = mobile;
-        if (deposit !== undefined) updateData.deposit = deposit;
         if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
 
         const updatedMember = await User.findByIdAndUpdate(

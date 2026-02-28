@@ -48,7 +48,7 @@ const Features = () => {
         {
             icon: Utensils,
             title: 'Advanced Meal Tracking',
-            description: 'Log daily lunch/dinner with guest support and password-protected "Clear All" functionality for admins.',
+            description: 'Log daily lunch/dinner with guest support and individual deletion tracking for members.',
             color: 'text-emerald-600',
             bg: 'bg-emerald-50',
             span: 'md:col-span-1'

@@ -3,7 +3,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { Check, Clock, X, TrendingUp, Filter, Trash2 } from 'lucide-react';
+import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
@@ -43,40 +43,40 @@ const Expenses = () => {
             key: 'market',
             count: marketExpenses.length,
             total: marketExpenses.reduce((acc, e) => acc + e.amount, 0),
-            icon: '🛒',
-            color: 'text-blue-600',
-            bg: 'bg-blue-50',
-            border: 'border-blue-200'
+            icon: ShoppingCart,
+            color: 'text-indigo-600 dark:text-indigo-400',
+            bg: 'bg-indigo-50 dark:bg-indigo-950/20',
+            border: 'border-indigo-200/50 dark:border-indigo-800/30'
         },
         {
             name: 'Spices',
             key: 'spices',
             count: spicesExpenses.length,
             total: spicesExpenses.reduce((acc, e) => acc + e.amount, 0),
-            icon: '🌶️',
-            color: 'text-orange-600',
-            bg: 'bg-orange-50',
-            border: 'border-orange-200'
+            icon: Flame,
+            color: 'text-orange-600 dark:text-orange-400',
+            bg: 'bg-orange-50 dark:bg-orange-950/20',
+            border: 'border-orange-200/50 dark:border-orange-800/30'
         },
         {
             name: 'Rice',
             key: 'rice',
             count: riceExpenses.length,
             total: riceExpenses.reduce((acc, e) => acc + e.amount, 0),
-            icon: '🍚',
-            color: 'text-green-600',
-            bg: 'bg-green-50',
-            border: 'border-green-200'
+            icon: Wheat,
+            color: 'text-emerald-600 dark:text-emerald-400',
+            bg: 'bg-emerald-50 dark:bg-emerald-950/20',
+            border: 'border-emerald-200/50 dark:border-emerald-800/30'
         },
         {
             name: 'Other',
             key: 'others',
             count: othersExpenses.length,
             total: othersExpenses.reduce((acc, e) => acc + e.amount, 0),
-            icon: '📦',
-            color: 'text-slate-600',
-            bg: 'bg-slate-50',
-            border: 'border-slate-200'
+            icon: Package,
+            color: 'text-slate-600 dark:text-slate-400',
+            bg: 'bg-slate-50 dark:bg-slate-900/40',
+            border: 'border-slate-200/50 dark:border-white/5'
         },
     ];
 
@@ -87,98 +87,60 @@ const Expenses = () => {
         <div className="space-y-6">
             <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Expense Management</h1>
 
-            {/* Clear All History Button */}
-            {expenses.length > 0 && (
-                <Card className="p-4 border-l-4 border-l-red-500 bg-white/90 backdrop-blur-xl dark:bg-red-950/20 border-indigo-100/50 dark:border-red-900/30">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="font-black text-slate-900 dark:text-red-400 tracking-tight">Danger Zone</h3>
-                            <p className="text-sm text-slate-500 dark:text-red-500/80 font-medium">Permanently delete all expense records from database</p>
-                        </div>
-                        <button
-                            onClick={async () => {
-                                const password = prompt('Enter password to clear ALL expense history:');
-                                if (password === null) return; // User cancelled
-
-                                if (password === 'came') {
-                                    if (window.confirm(`⚠️ WARNING: This will delete ALL ${expenses.length} expenses permanently! This cannot be undone! Are you absolutely sure?`)) {
-                                        try {
-                                            const response = await api.delete('/expenses/clear-all-history', {
-                                                data: { password }
-                                            });
-                                            if (response.status === 200) {
-                                                alert(`✅ Successfully deleted ${response.data.deletedCount} expenses!`);
-                                                await refreshData();
-                                            }
-                                        } catch (error) {
-                                            const message = error.response?.data?.message || 'Failed to clear history';
-                                            alert(`❌ Error: ${message}`);
-                                            console.error(error);
-                                        }
-                                    }
-                                } else {
-                                    alert('Incorrect password! Access denied.');
-                                }
-                            }}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-                        >
-                            <Trash2 size={16} />
-                            Clear All History
-                        </button>
-                    </div>
-                </Card>
-            )}
 
             {/* Main Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="p-0 overflow-hidden bg-primary-600 dark:bg-gradient-to-br dark:from-primary-600 dark:to-indigo-700 text-white border-none shadow-lg relative group">
-                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-5 transition-opacity duration-500"></div>
-                    <div className="p-6 relative">
-                        <p className="text-primary-100 font-bold opacity-80 text-sm uppercase tracking-widest">Total Approved Expenses</p>
-                        <h2 className="text-4xl font-black mt-2">₹{totalApproved}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Pending Approvals Card */}
+                <Card className="p-6 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-slate-900 dark:to-slate-800/80 border-amber-200/50 dark:border-amber-900/30 overflow-hidden relative group">
+                    <div className="absolute -right-6 -top-6 text-amber-500/10 dark:text-amber-500/5 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+                        <Clock size={120} />
                     </div>
-                </Card>
-                <Card className="p-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col h-full justify-between relative z-10">
                         <div>
-                            <p className="text-slate-500 dark:text-slate-400 font-bold text-sm uppercase tracking-widest">Pending Approvals</p>
-                            <h2 className="text-4xl font-black mt-2 text-amber-500">{pendingCount}</h2>
+                            <div className="flex items-center gap-2 mb-2">
+                                <Clock className="text-amber-500 dark:text-amber-400" size={20} />
+                                <p className="text-amber-700/70 dark:text-amber-400/70 font-black text-xs uppercase tracking-widest">Pending Approvals</p>
+                            </div>
+                            <h2 className="text-5xl font-black mt-2 text-amber-600 dark:text-amber-500 tracking-tighter">{pendingCount}</h2>
                         </div>
                         {pendingCount > 0 && (
-                            <button
-                                onClick={async () => {
-                                    if (window.confirm(`Approve all ${pendingCount} pending expenses?`)) {
-                                        const result = await approveAllExpenses();
-                                        if (result.success) {
-                                            alert(`✅ Successfully approved ${result.modifiedCount} expenses!`);
-                                        } else {
-                                            alert(`❌ Error: ${result.error}`);
+                            <div className="mt-6">
+                                <button
+                                    onClick={async () => {
+                                        if (window.confirm(`Approve all ${pendingCount} pending expenses?`)) {
+                                            const result = await approveAllExpenses();
+                                            if (result.success) {
+                                                alert(`✅ Successfully approved ${result.modifiedCount} expenses!`);
+                                            } else {
+                                                alert(`❌ Error: ${result.error}`);
+                                            }
                                         }
-                                    }
-                                }}
-                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2 text-sm"
-                            >
-                                <Check size={16} />
-                                Approve All
-                            </button>
+                                    }}
+                                    className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-xl transition-all flex items-center gap-2 text-xs uppercase tracking-widest shadow-sm shadow-amber-500/20 w-fit"
+                                >
+                                    <Check size={16} />
+                                    Approve All
+                                </button>
+                            </div>
                         )}
                     </div>
                 </Card>
 
                 {/* Member Summary Card */}
-                <Card className="p-6 border-l-4 border-l-primary-500 border-slate-200/60 dark:border-primary-500/30 bg-white dark:bg-primary-950/20">
+                <Card className="p-6 bg-gradient-to-br from-primary-50 to-white dark:from-slate-900 dark:to-slate-900/50 border-primary-200/50 dark:border-primary-900/30">
+                    <div className="flex items-center gap-2 mb-4">
+                        <TrendingUp className="text-primary-500 dark:text-primary-400" size={20} />
+                        <p className="text-primary-600/70 dark:text-primary-400/70 font-black text-xs uppercase tracking-widest">Individual Summary</p>
+                    </div>
+
                     {selectedMember !== 'all' ? (
                         <>
-                            <p className="text-primary-600 dark:text-primary-400 font-bold text-sm uppercase tracking-widest">Individual Summary</p>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-slate-50 mt-2 tracking-tight">
+                            <h3 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
                                 {getMemberName(selectedMember)}
                             </h3>
-                            <div className="mt-4 space-y-2">
+                            <div className="mt-5 grid grid-cols-2 gap-3">
                                 {(() => {
-                                    const memberExpenses = expenses.filter(e =>
-                                        e.paidBy === selectedMember &&
-                                        e.category === 'market'
-                                    );
+                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.category === 'market');
                                     const approved = memberExpenses.filter(e => e.status === 'approved');
                                     const pending = memberExpenses.filter(e => e.status === 'pending');
                                     const approvedTotal = approved.reduce((acc, e) => acc + e.amount, 0);
@@ -186,16 +148,16 @@ const Expenses = () => {
 
                                     return (
                                         <>
-                                            <div className="flex justify-between items-center text-sm font-bold">
-                                                <span className="text-emerald-600 dark:text-emerald-400">✓ Approved:</span>
-                                                <span className="text-emerald-700 dark:text-emerald-400">₹{approvedTotal}</span>
+                                            <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-xl p-3 border border-emerald-100 dark:border-emerald-900/30">
+                                                <p className="text-xs font-black text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-wider mb-1">Approved</p>
+                                                <p className="font-black text-lg text-emerald-700 dark:text-emerald-400">₹{approvedTotal}</p>
                                             </div>
-                                            <div className="flex justify-between items-center text-sm font-bold">
-                                                <span className="text-amber-600 dark:text-amber-400">⏳ Pending:</span>
-                                                <span className="text-amber-700 dark:text-amber-400">₹{pendingTotal}</span>
+                                            <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-3 border border-amber-100 dark:border-amber-900/30">
+                                                <p className="text-xs font-black text-amber-600/70 dark:text-amber-400/70 uppercase tracking-wider mb-1">Pending</p>
+                                                <p className="font-black text-lg text-amber-700 dark:text-amber-400">₹{pendingTotal}</p>
                                             </div>
-                                            <div className="pt-3 mt-3 border-t border-primary-200 dark:border-primary-500/30 flex justify-between items-center">
-                                                <span className="text-slate-900 dark:text-slate-50 font-black">Total Market:</span>
+                                            <div className="col-span-2 mt-2 pt-4 border-t border-primary-100 dark:border-primary-900/30 flex justify-between items-center">
+                                                <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Total Market Selected:</span>
                                                 <span className="font-black text-2xl text-primary-600 dark:text-primary-400">₹{approvedTotal + pendingTotal}</span>
                                             </div>
                                         </>
@@ -204,41 +166,59 @@ const Expenses = () => {
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-4">
-                            <p className="text-primary-600 dark:text-primary-400 text-xs font-bold uppercase tracking-widest">Select a member to view</p>
-                            <p className="text-slate-900 dark:text-slate-50 font-black text-xl mt-2 tracking-tight">Individual Summary</p>
+                        <div className="flex flex-col items-center justify-center h-[140px] text-center">
+                            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mb-3">
+                                <Filter className="text-primary-500" size={24} />
+                            </div>
+                            <p className="text-primary-700 dark:text-primary-400 text-sm font-bold">Select a member below</p>
+                            <p className="text-slate-500 dark:text-slate-500 text-xs mt-1">to view their specific contributions</p>
                         </div>
                     )}
                 </Card>
             </div>
 
             {/* Category Breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {categoryStats.map((stat) => (
-                    <Card
-                        key={stat.key}
-                        className={cn(
-                            "p-5 border-2 transition-all hover:shadow-md group cursor-pointer",
-                            activeCategory === stat.key
-                                ? "ring-2 ring-primary-500 ring-offset-2 dark:ring-offset-slate-900 border-primary-500 shadow-sm"
-                                : cn("bg-white border-slate-100 dark:border-white/5", stat.border.replace('border-', 'dark:border-').replace('border-', 'border-').replace('blue', 'primary').replace('orange', 'amber'))
-                        )}
-                        style={{
-                            backgroundColor: activeCategory === stat.key ? 'transparent' : undefined
-                        }}
-                        onClick={() => setActiveCategory(activeCategory === stat.key ? 'all' : stat.key)}
-                    >
-                        <div className="flex items-center justify-between mb-3">
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{stat.icon} {stat.name}</p>
-                            <span className="text-[10px] bg-white dark:bg-slate-900 px-2 py-0.5 rounded-full text-slate-600 dark:text-slate-400 font-bold border border-slate-100 dark:border-white/5 group-hover:scale-110 transition-transform">
-                                {stat.count} items
-                            </span>
-                        </div>
-                        <h3 className={cn("text-3xl font-black tracking-tight transition-colors", stat.color.replace('blue', 'primary').replace('orange', 'amber'))}>
-                            ₹{stat.total}
-                        </h3>
-                    </Card>
-                ))}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+                {categoryStats.map((stat) => {
+                    const Icon = stat.icon;
+                    return (
+                        <Card
+                            key={stat.key}
+                            className={cn(
+                                "p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group cursor-pointer relative overflow-hidden",
+                                activeCategory === stat.key
+                                    ? `ring-4 ring-offset-2 dark:ring-offset-slate-900 ${stat.color.replace('text-', 'ring-').split(' ')[0]} bg-white dark:bg-slate-900`
+                                    : cn("bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5", stat.bg)
+                            )}
+                            onClick={() => setActiveCategory(activeCategory === stat.key ? 'all' : stat.key)}
+                        >
+                            {/* Background decoration */}
+                            <div className={cn(
+                                "absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 pointer-events-none",
+                                stat.color
+                            )}>
+                                <Icon size={100} />
+                            </div>
+
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className={cn("p-2 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
+                                            <Icon size={16} />
+                                        </div>
+                                        <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{stat.name}</p>
+                                    </div>
+                                    <span className="text-[9px] bg-white/60 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full font-black tracking-wider uppercase border border-slate-200/50 dark:border-white/5 shadow-sm">
+                                        {stat.count} items
+                                    </span>
+                                </div>
+                                <h3 className={cn("text-2xl sm:text-3xl font-black tracking-tighter mt-1", stat.color)}>
+                                    ₹{stat.total}
+                                </h3>
+                            </div>
+                        </Card>
+                    );
+                })}
             </div>
 
             {/* Filters */}
@@ -358,9 +338,9 @@ const Expenses = () => {
                                                 </Button>
                                                 <Button
                                                     size="sm"
-                                                    onClick={() => {
-                                                        if (window.confirm('Are you sure you want to reject and delete this expense?')) {
-                                                            deleteExpense(expense._id || expense.id);
+                                                    onClick={async () => {
+                                                        if (window.confirm('Are you sure you want to reject this expense? This will delete the record.')) {
+                                                            await deleteExpense(expense._id || expense.id);
                                                         }
                                                     }}
                                                     className="bg-red-500 hover:bg-red-600 text-white shadow-none"
@@ -371,15 +351,15 @@ const Expenses = () => {
                                         )}
                                         {expense.status === 'approved' && (
                                             <button
-                                                onClick={() => {
-                                                    if (window.confirm(`Delete this expense?\n\nDescription: ${expense.description || expense.title}\nAmount: ₹${expense.amount}\n\nThis action cannot be undone.`)) {
-                                                        deleteExpense(expense._id || expense.id);
+                                                onClick={async () => {
+                                                    if (window.confirm('Do you want to delete?')) {
+                                                        await deleteExpense(expense._id || expense.id);
                                                     }
                                                 }}
-                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 p-2 rounded-xl transition-all"
-                                                title="Delete expense"
+                                                className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
+                                                title="Delete Expense"
                                             >
-                                                <Trash2 size={18} />
+                                                <Trash2 size={16} />
                                             </button>
                                         )}
                                     </td>

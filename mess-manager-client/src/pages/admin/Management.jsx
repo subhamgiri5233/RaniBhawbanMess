@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { ChefHat, UserCheck, ChevronDown, Calendar, Search } from 'lucide-react';
+import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../lib/api';
@@ -98,31 +98,30 @@ const Management = () => {
             console.error('Error adding manager record:', error);
             alert(error.response?.data?.error || 'Failed to add manager record');
         }
-    };
-
-    // Delete cooking record
+    };    // Delete cooking record
     const handleDeleteCooking = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this cooking record?')) return;
-
+        if (!window.confirm('Do you want to delete?')) return;
         try {
             await api.delete(`/cooking/${id}`);
             fetchCookingRecords();
         } catch (error) {
             console.error('Error deleting cooking record:', error);
+            alert('Failed to delete cooking record');
         }
     };
 
     // Delete manager record
     const handleDeleteManager = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this manager record?')) return;
-
+        if (!window.confirm('Do you want to delete?')) return;
         try {
             await api.delete(`/managers/${id}`);
             fetchManagerRecords();
         } catch (error) {
             console.error('Error deleting manager record:', error);
+            alert('Failed to delete manager record');
         }
     };
+
 
     return (
         <motion.div
@@ -219,10 +218,11 @@ const Management = () => {
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={() => handleDeleteCooking(record._id)}
-                                                className="text-[10px] font-black uppercase tracking-widest bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white px-3 py-2 rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
+                                                onClick={() => handleDeleteCooking(record._id || record.id)}
+                                                className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
+                                                title="Delete Record"
                                             >
-                                                Remove
+                                                <Trash2 size={14} />
                                             </button>
                                         </motion.div>
                                     ))
@@ -318,10 +318,11 @@ const Management = () => {
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={() => handleDeleteManager(record._id)}
-                                                className="text-[10px] font-black uppercase tracking-widest bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white px-3 py-2 rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
+                                                onClick={() => handleDeleteManager(record._id || record.id)}
+                                                className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
+                                                title="Delete Record"
                                             >
-                                                Remove
+                                                <Trash2 size={14} />
                                             </button>
                                         </motion.div>
                                     ))

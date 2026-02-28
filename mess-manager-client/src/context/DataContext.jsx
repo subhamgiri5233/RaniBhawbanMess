@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo } 
 import api from '../lib/api';
 import { useAuth } from './AuthContext';
 import { getDailyInfo } from '../utils/dailyUtils';
+import { MESS_CONFIG } from '../config';
 
 const DataContext = createContext();
 
@@ -24,6 +25,13 @@ export const DataProvider = ({ children }) => {
     const [cookingDuties, setCookingDuties] = useState([]);
     const [dailyInfo, setDailyInfo] = useState(null);
     const [loadingDaily, setLoadingDaily] = useState(true);
+
+    // Global Month Filter
+    const [globalMonth, setGlobalMonth] = useState(() => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    });
+
     const { isAuthenticated } = useAuth();
 
     const refreshData = useCallback(async () => {
@@ -254,18 +262,6 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    const clearAllAdminExpenses = async (password) => {
-        try {
-            const response = await api.delete('/expenses/admin/clear-all', {
-                data: { password }
-            });
-            await refreshData();
-            return { success: true, deletedCount: response.data.deletedCount };
-        } catch (error) {
-            console.error('Clear all expenses failed', error);
-            return { success: false, error: error.response?.data?.message || 'Failed to clear expenses' };
-        }
-    };
 
     // Market Actions
     const allocateMarketDay = async (date, memberId, type = 'manual_assign', managerId = null) => {
@@ -387,7 +383,8 @@ export const DataProvider = ({ children }) => {
     // Guest Meal Functions
     const addGuestMeal = async (date, memberId, guestMealType, mealTime) => {
         try {
-            const payload = { date, memberId, guestMealType, mealTime };
+            const amount = MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0;
+            const payload = { date, memberId, guestMealType, mealTime, amount };
             await api.post('/guest-meals', payload);
             await refreshData(); // Fixed: await refreshData
         } catch (error) {
@@ -405,49 +402,65 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    const clearAllGuestMeals = async (password) => {
+    const clearMonthlyData = async (month, password) => {
         try {
-            const response = await api.delete('/guest-meals/clear-all/confirm', {
-                data: { password }
+            const response = await api.delete('/admin/clear-month', {
+                data: { month, password }
             });
             await refreshData();
-            return { success: true, deletedCount: response.data.deletedCount };
+            return { success: true, data: response.data };
         } catch (error) {
-            console.error('Clear all guest meals failed', error);
-            return { success: false, error: error.response?.data?.error || 'Failed to clear guest meals' };
-        }
-    };
-
-    const clearAllMeals = async (password) => {
-        try {
-            const response = await api.delete('/meals/clear-all-meals', {
-                data: { password }
-            });
-            await refreshData();
-            return {
-                success: true,
-                deletedCount: response.data.deletedCount,
-                message: response.data.message
-            };
-        } catch (error) {
-            console.error('Clear all meals failed', error);
+            console.error('Clear monthly data failed', error);
             return {
                 success: false,
-                error: error.response?.data?.error || 'Failed to clear meals'
+                error: error.response?.data?.message || 'Failed to clear monthly data'
             };
         }
     };
 
+    const getMonthlyDataPreview = async (month) => {
+        try {
+            const response = await api.get(`/admin/clear-month/preview?month=${month}`);
+            return { success: true, data: response.data };
+        } catch (error) {
+            console.error('Get preview failed', error);
+            return { success: false, error: error.response?.data?.message || 'Failed to fetch preview' };
+        }
+    };
+
+
+
+    const filteredExpenses = useMemo(() => {
+        if (!Array.isArray(expenses)) return [];
+        return expenses.filter(e => e.date?.startsWith(globalMonth));
+    }, [expenses, globalMonth]);
+
+    const filteredMeals = useMemo(() => {
+        if (!Array.isArray(meals)) return [];
+        return meals.filter(m => m.date?.startsWith(globalMonth));
+    }, [meals, globalMonth]);
+
+    const filteredGuestMeals = useMemo(() => {
+        if (!Array.isArray(guestMeals)) return [];
+        return guestMeals.filter(m => m.date?.startsWith(globalMonth));
+    }, [guestMeals, globalMonth]);
 
     const contextValue = useMemo(() => ({
         members,
-        expenses,
-        meals,
-        guestMeals,
+        expenses: filteredExpenses,
+        meals: filteredMeals,
+        guestMeals: filteredGuestMeals,
+        allExpenses: expenses, // Keep raw data just in case
+        allMeals: meals,
+        allGuestMeals: guestMeals,
+        globalMonth,
+        setGlobalMonth,
         notifications,
         marketSchedule,
         managerAllocation,
         cookingDuties,
+        clearMonthlyData,
+        getMonthlyDataPreview,
         addMember,
         removeMember,
         updateMember,
@@ -455,8 +468,6 @@ export const DataProvider = ({ children }) => {
         removeMeal,
         addGuestMeal,
         removeGuestMeal,
-        clearAllGuestMeals,
-        clearAllMeals,
         sendNotification,
         sendPaymentNotifications,
         markPaymentAsPaid,
@@ -469,7 +480,6 @@ export const DataProvider = ({ children }) => {
         rejectExpense,
         updateExpense,
         deleteExpense,
-        clearAllAdminExpenses,
         allocateMarketDay,
         approveMarketRequest,
         rejectMarketRequest,
@@ -481,14 +491,15 @@ export const DataProvider = ({ children }) => {
         loadingDaily,
         sendBulkWhatsAppOfficial
     }), [
-        members, expenses, meals, guestMeals, notifications, marketSchedule,
-        managerAllocation, cookingDuties, dailyInfo, loadingDaily, refreshData,
+        members, expenses, filteredExpenses, meals, filteredMeals, guestMeals, filteredGuestMeals,
+        globalMonth, setGlobalMonth, notifications, marketSchedule,
+        managerAllocation, cookingDuties, clearMonthlyData, getMonthlyDataPreview, dailyInfo, loadingDaily, refreshData,
         addMember, removeMember, updateMember, addMeal, removeMeal, addGuestMeal,
-        removeGuestMeal, clearAllGuestMeals, clearAllMeals, sendNotification,
+        removeGuestMeal, sendNotification,
         sendPaymentNotifications, markPaymentAsPaid, updateNotification,
         deleteNotification, markAllAsRead, addExpense, approveExpense,
         approveAllExpenses, rejectExpense, updateExpense, deleteExpense,
-        clearAllAdminExpenses, allocateMarketDay, approveMarketRequest,
+        allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, setManagerForMonth, markCookingFinished, getCookingDuty,
         sendBulkWhatsAppOfficial
     ]);

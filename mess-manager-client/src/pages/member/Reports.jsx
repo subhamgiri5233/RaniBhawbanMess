@@ -7,11 +7,14 @@ import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
+import { useData } from '../../context/DataContext';
 
 const Reports = () => {
     const { user } = useAuth();
+    const { globalMonth } = useData();
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showAll, setShowAll] = useState(false);
 
     // Fetch all reports
     const fetchReports = async () => {
@@ -91,6 +94,12 @@ const Reports = () => {
         return format(date, 'MMMM yyyy');
     };
 
+    const filteredReports = showAll
+        ? reports
+        : reports.filter(r => r.month === globalMonth);
+
+    const monthLabel = formatMonth(globalMonth);
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -102,11 +111,33 @@ const Reports = () => {
                     <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Report Archive</h1>
                     <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Access generated monthly balance sheets and audit logs</p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-                    <FileText size={16} className="text-indigo-500" />
-                    <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">{reports.length} Documents</span>
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        onClick={() => setShowAll(!showAll)}
+                        className={cn(
+                            "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border",
+                            showAll
+                                ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-500/30"
+                                : "bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/5"
+                        )}
+                    >
+                        {showAll ? 'Show Selected Month' : 'Show All Archives'}
+                    </button>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
+                        <FileText size={16} className="text-indigo-500" />
+                        <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">{filteredReports.length} Documents</span>
+                    </div>
                 </div>
             </div>
+
+            {!showAll && (
+                <div className="flex items-center gap-2 px-6 py-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-500/10 rounded-2xl text-amber-700 dark:text-amber-400">
+                    <Calendar size={14} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                        Filtering by: {monthLabel}
+                    </span>
+                </div>
+            )}
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center p-24 bg-white dark:bg-slate-900 shadow-premium rounded-[2rem] border border-slate-100 dark:border-white/5">
@@ -126,7 +157,7 @@ const Reports = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <AnimatePresence>
-                        {reports.map((report, idx) => (
+                        {filteredReports.map((report, idx) => (
                             <motion.div
                                 key={report._id}
                                 layout

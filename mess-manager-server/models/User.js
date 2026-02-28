@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema({
     email: { type: String },
     mobile: { type: String },
     role: { type: String, default: 'member' },
-    deposit: { type: Number, default: 0 },
     joinedAt: { type: String },
     dateOfBirth: { type: String },
     sessionToken: { type: String, default: null }, // For single-device login

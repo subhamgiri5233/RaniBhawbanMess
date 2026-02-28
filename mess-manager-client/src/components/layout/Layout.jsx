@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import AnimatedRoutes from '../transitions/AnimatedRoutes';
 import JarvisAssistant from '../ui/JarvisAssistant';
+import GlobalMonthSelector from '../ui/GlobalMonthSelector';
 
 import { useState } from 'react';
 import { Menu, Sun, Moon } from 'lucide-react';
@@ -42,6 +43,7 @@ const Layout = () => {
 
             <main className="md:ml-64 min-h-screen p-4 md:p-8">
                 <div className="max-w-6xl mx-auto space-y-8">
+                    <GlobalMonthSelector />
                     <AnimatedRoutes>
                         <Outlet />
                     </AnimatedRoutes>

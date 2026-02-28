@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 const AddExpense = () => {
-    const { addExpense, expenses, members, updateMember, deleteExpense, clearAllAdminExpenses } = useData();
+    const { addExpense, expenses, members, updateMember, deleteExpense, globalMonth, setGlobalMonth } = useData();
     const { user } = useAuth();
 
     const isAdmin = user?.role === 'admin';
@@ -17,6 +17,12 @@ const AddExpense = () => {
     const [title, setTitle] = useState('');
     const [amount, setAmount] = useState('');
     const [category, setCategory] = useState(isAdmin ? 'spices' : 'market'); // Admin defaults to spices, members to market
+    const [transactionDate, setTransactionDate] = useState(() => {
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        // If today is in the global month, use today. Otherwise use 1st of global month.
+        return dateStr.startsWith(globalMonth) ? dateStr : `${globalMonth}-01`;
+    });
 
     // Admin Deposit State
     const [activeTab, setActiveTab] = useState('expense'); // 'expense' or 'deposit'
@@ -40,7 +46,7 @@ const AddExpense = () => {
             amount: Number(amount),
             category,
             paidBy: isAdmin ? 'admin' : (user.id || user.userId),
-            date: new Date().toISOString().split('T')[0],
+            date: transactionDate,
             status: isAdmin ? 'approved' : 'pending'
         });
 
@@ -82,7 +88,7 @@ const AddExpense = () => {
             amount: Number(depositAmount),
             category: paymentPurpose, // 'deposit', 'gas', 'wifi', etc.
             paidBy: selectedMemberId,
-            date: new Date().toISOString().split('T')[0],
+            date: transactionDate,
             status: 'approved'
         });
 
@@ -199,12 +205,26 @@ const AddExpense = () => {
                                     {isAdmin ? 'Expense Entry' : 'Market Purchase Log'}
                                 </h2>
                                 <form onSubmit={handleExpenseSubmit} className="space-y-6">
-                                    <Input
-                                        label="Item Description"
-                                        value={title}
-                                        onChange={e => setTitle(e.target.value)}
-                                        required
-                                    />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Input
+                                            label="Transaction Date"
+                                            type="date"
+                                            value={transactionDate}
+                                            onChange={e => {
+                                                const newDate = e.target.value;
+                                                setTransactionDate(newDate);
+                                                const newMonth = newDate.substring(0, 7);
+                                                if (newMonth !== globalMonth) setGlobalMonth(newMonth);
+                                            }}
+                                            required
+                                        />
+                                        <Input
+                                            label="Item Description"
+                                            value={title}
+                                            onChange={e => setTitle(e.target.value)}
+                                            required
+                                        />
+                                    </div>
                                     <Input
                                         label="Total Amount (₹)"
                                         type="number"
@@ -282,13 +302,27 @@ const AddExpense = () => {
                                             ))}
                                         </select>
                                     </div>
-                                    <Input
-                                        label="Amount Received (₹)"
-                                        type="number"
-                                        value={depositAmount}
-                                        onChange={e => setDepositAmount(e.target.value)}
-                                        required
-                                    />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Input
+                                            label="Payment Date"
+                                            type="date"
+                                            value={transactionDate}
+                                            onChange={e => {
+                                                const newDate = e.target.value;
+                                                setTransactionDate(newDate);
+                                                const newMonth = newDate.substring(0, 7);
+                                                if (newMonth !== globalMonth) setGlobalMonth(newMonth);
+                                            }}
+                                            required
+                                        />
+                                        <Input
+                                            label="Amount Received (₹)"
+                                            type="number"
+                                            value={depositAmount}
+                                            onChange={e => setDepositAmount(e.target.value)}
+                                            required
+                                        />
+                                    </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 flex items-center gap-2">
                                             <Info size={10} /> For Which Purpose?
@@ -415,30 +449,6 @@ const AddExpense = () => {
                         )}
                     </div>
 
-                    {/* Clear All History Button (Admin Only) */}
-                    {isAdmin && activeTab === 'expense' && historyItems.length > 0 && (
-                        <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/80">
-                            <button
-                                onClick={async () => {
-                                    const password = prompt('Enter password to clear all admin expense history:');
-                                    if (password === null) return; // User cancelled
-
-                                    if (window.confirm(`Are you sure you want to delete ALL ${historyItems.length} admin expenses? This cannot be undone!`)) {
-                                        const result = await clearAllAdminExpenses(password);
-                                        if (result.success) {
-                                            alert(`Successfully deleted ${result.deletedCount} admin expenses!`);
-                                        } else {
-                                            alert(`Error: ${result.error}`);
-                                        }
-                                    }
-                                }}
-                                className="w-full py-2 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-                            >
-                                <Trash2 size={16} />
-                                Clear All History
-                            </button>
-                        </div>
-                    )}
                 </Card>
             </div >
         </motion.div >

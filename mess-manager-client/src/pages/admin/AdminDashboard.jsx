@@ -4,73 +4,76 @@ import { useData } from '../../context/DataContext';
 import api from '../../lib/api';
 import Card from '../../components/ui/Card';
 import Clock from '../../components/ui/Clock';
-import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, TrendingUp, ArrowUpRight, Crown } from 'lucide-react';
+import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, TrendingUp, ArrowUpRight, Crown, Wallet, ShoppingCart, Flame, Wheat, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../../lib/utils';
 
 const AdminDashboard = () => {
-    const { members, expenses, meals } = useData();
+    const { members, expenses, meals, globalMonth } = useData();
     const navigate = useNavigate();
-    const [memberSummary, setMemberSummary] = useState([]);
-    const [editingId, setEditingId] = useState(null);
-    const [tempDeposit, setTempDeposit] = useState('');
 
-    const fetchSummary = useCallback(async () => {
-        try {
-            const res = await api.get('/members/summary');
-            setMemberSummary(res.data);
-        } catch (err) {
-            console.error("Failed to fetch member summary:", err);
-        }
-    }, []);
+    const memberSummary = useMemo(() => {
+        if (!Array.isArray(members) || !Array.isArray(meals) || !Array.isArray(expenses)) return [];
+        return members.filter(m => m.role === 'member').map(member => {
+            const memberId = member._id || member.id;
+            const memberMealCount = meals.filter(m =>
+                m.memberId === memberId || m.memberId === member?.userId
+            ).length;
 
-    useEffect(() => {
-        const load = async () => {
-            await fetchSummary();
-        };
-        load();
-    }, [fetchSummary]);
+            const memberDeposits = expenses.filter(e =>
+                e.category === 'deposit' && (e.paidBy === member.name || e.paidBy === memberId || e.paidBy === member?.userId)
+            );
+            const totalMonthlyDeposit = memberDeposits.reduce((sum, e) => sum + e.amount, 0);
 
-    const startEditing = (member) => {
-        setEditingId(member._id);
-        setTempDeposit(member.deposit);
-    };
+            return {
+                ...member,
+                totalMeals: memberMealCount,
+                monthlyDeposit: totalMonthlyDeposit
+            };
+        });
+    }, [members, meals, expenses]);
 
-    const cancelEditing = () => {
-        setEditingId(null);
-        setTempDeposit('');
-    };
+    const totalExpenses = useMemo(() => {
+        if (!Array.isArray(expenses)) return 0;
+        return expenses.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    }, [expenses]);
 
-    const saveDeposit = async (id) => {
-        try {
-            await api.put(`/members/${id}`, { deposit: Number(tempDeposit) });
-            setEditingId(null);
-            fetchSummary(); // Refresh data
-        } catch (err) {
-            console.error("Failed to update deposit:", err);
-            alert("Failed to update deposit");
-        }
-    };
-
-    const totalExpenses = useMemo(() => expenses.reduce((acc, curr) => acc + curr.amount, 0), [expenses]);
-    const totalMeals = useMemo(() => meals.length, [meals]);
+    const totalMeals = useMemo(() => {
+        if (!Array.isArray(meals)) return 0;
+        return meals.length;
+    }, [meals]);
 
     // Calculate expenses by category - Only count APPROVED expenses
-    const marketExpenses = useMemo(() => expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && e.status === 'approved').reduce((acc, curr) => acc + curr.amount, 0), [expenses]);
-    const spicesExpenses = useMemo(() => expenses.filter(e => e.category === 'spices' && e.status === 'approved').reduce((acc, curr) => acc + curr.amount, 0), [expenses]);
-    const riceExpenses = useMemo(() => expenses.filter(e => e.category === 'rice' && e.status === 'approved').reduce((acc, curr) => acc + curr.amount, 0), [expenses]);
-    const othersExpenses = useMemo(() => expenses.filter(e => e.category === 'others' && e.status === 'approved').reduce((acc, curr) => acc + curr.amount, 0), [expenses]);
+    const marketExpenses = useMemo(() => {
+        if (!Array.isArray(expenses)) return 0;
+        return expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && e.status === 'approved').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    }, [expenses]);
+
+    const spicesExpenses = useMemo(() => {
+        if (!Array.isArray(expenses)) return 0;
+        return expenses.filter(e => e.category === 'spices' && e.status === 'approved').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    }, [expenses]);
+
+    const riceExpenses = useMemo(() => {
+        if (!Array.isArray(expenses)) return 0;
+        return expenses.filter(e => e.category === 'rice' && e.status === 'approved').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    }, [expenses]);
+
+    const othersExpenses = useMemo(() => {
+        if (!Array.isArray(expenses)) return 0;
+        return expenses.filter(e => e.category === 'others' && e.status === 'approved').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    }, [expenses]);
 
     const stats = useMemo(() => [
-        { title: 'Total Members', value: members.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-        { title: 'Total Expenses', value: `₹${totalExpenses}`, icon: Receipt, color: 'text-green-600', bg: 'bg-green-50' },
-        { title: 'Total Meals', value: totalMeals, icon: UtensilsCrossed, color: 'text-orange-600', bg: 'bg-orange-50' },
-    ], [members.length, totalExpenses, totalMeals]);
+        { title: 'Total Members', value: members.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/20' },
+        { title: 'Total Meals', value: totalMeals, icon: UtensilsCrossed, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950/20' },
+    ], [members.length, totalMeals]);
 
     const expenseBreakdown = useMemo(() => [
-        { title: '🛒 Market Expenses', value: `₹${marketExpenses}`, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
-        { title: '🌶️ Spices Expenses', value: `₹${spicesExpenses}`, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
-        { title: '🍚 Rice Expenses', value: `₹${riceExpenses}`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
-        { title: '📦 Other Expenses', value: `₹${othersExpenses}`, color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200' },
+        { title: 'Market', value: `₹${marketExpenses}`, icon: ShoppingCart, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-950/20' },
+        { title: 'Spices', value: `₹${spicesExpenses}`, icon: Flame, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/20' },
+        { title: 'Rice', value: `₹${riceExpenses}`, icon: Wheat, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20' },
+        { title: 'Other', value: `₹${othersExpenses}`, icon: Package, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-900/40' },
     ], [marketExpenses, spicesExpenses, riceExpenses, othersExpenses]);
 
     return (
@@ -95,7 +98,7 @@ const AdminDashboard = () => {
             {/* Clock Component */}
             <Clock showGita={true} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                 {stats.map((stat, index) => (
                     <motion.div
                         key={index}
@@ -103,18 +106,34 @@ const AdminDashboard = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}
                     >
-                        <Card className="p-6 flex items-center justify-between hover:scale-[1.02] hover:shadow-lg transition-all border-indigo-100/50 dark:border-white/5 bg-white/90 backdrop-blur-xl group">
-                            <div className="flex items-center gap-5">
-                                <div className={`w-14 h-14 rounded-2xl ${stat.bg} ${stat.color} dark:bg-opacity-10 dark:text-opacity-100 flex items-center justify-center group-hover:rotate-6 transition-all duration-300`}>
-                                    <stat.icon size={28} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mb-1">{stat.title}</p>
-                                    <h3 className={`text-3xl font-black ${stat.color} filter drop-shadow-sm`}>{stat.value}</h3>
-                                </div>
+                        <Card className={cn(
+                            "p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden",
+                            "bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5",
+                            stat.bg
+                        )}>
+                            {/* Background decoration */}
+                            <div className={cn(
+                                "absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 pointer-events-none",
+                                stat.color
+                            )}>
+                                <stat.icon size={120} />
                             </div>
-                            <div className="p-2 bg-slate-50 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                                <ArrowUpRight size={18} className="text-slate-400" />
+
+                            <div className="relative z-10 flex items-start justify-between">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className={cn("p-2.5 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
+                                            <stat.icon size={20} />
+                                        </div>
+                                        <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{stat.title}</p>
+                                    </div>
+                                    <h3 className={cn("text-4xl sm:text-5xl font-black tracking-tighter mt-1", stat.color)}>
+                                        {stat.value}
+                                    </h3>
+                                </div>
+                                <div className="p-2 bg-white/50 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-slate-100 dark:border-white/5 shadow-sm">
+                                    <ArrowUpRight size={16} className="text-slate-400" />
+                                </div>
                             </div>
                         </Card>
                     </motion.div>
@@ -122,21 +141,44 @@ const AdminDashboard = () => {
             </div>
 
             {/* Expense Category Breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {expenseBreakdown.map((item, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 + index * 0.05 }}
-                    >
-                        <Card className={`p-5 border-2 ${item.border} bg-white/70 backdrop-blur-lg dark:bg-slate-900/40 dark:border-opacity-10 relative overflow-hidden group hover:shadow-md transition-all`}>
-                            <div className={`absolute -right-4 -bottom-4 w-16 h-16 rounded-full opacity-5 group-hover:scale-150 transition-transform ${item.color.replace('text-', 'bg-')}`}></div>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mb-1.5 flex items-center gap-2">{item.title}</p>
-                            <h3 className={`text-2xl font-black ${item.color} filter drop-shadow-sm`}>{item.value}</h3>
-                        </Card>
-                    </motion.div>
-                ))}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                {expenseBreakdown.map((item, index) => {
+                    const Icon = item.icon;
+                    return (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 + index * 0.05 }}
+                        >
+                            <Card className={cn(
+                                "p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden",
+                                "bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5",
+                                item.bg
+                            )}>
+                                {/* Background decoration */}
+                                <div className={cn(
+                                    "absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 pointer-events-none",
+                                    item.color
+                                )}>
+                                    <Icon size={100} />
+                                </div>
+
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className={cn("p-2 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", item.color)}>
+                                            <Icon size={16} />
+                                        </div>
+                                        <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{item.title}</p>
+                                    </div>
+                                    <h3 className={cn("text-2xl sm:text-3xl font-black tracking-tighter mt-1", item.color)}>
+                                        {item.value}
+                                    </h3>
+                                </div>
+                            </Card>
+                        </motion.div>
+                    );
+                })}
             </div>
 
             {/* Member Summary Section */}
@@ -167,8 +209,7 @@ const AdminDashboard = () => {
                                 <tr className="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
                                     <th className="p-4 md:p-6">Member Name</th>
                                     <th className="p-4 md:p-6 text-center">Meals</th>
-                                    <th className="p-4 md:p-6 text-center">Deposit</th>
-                                    <th className="p-4 md:p-6 text-right">Actions</th>
+                                    <th className="p-4 md:p-6 text-center">Monthly Deposit</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -185,7 +226,7 @@ const AdminDashboard = () => {
                                             <td className="p-4 md:p-6">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-slate-500 dark:text-slate-400 group-hover:from-primary-500 group-hover:to-primary-600 group-hover:text-white transition-all duration-500 shadow-sm uppercase">
-                                                        {member.name.charAt(0)}
+                                                        {(member.name || '?').charAt(0)}
                                                     </div>
                                                     <span className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-sm md:text-base">{member.name}</span>
                                                 </div>
@@ -196,50 +237,7 @@ const AdminDashboard = () => {
                                                 </span>
                                             </td>
                                             <td className="p-4 md:p-6 text-center">
-                                                {editingId === member._id ? (
-                                                    <div className="flex items-center justify-center gap-1 md:gap-2">
-                                                        <span className="text-emerald-600 font-black text-xs md:text-sm">₹</span>
-                                                        <input
-                                                            type="number"
-                                                            value={tempDeposit}
-                                                            onChange={(e) => setTempDeposit(e.target.value)}
-                                                            className="w-16 md:w-24 p-1 md:p-2 bg-white dark:bg-slate-950 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs md:text-sm font-black text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all text-center"
-                                                            autoFocus
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm md:text-lg">₹{member.deposit}</span>
-                                                )}
-                                            </td>
-                                            <td className="p-4 md:p-6 text-right">
-                                                <div className="flex items-center justify-end gap-1 md:gap-2">
-                                                    {editingId === member._id ? (
-                                                        <>
-                                                            <button
-                                                                onClick={() => saveDeposit(member._id)}
-                                                                className="p-1.5 md:p-2.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all shadow-lg shadow-emerald-500/10"
-                                                                title="Save Changes"
-                                                            >
-                                                                <Save size={16} />
-                                                            </button>
-                                                            <button
-                                                                onClick={cancelEditing}
-                                                                className="p-1.5 md:p-2.5 bg-slate-50 dark:bg-white/5 text-slate-400 hover:bg-slate-900 hover:text-white rounded-xl transition-all"
-                                                                title="Cancel"
-                                                            >
-                                                                <X size={16} />
-                                                            </button>
-                                                        </>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => startEditing(member)}
-                                                            className="p-1.5 md:p-2.5 bg-primary-50 dark:bg-primary-950/30 text-primary-600 hover:bg-primary-600 hover:text-white rounded-xl transition-all shadow-lg shadow-primary-500/10 opacity-0 group-hover:opacity-100"
-                                                            title="Edit Deposit"
-                                                        >
-                                                            <Pencil size={16} />
-                                                        </button>
-                                                    )}
-                                                </div>
+                                                <span className="font-black text-violet-600 dark:text-violet-400 text-sm md:text-lg">₹{member.monthlyDeposit}</span>
                                             </td>
                                         </motion.tr>
                                     ))}
@@ -294,7 +292,7 @@ const AdminDashboard = () => {
 };
 
 const AdminExpenseRow = ({ expense }) => {
-    const { updateExpense, deleteExpense } = useData();
+    const { updateExpense } = useData();
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({
         description: expense.description || expense.title,
@@ -308,10 +306,16 @@ const AdminExpenseRow = ({ expense }) => {
     };
 
     const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this expense?')) {
-            await deleteExpense(expense._id || expense.id);
+        if (!window.confirm('Do you want to delete?')) return;
+        try {
+            await api.delete(`/expenses/${expense._id || expense.id}`);
+            window.location.reload();
+        } catch (err) {
+            console.error("Failed to delete expense:", err);
+            alert("Failed to delete expense");
         }
     };
+
 
     if (isEditing) {
         return (
@@ -381,7 +385,11 @@ const AdminExpenseRow = ({ expense }) => {
                     <button onClick={() => setIsEditing(true)} className="text-slate-400 hover:text-primary-500 p-2 rounded-lg transition-colors hover:bg-primary-50 dark:hover:bg-primary-500/10">
                         <Pencil size={16} />
                     </button>
-                    <button onClick={handleDelete} className="text-slate-400 hover:text-red-500 p-2 rounded-lg transition-colors hover:bg-red-50 dark:hover:bg-red-500/10">
+                    <button
+                        onClick={handleDelete}
+                        className="text-red-400 hover:text-red-500 p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-500/10"
+                        title="Delete Spends"
+                    >
                         <Trash2 size={16} />
                     </button>
                 </div>

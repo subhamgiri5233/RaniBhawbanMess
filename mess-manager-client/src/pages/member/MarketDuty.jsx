@@ -8,9 +8,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils'; // Assuming cn is imported from utils
 
 const MarketDuty = () => {
-    const { marketSchedule, allocateMarketDay, approveMarketRequest, rejectMarketRequest, members, managerAllocation, refreshData } = useData();
+    const {
+        marketSchedule, allocateMarketDay, approveMarketRequest,
+        rejectMarketRequest, members, managerAllocation,
+        refreshData, globalMonth, setGlobalMonth
+    } = useData();
     const { user, isLoading } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
+
+    // Sync currentDate with globalMonth
+    useEffect(() => {
+        const [y, m] = globalMonth.split('-').map(Number);
+        if (currentDate.getFullYear() !== y || currentDate.getMonth() !== (m - 1)) {
+            setCurrentDate(new Date(y, m - 1, 1));
+        }
+    }, [globalMonth]);
 
     // Ensure latest data is loaded when visiting this page
     useEffect(() => {
@@ -27,16 +39,24 @@ const MarketDuty = () => {
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
     // Month navigation handlers
+    const updateGlobalMonthFromDate = (date) => {
+        const newMonthKey = format(date, 'yyyy-MM');
+        setGlobalMonth(newMonthKey);
+    };
+
     const goToPreviousMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+        const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+        updateGlobalMonthFromDate(newDate);
     };
 
     const goToNextMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+        const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+        updateGlobalMonthFromDate(newDate);
     };
 
     const goToCurrentMonth = () => {
-        setCurrentDate(new Date());
+        const today = new Date();
+        updateGlobalMonthFromDate(today);
     };
 
     // Check if viewing current or past month - use a stable reference
@@ -163,12 +183,14 @@ const MarketDuty = () => {
                             </div>
                         </div>
                     )}
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Confirmed Days</span>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-                            <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">{myDaysCount} Finalized</span>
+                    {!isAdmin && (
+                        <div className="flex flex-col items-end">
+                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Confirmed Days</span>
+                            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">{myDaysCount} Finalized</span>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
@@ -273,9 +295,11 @@ const MarketDuty = () => {
                                 Requests: <span className="text-sm md:text-lg leading-none align-middle ml-1">{myRequestsThisMonth}</span>/4
                             </div>
                         )}
-                        <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl border border-emerald-200 dark:border-emerald-500/30">
-                            Duties: <span className="text-sm md:text-lg leading-none align-middle ml-1">{myDaysCount}</span>
-                        </div>
+                        {!isAdmin && (
+                            <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl border border-emerald-200 dark:border-emerald-500/30">
+                                Duties: <span className="text-sm md:text-lg leading-none align-middle ml-1">{myDaysCount}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -12,7 +12,10 @@ import { MESS_CONFIG } from '../../config';
 
 const MemberMeals = () => {
     const { user } = useAuth();
-    const { members, meals, guestMeals, addMeal, removeMeal, addGuestMeal, removeGuestMeal } = useData();
+    const {
+        members, meals, guestMeals, addMeal, removeMeal,
+        addGuestMeal, removeGuestMeal, globalMonth, setGlobalMonth
+    } = useData();
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [showGuestDialog, setShowGuestDialog] = useState(false);
 
@@ -25,6 +28,21 @@ const MemberMeals = () => {
     const currentMember = useMemo(() =>
         members.filter(m => (m._id === user.id || m.id === user.id))
         , [members, user.id]);
+
+    // Sync selectedDate with globalMonth
+    useEffect(() => {
+        if (!selectedDate.startsWith(globalMonth)) {
+            setSelectedDate(`${globalMonth}-01`);
+        }
+    }, [globalMonth, selectedDate]);
+
+    const handleDateChange = (newDate) => {
+        setSelectedDate(newDate);
+        const newMonth = newDate.substring(0, 7);
+        if (newMonth !== globalMonth) {
+            setGlobalMonth(newMonth);
+        }
+    };
 
     // Handle Meal Toggling from Monthly Sheet
     const handleToggleMeal = (memberId, dateStr, type, shouldAdd) => {
@@ -62,8 +80,8 @@ const MemberMeals = () => {
         }
     };
 
-    // Get my guest meals for current month
-    const currentMonth = useMemo(() => format(new Date(selectedDate), 'yyyy-MM'), [selectedDate]);
+    // Get my guest meals for current month - now global
+    const currentMonth = globalMonth;
 
     const myGuestMeals = useMemo(() =>
         (guestMeals || []).filter(m =>
@@ -96,7 +114,7 @@ const MemberMeals = () => {
                     <input
                         type="date"
                         value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
+                        onChange={(e) => handleDateChange(e.target.value)}
                         className="bg-transparent outline-none text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight"
                     />
                 </div>

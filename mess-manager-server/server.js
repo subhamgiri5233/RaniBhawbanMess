@@ -133,8 +133,12 @@ app.use('/api/reports', reportsRoutes);
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
 
+const summaryRoutes = require('./routes/summary');
+app.use('/api/summary', summaryRoutes);
+
 const dailyRoutes = require('./routes/daily');
 app.use('/api/daily', dailyRoutes);
+
 
 const gitaRoutes = require('./routes/gita');
 app.use('/api/gita', gitaRoutes);

@@ -9,7 +9,7 @@ import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
 const Notifications = () => {
-    const { members, sendNotification, notifications, deleteNotification, markAllAsRead, refreshData } = useData();
+    const { members, sendNotification, notifications, markAllAsRead, deleteNotification, refreshData } = useData();
     const { user } = useAuth();
     const [selectedUser, setSelectedUser] = useState('');
     const [message, setMessage] = useState('');
@@ -132,7 +132,7 @@ const Notifications = () => {
                                                     <span className="font-black text-indigo-600 dark:text-indigo-400 text-sm uppercase tracking-tight">
                                                         {getMemberName(n.userId)}
                                                     </span>
-                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                    <div className="flex items-center gap-2 mt-0.5 text-right">
                                                         <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{n.date}</span>
                                                         {n.type && (
                                                             <span className="text-[8px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest rounded-md border border-slate-200/50 dark:border-white/5">
@@ -143,11 +143,15 @@ const Notifications = () => {
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={() => deleteNotification(n._id || n.id)}
-                                                className="opacity-0 group-hover:opacity-100 p-2 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all active:scale-90 flex-shrink-0"
-                                                title="Delete notification"
+                                                onClick={() => {
+                                                    if (window.confirm('Do you want to delete?')) {
+                                                        deleteNotification(n._id || n.id);
+                                                    }
+                                                }}
+                                                className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
+                                                title="Delete Notification"
                                             >
-                                                <Trash2 size={15} />
+                                                <Trash2 size={14} />
                                             </button>
                                         </div>
                                         <p className="text-slate-700 dark:text-slate-200 text-sm font-bold leading-relaxed">{n.message}</p>
@@ -164,36 +168,6 @@ const Notifications = () => {
                         )}
                     </div>
 
-                    {/* Audit Purge */}
-                    {notifications.length > 0 && (
-                        <div className="p-6 bg-slate-50/50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-white/5">
-                            <button
-                                onClick={async () => {
-                                    const password = prompt('Enter protocol password to purge transmission history:');
-                                    if (password === null) return;
-                                    if (window.confirm(`ERASE ALL ${notifications.length} TRANSMISSION RECORDS? THIS IS IRREVERSIBLE.`)) {
-                                        try {
-                                            const response = await api.delete('/notifications/admin/clear-all', {
-                                                data: { password }
-                                            });
-                                            if (response.status === 200) {
-                                                alert(`Successfully purged ${response.data.deletedCount} records.`);
-                                                refreshData();
-                                            }
-                                        } catch (error) {
-                                            const message = error.response?.data?.message || 'Purge Failure.';
-                                            alert(`Protocol Error: ${message}`);
-                                            console.error(error);
-                                        }
-                                    }
-                                }}
-                                className="w-full py-4 px-6 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-[1.5rem] transition-all flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest border border-rose-500/20 active:scale-95 shadow-lg shadow-rose-500/10"
-                            >
-                                <Trash2 size={16} />
-                                Purge System Ledger
-                            </button>
-                        </div>
-                    )}
                 </Card>
             </div>
         </motion.div >

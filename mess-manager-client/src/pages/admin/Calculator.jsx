@@ -15,7 +15,10 @@ import { MESS_CONFIG } from '../../config';
 
 const Calculator = () => {
     const { user } = useAuth();
-    const { members, expenses, meals, guestMeals, sendNotification, sendPaymentNotifications, sendBulkWhatsAppOfficial } = useData();
+    const {
+        members, expenses, meals, guestMeals, sendNotification,
+        sendPaymentNotifications, sendBulkWhatsAppOfficial, globalMonth
+    } = useData();
     const MIN_MEALS = MESS_CONFIG.MIN_MEALS_PER_MONTH;
 
     // -- State for Inputs --
@@ -46,17 +49,39 @@ const Calculator = () => {
     const [sendingNotifications, setSendingNotifications] = useState(false);
     const [savingPDF, setSavingPDF] = useState(false);
 
-    // Individual Member Inputs (Map of memberId -> { meals, deposit, guest })
+    // Individual Member Inputs (Map of memberId -> { meals, deposit, genDeposit, genDepositDate, guest, marketExpense })
     const [individualInputs, setIndividualInputs] = useState({});
+    const [monthlySummaries, setMonthlySummaries] = useState([]);
+    const [loadingSummaries, setLoadingSummaries] = useState(false);
 
-    // Auto-fetch values from database
+    // Fetch values and monthly snapshots from database
     useEffect(() => {
-        if (members.length > 0 && (expenses.length > 0 || meals.length > 0 || guestMeals.length > 0)) {
-            autoFetchFromDatabase();
-        }
-    }, [members, expenses, meals, guestMeals]);
+        const fetchData = async () => {
+            setLoadingSummaries(true);
+            try {
+                // Fetch summaries for the selected month to get accurate deposit snapshots
+                const summaryRes = await api.get(`/summary/${globalMonth}`);
+                setMonthlySummaries(summaryRes.data.members || []);
+            } catch (err) {
+                console.error('Failed to fetch monthly summaries:', err);
+            } finally {
+                setLoadingSummaries(false);
+                autoFetchFromDatabase();
+            }
+        };
+        fetchData();
+    }, [members, expenses, meals, guestMeals, globalMonth]);
 
     const autoFetchFromDatabase = () => {
+        // Reset to default/zero before fetching
+        const resetBills = {
+            gas: 0, paper: 0, wifi: 0, didi: 0,
+            spices: 0, houseRent: 0, electric: 0, others: 0
+        };
+        const resetMealInputs = {
+            totalMarket: 0, rice: 0, guest: 0, totalMeal: 1
+        };
+
         // Fetch approved expenses by category
         const approvedExpenses = expenses.filter(e => e.status === 'approved');
 
@@ -102,7 +127,8 @@ const Calculator = () => {
             return sum + price;
         }, 0);
 
-        // Update bills state with fetched values
+        // Update bills state - reset first
+        setBills(resetBills);
         setBills(prev => ({
             ...prev,
             gas: gasTotal,
@@ -110,13 +136,13 @@ const Calculator = () => {
             electric: electricTotal,
             spices: spicesTotal,
             others: othersTotal,
-            // Only overwrite these if there's actual data in the DB, otherwise preserve manual entry
             ...(paperTotal > 0 && { paper: paperTotal }),
             ...(didiTotal > 0 && { didi: didiTotal }),
             ...(houseRentTotal > 0 && { houseRent: houseRentTotal })
         }));
 
-        // Update meal inputs with fetched values
+        // Update meal inputs - reset first
+        setMealInputs(resetMealInputs);
         setMealInputs(prev => ({
             ...prev,
             totalMarket: marketTotal,
@@ -136,8 +162,8 @@ const Calculator = () => {
         console.log('Guest Meals:', guestMeals);
         console.log('Expenses:', expenses);
 
-        setIndividualInputs(prev => {
-            const newInputs = { ...prev };
+        setIndividualInputs(() => {
+            const newInputs = {}; // Start fresh for each month
 
             members.forEach(m => {
                 const memberId = m._id || m.id;
@@ -172,10 +198,37 @@ const Calculator = () => {
                 const marketTotal = memberMarketExpenses.reduce((sum, e) => sum + e.amount, 0);
                 console.log(`  - Market expenses: ₹${marketTotal}`, memberMarketExpenses);
 
+                // Calculate bill payments for this member (Gas, Wifi, Electric)
+                const memberBillExpenses = expenses.filter(e =>
+                    ['gas', 'wifi', 'electric'].includes(e.category) &&
+                    e.status === 'approved' &&
+                    (e.paidBy === memberId || e.paidBy === m._id || e.paidBy === m.id)
+                );
+                const gasPaid = memberBillExpenses.filter(e => e.category === 'gas').reduce((sum, e) => sum + e.amount, 0);
+                const wifiPaid = memberBillExpenses.filter(e => e.category === 'wifi').reduce((sum, e) => sum + e.amount, 0);
+                const electricPaid = memberBillExpenses.filter(e => e.category === 'electric').reduce((sum, e) => sum + e.amount, 0);
+                const totalBillsPaid = gasPaid + wifiPaid + electricPaid;
+
+                // Get the snapshot deposit if it exists for this month, else default to 0
+                const summary = monthlySummaries.find(ps => ps.memberId?.toString() === memberId?.toString() || ps.userId === m.userId);
+                // Fix: Never fall back to profile deposit (m.deposit) to prevent leakage
+                const snapshotDeposit = summary ? (summary.depositBalance || 0) : 0;
+                const snapshotDepositDate = summary ? summary.depositDate : (m.depositDate || '');
+
+                // Calculate general deposit for this member from expenses
+                const memberDepositExpenses = expenses.filter(e =>
+                    e.category === 'deposit' &&
+                    e.status === 'approved' &&
+                    (e.paidBy === memberId || e.paidBy === m._id || e.paidBy === m.id || e.paidBy === m.name)
+                );
+                const generalDeposit = memberDepositExpenses.reduce((sum, e) => sum + e.amount, 0);
+
                 // Initialize or update member data
                 newInputs[memberId] = {
                     meals: mealCount,
-                    deposit: m.deposit || 0,
+                    deposit: snapshotDeposit + totalBillsPaid,
+                    genDeposit: generalDeposit,
+                    genDepositDate: snapshotDepositDate,
                     guest: guestCost,
                     marketExpense: marketTotal
                 };
@@ -184,7 +237,7 @@ const Calculator = () => {
             console.log('Final individualInputs:', newInputs);
             return newInputs;
         });
-    }, [members, meals, guestMeals, expenses]);
+    }, [members, meals, guestMeals, expenses, globalMonth]);
 
     const handleBillChange = (e) => {
         setBills({ ...bills, [e.target.name]: parseFloat(e.target.value) || 0 });
@@ -286,7 +339,8 @@ const Calculator = () => {
         setSendingNotifications(true);
         try {
             const { data } = getCalculatedData();
-            const monthText = format(new Date(), 'MMMM yyyy');
+            const [y, m] = globalMonth.split('-').map(Number);
+            const monthText = format(new Date(y, m - 1), 'MMMM yyyy');
 
             const membersToNotify = data.map(m => ({
                 userId: m._id || m.id,
@@ -379,7 +433,10 @@ const Calculator = () => {
 
             const balanceText = `${Math.abs(Math.round(data.balance))} ${data.balance >= 0 ? 'To Pay' : 'To Receive'}`;
 
-            const message = `*Mess Bill Notification - ${format(new Date(), 'MMMM yyyy')}*\n\n` +
+            const [y, m] = globalMonth.split('-').map(Number);
+            const monthText = format(new Date(y, m - 1), 'MMMM yyyy');
+
+            const message = `*Mess Bill Notification - ${monthText}*\n\n` +
                 `Hello *${data.name}*, here is your mess bill for this month:\n\n` +
                 `• *Meals:* ${data.meals}${data.isBelowMinimum ? ` (40 Min applied)` : ''}\n` +
                 `• *Meal Charge:* ₹${(mealChargeResult?.mealCharge || 0).toFixed(2)} / meal\n` +
@@ -420,7 +477,10 @@ const Calculator = () => {
             const cleanedMobile = memberMobile.replace(/\D/g, '');
             const balanceText = `${Math.abs(Math.round(data.balance))} ${data.balance >= 0 ? 'To Pay' : 'To Receive'}`;
 
-            const message = `Mess Bill - ${format(new Date(), 'MMM yyyy')}\n\n` +
+            const [y, m] = globalMonth.split('-').map(Number);
+            const monthShortText = format(new Date(y, m - 1), 'MMM yyyy');
+
+            const message = `Mess Bill - ${monthShortText}\n\n` +
                 `Hello ${data.name}, your mess bill:\n` +
                 `• Meals: ${data.meals}\n` +
                 `• Meal Cost: Rs.${data.mealCost.toFixed(2)}\n` +
@@ -449,6 +509,29 @@ const Calculator = () => {
 
             const doc = new jsPDF('p', 'mm', 'a4');
 
+            const [y, m] = globalMonth.split('-').map(Number);
+            const reportMonthText = format(new Date(y, m - 1), 'MMMM yyyy');
+            const dateStr = format(new Date(), 'yyyy-MM-dd');
+            const pw = doc.internal.pageSize.getWidth();
+
+            // ── Banner ──
+            doc.setFillColor(67, 56, 202);
+            doc.rect(0, 0, pw, 28, 'F');
+            doc.setFillColor(99, 102, 241);
+            doc.rect(0, 24, pw, 4, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(255, 255, 255);
+            doc.text('RANI BHAWBAN MESS', pw / 2, 12, { align: 'center' });
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text('MONTHLY INVOICE', pw / 2, 19, { align: 'center' });
+
+            // ── Meta ──
+            doc.setFontSize(9); doc.setTextColor(30, 30, 60); doc.setFont('helvetica', 'bold');
+            doc.text(`Month: ${reportMonthText}`, 14, 36);
+            doc.text(`Generated: ${dateStr}`, pw - 14, 36, { align: 'right' });
+
             // Load Bengali font
             await addBengaliFont(doc);
 
@@ -459,21 +542,19 @@ const Calculator = () => {
                 console.warn('Bengali font not available, using default font');
                 doc.setFont('times', 'normal');
             }
-
-            // Title
-            doc.setFontSize(14);
-            doc.text('Mess Report', 105, 15, { align: 'center' });
-            doc.setFontSize(10);
-            const dateStr = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-            doc.text(`Generated on: ${dateStr}`, 105, 20, { align: 'center' });
+            doc.setTextColor(0, 0, 0); // Reset color
 
             // 1. Per Head
             console.log('Adding Per Head Table...');
             doc.setFontSize(12);
-            doc.text('PER HEAD CALCULATION', 52, 30, { align: 'center' });
+            doc.setTextColor(16, 185, 129); // emerald-500
+            doc.text('PER HEAD CALCULATION', 52, 45, { align: 'center' });
+            doc.setTextColor(0, 0, 0);
 
             autoTable(doc, {
-                startY: 35,
+                startY: 48,
+                head: [['Category', 'Amount']],
+                headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' },
                 columnStyles: { 0: { cellWidth: 45, fontStyle: 'bold' }, 1: { cellWidth: 30 } },
                 body: [
                     ['Gas', (bills.gas || 0).toFixed(2)],
@@ -492,14 +573,19 @@ const Calculator = () => {
                 styles: { fontSize: 10, cellPadding: 3 },
                 theme: 'grid'
             });
+            const perHeadFinalY = doc.lastAutoTable.finalY;
 
             // 2. Meal Charge
             console.log('Adding Meal Charge Table...');
             doc.setFontSize(12);
-            doc.text('MEAL CHARGE CALCULATION', 158, 30, { align: 'center' });
+            doc.setTextColor(245, 158, 11); // amber-500
+            doc.text('MEAL CHARGE CALCULATION', 158, 45, { align: 'center' });
+            doc.setTextColor(0, 0, 0);
 
             autoTable(doc, {
-                startY: 35,
+                startY: 48,
+                head: [['Item', 'Amount']],
+                headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold' },
                 columnStyles: { 0: { cellWidth: 50, fontStyle: 'bold' }, 1: { cellWidth: 30 } },
                 body: [
                     ['Total Market', (mealInputs.totalMarket || 0).toFixed(2)],
@@ -516,9 +602,12 @@ const Calculator = () => {
 
             // 3. Individual Table
             console.log('Adding Individual Table...');
-            const individualStartY = 160;
-            doc.setFontSize(12);
+            const mealChargeFinalY = doc.lastAutoTable.finalY;
+            const individualStartY = Math.max(perHeadFinalY, mealChargeFinalY) + 15;
+            doc.setFontSize(14);
+            doc.setTextColor(63, 131, 248); // blue-500
             doc.text('INDIVIDUAL BALANCES', 105, individualStartY, { align: 'center' });
+            doc.setTextColor(0, 0, 0);
 
             const tableBody = calculatedData.data.map(d => [
                 d.name,
@@ -528,7 +617,7 @@ const Calculator = () => {
                 d.fixedCost.toFixed(2),
                 d.guest.toFixed(2),
                 d.marketExpense.toFixed(2),
-                d.deposit.toFixed(2),
+                ((d.deposit || 0) + (d.genDeposit || 0)).toFixed(0),
                 {
                     content: `${Math.abs(Math.round(d.balance))} ${d.balance >= 0 ? 'To Pay' : 'To Receive'}`,
                     styles: { textColor: d.balance >= 0 ? [255, 0, 0] : [0, 128, 0], fontStyle: 'bold' }
@@ -540,13 +629,14 @@ const Calculator = () => {
                 head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
                 body: tableBody,
                 styles: { fontSize: 9, cellPadding: 2 },
-                headStyles: { fillColor: [51, 51, 51], textColor: 255, fontStyle: 'bold' },
+                headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold' }, // blue-500
                 theme: 'grid',
                 margin: { bottom: 10 }
             });
 
             console.log('Saving PDF...');
-            doc.save(`Mess_Report_${dateStr.replace(/ /g, '_')}.pdf`);
+            const pdfFileName = `Mess_Report_${globalMonth}_${dateStr.replace(/ /g, '_')}.pdf`;
+            doc.save(pdfFileName);
             console.log('PDF Saved!');
         } catch (error) {
             console.error('PDF Generation Failed:', error);
@@ -568,6 +658,30 @@ const Calculator = () => {
             }
 
             const doc = new jsPDF('p', 'mm', 'a4');
+            // Generate same PDF content as downloadable version
+            const [y, m] = globalMonth.split('-').map(Number);
+            const monthTitleText = format(new Date(y, m - 1), 'MMMM yyyy');
+            const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+            const pw = doc.internal.pageSize.getWidth();
+
+            // ── Banner ──
+            doc.setFillColor(67, 56, 202);
+            doc.rect(0, 0, pw, 28, 'F');
+            doc.setFillColor(99, 102, 241);
+            doc.rect(0, 24, pw, 4, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(255, 255, 255);
+            doc.text('RANI BHAWBAN MESS', pw / 2, 12, { align: 'center' });
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text('MONTHLY INVOICE', pw / 2, 19, { align: 'center' });
+
+            // ── Meta ──
+            doc.setFontSize(9); doc.setTextColor(30, 30, 60); doc.setFont('helvetica', 'bold');
+            doc.text(`Month: ${monthTitleText}`, 14, 36);
+            doc.text(`Generated: ${dateStr}`, pw - 14, 36, { align: 'right' });
+
             await addBengaliFont(doc);
 
             try {
@@ -575,21 +689,15 @@ const Calculator = () => {
             } catch (e) {
                 doc.setFont('times', 'normal');
             }
+            doc.setTextColor(0, 0, 0); // Reset
 
-            // Generate same PDF content as downloadable version
-            const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-
-            // Title
-            doc.setFontSize(18);
-            doc.text('Mess Monthly Report', 105, 20, { align: 'center' });
-            doc.setFontSize(12);
-            doc.text(dateStr, 105, 28, { align: 'center' });
-
-            let startY = 40;
+            let startY = 48;
 
             // Per Head Section
             doc.setFontSize(14);
+            doc.setTextColor(16, 185, 129);
             doc.text('Per Head Costs', 14, startY);
+            doc.setTextColor(0, 0, 0);
             const perHeadData = [
                 ['Gas', `৳${bills.gas}`], ['Paper', `৳${bills.paper}`],
                 ['WiFi', `৳${bills.wifi}`], ['Didi', `৳${bills.didi}`],
@@ -598,25 +706,31 @@ const Calculator = () => {
                 ['Total', `৳${perHeadResult.totalAmount.toFixed(2)}`],
                 ['Per Head', `৳${perHeadResult.perHeadAmount.toFixed(2)}`]
             ];
-            autoTable(doc, { startY: startY + 5, head: [['Category', 'Amount']], body: perHeadData, styles: { fontSize: 10 }, theme: 'grid' });
+            autoTable(doc, { startY: startY + 5, head: [['Category', 'Amount']], body: perHeadData, headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 10 }, theme: 'grid' });
 
             // Meal Charge Section
             const mealStartY = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(14);
+            doc.setTextColor(245, 158, 11); // amber-500
             doc.text('Meal Charges', 14, mealStartY);
+            doc.setTextColor(0, 0, 0);
             const mealData = [
                 ['Total Market', `৳${mealInputs.totalMarket}`], ['Rice', `৳${mealInputs.rice}`],
                 ['Guest Adjustment', `৳${mealInputs.guest}`], ['Total Meals', mealInputs.totalMeal],
                 ['Per Meal Charge', `৳${mealChargeResult.mealCharge.toFixed(2)}`]
             ];
-            autoTable(doc, { startY: mealStartY + 5, head: [['Category', 'Value']], body: mealData, styles: { fontSize: 10 }, theme: 'grid' });
+            autoTable(doc, { startY: mealStartY + 5, head: [['Category', 'Value']], body: mealData, headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 10 }, theme: 'grid' });
 
             // Individual Member Table
             const individualStartY = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(14);
+            doc.setTextColor(63, 131, 248); // blue-500
             doc.text('Individual Member Details', 14, individualStartY);
+            doc.setTextColor(0, 0, 0);
             const tableBody = calculatedData.data.map(d => [
                 d.name, `${d.meals || 0}${d.isBelowMinimum ? ` (${MIN_MEALS})` : ''}`, `৳${mealChargeResult.mealCharge.toFixed(2)}`,
                 `৳${d.mealCost.toFixed(2)}`, `৳${d.fixedCost.toFixed(2)}`,
-                `৳${d.guest || 0}`, `৳${d.marketExpense || 0}`, `৳${d.deposit || 0}`,
+                `৳${d.guest || 0}`, `৳${d.marketExpense || 0}`, `৳${((d.deposit || 0) + (d.genDeposit || 0)).toFixed(0)}`,
                 d.balance >= 0 ? `Pay ৳${Math.abs(Math.round(d.balance))}` : `Get ৳${Math.abs(Math.round(d.balance))}`
             ]);
             autoTable(doc, {
@@ -624,13 +738,13 @@ const Calculator = () => {
                 head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
                 body: tableBody,
                 styles: { fontSize: 9, cellPadding: 2 },
-                headStyles: { fillColor: [51, 51, 51], textColor: 255, fontStyle: 'bold' },
+                headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold' },
                 theme: 'grid'
             });
 
             // Get PDF as base64
             const pdfBase64 = doc.output('datauristring').split(',')[1];
-            const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+            const month = globalMonth;
             const fileName = `Mess_Report_${month}.pdf`;
 
             console.log('Saving to database...');
@@ -793,7 +907,7 @@ const Calculator = () => {
                                         <th className="p-4 w-32">Market (₹)</th>
                                         <th className="p-4 w-28">Guest (₹)</th>
                                         <th className="p-4 w-32">Per Head (₹)</th>
-                                        <th className="p-4 w-32">Deposit (₹)</th>
+                                        <th className="p-4 w-32">Deposit (Tot/Gen)</th>
                                         <th className="p-4 text-right">Balance</th>
                                         <th className="p-4 text-center w-28">Notify</th>
                                     </tr>
@@ -853,12 +967,18 @@ const Calculator = () => {
                                                     />
                                                 </td>
                                                 <td className="p-4">
-                                                    <input
-                                                        type="number"
-                                                        value={individualInputs[memberId]?.deposit || 0}
-                                                        onChange={(e) => handleIndividualChange(memberId, 'deposit', e.target.value)}
-                                                        className="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-black text-slate-900 dark:text-slate-100 text-center focus:ring-2 focus:ring-primary-500/20 outline-none transition-all"
-                                                    />
+                                                    <div className="flex flex-col gap-1">
+                                                        <input
+                                                            type="number"
+                                                            value={individualInputs[memberId]?.deposit || 0}
+                                                            onChange={(e) => handleIndividualChange(memberId, 'deposit', e.target.value)}
+                                                            className="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-black text-slate-900 dark:text-slate-100 text-center focus:ring-2 focus:ring-primary-500/20 outline-none transition-all"
+                                                            title="Total monthly deposit (editable)"
+                                                        />
+                                                        <div className="text-[9px] font-black text-violet-500 dark:text-violet-400 text-center uppercase tracking-tighter">
+                                                            Gen: ₹{individualInputs[memberId]?.genDeposit || 0}
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td className={`p-4 text-right font-black ${data.balance >= 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                                     ₹{Math.abs(Math.round(data.balance))} {data.balance >= 0 ? '(Pay)' : '(Get)'}

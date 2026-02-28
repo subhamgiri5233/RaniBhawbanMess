@@ -17,7 +17,8 @@ import {
     UserCheck,
     FileText,
     Sun,
-    Moon
+    Moon,
+    ClipboardList
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import Button from '../ui/Button';
@@ -65,6 +66,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { to: '/meals', icon: Utensils, label: 'Meals' },
         { to: '/expenses', icon: Receipt, label: 'Expenses' },
         { to: '/calculator', icon: Calculator, label: 'Calculator' },
+        { to: '/monthly-summary', icon: ClipboardList, label: 'Monthly Summary' },
         { to: '/settings', icon: SettingsIcon, label: 'Settings' },
         { to: '/management', icon: UserCheck, label: 'Management' },
         { to: '/notifications', icon: Bell, label: 'Notifications' },
