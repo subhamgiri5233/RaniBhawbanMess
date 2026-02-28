@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import {
     Users, Utensils, Calculator, Receipt, Clock, Sparkles,
     ShoppingCart, Bell, FileText, BarChart2, Smartphone, CreditCard,
-    Calendar, Shield, Zap, Gift
+    Calendar, Shield, Zap, Gift, Bot
 } from 'lucide-react';
 import Card from '../ui/Card';
 
@@ -148,8 +148,50 @@ const Features = () => {
                     </span>
                 </h2>
                 <p className="text-slate-400 font-medium max-w-2xl mx-auto">
-                    12 powerful features built for real mess management — from daily meals to monthly reports.
+                    13 powerful features built for real mess management — from daily meals to AI-powered insights.
                 </p>
+            </motion.div>
+
+            {/* JARVIS AI — Star Feature Spotlight */}
+            <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                whileHover={{ y: -6, transition: { duration: 0.3 } }}
+                className="mb-6"
+            >
+                <Card className="relative overflow-hidden p-8 md:p-10 border border-violet-500/30 bg-gradient-to-br from-violet-500/10 via-indigo-500/5 to-purple-500/10 shadow-2xl shadow-violet-500/20 rounded-3xl backdrop-blur-2xl">
+                    <div className="absolute -top-20 -right-20 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                        <div className="flex-shrink-0 w-20 h-20 rounded-3xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center shadow-2xl shadow-violet-500/30">
+                            <Bot size={38} className="text-violet-300" />
+                        </div>
+                        <div className="flex-1 text-center md:text-left">
+                            <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                <h3 className="text-2xl font-black text-white tracking-tight">JARVIS AI Assistant</h3>
+                                <span className="px-3 py-1 bg-violet-500/20 border border-violet-500/30 text-violet-300 text-[10px] font-black uppercase tracking-widest rounded-full">
+                                    Powered by Gemini 2.5
+                                </span>
+                            </div>
+                            <p className="text-slate-300 font-medium leading-relaxed max-w-2xl mb-4">
+                                Ask anything about your mess — expenses, meals, market schedules, member balances, and more. JARVIS reads live database data and responds like Iron Man's AI: calm, precise, and occasionally witty.
+                            </p>
+                            <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                                {['Live DB Context', 'Expense Analysis', 'Meal Insights', 'Gita Verses', 'Birthday Reminders', 'Google Search'].map(tag => (
+                                    <span key={tag} className="px-3 py-1 bg-white/5 border border-white/10 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-lg">{tag}</span>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex-shrink-0">
+                            <div className="w-20 h-20 rounded-full bg-violet-500/20 border-2 border-violet-400/40 flex flex-col items-center justify-center shadow-xl shadow-violet-500/20">
+                                <Sparkles size={20} className="text-violet-300 mb-1" />
+                                <span className="text-[9px] font-black text-violet-300 uppercase tracking-[0.2em]">AI</span>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
             </motion.div>
 
             <motion.div
