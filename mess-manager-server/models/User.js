@@ -13,4 +13,7 @@ const userSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// Speed up role-based queries (e.g. find all members)
+userSchema.index({ role: 1 });
+
 module.exports = mongoose.model('User', userSchema);

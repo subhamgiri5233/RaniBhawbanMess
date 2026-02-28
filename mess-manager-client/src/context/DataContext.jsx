@@ -88,63 +88,82 @@ export const DataProvider = ({ children }) => {
         }
     }, [isAuthenticated, refreshData]);
 
-    // Admin Actions
-    const addMember = async (member) => {
+    // --- Targeted re-fetch helpers (more efficient than full refreshData) ---
+    const refreshMembers = useCallback(async () => {
+        try { const r = await api.get('/members'); setMembers(r.data); } catch (e) { console.error('refreshMembers failed', e); }
+    }, []);
+    const refreshExpenses = useCallback(async () => {
+        try { const r = await api.get('/expenses'); setExpenses(r.data); } catch (e) { console.error('refreshExpenses failed', e); }
+    }, []);
+    const refreshMarket = useCallback(async () => {
         try {
-            console.log('Adding member:', member);
+            const r = await api.get('/market');
+            const map = {};
+            r.data.forEach(item => { const m = item.date.substring(0, 7); if (!map[m]) map[m] = []; map[m].push(item); });
+            setMarketSchedule(map);
+        } catch (e) { console.error('refreshMarket failed', e); }
+    }, []);
+    const refreshMeals = useCallback(async () => {
+        try { const r = await api.get('/meals'); setMeals(r.data); } catch (e) { console.error('refreshMeals failed', e); }
+    }, []);
+    const refreshGuestMeals = useCallback(async () => {
+        try { const r = await api.get('/guest-meals'); setGuestMeals(r.data); } catch (e) { console.error('refreshGuestMeals failed', e); }
+    }, []);
+    const refreshNotifications = useCallback(async () => {
+        try { const r = await api.get('/notifications'); setNotifications(r.data); } catch (e) { console.error('refreshNotifications failed', e); }
+    }, []);
+
+    // Admin Actions
+    const addMember = useCallback(async (member) => {
+        try {
             await api.post('/members', member);
-            console.log('Member added, refreshing data...');
-            await refreshData();
-            console.log('Data refreshed.');
+            await refreshMembers();
         } catch (error) {
             console.error('Add Member failed:', error);
         }
-    };
+    }, [refreshMembers]);
 
-    const removeMember = async (id) => {
+    const removeMember = useCallback(async (id) => {
         try {
             await api.delete(`/members/${id}`);
-            refreshData(); // Or optimistically update
-            setMembers(prev => prev.filter(m => m._id !== id && m.id !== id)); // Handle both _id and id (backend uses _id)
+            setMembers(prev => prev.filter(m => m._id !== id && m.id !== id));
         } catch (error) {
             console.error('Remove member failed', error);
         }
-    };
+    }, []);
 
-    const updateMember = async (id, updates) => {
+    const updateMember = useCallback(async (id, updates) => {
         try {
             await api.put(`/members/${id}`, updates);
-            refreshData();
+            await refreshMembers();
         } catch (error) {
             console.error('Update Member failed:', error);
         }
-    };
+    }, [refreshMembers]);
 
-    // Notification Logic (Backend Hybrid)
-    // We send to backend, but we also want UI to update instantly if possible.
-    const sendNotification = async (userId, message) => {
+    // Notification Logic
+    const sendNotification = useCallback(async (userId, message) => {
         try {
             await api.post('/notifications', { userId, message, type: 'general' });
-            // Ideally we re-fetch notifications if the current user needs to see them
         } catch (error) {
             console.error('Send Notification failed', error);
         }
-    };
+    }, []);
 
     // Send Payment Notifications to All Members
-    const sendPaymentNotifications = async (members) => {
+    const sendPaymentNotifications = useCallback(async (members) => {
         try {
             const response = await api.post('/notifications/payment/bulk', { members });
-            await refreshData();
+            await refreshNotifications();
             return { success: true, count: response.data.count };
         } catch (error) {
             console.error('Send Payment Notifications failed', error);
             return { success: false, error: error.response?.data?.message || 'Failed to send notifications' };
         }
-    };
+    }, [refreshNotifications]);
 
     // Send Official WhatsApp Notifications to Multiple Members
-    const sendBulkWhatsAppOfficial = async (members) => {
+    const sendBulkWhatsAppOfficial = useCallback(async (members) => {
         try {
             const response = await api.post('/notifications/whatsapp/official/bulk', { members });
             return { success: true, results: response.data.results };
@@ -152,274 +171,209 @@ export const DataProvider = ({ children }) => {
             console.error('Official WhatsApp Notifications failed', error);
             return { success: false, error: error.response?.data?.message || 'Failed to send bulk WhatsApp messages' };
         }
-    };
+    }, []);
 
     // Mark Payment as Paid
-    const markPaymentAsPaid = async (notificationId) => {
+    const markPaymentAsPaid = useCallback(async (notificationId) => {
         try {
             await api.put(`/notifications/payment/${notificationId}/mark-paid`);
-            await refreshData();
+            await refreshNotifications();
             return { success: true };
         } catch (error) {
             console.error('Mark payment as paid failed', error);
             return { success: false, error: error.response?.data?.message || 'Failed to mark payment' };
         }
-    };
+    }, [refreshNotifications]);
 
-    const updateNotification = async (id, updates) => {
+    const updateNotification = useCallback(async (id, updates) => {
         try {
             await api.put(`/notifications/${id}`, updates);
-            // We need to update local state if we are tracking it. 
-            // Since we moved notifications fetching to components/AuthContext mostly, 
-            // we expose a way to update it.
             setNotifications(prev => prev.map(n => n.id === id || n._id === id ? { ...n, ...updates } : n));
         } catch (error) {
             console.error('Update Notification failed', error);
         }
-    };
+    }, []);
 
-    const deleteNotification = async (id) => {
+    const deleteNotification = useCallback(async (id) => {
         try {
             await api.delete(`/notifications/${id}`);
             setNotifications(prev => prev.filter(n => n.id !== id && n._id !== id));
         } catch (error) {
             console.error('Delete Notification failed', error);
         }
-    };
+    }, []);
 
-    const markAllAsRead = async (userId) => {
+    const markAllAsRead = useCallback(async (userId) => {
         try {
             await api.put(`/notifications/mark-read/${userId}`);
-            // Optimistic update
             setNotifications(prev => prev.map(n =>
                 (n.userId === userId || n.userId === 'all') ? { ...n, isRead: true } : n
             ));
         } catch (error) {
             console.error('Mark read failed', error);
         }
-    };
+    }, []);
 
-
-    // Member Actions
-    const addExpense = async (expense) => {
+    // Expense Actions
+    const addExpense = useCallback(async (expense) => {
         try {
             const response = await api.post('/expenses', expense);
-            await refreshData();
+            await refreshExpenses();
             return { success: true, data: response.data };
         } catch (error) {
             console.error('Add Expense failed', error);
             const errorMessage = error.response?.data?.message || error.message || 'Failed to add expense';
             return { success: false, error: errorMessage };
         }
-    };
+    }, [refreshExpenses]);
 
-
-    const approveExpense = async (id) => {
+    const approveExpense = useCallback(async (id) => {
         try {
             await api.put(`/expenses/${id}`, { status: 'approved' });
-            refreshData();
+            setExpenses(prev => prev.map(e => (e._id === id || e.id === id) ? { ...e, status: 'approved' } : e));
         } catch (error) {
             console.error('Approve Expense failed', error);
         }
-    };
+    }, []);
 
-    const approveAllExpenses = async () => {
+    const approveAllExpenses = useCallback(async () => {
         try {
             const response = await api.put('/expenses/approve-all');
-            await refreshData();
+            await refreshExpenses();
             return { success: true, modifiedCount: response.data.modifiedCount };
         } catch (error) {
             console.error('Approve all expenses failed', error);
             return { success: false, error: error.response?.data?.message || 'Failed to approve all expenses' };
         }
-    };
+    }, [refreshExpenses]);
 
-
-    const rejectExpense = async (id) => {
+    const rejectExpense = useCallback(async (id) => {
         try {
             await api.put(`/expenses/${id}`, { status: 'rejected' });
-            refreshData();
+            setExpenses(prev => prev.map(e => (e._id === id || e.id === id) ? { ...e, status: 'rejected' } : e));
         } catch (error) {
             console.error('Reject Expense failed', error);
         }
-    };
+    }, []);
 
-    const updateExpense = async (id, updatedData) => {
+    const updateExpense = useCallback(async (id, updatedData) => {
         try {
             await api.put(`/expenses/${id}`, updatedData);
-            refreshData();
+            await refreshExpenses();
         } catch (error) {
             console.error('Update Expense failed', error);
         }
-    };
+    }, [refreshExpenses]);
 
-    const deleteExpense = async (id) => {
+    const deleteExpense = useCallback(async (id) => {
         try {
             await api.delete(`/expenses/${id}`);
-            await refreshData();
+            setExpenses(prev => prev.filter(e => e._id !== id && e.id !== id));
         } catch (error) {
             console.error('Delete Expense failed', error);
         }
-    };
-
+    }, []);
 
     // Market Actions
-    const allocateMarketDay = async (date, memberId, type = 'manual_assign', managerId = null) => {
+    const allocateMarketDay = useCallback(async (date, memberId, type = 'manual_assign', managerId = null) => {
         try {
-            await api.post('/market', {
-                date,
-                assignedMemberId: memberId,
-                requestType: type,
-                managerId
-            });
-            refreshData();
-            // Notify Member? Backend could handle this trigger.
+            await api.post('/market', { date, assignedMemberId: memberId, requestType: type, managerId });
+            await refreshMarket();
         } catch (error) {
             console.error('Allocate market failed', error);
         }
-    };
+    }, [refreshMarket]);
 
-    // Request Market Day (Member)
-    // Logic: Request -> Pending. 
-    // Previous logic was: allocateMarketDay handles both. Let's keep signature or separate?
-    // User click calls `allocateMarketDay` in Market.jsx. 
-    // If it's a request, it should be distinct?
-    // The UI uses `allocateMarketDay` for both. I'll modify logic to detect context or just simpler api call.
-    // Actually, `allocateMarketDay` in previous DataContext handled request logic too.
-    // I will make `allocateMarketDay` strictly about assignment/request logic.
-    // I need to know WHO is calling it? Market.jsx knows.
-    // I will rename this to `requestOrAssignMarket`. But to avoid breaking UI, I keep name.
-    // But wait, the backend route `POST /market` handles upsert.
-    // If Admin calls, status=approved. If Member calls, status=pending.
-    // How do we know? We don't send token yet. 
-    // Temporary Hack: Send `role` or `requestType` in body.
-    // UI doesn't pass role here.
-    // I'll update it to just send `requestType: 'request'` if it's a request.
-    // But `Market.jsx` isn't updated yet.
-    // I'll stick to Default behavior: `allocateMarketDay` = `request`. 
-    // I'll add a separate `assignMarketDay` if needed, or check `date` logic.
-
-    // Actually, let's look at Market.jsx usage. It calls `allocateMarketDay(date, user.id)`.
-    // So it's mostly member making requests.
-    // If Admin assigns, it might be different.
-    // I'll treat it as a request if status isn't passed.
-    // The previous code had complex logic.
-    // I'll simplify: Call API, let backend set default status.
-
-    // Also, we need notify admin logic. Backend can handle logic if we improve it, 
-    // but for now, I'll send a notification manually here to match previous behavior if needed.
-    // But previous behavior: `setNotifications` (admin).
-
-    // I'll assume standard flow:
-    // Member clicks -> allocateMarketDay -> POST /market (requestType='request')
-    // Admin clicks Approve -> PUT /market/:date (status='approved')
-
-    // I'll keep the function signature.
-
-    const approveMarketRequest = async (idOrDate, shouldRefresh = true) => {
+    const approveMarketRequest = useCallback(async (idOrDate, shouldRefresh = true) => {
         try {
-            // Check if it's an ID (usually longer mongo ID) or a date (YYYY-MM-DD)
-            const isId = idOrDate.includes('-') === false || idOrDate.length > 10;
+            const isId = !idOrDate.includes('-') || idOrDate.length > 10;
             const endpoint = isId ? `/market/id/${idOrDate}` : `/market/${idOrDate}`;
             await api.put(endpoint, { status: 'approved' });
-            if (shouldRefresh) refreshData();
+            if (shouldRefresh) await refreshMarket();
         } catch (error) {
             console.error('Approve market failed', error);
         }
-    };
+    }, [refreshMarket]);
 
-    const rejectMarketRequest = async (idOrDate, shouldRefresh = true) => {
+    const rejectMarketRequest = useCallback(async (idOrDate, shouldRefresh = true) => {
         try {
-            const isId = idOrDate.includes('-') === false || idOrDate.length > 10;
+            const isId = !idOrDate.includes('-') || idOrDate.length > 10;
             const endpoint = isId ? `/market/id/${idOrDate}` : `/market/${idOrDate}`;
             await api.put(endpoint, { status: 'rejected' });
-            if (shouldRefresh) refreshData();
+            if (shouldRefresh) await refreshMarket();
         } catch (error) {
             console.error('Reject market failed', error);
         }
-    };
+    }, [refreshMarket]);
 
-    const setManagerForMonth = (month, memberId) => {
+    const setManagerForMonth = useCallback((month, memberId) => {
         setManagerAllocation(prev => ({ ...prev, [month]: memberId }));
-    };
+    }, []);
 
-    const markCookingFinished = (date, memberId) => {
+    const markCookingFinished = useCallback((date, memberId) => {
         setCookingDuties(prev => [...prev, { date, memberId, finished: true }]);
-    };
+    }, []);
 
-    const getCookingDuty = (date) => cookingDuties.find(d => d.date === date);
+    const getCookingDuty = useCallback((date) => cookingDuties.find(d => d.date === date), [cookingDuties]);
 
-    // Meal Mock
-    const addMeal = async (date, memberIds, type, isGuest = false, guestMealType = null, mealTime = null) => {
+    // Meal Actions
+    const addMeal = useCallback(async (date, memberIds, type, isGuest = false, guestMealType = null, mealTime = null) => {
         try {
-            // Support single member addition as per usage
             for (const memberId of memberIds) {
                 const payload = { date, memberId, type };
-                if (isGuest) {
-                    payload.isGuest = true;
-                    payload.guestMealType = guestMealType;
-                    payload.mealTime = mealTime;
-                }
+                if (isGuest) { payload.isGuest = true; payload.guestMealType = guestMealType; payload.mealTime = mealTime; }
                 await api.post('/meals', payload);
             }
-            refreshData();
+            await refreshMeals();
         } catch (error) {
             console.error('Add meal failed', error);
         }
-    };
+    }, [refreshMeals]);
 
-    const removeMeal = async (date, memberId, type, mealId = null) => {
+    const removeMeal = useCallback(async (date, memberId, type, mealId = null) => {
         try {
             const payload = { date, memberId, type };
-            if (mealId) {
-                payload.mealId = mealId;
-            }
+            if (mealId) payload.mealId = mealId;
             await api.delete('/meals', { data: payload });
-            refreshData();
+            await refreshMeals();
         } catch (error) {
             console.error('Remove meal failed', error);
         }
-    };
+    }, [refreshMeals]);
 
     // Guest Meal Functions
-    const addGuestMeal = async (date, memberId, guestMealType, mealTime) => {
+    const addGuestMeal = useCallback(async (date, memberId, guestMealType, mealTime) => {
         try {
             const amount = MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0;
-            const payload = { date, memberId, guestMealType, mealTime, amount };
-            await api.post('/guest-meals', payload);
-            await refreshData(); // Fixed: await refreshData
+            await api.post('/guest-meals', { date, memberId, guestMealType, mealTime, amount });
+            await refreshGuestMeals();
         } catch (error) {
             console.error('Add guest meal failed', error);
             throw error;
         }
-    };
+    }, [refreshGuestMeals]);
 
-    const removeGuestMeal = async (guestMealId) => {
+    const removeGuestMeal = useCallback(async (guestMealId) => {
         try {
             await api.delete(`/guest-meals/${guestMealId}`);
-            await refreshData(); // Fixed: await refreshData
+            await refreshGuestMeals();
         } catch (error) {
             console.error('Remove guest meal failed', error);
         }
-    };
+    }, [refreshGuestMeals]);
 
-    const clearMonthlyData = async (month, password) => {
+    const clearMonthlyData = useCallback(async (month, password) => {
         try {
-            const response = await api.delete('/admin/clear-month', {
-                data: { month, password }
-            });
+            const response = await api.delete('/admin/clear-month', { data: { month, password } });
             await refreshData();
             return { success: true, data: response.data };
         } catch (error) {
             console.error('Clear monthly data failed', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Failed to clear monthly data'
-            };
+            return { success: false, error: error.response?.data?.message || 'Failed to clear monthly data' };
         }
-    };
+    }, [refreshData]);
 
-    const getMonthlyDataPreview = async (month) => {
+    const getMonthlyDataPreview = useCallback(async (month) => {
         try {
             const response = await api.get(`/admin/clear-month/preview?month=${month}`);
             return { success: true, data: response.data };
@@ -427,7 +381,7 @@ export const DataProvider = ({ children }) => {
             console.error('Get preview failed', error);
             return { success: false, error: error.response?.data?.message || 'Failed to fetch preview' };
         }
-    };
+    }, []);
 
 
 

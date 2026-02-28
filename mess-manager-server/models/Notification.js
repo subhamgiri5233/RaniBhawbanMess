@@ -13,4 +13,8 @@ const notificationSchema = new mongoose.Schema({
     isPaid: { type: Boolean, default: false } // Whether payment is marked as complete
 });
 
+// Speed up per-user notification lookups and unread counts
+notificationSchema.index({ userId: 1, isRead: 1 });
+notificationSchema.index({ type: 1 });
+
 module.exports = mongoose.model('Notification', notificationSchema);
