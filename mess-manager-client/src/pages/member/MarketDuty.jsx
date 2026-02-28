@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
-import { ShoppingCart, Calendar as CalendarIcon, Check, ChevronLeft, ChevronRight, Lock, X, Info, Utensils, Sparkles, TrendingUp, Inbox } from 'lucide-react';
+import { ShoppingCart, Calendar as CalendarIcon, Check, ChevronLeft, ChevronRight, Lock, X, Info, Utensils, Sparkles, TrendingUp, Inbox, User } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils'; // Assuming cn is imported from utils
+import Modal from '../../components/ui/Modal';
 
 const MarketDuty = () => {
     const {
@@ -15,6 +16,8 @@ const MarketDuty = () => {
     } = useData();
     const { user, isLoading } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedModalDate, setSelectedModalDate] = useState(null);
 
     // Sync currentDate with globalMonth
     useEffect(() => {
@@ -81,14 +84,15 @@ const MarketDuty = () => {
     const isReadOnlyAdmin = isAdmin && !isAssignedManager;
 
     // Helper to see who has a date
-    const getDayInfo = (date) => {
+    const getDaysInfo = (date) => {
         const dateStr = format(date, 'yyyy-MM-dd');
-        return currentMonthSchedule.find(d => d.date === dateStr);
+        return currentMonthSchedule.filter(d => d.date === dateStr);
     };
 
     const handleDayClick = (date) => {
         const dateStr = format(date, 'yyyy-MM-dd');
-        const dayInfo = getDayInfo(date);
+        const dayInfos = getDaysInfo(date);
+        const approvedInfo = dayInfos.find(d => d.status === 'approved');
 
         // Prevent requests in past months
         if (isPastMonth) {
@@ -96,37 +100,36 @@ const MarketDuty = () => {
             return;
         }
 
+        // Admin view opens member selection modal
+        if (isAdmin) {
+            setSelectedModalDate(date);
+            setIsModalOpen(true);
+            return;
+        }
+
+        // CUSTOMER/MEMBER LOGIC BELOW
         // If member clicks on their own pending request, allow them to cancel it
-        if (dayInfo && dayInfo.assignedMemberId === user.id && dayInfo.status === 'pending' && !isManager) {
+        const myPendingRequest = dayInfos.find(d => d.assignedMemberId === user.id && d.status === 'pending');
+        if (myPendingRequest) {
             if (window.confirm('Cancel your pending request for this date?')) {
-                rejectMarketRequest(dateStr);
+                rejectMarketRequest(myPendingRequest._id || myPendingRequest.id);
             }
             return;
         }
 
         // Don't allow clicking on already assigned/approved dates or others' requests
-        if (dayInfo) {
+        if (approvedInfo) {
             return;
         }
 
         // Check 4-day limit for members
-        if (!isManager && myRequestsThisMonth >= 4) {
+        if (myRequestsThisMonth >= 4) {
             alert('⚠️ You can only request maximum 4 days per month');
             return;
         }
 
-        // Admin view is read-only unless they are the active manager
-        if (isReadOnlyAdmin) {
-            return;
-        }
-
-        if (isManager) {
-            // Managers assign directly
-            allocateMarketDay(dateStr, user.id, 'manual_assign');
-        } else {
-            // Members request
-            allocateMarketDay(dateStr, user.id, 'request', currentManagerId);
-        }
+        // Members request
+        allocateMarketDay(dateStr, user.id, 'request', currentManagerId);
     };
 
     const getMemberName = (id) => members.find(m => (m._id === id || m.id === id))?.name;
@@ -237,13 +240,13 @@ const MarketDuty = () => {
                                         <div className="flex gap-2">
                                             <button
                                                 className="text-slate-300 hover:text-rose-500 p-2.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all active:scale-90"
-                                                onClick={() => rejectMarketRequest(req.date)}
+                                                onClick={() => rejectMarketRequest(req._id || req.id)}
                                             >
                                                 <X size={20} />
                                             </button>
                                             <button
                                                 className="text-slate-300 hover:text-emerald-500 p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all active:scale-90"
-                                                onClick={() => approveMarketRequest(req.date)}
+                                                onClick={() => approveMarketRequest(req._id || req.id)}
                                             >
                                                 <Check size={20} />
                                             </button>
@@ -328,14 +331,16 @@ const MarketDuty = () => {
                     ))}
                     {days.map((day, dayIdx) => {
                         const dateStr = format(day, 'yyyy-MM-dd');
-                        const info = getDayInfo(day);
-                        const isMine = info?.assignedMemberId === user.id;
+                        const dayInfos = getDaysInfo(day);
+                        const approvedInfo = dayInfos.find(d => d.status === 'approved');
+                        const pendingInfos = dayInfos.filter(d => d.status === 'pending');
+                        const isMine = approvedInfo?.assignedMemberId === user.id || pendingInfos.some(p => p.assignedMemberId === user.id);
 
                         // Status Logic
-                        const isApproved = info?.status === 'approved';
-                        const isRequested = info?.status === 'pending';
-                        const isTaken = isApproved && !isMine; // Taken by others
-                        const isPending = isRequested && !isMine; // Pending by others
+                        const isApproved = !!approvedInfo;
+                        const isRequested = pendingInfos.length > 0;
+                        const isMineApproved = approvedInfo?.assignedMemberId === user.id;
+                        const isMinePending = pendingInfos.some(p => p.assignedMemberId === user.id);
 
                         return (
                             <motion.button
@@ -345,20 +350,21 @@ const MarketDuty = () => {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: dayIdx * 0.01 }}
                                 onClick={() => handleDayClick(day)}
-                                disabled={isPastMonth || (info && !(info.assignedMemberId === user.id && info.status === 'pending' && !isManager))}
+                                disabled={isPastMonth || (!isAdmin && approvedInfo && approvedInfo.assignedMemberId !== user.id)}
                                 className={cn(
                                     "h-20 md:h-32 p-2 md:p-4 rounded-xl md:rounded-3xl border-2 flex flex-col items-start justify-between transition-all relative overflow-hidden group/day",
                                     isToday(day) && "ring-2 md:ring-4 ring-primary-500/20 border-primary-500/50 shadow-lg md:shadow-xl shadow-primary-500/10",
                                     // ME
-                                    isMine && isApproved && "bg-gradient-to-br from-indigo-600 to-purple-700 text-white border-transparent shadow-xl md:shadow-2xl shadow-indigo-500/30 active:scale-95",
-                                    isMine && isRequested && "bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-200 dark:border-amber-500/30 border-dashed animate-pulse-subtle",
-                                    // OTHERS
-                                    isTaken && "bg-slate-50 dark:bg-slate-950/20 text-slate-300 dark:text-slate-700 cursor-not-allowed border-slate-100 dark:border-white/5",
-                                    isPending && "bg-slate-50/50 dark:bg-slate-950/10 text-slate-300 dark:text-slate-600 border-slate-100 dark:border-white/5 border-dashed",
+                                    isMineApproved && "bg-gradient-to-br from-indigo-600 to-purple-700 text-white border-transparent shadow-xl md:shadow-2xl shadow-indigo-500/30 active:scale-95",
+                                    isMinePending && "bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-200 dark:border-amber-500/30 border-dashed animate-pulse-subtle",
+                                    // OTHERS (admin sees it as reassignable, others see it as taken)
+                                    isApproved && !isMineApproved && !isAdmin && "bg-slate-50 dark:bg-slate-950/20 text-slate-300 dark:text-slate-700 cursor-not-allowed border-slate-100 dark:border-white/5",
+                                    isApproved && !isMineApproved && isAdmin && "bg-slate-50 dark:bg-slate-950/20 text-slate-300 dark:text-slate-700 border-slate-100 dark:border-white/5 hover:border-primary-400 hover:shadow-xl hover:-translate-y-1 cursor-pointer active:scale-95",
+                                    isRequested && !isMinePending && !isApproved && "bg-slate-50/50 dark:bg-slate-950/10 text-slate-300 dark:text-slate-600 border-slate-100 dark:border-white/5 border-dashed",
                                     // EMPTY
-                                    !info && !isPastMonth && "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/80 hover:border-primary-400 dark:hover:border-primary-600 hover:shadow-xl md:hover:shadow-2xl hover:-translate-y-1 md:hover:-translate-y-1.5 cursor-pointer active:scale-95",
+                                    !isApproved && !isRequested && !isPastMonth && "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/80 hover:border-primary-400 dark:hover:border-primary-600 hover:shadow-xl md:hover:shadow-2xl hover:-translate-y-1 md:hover:-translate-y-1.5 cursor-pointer active:scale-95",
                                     // PAST MONTH
-                                    !info && isPastMonth && "bg-slate-100/50 dark:bg-slate-950/40 text-slate-200 dark:text-slate-800 cursor-not-allowed border-slate-50 dark:border-slate-900/40"
+                                    !isApproved && !isRequested && isPastMonth && "bg-slate-100/50 dark:bg-slate-950/40 text-slate-200 dark:text-slate-800 cursor-not-allowed border-slate-50 dark:border-slate-900/40"
                                 )}
                             >
                                 <div className="flex w-full justify-between items-start">
@@ -375,34 +381,38 @@ const MarketDuty = () => {
                                     )}
                                 </div>
 
-                                {info ? (
+                                {isApproved || isRequested ? (
                                     (() => {
-                                        const memberColor = getMemberColor(info.assignedMemberId);
+                                        const displayInfo = approvedInfo || pendingInfos[0];
+                                        const memberColor = getMemberColor(displayInfo.assignedMemberId);
+                                        const isMine = displayInfo.assignedMemberId === user.id;
+                                        const isDisplayApproved = displayInfo.status === 'approved';
+
                                         return (
                                             <div className="w-full">
                                                 <div className="flex items-center gap-1.5 md:gap-2 mt-1 min-w-0">
                                                     <div className={cn(
                                                         "w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-[8px] md:text-[10px] font-black shadow-sm group-hover/day:scale-110 transition-transform duration-500",
-                                                        (isMine && isApproved) ? "bg-white/20 text-white border border-white/30 backdrop-blur-md" : `${memberColor.bg} ${memberColor.text} border ${memberColor.border}`
+                                                        (isMine && isDisplayApproved) ? "bg-white/20 text-white border border-white/30 backdrop-blur-md" : `${memberColor.bg} ${memberColor.text} border ${memberColor.border}`
                                                     )}>
-                                                        {getMemberName(info.assignedMemberId)?.charAt(0).toUpperCase()}
+                                                        {getMemberName(displayInfo.assignedMemberId)?.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
                                                         <span className={cn(
                                                             "text-[8px] md:text-[10px] font-black truncate transition-colors tracking-tight hidden sm:block",
-                                                            (isMine && isApproved) ? "text-white" : "text-slate-900 dark:text-slate-100"
+                                                            (isMine && isDisplayApproved) ? "text-white" : "text-slate-900 dark:text-slate-100"
                                                         )}>
-                                                            {getMemberName(info.assignedMemberId)}
+                                                            {getMemberName(displayInfo.assignedMemberId)}
                                                         </span>
-                                                        {isRequested && (
+                                                        {!isApproved && isRequested && (
                                                             <span className={cn(
                                                                 "text-[6px] md:text-[7px] font-black uppercase tracking-widest px-1 md:px-1.5 py-0.5 rounded-md w-fit mt-0.5",
                                                                 isMine ? "bg-amber-400 text-amber-950 shadow-sm animate-pulse" : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-500"
                                                             )}>
-                                                                {isMine ? (window.innerWidth < 640 ? 'Mine' : 'Your Req') : 'Pending'}
+                                                                {isMine ? (window.innerWidth < 640 ? 'Mine' : 'Your Req') : `Reqs (${pendingInfos.length})`}
                                                             </span>
                                                         )}
-                                                        {isApproved && !isMine && (
+                                                        {isApproved && (approvedInfo.assignedMemberId !== user.id || !isMine) && (
                                                             <span className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600 mt-0.5 hidden sm:block">
                                                                 Reserved
                                                             </span>
@@ -417,11 +427,11 @@ const MarketDuty = () => {
                                         <div className="p-2 bg-primary-50 dark:bg-primary-950/40 rounded-xl">
                                             <ShoppingCart size={16} className="text-primary-500" />
                                         </div>
-                                        <span className="text-[8px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest">Reserve</span>
+                                        <span className="text-[8px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest">{isAdmin ? 'Assign' : 'Reserve'}</span>
                                     </div>
                                 )}
 
-                                {isMine && isApproved && (
+                                {isMineApproved && (
                                     <div className="absolute -top-1 -right-1">
                                         <div className="bg-indigo-400 p-2 rounded-bl-3xl shadow-lg border-b border-l border-white/20">
                                             <Check size={14} className="text-white font-black" />
@@ -463,6 +473,87 @@ const MarketDuty = () => {
                     </div>
                 </div>
             </motion.div>
+
+            {/* Member Selection Modal for Admins */}
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={`Duty for ${selectedModalDate ? format(selectedModalDate, 'dd MMM yyyy') : ''}`}
+            >
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Select a member to assign or approve</p>
+
+                    {members.map(member => {
+                        const dayInfos = selectedModalDate ? getDaysInfo(selectedModalDate) : [];
+                        const memberRequest = dayInfos.find(d => d.assignedMemberId === (member._id || member.id));
+                        const isApprovedForThisDate = memberRequest?.status === 'approved';
+                        const isPending = memberRequest?.status === 'pending';
+                        const memberColor = getMemberColor(member._id || member.id);
+
+                        // Count how many approved duties this member already has this month
+                        const memberApprovedDuties = currentMonthSchedule.filter(
+                            d => d.assignedMemberId === (member._id || member.id) && d.status === 'approved'
+                        ).length;
+                        const hasMaxDuties = memberApprovedDuties >= 4 && !isApprovedForThisDate;
+
+                        return (
+                            <button
+                                key={member._id || member.id}
+                                onClick={() => {
+                                    if (isApprovedForThisDate) {
+                                        // If already approved, clicking again removes the assignment
+                                        if (window.confirm(`Remove assignment for ${member.name}?`)) {
+                                            rejectMarketRequest(memberRequest._id || memberRequest.id);
+                                            setIsModalOpen(false);
+                                        }
+                                    } else if (hasMaxDuties) {
+                                        // 4-duty limit warning
+                                        alert(`⚠️ Member "${member.name}" already has ${memberApprovedDuties} days duty this month. Please select another member.`);
+                                    } else if (isPending) {
+                                        // Approve specific request
+                                        approveMarketRequest(memberRequest._id || memberRequest.id);
+                                        setIsModalOpen(false);
+                                    } else {
+                                        // Manual assign
+                                        allocateMarketDay(format(selectedModalDate, 'yyyy-MM-dd'), member._id || member.id, 'manual_assign');
+                                        setIsModalOpen(false);
+                                    }
+                                }}
+                                className={cn(
+                                    "w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all hover:scale-[1.02] active:scale-95 group",
+                                    isApprovedForThisDate ? "bg-indigo-600 border-transparent shadow-lg shadow-indigo-500/20" :
+                                        isPending ? "bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-500/20" :
+                                            hasMaxDuties ? "bg-slate-100 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-70" :
+                                                "bg-white dark:bg-slate-900 border-slate-100 dark:border-white/5"
+                                )}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className={cn(
+                                        "w-10 h-10 rounded-xl flex items-center justify-center font-black",
+                                        isApprovedForThisDate ? "bg-white/20 text-white" : `${memberColor.bg} ${memberColor.text}`
+                                    )}>
+                                        {member.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="text-left">
+                                        <p className={cn("font-black text-sm", isApprovedForThisDate ? "text-white" : "text-slate-900 dark:text-white")}>{member.name}</p>
+                                        {isPending && <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Has Pending Request</p>}
+                                        {isApprovedForThisDate && <p className="text-[10px] font-bold text-indigo-100 uppercase tracking-widest">Currently Assigned</p>}
+                                        {hasMaxDuties && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">4 Days Duty — Limit Reached</p>}
+                                    </div>
+                                </div>
+                                <div className={cn(
+                                    "p-2 rounded-lg transition-colors",
+                                    isApprovedForThisDate ? "bg-white/20 text-white" :
+                                        hasMaxDuties ? "bg-rose-50 dark:bg-rose-900/20 text-rose-400" :
+                                            "bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-primary-500"
+                                )}>
+                                    {isApprovedForThisDate ? <Check size={18} /> : isPending ? <Sparkles size={18} /> : hasMaxDuties ? <X size={18} /> : <User size={18} />}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </Modal>
         </motion.div>
     );
 };

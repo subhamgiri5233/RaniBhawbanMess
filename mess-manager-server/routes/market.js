@@ -25,12 +25,20 @@ router.post('/', auth, async (req, res) => {
     }
 
     try {
-        // Upsert
+        // Upsert by date AND memberId
         const updated = await MarketRequest.findOneAndUpdate(
-            { date },
-            { assignedMemberId, requestType, status: requestType === 'request' ? 'pending' : 'approved' },
+            { date, assignedMemberId },
+            { requestType, status: requestType === 'request' ? 'pending' : 'approved' },
             { new: true, upsert: true }
         );
+
+        // If newly approved, reject others for this date
+        if (updated.status === 'approved') {
+            await MarketRequest.updateMany(
+                { date, _id: { $ne: updated._id }, status: 'pending' },
+                { status: 'rejected' }
+            );
+        }
 
         if (requestType === 'request') {
             // Notify Manager
@@ -49,33 +57,32 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// Approve/Reject - Admin or Requester (for cancellation)
-router.put('/:date', auth, async (req, res) => {
-    const { status } = req.body; // 'approved' or 'rejected'
+// Update status by ID (New more specific route)
+router.put('/id/:id', auth, async (req, res) => {
+    const { status } = req.body;
     try {
-        const existing = await MarketRequest.findOne({ date: req.params.date });
+        const existing = await MarketRequest.findById(req.params.id);
         if (!existing) return res.status(404).json({ message: 'Request not found' });
 
         const isAdmin = req.user.role === 'admin';
-        const isRequester = existing.assignedMemberId === req.user.id;
-        const isPending = existing.status === 'pending';
+        if (!isAdmin && status === 'approved') {
+            return res.status(403).json({ message: 'Only admins can approve requests' });
+        }
 
         if (status === 'approved') {
-            // ONLY Admin can approve
-            if (!isAdmin) {
-                return res.status(403).json({ message: 'Access denied. Only managers can approve requests.' });
-            }
+            existing.status = 'approved';
+            await existing.save();
 
-            const updated = await MarketRequest.findOneAndUpdate(
-                { date: req.params.date },
-                { status: 'approved' },
-                { new: true }
+            // Auto-reject others for the same date
+            await MarketRequest.updateMany(
+                { date: existing.date, _id: { $ne: existing._id }, status: 'pending' },
+                { status: 'rejected' }
             );
 
-            // CLEANUP: Delete any pending "New Market Request" alerts for this date
+            // Cleanup notifications
             await Notification.deleteMany({
                 type: 'market_request',
-                'metadata.date': req.params.date
+                'metadata.date': existing.date
             });
 
             // Notify User
@@ -86,40 +93,41 @@ router.put('/:date', auth, async (req, res) => {
                 metadata: { date: existing.date }
             }).save();
 
-            return res.json(updated);
+            return res.json(existing);
         }
 
         if (status === 'rejected') {
-            // REJECT (Cancel) is allowed if:
-            // 1. User is Admin (Standard Rejection)
-            // 2. User is Requester AND it's still pending (Self-Cancellation)
-            if (!isAdmin && !(isRequester && isPending)) {
-                return res.status(403).json({ message: 'Access denied.' });
-            }
+            // For rejection, we usually just delete to keep calendar clean for requests
+            await MarketRequest.findByIdAndDelete(req.params.id);
 
-            // "Not stored in database" -> Delete it
-            await MarketRequest.findOneAndDelete({ date: req.params.date });
-
-            // CLEANUP: Delete any pending "New Market Request" alerts for this date
-            await Notification.deleteMany({
-                type: 'market_request',
-                'metadata.date': req.params.date
-            });
-
-            // Notify User only if NOT self-canceling
-            if (isAdmin && !isRequester) {
+            // If admin rejected it (and it wasn't a self-cancel), notify
+            if (isAdmin && existing.assignedMemberId !== req.user.id) {
                 await new Notification({
                     userId: existing.assignedMemberId,
-                    message: `Your market request for ${existing.date} was REJECTED. Please choose another date.`,
+                    message: `Your market request for ${existing.date} was REJECTED.`,
                     type: 'market_rejected',
                     metadata: { date: existing.date }
                 }).save();
             }
 
-            return res.json({ message: isRequester ? 'Request cancelled' : 'Request rejected and removed' });
+            return res.json({ message: 'Request removed/rejected' });
         }
 
-        res.status(400).json({ message: 'Invalid status update' });
+        res.status(400).json({ message: 'Invalid status' });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+// Original route (For backward compatibility or simple rejection by date)
+router.put('/:date', auth, async (req, res) => {
+    const { status } = req.body; // 'approved' or 'rejected'
+    try {
+        const existing = await MarketRequest.findOne({ date: req.params.date });
+        if (!existing) return res.status(404).json({ message: 'Request not found' });
+
+        // Redirect to ID based logic if specific
+        return res.redirect(307, `/api/market/id/${existing._id}`);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }

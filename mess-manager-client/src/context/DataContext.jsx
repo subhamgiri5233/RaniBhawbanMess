@@ -316,22 +316,23 @@ export const DataProvider = ({ children }) => {
 
     // I'll keep the function signature.
 
-    const approveMarketRequest = async (date, shouldRefresh = true) => {
+    const approveMarketRequest = async (idOrDate, shouldRefresh = true) => {
         try {
-            await api.put(`/market/${date}`, { status: 'approved' });
+            // Check if it's an ID (usually longer mongo ID) or a date (YYYY-MM-DD)
+            const isId = idOrDate.includes('-') === false || idOrDate.length > 10;
+            const endpoint = isId ? `/market/id/${idOrDate}` : `/market/${idOrDate}`;
+            await api.put(endpoint, { status: 'approved' });
             if (shouldRefresh) refreshData();
         } catch (error) {
             console.error('Approve market failed', error);
         }
     };
 
-    const rejectMarketRequest = async (date, shouldRefresh = true) => {
-        // Backend doesn't delete, it sets status=rejected? Or deletes?
-        // Previous logic: filter out (delete).
-        // I'll delete or set status. Let's set status 'rejected' for record, or delete if "cancel".
-        // Use PUT status='rejected'.
+    const rejectMarketRequest = async (idOrDate, shouldRefresh = true) => {
         try {
-            await api.put(`/market/${date}`, { status: 'rejected' });
+            const isId = idOrDate.includes('-') === false || idOrDate.length > 10;
+            const endpoint = isId ? `/market/id/${idOrDate}` : `/market/${idOrDate}`;
+            await api.put(endpoint, { status: 'rejected' });
             if (shouldRefresh) refreshData();
         } catch (error) {
             console.error('Reject market failed', error);
