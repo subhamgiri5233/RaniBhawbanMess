@@ -15,7 +15,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="max-w-[1600px] mx-auto px-6 md:px-12 py-12 border-t border-white/5 transition-all">
+        <footer className="relative z-10 max-w-[1600px] mx-auto px-6 md:px-12 py-12 border-t border-white/10 transition-all text-slate-300">
             {/* Top row: brand + quick links */}
             <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-10">
                 {/* Brand */}
