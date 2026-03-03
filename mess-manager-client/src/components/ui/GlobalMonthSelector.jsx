@@ -49,11 +49,17 @@ const GlobalMonthSelector = () => {
     const [currentYear, currentMonth] = globalMonth.split('-').map(Number);
     const formattedCurrentMonth = new Date(currentYear, currentMonth - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
 
+    const todayMonth = (() => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    })();
+    const isCurrentMonth = globalMonth === todayMonth;
+
     return (
         <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 sm:p-3 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
+            className="bg-white/80 dark:bg-slate-900 border border-indigo-200/50 dark:border-slate-800 rounded-2xl p-2 sm:p-3 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_2px_16px_-2px_rgba(99,102,241,0.10)] dark:shadow-sm backdrop-blur-sm"
         >
             <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-xl">
@@ -96,13 +102,15 @@ const GlobalMonthSelector = () => {
             </div>
 
             <div className="flex items-center">
-                <button
-                    onClick={handleCurrentMonth}
-                    className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 dark:hover:bg-emerald-950/40 transition-all border border-emerald-200/50 dark:border-emerald-800/30"
-                >
-                    <CalendarCheck size={14} />
-                    Current
-                </button>
+                {!isCurrentMonth && (
+                    <button
+                        onClick={handleCurrentMonth}
+                        className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 dark:hover:bg-emerald-950/40 transition-all border border-emerald-200/50 dark:border-emerald-800/30"
+                    >
+                        <CalendarCheck size={14} />
+                        Current
+                    </button>
+                )}
             </div>
         </motion.div>
     );

@@ -14,6 +14,19 @@ const AddExpense = () => {
 
     const isAdmin = user?.role === 'admin';
 
+    // Compute each member's general deposit balance for the selected month (expenses is already filtered by globalMonth)
+    // Mirrors AdminDashboard logic: match paidBy against _id, userId, OR name
+    const getMemberGeneralDeposit = (member) => {
+        if (!Array.isArray(expenses)) return 0;
+        const memberId = member._id || member.id;
+        return expenses
+            .filter(e =>
+                e.category === 'deposit' &&
+                (e.paidBy === memberId || e.paidBy === String(memberId) || e.paidBy === member?.userId || e.paidBy === member?.name)
+            )
+            .reduce((sum, e) => sum + (e.amount || 0), 0);
+    };
+
     const [title, setTitle] = useState('');
     const [amount, setAmount] = useState('');
     const [category, setCategory] = useState(isAdmin ? 'spices' : 'market'); // Admin defaults to spices, members to market
@@ -297,7 +310,7 @@ const AddExpense = () => {
                                             <option value="">Choose a member...</option>
                                             {members.filter(m => m.role === 'member').map(m => (
                                                 <option key={m.id || m._id} value={m.id || m._id} className="dark:bg-slate-900">
-                                                    {m.name} (Balance: ₹{m.deposit})
+                                                    {m.name} (Balance: ₹{getMemberGeneralDeposit(m)})
                                                 </option>
                                             ))}
                                         </select>

@@ -51,9 +51,9 @@ const MealRow = React.memo(({ member, type, days, getStatus, todayStr, calculate
             "border-b group hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors",
             isLunch ? "border-slate-50 dark:border-white/5" : "border-b-4 border-slate-100 dark:border-white/5"
         )}>
-            <td className="p-4 border-r border-slate-50 dark:border-white/5 font-black text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-950 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">
+            <td className="p-4 min-w-[170px] border-r border-slate-50 dark:border-white/5 font-black text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-950 z-20 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)]">
                 <div className="flex flex-col">
-                    <span className="truncate max-w-[140px]">{member.name}</span>
+                    <span className="font-black text-slate-900 dark:text-slate-100">{member.name}</span>
                     <span className={cn(
                         "text-[8px] uppercase tracking-widest mt-1 flex items-center gap-1",
                         isLunch ? "text-primary-500 dark:text-primary-400" : "text-indigo-500 dark:text-indigo-400"
@@ -129,10 +129,14 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
         return (meals || []).filter(m => m && m.memberId === memberId && m.date && m.date.startsWith(currentMonthStr) && m.type === type).length;
     }, [meals, currentMonthStr]);
 
-    // Calculate Grand Total for the month
+    // Calculate Grand Total — only for the members passed in (may be just 1 in member view)
+    const memberIds = useMemo(() => (members || []).map(m => m._id || m.id), [members]);
     const monthlyGrandTotal = useMemo(() => {
-        return (meals || []).filter(m => m && m.date && m.date.startsWith(currentMonthStr)).length;
-    }, [meals, currentMonthStr]);
+        return (meals || []).filter(m =>
+            m && m.date && m.date.startsWith(currentMonthStr) &&
+            memberIds.includes(m.memberId)
+        ).length;
+    }, [meals, currentMonthStr, memberIds]);
 
     // Interaction Logic
     const [activeCell, setActiveCell] = useState(null);
@@ -169,7 +173,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
     };
 
     return (
-        <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200/60 dark:border-white/5 rounded-[2rem] shadow-premium dark:shadow-premium-dark flex flex-col relative max-h-[700px]">
+        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-indigo-100 dark:border-white/5 rounded-[2rem] shadow-[0_4px_24px_rgba(79,70,229,0.13)] dark:shadow-premium-dark flex flex-col relative max-h-[700px]">
             <div className="overflow-auto custom-scrollbar flex-1 rounded-t-[2rem]">
                 <table className="w-full text-[10px] md:text-xs border-collapse bg-transparent transition-colors">
                     <thead>
@@ -257,7 +261,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
 
                 <div className="flex items-center gap-8 bg-white dark:bg-slate-950 p-2 pl-6 pr-2 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm">
                     <div>
-                        <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-right">Aggregate Throughput</p>
+                        <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-right">My Meals This Month</p>
                         <p className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tighter text-right">{monthlyGrandTotal} <span className="text-[10px] font-bold text-slate-400 ml-1 tracking-normal">MEALS</span></p>
                     </div>
                     <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30">

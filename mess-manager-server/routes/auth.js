@@ -150,4 +150,25 @@ router.patch('/change-password', auth, async (req, res) => {
     }
 });
 
+// Member self-service avatar update
+router.patch('/update-avatar', auth, async (req, res) => {
+    try {
+        const { avatar } = req.body;
+        if (!avatar) {
+            return res.status(400).json({ success: false, message: 'Avatar seed is required' });
+        }
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { avatar },
+            { new: true }
+        );
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        res.json({ success: true, avatar: user.avatar });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 module.exports = router;

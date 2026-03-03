@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
     role: { type: String, default: 'member' },
     joinedAt: { type: String },
     dateOfBirth: { type: String },
+    avatar: { type: String, default: null }, // DiceBear seed string
     sessionToken: { type: String, default: null }, // For single-device login
     createdAt: { type: Date, default: Date.now }
 });

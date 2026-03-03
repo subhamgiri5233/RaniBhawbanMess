@@ -3,6 +3,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Clock from '../../components/ui/Clock';
+import AvatarPicker, { getAvatarUrl } from '../../components/ui/AvatarPicker';
 import { Wallet, Utensils, ShoppingCart, Star, TrendingUp, Calendar as CalendarIcon, Lock, Eye, EyeOff, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +15,9 @@ const MemberDashboard = () => {
     const { user } = useAuth();
     const { members, expenses, meals, guestMeals, marketSchedule, addExpense, globalMonth } = useData();
     const MIN_MEALS = MESS_CONFIG.MIN_MEALS_PER_MONTH;
+
+    // Avatar state — read from members list
+    const [avatarSeed, setAvatarSeed] = useState(null);
 
     // Password change state
     const [currentPassword, setCurrentPassword] = useState('');
@@ -123,13 +127,21 @@ const MemberDashboard = () => {
             className="space-y-8 pb-12"
         >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/90 dark:bg-slate-900 shadow-sm p-8 rounded-[2rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
-                        Namaste, <span className="text-indigo-600 dark:text-indigo-400">{user.name}</span>
-                    </h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
-                        Activity overview for <span className="text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/30">{monthLabel}</span>
-                    </p>
+                <div className="flex items-center gap-6">
+                    {/* Avatar */}
+                    <AvatarPicker
+                        currentAvatar={currentMember?.avatar || avatarSeed}
+                        memberId={user.id}
+                        onSaved={(seed) => setAvatarSeed(seed)}
+                    />
+                    <div>
+                        <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
+                            Namaste, <span className="text-indigo-600 dark:text-indigo-400">{user.name}</span>
+                        </h1>
+                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
+                            Activity overview for <span className="text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/30">{monthLabel}</span>
+                        </p>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
                     <Star size={16} className="text-indigo-500" />

@@ -57,7 +57,20 @@ const Payments = () => {
 
     // Get current member's data
     const currentMember = members.find(m => (m._id === user.id || m.id === user.id));
-    const currentDeposit = currentMember?.deposit || 0;
+
+    // Compute General Deposit for the selected month only (expenses is already filtered by globalMonth)
+    // Mirrors Finance page & Dashboard logic: match paidBy by _id, userId, or name
+    const currentGeneralDeposit = (() => {
+        if (!Array.isArray(expenses) || !currentMember) return 0;
+        const memberId = currentMember._id || currentMember.id;
+        return expenses
+            .filter(e =>
+                e.category === 'deposit' &&
+                (e.paidBy === memberId || e.paidBy === String(memberId) ||
+                    e.paidBy === currentMember?.userId || e.paidBy === currentMember?.name)
+            )
+            .reduce((sum, e) => sum + (e.amount || 0), 0);
+    })();
 
     return (
         <motion.div
@@ -85,7 +98,7 @@ const Payments = () => {
                     </div>
                     <div className="relative z-10">
                         <p className="text-emerald-100 font-black text-[10px] uppercase tracking-widest">Liquidity Balance</p>
-                        <h2 className="text-4xl font-black mt-2 tracking-tight">₹{currentDeposit.toLocaleString()}</h2>
+                        <h2 className="text-4xl font-black mt-2 tracking-tight">₹{currentGeneralDeposit.toLocaleString()}</h2>
                         <div className="mt-8 pt-6 border-t border-white/10 flex items-center gap-3">
                             <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
                                 <CheckCircle size={14} className="text-emerald-200" />
@@ -108,7 +121,7 @@ const Payments = () => {
                     <div className="space-y-4 relative z-10">
                         <div className="p-4 bg-indigo-50/30 dark:bg-slate-950/40 rounded-2xl border border-indigo-100/50 dark:border-white/5">
                             <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Available Funds</p>
-                            <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tight">₹{currentDeposit}</p>
+                            <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tight">₹{currentGeneralDeposit.toLocaleString()}</p>
                         </div>
                         <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
                             Payment requests are historical records of mess contributions. Clear them to maintain a healthy account balance.
