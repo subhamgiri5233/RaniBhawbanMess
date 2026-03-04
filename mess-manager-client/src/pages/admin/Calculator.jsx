@@ -298,10 +298,10 @@ const Calculator = () => {
                 const mealCost = effectiveMeals * (mealChargeResult.mealCharge || 0);
                 const fixedCost = perHeadResult.perHeadAmount || 0;
                 const total = mealCost + fixedCost + (inputs.guest || 0);
-                const balance = total - ((inputs.deposit || 0) + (inputs.marketExpense || 0));
+                const balance = total - ((inputs.deposit || 0) + (inputs.genDeposit || 0) + (inputs.marketExpense || 0));
 
                 totalMealCost += mealCost;
-                totalDeposit += (inputs.deposit || 0);
+                totalDeposit += (inputs.deposit || 0) + (inputs.genDeposit || 0);
                 totalBalance += balance;
 
                 return {
