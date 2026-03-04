@@ -108,7 +108,7 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
                     <img
                         src={currentSrc}
                         alt="Profile"
-                        className="w-20 h-20 aspect-square rounded-full border-4 border-indigo-100 dark:border-indigo-900/40 shadow-lg group-hover:border-indigo-400 transition-all object-cover shrink-0"
+                        className="w-16 h-16 sm:w-20 sm:h-20 aspect-square rounded-full border-4 border-indigo-100 dark:border-indigo-900/40 shadow-lg group-hover:border-indigo-400 transition-all object-cover shrink-0"
                     />
                     <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Camera size={20} className="text-white" />
@@ -187,7 +187,7 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
                                         animate={{ scale: 1, opacity: 1 }}
                                         src={previewSrc}
                                         alt="Preview"
-                                        className="w-24 h-24 aspect-square rounded-full border-4 border-indigo-500 shadow-xl shadow-indigo-500/20 object-cover"
+                                        className="w-20 h-20 sm:w-24 sm:h-24 aspect-square rounded-full border-4 border-indigo-500 shadow-xl shadow-indigo-500/20 object-cover"
                                     />
                                 </div>
 

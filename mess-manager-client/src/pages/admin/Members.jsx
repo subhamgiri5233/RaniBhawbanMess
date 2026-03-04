@@ -119,7 +119,7 @@ const Members = () => {
             className="space-y-8 pb-12"
         >
             {/* Header with clean light mode / dark mode variants */}
-            <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 shadow-sm border border-slate-200/50 dark:border-white/5 group border-l-8 border-l-indigo-600">
+            <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-10 shadow-sm border border-slate-200/50 dark:border-white/5 group border-l-8 border-l-indigo-600">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/5 rounded-full -ml-24 -mb-24 blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
@@ -273,7 +273,7 @@ const Members = () => {
                                         transition={{ delay: index * 0.05 }}
                                         className="hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
                                     >
-                                        <td className="p-6">
+                                        <td className="p-4 sm:p-6">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-all shrink-0">
                                                     {member.name.charAt(0).toUpperCase()}
@@ -289,7 +289,7 @@ const Members = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-6">
+                                        <td className="p-4 sm:p-6">
                                             <div className="flex flex-col gap-1.5">
                                                 <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
                                                     <Mail size={14} className="text-slate-400" />
@@ -301,7 +301,7 @@ const Members = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-6">
+                                        <td className="p-4 sm:p-6">
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex items-center gap-1.5">
                                                     <Shield size={10} className="text-slate-400" />

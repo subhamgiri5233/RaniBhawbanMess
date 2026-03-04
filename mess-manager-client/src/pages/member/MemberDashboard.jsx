@@ -126,8 +126,8 @@ const MemberDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/90 dark:bg-slate-900 shadow-sm p-8 rounded-[2rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
-                <div className="flex items-center gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-white/90 dark:bg-slate-900 shadow-sm p-5 sm:p-8 rounded-[2rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
+                <div className="flex items-center gap-4 sm:gap-6">
                     {/* Avatar */}
                     <AvatarPicker
                         currentAvatar={currentMember?.avatar || avatarSeed}
@@ -135,7 +135,7 @@ const MemberDashboard = () => {
                         onSaved={(seed) => setAvatarSeed(seed)}
                     />
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
                             Namaste, <span className="text-indigo-600 dark:text-indigo-400">{user.name}</span>
                         </h1>
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
@@ -155,7 +155,7 @@ const MemberDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="p-8 group hover:-translate-y-1 transition-all duration-500">
+                <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                     <div className="flex items-start justify-between mb-4">
                         <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 dark:bg-indigo-500/20 group-hover:scale-110 transition-transform">
                             <Utensils size={24} />
@@ -173,7 +173,7 @@ const MemberDashboard = () => {
                     )}
                 </Card>
 
-                <Card className="p-8 group hover:-translate-y-1 transition-all duration-500">
+                <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                     <div className="flex items-start justify-between mb-4">
                         <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 dark:bg-emerald-500/20 group-hover:scale-110 transition-transform">
                             <Wallet size={24} />
@@ -185,7 +185,7 @@ const MemberDashboard = () => {
                     <p className="text-[10px] font-black text-emerald-500/60 dark:text-emerald-400/60 mt-1 uppercase tracking-widest italic">Gen: ₹{myMonthlyDeposit}</p>
                 </Card>
 
-                <Card className="p-8 group hover:-translate-y-1 transition-all duration-500">
+                <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                     <div className="flex items-start justify-between mb-4">
                         <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20 group-hover:scale-110 transition-transform">
                             <ShoppingCart size={24} />
@@ -196,7 +196,7 @@ const MemberDashboard = () => {
                     <h3 className="text-3xl font-black text-amber-600 dark:text-amber-400 mt-2 tracking-tight">₹{totalMarketAmount}</h3>
                 </Card>
 
-                <Card className="p-8 group hover:-translate-y-1 transition-all duration-500">
+                <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                     <div className="flex items-start justify-between mb-4">
                         <div className="p-4 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 dark:bg-purple-500/20 group-hover:scale-110 transition-transform">
                             <Utensils size={24} />
