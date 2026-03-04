@@ -17,6 +17,7 @@ const Management = () => {
     // Cooking state
     const [cookingRecords, setCookingRecords] = useState([]);
     const [selectedCook, setSelectedCook] = useState('');
+    const [selectedMealType, setSelectedMealType] = useState('lunch');
 
     // Manager state
     const [managerRecords, setManagerRecords] = useState([]);
@@ -61,6 +62,7 @@ const Management = () => {
             const response = await api.post('/cooking', {
                 memberId: selectedCook,
                 date: selectedDate,
+                mealType: selectedMealType,
                 assignedBy: user.id
             });
 
@@ -68,6 +70,7 @@ const Management = () => {
                 alert('Cooking record added successfully!');
                 fetchCookingRecords();
                 setSelectedCook('');
+                setSelectedMealType('lunch');
             }
         } catch (error) {
             console.error('Error adding cooking record:', error);
@@ -181,6 +184,27 @@ const Management = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Lunch / Dinner Toggle */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black text-amber-800/60 dark:text-amber-300/60 uppercase tracking-widest">Meal Type</span>
+                                <div className="flex gap-1 p-1 bg-amber-100/60 dark:bg-amber-900/20 rounded-2xl border border-amber-200/60 dark:border-amber-800/30">
+                                    {['lunch', 'dinner'].map(type => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setSelectedMealType(type)}
+                                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${selectedMealType === type
+                                                    ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
+                                                    : 'text-amber-700 dark:text-amber-400 hover:bg-amber-200/60 dark:hover:bg-amber-800/30'
+                                                }`}
+                                        >
+                                            {type === 'lunch' ? '☀️' : '🌙'} {type}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <Button
                                 onClick={handleAddCooking}
                                 className="w-full bg-amber-600 hover:bg-amber-700 text-white font-black uppercase tracking-widest text-xs py-3.5 rounded-2xl shadow-xl shadow-amber-600/20 active:scale-[0.98] transition-all"
@@ -212,9 +236,17 @@ const Management = () => {
                                                 </div>
                                                 <div>
                                                     <p className="font-black text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors uppercase">{record.memberName}</p>
-                                                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1 mt-0.5">
-                                                        <Calendar size={10} /> {format(new Date(record.date), 'dd MMM yyyy')}
-                                                    </p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                                                            <Calendar size={10} /> {format(new Date(record.date), 'dd MMM yyyy')}
+                                                        </p>
+                                                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${record.mealType === 'dinner'
+                                                                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                                                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                            }`}>
+                                                            {record.mealType === 'dinner' ? '🌙 Dinner' : '☀️ Lunch'}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <button

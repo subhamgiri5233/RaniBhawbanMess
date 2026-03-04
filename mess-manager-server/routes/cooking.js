@@ -27,7 +27,7 @@ router.get('/date/:date', auth, async (req, res) => {
 // Add a cooking record - Admin only
 router.post('/', auth, requireAdmin, async (req, res) => {
     try {
-        const { memberId, date, assignedBy } = req.body;
+        const { memberId, date, mealType = 'lunch', assignedBy } = req.body;
 
         // Get member name
         const member = await User.findById(memberId);
@@ -35,16 +35,17 @@ router.post('/', auth, requireAdmin, async (req, res) => {
             return res.status(404).json({ error: 'Member not found' });
         }
 
-        // Check if record already exists for this member and date
-        const existing = await CookingRecord.findOne({ memberId, date });
+        // Check if record already exists for this member, date AND mealType
+        const existing = await CookingRecord.findOne({ memberId, date, mealType });
         if (existing) {
-            return res.status(400).json({ error: 'Cooking record already exists for this member and date' });
+            return res.status(400).json({ error: `Cooking record already exists for this member, date and meal type (${mealType})` });
         }
 
         const record = new CookingRecord({
             memberId,
             memberName: member.name,
             date,
+            mealType,
             cooked: true
         });
 
