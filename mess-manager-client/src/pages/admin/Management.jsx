@@ -231,14 +231,14 @@ const Management = () => {
                             </Button>
                         </div>
 
-                        {/* Cooking Records List */}
-                        <div className="space-y-3 max-h-96 overflow-y-auto px-1 scrollbar-hide">
+                        {/* Cooking Records List - current month only */}
+                        <div className="space-y-3 max-h-64 overflow-y-auto px-1 scrollbar-hide">
                             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Search size={10} /> Recent cooking activities
+                                <Search size={10} /> This month's cooking activities
                             </h3>
                             <AnimatePresence mode="popLayout">
-                                {cookingRecords.length > 0 ? (
-                                    cookingRecords.map((record, index) => (
+                                {cookingRecords.filter(r => r.date?.startsWith(currentMonth)).length > 0 ? (
+                                    cookingRecords.filter(r => r.date?.startsWith(currentMonth)).map((record, index) => (
                                         <motion.div
                                             key={record._id}
                                             layout
@@ -373,14 +373,14 @@ const Management = () => {
                             </Button>
                         </div>
 
-                        {/* Manager Records List */}
-                        <div className="space-y-3 max-h-96 overflow-y-auto px-1 scrollbar-hide">
+                        {/* Manager Records List - current month only */}
+                        <div className="space-y-3 max-h-64 overflow-y-auto px-1 scrollbar-hide">
                             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Search size={10} /> Recent management records
+                                <Search size={10} /> This month's management records
                             </h3>
                             <AnimatePresence mode="popLayout">
-                                {managerRecords.length > 0 ? (
-                                    managerRecords.map((record, index) => (
+                                {managerRecords.filter(r => r.date?.startsWith(currentMonth)).length > 0 ? (
+                                    managerRecords.filter(r => r.date?.startsWith(currentMonth)).map((record, index) => (
                                         <motion.div
                                             key={record._id}
                                             layout
