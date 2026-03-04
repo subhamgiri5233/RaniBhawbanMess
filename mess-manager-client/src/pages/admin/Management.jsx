@@ -51,8 +51,8 @@ const Management = () => {
         load();
     }, [fetchCookingRecords, fetchManagerRecords]);
 
-    // Compute current month from selectedDate
-    const currentMonth = selectedDate.substring(0, 7); // e.g. "2026-03"
+    // Always track the REAL current month, not the date picker value
+    const currentMonth = new Date().toISOString().substring(0, 7); // e.g. "2026-03"
 
     // All non-admin members (matches server-side member query logic)
     const memberList = members.filter(m => m.role !== 'admin');
