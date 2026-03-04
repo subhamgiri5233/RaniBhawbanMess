@@ -3,7 +3,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package } from 'lucide-react';
+import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
@@ -11,6 +11,7 @@ const Expenses = () => {
     const { expenses, members, approveExpense, approveAllExpenses, deleteExpense, refreshData } = useData();
     const [activeCategory, setActiveCategory] = useState('all');
     const [selectedMember, setSelectedMember] = useState('all');
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const getMemberName = (paidBy) => {
         if (paidBy === 'admin') return 'Admin';
@@ -20,16 +21,20 @@ const Expenses = () => {
 
     // Filter expenses based on category and member
     // Exclude admin market expenses (admin only adds spices/other)
-    const filteredExpenses = expenses.filter(expense => {
-        // Hide admin market expenses
-        if (expense.category === 'market' && expense.paidBy === 'admin') {
-            return false;
-        }
-
-        const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
-        const memberMatch = selectedMember === 'all' || expense.paidBy === selectedMember;
-        return categoryMatch && memberMatch;
-    });
+    const filteredExpenses = expenses
+        .filter(expense => {
+            // Hide admin market expenses and rejected expenses
+            if (expense.category === 'market' && expense.paidBy === 'admin') return false;
+            if (expense.status === 'rejected') return false;
+            const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
+            const memberMatch = selectedMember === 'all' || expense.paidBy === selectedMember;
+            return categoryMatch && memberMatch;
+        })
+        .sort((a, b) => {
+            // Pending first, then rejected, then approved
+            const order = { pending: 0, rejected: 1, approved: 2 };
+            return (order[a.status] ?? 3) - (order[b.status] ?? 3);
+        });
 
     // Category-wise breakdown - Only count APPROVED expenses
     const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && e.status === 'approved');
@@ -85,7 +90,21 @@ const Expenses = () => {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Expense Management</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Expense Management</h1>
+                <button
+                    onClick={async () => {
+                        setIsRefreshing(true);
+                        await refreshData();
+                        setIsRefreshing(false);
+                    }}
+                    disabled={isRefreshing}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 disabled:opacity-60 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-sm shadow-primary-500/20"
+                >
+                    <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
+                    {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                </button>
+            </div>
 
 
             {/* Main Stats */}
