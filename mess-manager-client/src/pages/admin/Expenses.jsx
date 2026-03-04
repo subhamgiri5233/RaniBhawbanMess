@@ -3,12 +3,12 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw } from 'lucide-react';
+import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, AlertTriangle, UserX } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
 const Expenses = () => {
-    const { expenses, members, approveExpense, approveAllExpenses, deleteExpense, refreshData } = useData();
+    const { expenses, members, approveExpense, approveAllExpenses, deleteExpense, refreshData, globalMonth } = useData();
     const [activeCategory, setActiveCategory] = useState('all');
     const [selectedMember, setSelectedMember] = useState('all');
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -87,6 +87,20 @@ const Expenses = () => {
 
     const totalApproved = expenses.filter(e => e.status === 'approved').reduce((acc, e) => acc + e.amount, 0);
     const pendingCount = expenses.filter(e => e.status === 'pending').length;
+
+    // Members who haven't submitted ANY market expense this month
+    const memberOnlyList = members.filter(m => m.role === 'member');
+    const membersWithMarket = new Set(
+        expenses
+            .filter(e => e.category === 'market' && e.paidBy !== 'admin')
+            .map(e => e.paidBy)
+    );
+    const membersWithoutMarket = memberOnlyList.filter(m => !membersWithMarket.has(m._id || m.id));
+
+    // Format month label e.g. "2026-03" → "March 2026"
+    const monthLabel = globalMonth
+        ? new Date(`${globalMonth}-01`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
+        : '';
 
     return (
         <div className="space-y-6">
@@ -196,7 +210,40 @@ const Expenses = () => {
                 </Card>
             </div>
 
+            {/* Missing Market Submissions Alert */}
+            {membersWithoutMarket.length > 0 && (
+                <Card className="p-4 bg-gradient-to-br from-rose-50 to-rose-100/40 dark:from-slate-900 dark:to-slate-800/80 border-rose-200/60 dark:border-rose-900/30">
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-xl shrink-0">
+                            <UserX className="text-rose-500 dark:text-rose-400" size={18} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                                <p className="text-rose-700 dark:text-rose-400 font-black text-xs uppercase tracking-widest">
+                                    No Market Expense Submitted — {monthLabel}
+                                </p>
+                                <span className="text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-black">
+                                    {membersWithoutMarket.length}
+                                </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {membersWithoutMarket.map(m => (
+                                    <span
+                                        key={m._id || m.id}
+                                        className="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-800/60 border border-rose-200 dark:border-rose-900/40 rounded-lg text-sm font-bold text-rose-700 dark:text-rose-400"
+                                    >
+                                        <AlertTriangle size={12} />
+                                        {m.name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            )}
+
             {/* Category Breakdown */}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
                 {categoryStats.map((stat) => {
                     const Icon = stat.icon;
