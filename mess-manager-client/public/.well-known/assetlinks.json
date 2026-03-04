@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "app.vercel.rani_bhawban_mess.twa",
+            "sha256_cert_fingerprints": [
+                "E7:D4:B0:7C:E0:B8:29:D6:CC:1B:8D:92:99:34:AE:FE:2B:59:75:D6:D5:CD:82:D9:BF:1C:14:3C:D1:B9:31:70"
+            ]
+        }
+    }
+]

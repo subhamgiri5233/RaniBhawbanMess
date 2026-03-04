@@ -275,7 +275,7 @@ const Members = () => {
                                     >
                                         <td className="p-6">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-all">
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-all shrink-0">
                                                     {member.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>

@@ -225,7 +225,7 @@ const AdminDashboard = () => {
                                         >
                                             <td className="p-4 md:p-6">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-slate-500 dark:text-slate-400 group-hover:from-primary-500 group-hover:to-primary-600 group-hover:text-white transition-all duration-500 shadow-sm uppercase">
+                                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-slate-500 dark:text-slate-400 group-hover:from-primary-500 group-hover:to-primary-600 group-hover:text-white transition-all duration-500 shadow-sm uppercase shrink-0">
                                                         {(member.name || '?').charAt(0)}
                                                     </div>
                                                     <span className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-sm md:text-base">{member.name}</span>
