@@ -54,8 +54,8 @@ const Management = () => {
     // Compute current month from selectedDate
     const currentMonth = selectedDate.substring(0, 7); // e.g. "2026-03"
 
-    // Members who have/haven't cooked this month
-    const memberList = members.filter(m => m.role === 'member');
+    // All non-admin members (matches server-side member query logic)
+    const memberList = members.filter(m => m.role !== 'admin');
     const cookedThisMonth = new Set(
         cookingRecords.filter(r => r.date?.startsWith(currentMonth)).map(r => r.memberId)
     );
