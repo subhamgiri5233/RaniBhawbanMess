@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock } from 'lucide-react';
+import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock, CheckCircle2, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../lib/api';
@@ -50,6 +50,24 @@ const Management = () => {
         };
         load();
     }, [fetchCookingRecords, fetchManagerRecords]);
+
+    // Compute current month from selectedDate
+    const currentMonth = selectedDate.substring(0, 7); // e.g. "2026-03"
+
+    // Members who have/haven't cooked this month
+    const memberList = members.filter(m => m.role === 'member');
+    const cookedThisMonth = new Set(
+        cookingRecords.filter(r => r.date?.startsWith(currentMonth)).map(r => r.memberId)
+    );
+    const doneCooks = memberList.filter(m => cookedThisMonth.has(m._id || m.id));
+    const pendingCooks = memberList.filter(m => !cookedThisMonth.has(m._id || m.id));
+
+    // Members who have/haven't been manager this month
+    const managedThisMonth = new Set(
+        managerRecords.filter(r => r.date?.startsWith(currentMonth)).map(r => r.memberId)
+    );
+    const doneManagers = memberList.filter(m => managedThisMonth.has(m._id || m.id));
+    const pendingManagers = memberList.filter(m => !managedThisMonth.has(m._id || m.id));
 
     // Add cooking record
     const handleAddCooking = async () => {
@@ -195,8 +213,8 @@ const Management = () => {
                                             type="button"
                                             onClick={() => setSelectedMealType(type)}
                                             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${selectedMealType === type
-                                                    ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
-                                                    : 'text-amber-700 dark:text-amber-400 hover:bg-amber-200/60 dark:hover:bg-amber-800/30'
+                                                ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
+                                                : 'text-amber-700 dark:text-amber-400 hover:bg-amber-200/60 dark:hover:bg-amber-800/30'
                                                 }`}
                                         >
                                             {type === 'lunch' ? '☀️' : '🌙'} {type}
@@ -241,8 +259,8 @@ const Management = () => {
                                                             <Calendar size={10} /> {format(new Date(record.date), 'dd MMM yyyy')}
                                                         </p>
                                                         <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${record.mealType === 'dinner'
-                                                                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-                                                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                                                             }`}>
                                                             {record.mealType === 'dinner' ? '🌙 Dinner' : '☀️ Lunch'}
                                                         </span>
@@ -268,6 +286,40 @@ const Management = () => {
                                     </motion.p>
                                 )}
                             </AnimatePresence>
+                        </div>
+
+                        {/* Cooking Duty Rotation Tracker */}
+                        <div className="mt-6 pt-5 border-t border-amber-100 dark:border-amber-900/20">
+                            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Clock size={10} /> This Month's Cooking Duty
+                            </h3>
+                            {pendingCooks.length === 0 ? (
+                                <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200/60 dark:border-emerald-900/30">
+                                    <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
+                                    <p className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have cooked.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2.5">
+                                    <div>
+                                        <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-1.5">Pending ({pendingCooks.length})</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {pendingCooks.map(m => (
+                                                <span key={m._id || m.id} className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {doneCooks.length > 0 && (
+                                        <div>
+                                            <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1.5">Done ✓ ({doneCooks.length})</p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {doneCooks.map(m => (
+                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </Card>
@@ -368,6 +420,40 @@ const Management = () => {
                                     </motion.p>
                                 )}
                             </AnimatePresence>
+                        </div>
+
+                        {/* Manager Duty Rotation Tracker */}
+                        <div className="mt-6 pt-5 border-t border-primary-100 dark:border-primary-900/20">
+                            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Clock size={10} /> This Month's Manager Duty
+                            </h3>
+                            {pendingManagers.length === 0 ? (
+                                <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200/60 dark:border-emerald-900/30">
+                                    <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
+                                    <p className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have managed.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2.5">
+                                    <div>
+                                        <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-1.5">Pending ({pendingManagers.length})</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {pendingManagers.map(m => (
+                                                <span key={m._id || m.id} className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {doneManagers.length > 0 && (
+                                        <div>
+                                            <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1.5">Done ✓ ({doneManagers.length})</p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {doneManagers.map(m => (
+                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </Card>

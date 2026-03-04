@@ -3,7 +3,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, AlertTriangle, UserX } from 'lucide-react';
+import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, AlertTriangle, UserX, Bell } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
@@ -12,6 +12,7 @@ const Expenses = () => {
     const [activeCategory, setActiveCategory] = useState('all');
     const [selectedMember, setSelectedMember] = useState('all');
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isSendingAlerts, setIsSendingAlerts] = useState(false);
 
     const getMemberName = (paidBy) => {
         if (paidBy === 'admin') return 'Admin';
@@ -237,6 +238,30 @@ const Expenses = () => {
                                     </span>
                                 ))}
                             </div>
+                            <button
+                                onClick={async () => {
+                                    setIsSendingAlerts(true);
+                                    try {
+                                        for (const m of membersWithoutMarket) {
+                                            await api.post('/notifications', {
+                                                userId: m._id || m.id,
+                                                message: `⚠️ Reminder: Please submit your market expense for ${monthLabel}. The deadline is approaching!`,
+                                                type: 'market_reminder'
+                                            });
+                                        }
+                                        alert(`✅ Notifications sent to ${membersWithoutMarket.length} member(s)!`);
+                                    } catch (err) {
+                                        alert('Failed to send some notifications.');
+                                    } finally {
+                                        setIsSendingAlerts(false);
+                                    }
+                                }}
+                                disabled={isSendingAlerts}
+                                className="mt-3 flex items-center gap-2 px-4 py-2 bg-rose-500 hover:bg-rose-600 disabled:opacity-60 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all"
+                            >
+                                <Bell size={13} className={isSendingAlerts ? 'animate-bounce' : ''} />
+                                {isSendingAlerts ? 'Sending...' : `Notify ${membersWithoutMarket.length} Member${membersWithoutMarket.length > 1 ? 's' : ''}`}
+                            </button>
                         </div>
                     </div>
                 </Card>
