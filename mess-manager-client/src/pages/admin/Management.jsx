@@ -51,23 +51,18 @@ const Management = () => {
         load();
     }, [fetchCookingRecords, fetchManagerRecords]);
 
-    // Always track the REAL current month, not the date picker value
-    const currentMonth = new Date().toISOString().substring(0, 7); // e.g. "2026-03"
-
-    // All non-admin members (matches server-side member query logic)
+    // All non-admin members
     const memberList = members.filter(m => m.role !== 'admin');
-    const cookedThisMonth = new Set(
-        cookingRecords.filter(r => r.date?.startsWith(currentMonth)).map(r => r.memberId)
-    );
-    const doneCooks = memberList.filter(m => cookedThisMonth.has(m._id || m.id));
-    const pendingCooks = memberList.filter(m => !cookedThisMonth.has(m._id || m.id));
 
-    // Members who have/haven't been manager this month
-    const managedThisMonth = new Set(
-        managerRecords.filter(r => r.date?.startsWith(currentMonth)).map(r => r.memberId)
-    );
-    const doneManagers = memberList.filter(m => managedThisMonth.has(m._id || m.id));
-    const pendingManagers = memberList.filter(m => !managedThisMonth.has(m._id || m.id));
+    // Who has EVER cooked (no date filter — full rotation tracking)
+    const cookedEver = new Set(cookingRecords.map(r => r.memberId));
+    const doneCooks = memberList.filter(m => cookedEver.has(m._id || m.id));
+    const pendingCooks = memberList.filter(m => !cookedEver.has(m._id || m.id));
+
+    // Who has EVER been manager (no date filter)
+    const managedEver = new Set(managerRecords.map(r => r.memberId));
+    const doneManagers = memberList.filter(m => managedEver.has(m._id || m.id));
+    const pendingManagers = memberList.filter(m => !managedEver.has(m._id || m.id));
 
     // Add cooking record
     const handleAddCooking = async () => {
@@ -231,14 +226,14 @@ const Management = () => {
                             </Button>
                         </div>
 
-                        {/* Cooking Records List - current month only */}
+                        {/* Cooking Records List - all records */}
                         <div className="space-y-3 max-h-64 overflow-y-auto px-1 scrollbar-hide">
                             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Search size={10} /> This month's cooking activities
+                                <Search size={10} /> Recent cooking activities
                             </h3>
                             <AnimatePresence mode="popLayout">
-                                {cookingRecords.filter(r => r.date?.startsWith(currentMonth)).length > 0 ? (
-                                    cookingRecords.filter(r => r.date?.startsWith(currentMonth)).map((record, index) => (
+                                {cookingRecords.length > 0 ? (
+                                    cookingRecords.map((record, index) => (
                                         <motion.div
                                             key={record._id}
                                             layout
@@ -291,7 +286,7 @@ const Management = () => {
                         {/* Cooking Duty Rotation Tracker */}
                         <div className="mt-6 pt-5 border-t border-amber-100 dark:border-amber-900/20">
                             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Clock size={10} /> This Month's Cooking Duty
+                                <Clock size={10} /> Cooking Duty Rotation
                             </h3>
                             {pendingCooks.length === 0 ? (
                                 <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200/60 dark:border-emerald-900/30">
@@ -373,14 +368,14 @@ const Management = () => {
                             </Button>
                         </div>
 
-                        {/* Manager Records List - current month only */}
+                        {/* Manager Records List - all records */}
                         <div className="space-y-3 max-h-64 overflow-y-auto px-1 scrollbar-hide">
                             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Search size={10} /> This month's management records
+                                <Search size={10} /> Recent management records
                             </h3>
                             <AnimatePresence mode="popLayout">
-                                {managerRecords.filter(r => r.date?.startsWith(currentMonth)).length > 0 ? (
-                                    managerRecords.filter(r => r.date?.startsWith(currentMonth)).map((record, index) => (
+                                {managerRecords.length > 0 ? (
+                                    managerRecords.map((record, index) => (
                                         <motion.div
                                             key={record._id}
                                             layout
@@ -425,7 +420,7 @@ const Management = () => {
                         {/* Manager Duty Rotation Tracker */}
                         <div className="mt-6 pt-5 border-t border-primary-100 dark:border-primary-900/20">
                             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Clock size={10} /> This Month's Manager Duty
+                                <Clock size={10} /> Manager Duty Rotation
                             </h3>
                             {pendingManagers.length === 0 ? (
                                 <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200/60 dark:border-emerald-900/30">
