@@ -116,12 +116,12 @@ export const DataProvider = ({ children }) => {
     // Admin Actions
     const addMember = useCallback(async (member) => {
         try {
-            await api.post('/members', member);
-            await refreshMembers();
+            const response = await api.post('/members', member);
+            setMembers(prev => [...prev, response.data]);
         } catch (error) {
             console.error('Add Member failed:', error);
         }
-    }, [refreshMembers]);
+    }, []);
 
     const removeMember = useCallback(async (id) => {
         try {
@@ -134,12 +134,12 @@ export const DataProvider = ({ children }) => {
 
     const updateMember = useCallback(async (id, updates) => {
         try {
-            await api.put(`/members/${id}`, updates);
-            await refreshMembers();
+            const response = await api.put(`/members/${id}`, updates);
+            setMembers(prev => prev.map(m => (m._id === id || m.id === id) ? response.data : m));
         } catch (error) {
             console.error('Update Member failed:', error);
         }
-    }, [refreshMembers]);
+    }, []);
 
     // Notification Logic
     const sendNotification = useCallback(async (userId, message) => {
@@ -218,14 +218,14 @@ export const DataProvider = ({ children }) => {
     const addExpense = useCallback(async (expense) => {
         try {
             const response = await api.post('/expenses', expense);
-            await refreshExpenses();
+            setExpenses(prev => [...prev, response.data]);
             return { success: true, data: response.data };
         } catch (error) {
             console.error('Add Expense failed', error);
             const errorMessage = error.response?.data?.message || error.message || 'Failed to add expense';
             return { success: false, error: errorMessage };
         }
-    }, [refreshExpenses]);
+    }, []);
 
     const approveExpense = useCallback(async (id) => {
         try {
@@ -239,13 +239,13 @@ export const DataProvider = ({ children }) => {
     const approveAllExpenses = useCallback(async () => {
         try {
             const response = await api.put('/expenses/approve-all');
-            await refreshExpenses();
+            setExpenses(prev => prev.map(e => e.status === 'pending' ? { ...e, status: 'approved' } : e));
             return { success: true, modifiedCount: response.data.modifiedCount };
         } catch (error) {
             console.error('Approve all expenses failed', error);
             return { success: false, error: error.response?.data?.message || 'Failed to approve all expenses' };
         }
-    }, [refreshExpenses]);
+    }, []);
 
     const rejectExpense = useCallback(async (id) => {
         try {
@@ -258,12 +258,12 @@ export const DataProvider = ({ children }) => {
 
     const updateExpense = useCallback(async (id, updatedData) => {
         try {
-            await api.put(`/expenses/${id}`, updatedData);
-            await refreshExpenses();
+            const response = await api.put(`/expenses/${id}`, updatedData);
+            setExpenses(prev => prev.map(e => (e._id === id || e.id === id) ? response.data : e));
         } catch (error) {
             console.error('Update Expense failed', error);
         }
-    }, [refreshExpenses]);
+    }, []);
 
     const deleteExpense = useCallback(async (id) => {
         try {
@@ -277,34 +277,56 @@ export const DataProvider = ({ children }) => {
     // Market Actions
     const allocateMarketDay = useCallback(async (date, memberId, type = 'manual_assign', managerId = null) => {
         try {
-            await api.post('/market', { date, assignedMemberId: memberId, requestType: type, managerId });
-            await refreshMarket();
+            const response = await api.post('/market', { date, assignedMemberId: memberId, requestType: type, managerId });
+            const newItem = response.data;
+            setMarketSchedule(prev => {
+                const month = date.substring(0, 7);
+                return { ...prev, [month]: [...(prev[month] || []), newItem] };
+            });
         } catch (error) {
             console.error('Allocate market failed', error);
         }
-    }, [refreshMarket]);
+    }, []);
 
     const approveMarketRequest = useCallback(async (idOrDate, shouldRefresh = true) => {
         try {
             const isId = !idOrDate.includes('-') || idOrDate.length > 10;
             const endpoint = isId ? `/market/id/${idOrDate}` : `/market/${idOrDate}`;
             await api.put(endpoint, { status: 'approved' });
-            if (shouldRefresh) await refreshMarket();
+            setMarketSchedule(prev => {
+                const updated = {};
+                for (const [month, items] of Object.entries(prev)) {
+                    updated[month] = items.map(item =>
+                        (item._id === idOrDate || item.id === idOrDate || item.date === idOrDate)
+                            ? { ...item, status: 'approved' } : item
+                    );
+                }
+                return updated;
+            });
         } catch (error) {
             console.error('Approve market failed', error);
         }
-    }, [refreshMarket]);
+    }, []);
 
     const rejectMarketRequest = useCallback(async (idOrDate, shouldRefresh = true) => {
         try {
             const isId = !idOrDate.includes('-') || idOrDate.length > 10;
             const endpoint = isId ? `/market/id/${idOrDate}` : `/market/${idOrDate}`;
             await api.put(endpoint, { status: 'rejected' });
-            if (shouldRefresh) await refreshMarket();
+            setMarketSchedule(prev => {
+                const updated = {};
+                for (const [month, items] of Object.entries(prev)) {
+                    updated[month] = items.map(item =>
+                        (item._id === idOrDate || item.id === idOrDate || item.date === idOrDate)
+                            ? { ...item, status: 'rejected' } : item
+                    );
+                }
+                return updated;
+            });
         } catch (error) {
             console.error('Reject market failed', error);
         }
-    }, [refreshMarket]);
+    }, []);
 
     const setManagerForMonth = useCallback((month, memberId) => {
         setManagerAllocation(prev => ({ ...prev, [month]: memberId }));
@@ -319,39 +341,47 @@ export const DataProvider = ({ children }) => {
     // Meal Actions
     const addMeal = useCallback(async (date, memberIds, type, isGuest = false, guestMealType = null, mealTime = null) => {
         try {
+            const newMeals = [];
             for (const memberId of memberIds) {
                 const payload = { date, memberId, type };
                 if (isGuest) { payload.isGuest = true; payload.guestMealType = guestMealType; payload.mealTime = mealTime; }
-                await api.post('/meals', payload);
+                const response = await api.post('/meals', payload);
+                newMeals.push(response.data);
             }
-            await refreshMeals();
+            setMeals(prev => [...prev, ...newMeals]);
         } catch (error) {
             console.error('Add meal failed', error);
         }
-    }, [refreshMeals]);
+    }, []);
 
     const removeMeal = useCallback(async (date, memberId, type, mealId = null) => {
         try {
             const payload = { date, memberId, type };
             if (mealId) payload.mealId = mealId;
             await api.delete('/meals', { data: payload });
-            await refreshMeals();
+            // Remove by mealId if provided, otherwise remove the first matching meal
+            setMeals(prev => {
+                if (mealId) return prev.filter(m => m._id !== mealId && m.id !== mealId);
+                const idx = prev.findIndex(m => m.date === date && m.memberId === memberId && m.type === type);
+                if (idx === -1) return prev;
+                return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
+            });
         } catch (error) {
             console.error('Remove meal failed', error);
         }
-    }, [refreshMeals]);
+    }, []);
 
     // Guest Meal Functions
     const addGuestMeal = useCallback(async (date, memberId, guestMealType, mealTime) => {
         try {
             const amount = MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0;
-            await api.post('/guest-meals', { date, memberId, guestMealType, mealTime, amount });
-            await refreshGuestMeals();
+            const response = await api.post('/guest-meals', { date, memberId, guestMealType, mealTime, amount });
+            setGuestMeals(prev => [...prev, response.data]);
         } catch (error) {
             console.error('Add guest meal failed', error);
             throw error;
         }
-    }, [refreshGuestMeals]);
+    }, []);
 
     const removeGuestMeal = useCallback(async (guestMealId) => {
         try {
