@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mess-manager-mobile",
+    "name": "Rani Bhawban Mess",
     "slug": "mess-manager-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,6 +15,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.ranibhawban.messmanager",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
