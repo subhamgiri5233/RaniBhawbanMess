@@ -27,7 +27,9 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
                         "w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 relative z-10",
                         lunchStatus
                             ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                            : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 hover:scale-125"
+                            : (!lunchStatus && day.dateStr < todayStr)
+                                ? "bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400"
+                                : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 hover:scale-125"
                     )}
                     title="Lunch"
                 >
@@ -40,7 +42,9 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
                         "w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 relative z-10",
                         dinnerStatus
                             ? "bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
-                            : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 hover:scale-125"
+                            : (!dinnerStatus && day.dateStr < todayStr)
+                                ? "bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400"
+                                : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 hover:scale-125"
                     )}
                     title="Dinner"
                 >
