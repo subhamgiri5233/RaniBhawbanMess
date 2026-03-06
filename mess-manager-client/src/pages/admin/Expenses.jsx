@@ -175,22 +175,42 @@ const Expenses = () => {
                             <div className="mt-5 grid grid-cols-2 gap-3">
                                 {(() => {
                                     const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status !== 'rejected');
-                                    const approved = memberExpenses.filter(e => e.status === 'approved');
-                                    const pending = memberExpenses.filter(e => e.status === 'pending');
-                                    const approvedTotal = approved.reduce((acc, e) => acc + e.amount, 0);
-                                    const pendingTotal = pending.reduce((acc, e) => acc + e.amount, 0);
+                                    const approvedTotal = memberExpenses.filter(e => e.status === 'approved').reduce((acc, e) => acc + e.amount, 0);
+                                    const pendingTotal = memberExpenses.filter(e => e.status === 'pending').reduce((acc, e) => acc + e.amount, 0);
+
+                                    const marketTotal = memberExpenses.filter(e => e.category === 'market').reduce((acc, e) => acc + e.amount, 0);
+                                    const riceTotal = memberExpenses.filter(e => e.category === 'rice').reduce((acc, e) => acc + e.amount, 0);
+                                    const spicesOthersTotal = memberExpenses.filter(e => e.category === 'spices' || e.category === 'others').reduce((acc, e) => acc + e.amount, 0);
 
                                     return (
                                         <>
-                                            <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-xl p-3 border border-emerald-100 dark:border-emerald-900/30">
-                                                <p className="text-xs font-black text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-wider mb-1">Approved</p>
-                                                <p className="font-black text-lg text-emerald-700 dark:text-emerald-400">₹{approvedTotal}</p>
+                                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+                                                <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-xl p-2.5 sm:p-3 border border-indigo-100 dark:border-indigo-900/30">
+                                                    <p className="text-[10px] font-black text-indigo-600/70 dark:text-indigo-400/70 uppercase tracking-wider mb-0.5">Market</p>
+                                                    <p className="font-black text-base sm:text-lg text-indigo-700 dark:text-indigo-400">₹{marketTotal}</p>
+                                                </div>
+                                                <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-xl p-2.5 sm:p-3 border border-emerald-100 dark:border-emerald-900/30">
+                                                    <p className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-wider mb-0.5">Rice</p>
+                                                    <p className="font-black text-base sm:text-lg text-emerald-700 dark:text-emerald-400">₹{riceTotal}</p>
+                                                </div>
+                                                <div className="bg-orange-50 dark:bg-orange-950/20 rounded-xl p-2.5 sm:p-3 border border-orange-100 dark:border-orange-900/30 col-span-2 lg:col-span-1">
+                                                    <p className="text-[10px] font-black text-orange-600/70 dark:text-orange-400/70 uppercase tracking-wider mb-0.5">Spices + Others</p>
+                                                    <p className="font-black text-base sm:text-lg text-orange-700 dark:text-orange-400">₹{spicesOthersTotal}</p>
+                                                </div>
                                             </div>
-                                            <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-3 border border-amber-100 dark:border-amber-900/30">
-                                                <p className="text-xs font-black text-amber-600/70 dark:text-amber-400/70 uppercase tracking-wider mb-1">Pending</p>
-                                                <p className="font-black text-lg text-amber-700 dark:text-amber-400">₹{pendingTotal}</p>
+
+                                            <div className="mt-4 grid grid-cols-2 gap-3 pb-4 border-b border-primary-100/50 dark:border-primary-900/30">
+                                                <div className="flex flex-col">
+                                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Approved</p>
+                                                    <p className="font-black text-sm text-emerald-500">₹{approvedTotal}</p>
+                                                </div>
+                                                <div className="flex flex-col items-end">
+                                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Pending</p>
+                                                    <p className="font-black text-sm text-amber-500">₹{pendingTotal}</p>
+                                                </div>
                                             </div>
-                                            <div className="col-span-2 mt-2 pt-4 border-t border-primary-100 dark:border-primary-900/30 flex justify-between items-center">
+
+                                            <div className="mt-4 flex justify-between items-center">
                                                 <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Total Contribution:</span>
                                                 <span className="font-black text-2xl text-primary-600 dark:text-primary-400">₹{approvedTotal + pendingTotal}</span>
                                             </div>
