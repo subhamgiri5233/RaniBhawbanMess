@@ -119,7 +119,12 @@ router.delete('/clear-all-history', auth, requireAdmin, async (req, res) => {
 });
 
 // Update Expense - Admin only
-router.put('/:id([0-9a-fA-F]{24})', auth, requireAdmin, async (req, res) => {
+router.put('/:id', auth, requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    // Guard: ensure this is a valid ObjectId (not a named route segment like 'approve-all')
+    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+        return res.status(400).json({ message: 'Invalid expense ID' });
+    }
     const { status, description, amount, category, date, paidBy } = req.body;
 
     // Construct update object with only provided fields
@@ -133,7 +138,7 @@ router.put('/:id([0-9a-fA-F]{24})', auth, requireAdmin, async (req, res) => {
 
     try {
         const updatedExpense = await Expense.findByIdAndUpdate(
-            req.params.id,
+            id,
             updateData,
             { new: true }
         );
@@ -144,9 +149,14 @@ router.put('/:id([0-9a-fA-F]{24})', auth, requireAdmin, async (req, res) => {
 });
 
 // Delete Expense - Admin only
-router.delete('/:id([0-9a-fA-F]{24})', auth, requireAdmin, async (req, res) => {
+router.delete('/:id', auth, requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    // Guard: ensure this is a valid ObjectId
+    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+        return res.status(400).json({ message: 'Invalid expense ID' });
+    }
     try {
-        const deletedExpense = await Expense.findByIdAndDelete(req.params.id);
+        const deletedExpense = await Expense.findByIdAndDelete(id);
         if (!deletedExpense) {
             return res.status(404).json({ message: 'Expense not found' });
         }
