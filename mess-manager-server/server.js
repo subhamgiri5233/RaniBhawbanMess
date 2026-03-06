@@ -16,8 +16,21 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mess-manag
 app.use(helmet()); // Security headers
 
 // CORS Configuration
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://rani-bhawban-mess.vercel.app'
+];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
