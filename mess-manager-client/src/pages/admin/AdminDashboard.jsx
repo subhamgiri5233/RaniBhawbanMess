@@ -203,10 +203,10 @@ const AdminDashboard = () => {
                             View All <ArrowUpRight size={14} />
                         </button>
                     </div>
-                    <div className="overflow-x-auto scrollbar-hide">
+                    <div className="overflow-auto max-h-[400px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                         <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
+                            <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900/90 backdrop-blur-sm">
+                                <tr className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
                                     <th className="p-4 md:p-6">Member Name</th>
                                     <th className="p-4 md:p-6 text-center">Meals</th>
                                     <th className="p-4 md:p-6 text-center">Monthly Deposit</th>
@@ -263,10 +263,10 @@ const AdminDashboard = () => {
                             View All <ArrowUpRight size={14} />
                         </button>
                     </div>
-                    <div className="overflow-x-auto scrollbar-hide">
+                    <div className="overflow-auto max-h-[400px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                         <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
+                            <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900/90 backdrop-blur-sm">
+                                <tr className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
                                     <th className="p-4 md:p-6">Details</th>
                                     <th className="p-4 md:p-6">Amount</th>
                                     <th className="p-4 md:p-6 text-right">Actions</th>

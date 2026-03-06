@@ -251,10 +251,10 @@ const Members = () => {
                 </div>
 
                 {/* Table section */}
-                <div className="overflow-x-auto scrollbar-hide">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-[#f4f7ff]/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-white/5">
+                <div className="overflow-auto max-h-[600px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+                    <table className="w-full text-left border-collapse relative">
+                        <thead className="sticky top-0 z-10 bg-[#f4f7ff] dark:bg-slate-900 shadow-sm">
+                            <tr className="border-b border-slate-200 dark:border-white/5">
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Identity</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Contact</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Access</th>

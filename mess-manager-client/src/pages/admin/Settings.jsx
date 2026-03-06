@@ -359,15 +359,51 @@ const Settings = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {previewStats?.stats.map((stat) => (
-                                    <div key={stat.name} className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
-                                        <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate">
-                                            {stat.name.replace(/([A-Z])/g, ' $1').trim()}
+                                    <div key={stat.name} className="group p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all">
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest truncate">
+                                                {stat.name.replace(/([A-Z])/g, ' $1').trim()}
+                                            </div>
+                                            {stat.count > 0 && (
+                                                <button
+                                                    onClick={() => {
+                                                        if (!deletePassword) {
+                                                            alert('Please enter your admin password first');
+                                                            return;
+                                                        }
+                                                        if (window.confirm(`Are you sure you want to delete all ${stat.name.replace(/([A-Z])/g, ' $1').trim()} for ${deleteMonth}?`)) {
+                                                            const handleClearCategoryData = async () => {
+                                                                try {
+                                                                    setDeleting(true);
+                                                                    const result = await clearMonthlyData(deleteMonth, deletePassword, stat.name);
+                                                                    if (result.success) {
+                                                                        alert(`Successfully cleared ${stat.name} for ${deleteMonth}!`);
+                                                                        fetchPreview();
+                                                                    } else {
+                                                                        alert(`Error: ${result.error}`);
+                                                                    }
+                                                                } catch (error) {
+                                                                    console.error('Deletion error:', error);
+                                                                    alert('An unexpected error occurred during deletion.');
+                                                                } finally {
+                                                                    setDeleting(false);
+                                                                }
+                                                            };
+                                                            handleClearCategoryData();
+                                                        }
+                                                    }}
+                                                    className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                                    title={`Delete ${stat.name}`}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            )}
                                         </div>
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-sm font-black text-slate-700 dark:text-slate-200">{stat.count}</span>
-                                            <span className="text-[9px] font-bold text-slate-400">rec.</span>
+                                            <span className="text-lg font-black text-slate-700 dark:text-slate-200">{stat.count}</span>
+                                            <span className="text-[10px] font-bold text-slate-400">records</span>
                                         </div>
                                     </div>
                                 ))}

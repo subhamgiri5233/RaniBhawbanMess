@@ -48,6 +48,7 @@ const Calculator = () => {
     const [mealChargeResult, setMealChargeResult] = useState(null); // { mealCharge }
     const [sendingNotifications, setSendingNotifications] = useState(false);
     const [savingPDF, setSavingPDF] = useState(false);
+    const [submittingReport, setSubmittingReport] = useState(false);
 
     // Individual Member Inputs (Map of memberId -> { meals, deposit, genDeposit, genDepositDate, guest, marketExpense })
     const [individualInputs, setIndividualInputs] = useState({});
@@ -82,11 +83,11 @@ const Calculator = () => {
             totalMarket: 0, rice: 0, guest: 0, totalMeal: 1
         };
 
-        // Fetch approved expenses by category
-        const approvedExpenses = expenses.filter(e => e.status === 'approved');
+        // Fetch approved or pending expenses by category
+        const relevantExpenses = expenses.filter(e => e.status === 'approved' || e.status === 'pending');
 
         // Helper to sum by category
-        const sumCat = (cat) => approvedExpenses.filter(e => e.category === cat).reduce((sum, e) => sum + e.amount, 0);
+        const sumCat = (cat) => relevantExpenses.filter(e => e.category === cat).reduce((sum, e) => sum + e.amount, 0);
 
         const spicesTotal = sumCat('spices');
         const othersTotal = sumCat('others');
@@ -189,19 +190,19 @@ const Calculator = () => {
                 }, 0);
                 console.log(`  - Guest cost: ₹${guestCost}`, memberGuestMeals);
 
-                // Calculate market expenses for this member
+                // Calculate market expenses for this member (approved or pending)
                 const memberMarketExpenses = expenses.filter(e =>
                     e.category === 'market' &&
-                    e.status === 'approved' &&
+                    (e.status === 'approved' || e.status === 'pending') &&
                     (e.paidBy === memberId || e.paidBy === m._id || e.paidBy === m.id)
                 );
                 const marketTotal = memberMarketExpenses.reduce((sum, e) => sum + e.amount, 0);
                 console.log(`  - Market expenses: ₹${marketTotal}`, memberMarketExpenses);
 
-                // Calculate bill payments for this member (Gas, Wifi, Electric)
+                // Calculate bill payments for this member (Gas, Wifi, Electric) - approved or pending
                 const memberBillExpenses = expenses.filter(e =>
                     ['gas', 'wifi', 'electric'].includes(e.category) &&
-                    e.status === 'approved' &&
+                    (e.status === 'approved' || e.status === 'pending') &&
                     (e.paidBy === memberId || e.paidBy === m._id || e.paidBy === m.id)
                 );
                 const gasPaid = memberBillExpenses.filter(e => e.category === 'gas').reduce((sum, e) => sum + e.amount, 0);
@@ -215,10 +216,10 @@ const Calculator = () => {
                 const snapshotDeposit = summary ? (summary.depositBalance || 0) : 0;
                 const snapshotDepositDate = summary ? summary.depositDate : (m.depositDate || '');
 
-                // Calculate general deposit for this member from expenses
+                // Calculate general deposit for this member from expenses (approved or pending)
                 const memberDepositExpenses = expenses.filter(e =>
                     e.category === 'deposit' &&
-                    e.status === 'approved' &&
+                    (e.status === 'approved' || e.status === 'pending') &&
                     (e.paidBy === memberId || e.paidBy === m._id || e.paidBy === m.id || e.paidBy === m.name)
                 );
                 const generalDeposit = memberDepositExpenses.reduce((sum, e) => sum + e.amount, 0);
@@ -275,6 +276,44 @@ const Calculator = () => {
         const { totalMarket, rice, guest, totalMeal } = mealInputs;
         const mealCharge = (totalMarket + rice - guest) / (totalMeal || 1);
         setMealChargeResult({ mealCharge });
+    };
+
+    const handleSubmitToMonthlyReport = async () => {
+        if (!confirm('Submit these shared expenses to the monthly report? This will create or update expense records for Gas, Paper, WiFi, etc.')) {
+            return;
+        }
+        setSubmittingReport(true);
+        const { data: finalCalculatedData } = getCalculatedData();
+        const memberBalances = finalCalculatedData.map(m => ({
+            memberId: m._id || m.id,
+            memberName: m.name,
+            meals: m.meals || 0,
+            isBelowMinimum: m.isBelowMinimum || false,
+            mealCost: Math.round(m.mealCost || 0),
+            sharedCost: Math.round(m.fixedCost || 0),
+            marketCost: Math.round(m.marketExpense || 0),
+            guestCost: Math.round(m.guest || 0),
+            totalCost: Math.round(m.total || 0),
+            balance: Math.round(Math.abs(m.balance)),
+            type: m.balance >= 0 ? 'Pay' : 'Get'
+        }));
+
+        try {
+            await api.post('/expenses/bulk-shared', {
+                month: globalMonth,
+                bills: bills,
+                mealInputs: mealInputs,
+                perHeadResult: perHeadResult,
+                mealChargeResult: mealChargeResult,
+                memberBalances: memberBalances
+            });
+            alert('Shared expenses submitted to monthly report successfully!');
+        } catch (error) {
+            console.error('Submission error:', error);
+            alert('Failed to submit: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setSubmittingReport(false);
+        }
     };
 
     // Calculate Balances for Table
@@ -570,7 +609,7 @@ const Calculator = () => {
                     ['Per Head', perHeadResult.perHeadAmount.toFixed(2)]
                 ],
                 margin: { left: 15 },
-                styles: { fontSize: 10, cellPadding: 3 },
+                styles: { fontSize: 10, cellPadding: 3, font: 'helvetica' },
                 theme: 'grid'
             });
             const perHeadFinalY = doc.lastAutoTable.finalY;
@@ -596,7 +635,7 @@ const Calculator = () => {
                     ['MEAL CHARGE', mealChargeResult.mealCharge.toFixed(2)]
                 ],
                 margin: { left: 110 },
-                styles: { fontSize: 10, cellPadding: 3 },
+                styles: { fontSize: 10, cellPadding: 3, font: 'helvetica' },
                 theme: 'grid'
             });
 
@@ -628,7 +667,7 @@ const Calculator = () => {
                 startY: individualStartY + 5,
                 head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
                 body: tableBody,
-                styles: { fontSize: 9, cellPadding: 2 },
+                styles: { fontSize: 9, cellPadding: 2, font: 'helvetica' },
                 headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold' }, // blue-500
                 theme: 'grid',
                 margin: { bottom: 10 }
@@ -699,14 +738,14 @@ const Calculator = () => {
             doc.text('Per Head Costs', 14, startY);
             doc.setTextColor(0, 0, 0);
             const perHeadData = [
-                ['Gas', `৳${bills.gas}`], ['Paper', `৳${bills.paper}`],
-                ['WiFi', `৳${bills.wifi}`], ['Didi', `৳${bills.didi}`],
-                ['Spices', `৳${bills.spices}`], ['House Rent', `৳${bills.houseRent}`],
-                ['Electric', `৳${bills.electric}`], ['Others', `৳${bills.others}`],
-                ['Total', `৳${perHeadResult.totalAmount.toFixed(2)}`],
-                ['Per Head', `৳${perHeadResult.perHeadAmount.toFixed(2)}`]
+                ['Gas', `₹${bills.gas}`], ['Paper', `₹${bills.paper}`],
+                ['WiFi', `₹${bills.wifi}`], ['Didi', `₹${bills.didi}`],
+                ['Spices', `₹${bills.spices}`], ['House Rent', `₹${bills.houseRent}`],
+                ['Electric', `₹${bills.electric}`], ['Others', `₹${bills.others}`],
+                ['Total', `₹${perHeadResult.totalAmount.toFixed(2)}`],
+                ['Per Head', `₹${perHeadResult.perHeadAmount.toFixed(2)}`]
             ];
-            autoTable(doc, { startY: startY + 5, head: [['Category', 'Amount']], body: perHeadData, headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 10 }, theme: 'grid' });
+            autoTable(doc, { startY: startY + 5, head: [['Category', 'Amount']], body: perHeadData, headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 10, font: 'helvetica' }, theme: 'grid' });
 
             // Meal Charge Section
             const mealStartY = doc.lastAutoTable.finalY + 10;
@@ -715,11 +754,11 @@ const Calculator = () => {
             doc.text('Meal Charges', 14, mealStartY);
             doc.setTextColor(0, 0, 0);
             const mealData = [
-                ['Total Market', `৳${mealInputs.totalMarket}`], ['Rice', `৳${mealInputs.rice}`],
-                ['Guest Adjustment', `৳${mealInputs.guest}`], ['Total Meals', mealInputs.totalMeal],
-                ['Per Meal Charge', `৳${mealChargeResult.mealCharge.toFixed(2)}`]
+                ['Total Market', `₹${mealInputs.totalMarket}`], ['Rice', `₹${mealInputs.rice}`],
+                ['Guest Adjustment', `₹${mealInputs.guest}`], ['Total Meals', mealInputs.totalMeal],
+                ['Per Meal Charge', `₹${mealChargeResult.mealCharge.toFixed(2)}`]
             ];
-            autoTable(doc, { startY: mealStartY + 5, head: [['Category', 'Value']], body: mealData, headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 10 }, theme: 'grid' });
+            autoTable(doc, { startY: mealStartY + 5, head: [['Category', 'Value']], body: mealData, headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 10, font: 'helvetica' }, theme: 'grid' });
 
             // Individual Member Table
             const individualStartY = doc.lastAutoTable.finalY + 10;
@@ -728,43 +767,26 @@ const Calculator = () => {
             doc.text('Individual Member Details', 14, individualStartY);
             doc.setTextColor(0, 0, 0);
             const tableBody = calculatedData.data.map(d => [
-                d.name, `${d.meals || 0}${d.isBelowMinimum ? ` (${MIN_MEALS})` : ''}`, `৳${mealChargeResult.mealCharge.toFixed(2)}`,
-                `৳${d.mealCost.toFixed(2)}`, `৳${d.fixedCost.toFixed(2)}`,
-                `৳${d.guest || 0}`, `৳${d.marketExpense || 0}`, `৳${((d.deposit || 0) + (d.genDeposit || 0)).toFixed(0)}`,
-                d.balance >= 0 ? `Pay ৳${Math.abs(Math.round(d.balance))}` : `Get ৳${Math.abs(Math.round(d.balance))}`
+                d.name, `${d.meals || 0}${d.isBelowMinimum ? ` (${MIN_MEALS})` : ''}`, `₹${mealChargeResult.mealCharge.toFixed(2)}`,
+                `₹${d.mealCost.toFixed(2)}`, `₹${d.fixedCost.toFixed(2)}`,
+                `₹${d.guest || 0}`, `₹${d.marketExpense || 0}`, `₹${((d.deposit || 0) + (d.genDeposit || 0)).toFixed(0)}`,
+                d.balance >= 0 ? `Pay ₹${Math.abs(Math.round(d.balance))}` : `Get ₹${Math.abs(Math.round(d.balance))}`
             ]);
             autoTable(doc, {
                 startY: individualStartY + 5,
                 head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
                 body: tableBody,
-                styles: { fontSize: 9, cellPadding: 2 },
+                styles: { fontSize: 9, cellPadding: 2, font: 'helvetica' },
                 headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold' },
                 theme: 'grid'
             });
 
-            // Get PDF as base64
-            const pdfBase64 = doc.output('datauristring').split(',')[1];
-            const month = globalMonth;
-            const fileName = `Mess_Report_${month}.pdf`;
-
-            console.log('Saving to database...');
-            const response = await api.post('/reports', {
-                month,
-                pdfData: pdfBase64,
-                fileName,
-                generatedBy: user.id,
-                generatedByName: user.name
-            });
-
-            if (response.status === 201 || response.status === 200) {
-                alert('✅ PDF saved successfully! All members can now download it from the Reports page.');
-                console.log('PDF saved:', response.data);
-            }
+            const reportMonthStr = format(new Date(globalMonth.split('-')[0], globalMonth.split('-')[1] - 1), 'MMMM yyyy');
+            const fileName = `Mess_Report_${reportMonthStr.replace(' ', '_')}.pdf`;
+            doc.save(fileName);
         } catch (error) {
             console.error('Save PDF Failed:', error);
             alert(`Error saving PDF: ${error.message}`);
-        } finally {
-            setSavingPDF(false);
         }
     };
 
@@ -780,14 +802,14 @@ const Calculator = () => {
                         <Download size={18} />
                         Download
                     </Button>
+
                     <Button
-                        onClick={savePDFToDatabase}
-                        disabled={!perHeadResult || !mealChargeResult || savingPDF}
-                        variant="secondary"
-                        className="rounded-2xl shadow-lg active:scale-95 transition-all"
+                        onClick={handleSubmitToMonthlyReport}
+                        disabled={submittingReport || !perHeadResult || !mealChargeResult}
+                        className="rounded-2xl shadow-lg active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-700 border-none text-white font-black"
                     >
                         <Save size={18} />
-                        {savingPDF ? 'Saving...' : 'Share Report'}
+                        {submittingReport ? 'Submitting...' : 'Submit to Report'}
                     </Button>
                 </div>
             </div>

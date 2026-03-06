@@ -69,74 +69,26 @@ const StatusBadge = ({ status, onClick }) => {
 // ─── Payment edit modal ───────────────────────────────────────────────────────
 
 const PaymentModal = ({ member, month, onClose, onSaved }) => {
-    const { expenses, addExpense, deleteExpense } = useData();
-    const [depositBalance, setDepositBalance] = useState(member.depositBalance || 0);
-    const [submittedAmount, setSubmittedAmount] = useState(member.submittedAmount || 0);
+    const [depositBalance, setDepositBalance] = useState((member.finalBalance ?? member.depositBalance ?? 0).toString());
+    const [submittedAmount, setSubmittedAmount] = useState((member.submittedAmount ?? 0).toString());
+    const [depositDate, setDepositDate] = useState(member.depositDate || new Date().toISOString().split('T')[0]);
     const [note, setNote] = useState(member.note || '');
     const [saving, setSaving] = useState(false);
 
-    // New deposit record state
-    const [newDepAmount, setNewDepAmount] = useState('');
-    const [newDepNote, setNewDepNote] = useState('');
-    const [addingDep, setAddingDep] = useState(false);
-
-    // Filter deposits for this specific member and month
-    const memberId = member.memberId;
-    const memberDeposits = useMemo(() => {
-        return expenses.filter(e => e.category === 'deposit' && (e.paidBy === member.memberName || e.paidBy === memberId || e.paidBy === member._id));
-    }, [expenses, memberId, member._id, member.memberName]);
-
-    const receivedAmount = useMemo(() => {
-        return memberDeposits.reduce((sum, d) => sum + d.amount, 0);
-    }, [memberDeposits]);
-
-    const depositDate = useMemo(() => {
-        if (memberDeposits.length === 0) return new Date().toISOString().split('T')[0];
-        return memberDeposits[memberDeposits.length - 1].date;
-    }, [memberDeposits]);
-
-    // Auto-derive status from RECEIVED vs deposit balance
+    // Auto-derive status from submitted vs deposit balance
     const submitted = Number(submittedAmount) || 0;
-    const received = Number(receivedAmount) || 0;
     const balance = Number(depositBalance) || 0;
-    const autoStatus = received >= balance && balance > 0 ? 'clear' : received > 0 ? 'partial' : 'pending';
-    const remaining = Math.max(0, balance - received);
+    const autoStatus = submitted >= balance && balance > 0 ? 'clear' : submitted > 0 ? 'partial' : 'pending';
+    const remaining = Math.max(0, balance - submitted);
     const [status, setStatus] = useState(member.paymentStatus || autoStatus);
 
-    // Keep status in sync when received/balance changes
+    // Keep status in sync when submitted/balance changes
     useEffect(() => {
         setStatus(autoStatus);
     }, [autoStatus]);
 
     const handleBalanceChange = (val) => {
-        setDepositBalance(val);
-    };
-
-    const handleAddDeposit = async () => {
-        if (!newDepAmount || isNaN(newDepAmount)) return;
-        setAddingDep(true);
-        try {
-            await addExpense({
-                description: newDepNote || 'Monthly Deposit',
-                amount: Number(newDepAmount),
-                category: 'deposit',
-                paidBy: member.memberName || member._id,
-                date: new Date().toISOString().split('T')[0],
-                status: 'approved',
-                splits: [member.memberId || member._id]
-            });
-            setNewDepAmount('');
-            setNewDepNote('');
-        } catch (err) {
-            alert('Failed to add deposit');
-        } finally {
-            setAddingDep(false);
-        }
-    };
-
-    const handleDeleteDeposit = async (id) => {
-        if (!window.confirm('Delete this deposit?')) return;
-        await deleteExpense(id);
+        setDepositBalance(val.toString());
     };
 
     const handleSave = async () => {
@@ -146,20 +98,20 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
                 memberId: member.memberId,
                 memberName: member.memberName,
                 paymentStatus: status,
-                amountPaid: received,
+                amountPaid: submitted,
                 submittedAmount: submitted,
-                receivedAmount: received,
-                depositBalance: Number(depositBalance),
+                receivedAmount: submitted,
+                depositBalance: balance,
                 depositDate,
                 note
             });
             onSaved({
                 memberId: member.memberId,
                 paymentStatus: status,
-                amountPaid: received,
+                amountPaid: submitted,
                 submittedAmount: submitted,
-                receivedAmount: received,
-                depositBalance: Number(depositBalance),
+                receivedAmount: submitted,
+                depositBalance: balance,
                 depositDate,
                 depositBalanceLocked: true,
                 note
@@ -196,7 +148,7 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
                         <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">{member.memberName}</span>
                             <span className="px-1.5 py-0.5 rounded-lg bg-violet-50 dark:bg-violet-950/20 text-violet-600 dark:text-violet-400 text-[9px] font-black uppercase tracking-wide border border-violet-200/50 dark:border-violet-800/30">
-                                Gen: ₹{member.deposit || 0}
+                                Gen: ₹{Math.round(member.expenses?.deposit || 0)}
                             </span>
                         </div>
                     </div>
@@ -211,18 +163,22 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
                 {/* Deposit Balance for this month */}
                 <div className="mb-4">
                     <div className="flex justify-between items-center mb-1">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Deposit Balance for this Month (₹)</label>
-                        {member.deposit > 0 && (
+                        <label className={`text-[10px] font-black uppercase tracking-widest ${member.snapshotType === 'Get' ? 'text-emerald-500' : 'text-slate-500 dark:text-slate-400'}`}>
+                            {member.snapshotType === 'Get' ? 'Amount to Return (₹)' : 'Amount to Pay (₹)'}
+                        </label>
+                        {member.expenses?.deposit > 0 && member.snapshotType !== 'Get' && (
                             <button
                                 type="button"
-                                onClick={() => handleBalanceChange(member.deposit)}
+                                onClick={() => handleBalanceChange(Math.round(member.expenses.deposit))}
                                 className="text-[9px] font-black uppercase tracking-tighter text-primary-500 hover:text-primary-600 transition-colors"
                             >
-                                Fill from profile (₹{member.deposit})
+                                Fill from profile (₹{Math.round(member.expenses.deposit)})
                             </button>
                         )}
                     </div>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-2">The total amount this member needs to pay this month.</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-2">
+                        {member.snapshotType === 'Get' ? 'The total amount the mess needs to return to this member.' : 'The total amount this member needs to pay this month.'}
+                    </p>
                     <input
                         type="number"
                         value={depositBalance}
@@ -247,87 +203,40 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
                     </div>
                 </div>
 
-                {/* Deposit History & Add */}
-                <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-white/5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Deposit History</label>
-                    <div className="space-y-2 mb-3 max-h-32 overflow-y-auto pr-1">
-                        {memberDeposits.length === 0 ? (
-                            <p className="text-[10px] text-slate-400 italic">No deposits recorded for this month.</p>
-                        ) : (
-                            memberDeposits.map(d => (
-                                <div key={d._id} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-white/5 last:border-0">
-                                    <div className="flex flex-col">
-                                        <span className="text-xs font-black text-slate-700 dark:text-slate-200">₹{d.amount}</span>
-                                        <span className="text-[8px] text-slate-400">{d.date} • {d.note}</span>
-                                    </div>
-                                    <button
-                                        onClick={() => handleDeleteDeposit(d._id)}
-                                        className="p-1 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-all"
-                                    >
-                                        <X size={12} />
-                                    </button>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    <div className="flex gap-2">
-                        <input
-                            type="number"
-                            value={newDepAmount}
-                            onChange={e => setNewDepAmount(e.target.value)}
-                            placeholder="Amount"
-                            className="flex-1 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary-500/20 outline-none"
-                        />
-                        <button
-                            onClick={handleAddDeposit}
-                            disabled={addingDep || !newDepAmount}
-                            className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-black transition-all flex items-center gap-1 disabled:opacity-50"
-                        >
-                            {addingDep ? <Loader2 size={12} className="animate-spin" /> : 'Add'}
-                        </button>
-                    </div>
+                {/* Input for the amount they are paying or getting right now */}
+                <div className="mb-4">
+                    <label className={`text-[10px] font-black uppercase tracking-widest ${member.snapshotType === 'Get' ? 'text-emerald-500' : 'text-blue-500'} mb-1 block`}>
+                        {member.snapshotType === 'Get' ? 'Total Returned This Month (₹)' : 'Total Paid This Month (₹)'}
+                    </label>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-2 leading-tight">
+                        Enter the cumulative amount submitted so far. If adding a new payment, add it to the existing number.
+                    </p>
+                    <input
+                        type="number"
+                        value={submittedAmount}
+                        onChange={e => setSubmittedAmount(e.target.value)}
+                        min="0"
+                        className={`w-full px-4 py-2.5 ${member.snapshotType === 'Get' ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 focus:ring-emerald-500/30 focus:border-emerald-500' : 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/50 text-slate-900 dark:text-white focus:ring-blue-500/30 focus:border-blue-500'} border rounded-xl text-sm font-bold outline-none transition-all`}
+                        placeholder="0"
+                    />
                 </div>
-
-                {/* Two-column: Submitted (Pay) + Received (Readonly total) */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                    {/* Pay — submitted by member */}
-                    <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-blue-500 dark:text-blue-400 mb-1 block flex items-center gap-1">
-                            ↑ Member Submitted (₹)
-                        </label>
-                        <input
-                            type="number"
-                            value={submittedAmount}
-                            onChange={e => setSubmittedAmount(e.target.value)}
-                            min="0"
-                            className="w-full px-4 py-2.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all"
-                            placeholder="0"
-                        />
-                    </div>
-                    {/* Received — auto-sum from history */}
-                    <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-emerald-500 dark:text-emerald-400 mb-1 block">
-                            ↓ Total Received (₹)
-                        </label>
-                        <div className="w-full px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 rounded-xl text-sm font-black text-emerald-700 dark:text-emerald-400 flex items-center">
-                            ₹{receivedAmount}
-                        </div>
-                    </div>
-                </div>
-                {/* Status indicator based on received */}
+                {/* Status indicator based on submitted amount */}
                 {balance > 0 && (
-                    <div className={`mb-4 px-3 py-2 rounded-xl text-xs font-black flex items-center gap-2 ${autoStatus === 'clear'
-                        ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400'
-                        : autoStatus === 'partial'
-                            ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400'
-                            : 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400'
-                        }`}>
-                        {autoStatus === 'clear'
-                            ? <><CheckCircle2 size={13} /> Fully received — cleared!</>
+                    <div className={`mb-4 px-3 py-2 rounded-xl text-xs font-black flex items-center gap-2 ${submitted > balance
+                        ? 'bg-violet-50 dark:bg-violet-950/20 text-violet-600 dark:text-violet-400'
+                        : autoStatus === 'clear'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400'
                             : autoStatus === 'partial'
-                                ? <><AlertCircle size={13} /> ₹{remaining} still pending (received ₹{received} of ₹{balance})</>
-                                : <><Clock size={13} /> Full amount of ₹{balance} is due</>
+                                ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400'
+                                : 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400'
+                        }`}>
+                        {submitted > balance
+                            ? <><AlertCircle size={13} /> {member.snapshotType === 'Get' ? `Over-returning by ₹${submitted - balance}!` : `Overpaying by ₹${submitted - balance}!`}</>
+                            : autoStatus === 'clear'
+                                ? <><CheckCircle2 size={13} /> {member.snapshotType === 'Get' ? 'Fully returned' : 'Fully received'} — cleared!</>
+                                : autoStatus === 'partial'
+                                    ? <><AlertCircle size={13} /> ₹{remaining} still pending ({member.snapshotType === 'Get' ? 'returned' : 'received'} ₹{submitted} of ₹{balance})</>
+                                    : <><Clock size={13} /> Full amount of ₹{balance} is due</>
                         }
                     </div>
                 )}
@@ -445,20 +354,27 @@ const MonthlySummary = () => {
                 api.get(`/summary/${monthStr}/admin-expenses`)
             ]);
             setData(summaryRes.data);
+            const snapshot = summaryRes.data.sharedExpense;
 
-            // Extract Paper, Didi, House Rent from admin expenses
-            const adminExps = adminExpRes.data.adminExpenses || [];
-            const sumCat = (cat) => adminExps
-                .filter(e => e.category === cat)
-                .reduce((s, e) => s + (e.amount || 0), 0);
-            setSharedExpenses({
-                paper: sumCat('paper'),
-                didi: sumCat('didi'),
-                houseRent: sumCat('houseRent'),
-                gas: sumCat('gas'),
-                wifi: sumCat('wifi'),
-                electric: sumCat('electric'),
-            });
+            if (snapshot && snapshot.bills) {
+                setSharedExpenses({
+                    paper: snapshot.bills.paper || 0,
+                    didi: snapshot.bills.didi || 0,
+                    houseRent: snapshot.bills.houseRent || 0,
+                    gas: snapshot.bills.gas || 0,
+                    wifi: snapshot.bills.wifi || 0,
+                    electric: snapshot.bills.electric || 0,
+                    spices: snapshot.bills.spices || 0,
+                    others: snapshot.bills.others || 0,
+                    isSnapshot: true
+                });
+            } else {
+                // FALLBACK REMOVED: strictly use snapshot
+                setSharedExpenses({
+                    paper: 0, didi: 0, houseRent: 0, gas: 0, wifi: 0, electric: 0, spices: 0, others: 0,
+                    isSnapshot: false
+                });
+            }
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to load summary.');
         } finally {
@@ -625,17 +541,44 @@ const MonthlySummary = () => {
             }
 
 
+            // ── Monthly Charges (Snapshot) ──
+            const snapshotM = data?.sharedExpense?.memberBalances?.find(mb => mb.memberId === inv.member.memberId);
+            if (snapshotM) {
+                sectionHeader('MONTHLY CHARGES (OFFICIAL)', 67, 56, 202);
+                autoTable(doc, {
+                    startY: y,
+                    head: [['Description', 'Amount (Rs.)']],
+                    body: [
+                        ['Meal Cost', `Rs.${snapshotM.mealCost}`],
+                        ['Shared/Fixed Cost', `Rs.${snapshotM.sharedCost}`],
+                        ['Guest Adjustment', `Rs.${snapshotM.guestCost}`],
+                        ['TOTAL GROSS CHARGE', `Rs.${snapshotM.totalCost}`],
+                        ['Market Paid (Deducted)', `Rs.${snapshotM.marketCost}`]
+                    ],
+                    theme: 'grid',
+                    headStyles: { fillColor: [67, 56, 202], textColor: 255, fontStyle: 'bold', fontSize: 8 },
+                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60] },
+                    margin: { left: 14, right: 14 },
+                });
+                y = doc.lastAutoTable.finalY + 8;
+            }
+
             // ── Payment summary ──
             sectionHeader('PAYMENT SUMMARY', 239, 68, 68);
             const statusColors = { clear: [16, 185, 129], partial: [245, 158, 11], pending: [239, 68, 68] };
             const sc = statusColors[payStatus] || statusColors.pending;
+
+            // Due logic: (TotalCost - MarketPaid) - CashReceived
+            const payableBase = snapshotM ? (snapshotM.totalCost - snapshotM.marketCost) : Math.round(depositBalance);
+            const cashReceived = (inv.payment?.receivedAmount || 0);
+
             autoTable(doc, {
                 startY: y,
-                head: [['Deposit Balance (Rs.)', 'Submitted (Rs.)', 'Due (Rs.)', 'Payment Status', 'Note']],
+                head: [['Payable Base (Rs.)', 'Confirmed Paid (Rs.)', 'Due (Rs.)', 'Payment Status', 'Note']],
                 body: [[
-                    `Rs.${depositBalance}`,
-                    `Rs.${submittedAmt}`,
-                    `Rs.${Math.max(0, depositBalance - submittedAmt)}`,
+                    `Rs.${Math.round(payableBase)}`,
+                    `Rs.${Math.round(cashReceived)}`,
+                    `Rs.${Math.round(Math.max(0, payableBase - cashReceived))}`,
                     payStatus.toUpperCase(),
                     note || '—'
                 ]],
@@ -742,8 +685,11 @@ const MonthlySummary = () => {
     const clearedCount = data?.members?.filter(m => m.paymentStatus === 'clear').length || 0;
     const pendingCount = data?.members?.filter(m => m.paymentStatus === 'pending').length || 0;
     const partialCount = data?.members?.filter(m => m.paymentStatus === 'partial').length || 0;
-    const totalDeposits = data?.members?.reduce((s, m) => s + (m.expenses?.deposit || 0), 0) || 0;
-    const totalMarket = data?.members?.reduce((s, m) => s + (m.expenses?.market || 0), 0) || 0;
+    const totalMeals = data?.members?.reduce((s, m) => s + (m.regularMeals || 0) + (m.guestMeals || 0), 0) || 0;
+    const totalMealCharge = Math.round(data?.sharedExpense?.memberBalances?.reduce((s, m) => s + (m.mealCost || 0), 0) || 0);
+    const mealRate = totalMeals > 0 ? (totalMealCharge / totalMeals).toFixed(2) : '0';
+    const totalMarket = data?.sharedExpense?.memberBalances?.reduce((s, m) => s + (m.marketCost || 0), 0) ||
+        data?.members?.reduce((s, m) => s + (m.expenses?.market || 0), 0) || 0;
 
     return (
         <motion.div
@@ -803,286 +749,21 @@ const MonthlySummary = () => {
                 </div>
             </Card>
 
-            {/* ── Stats overview ── */}
-            {data && (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    {[
-                        { label: 'Members', value: totalMembers, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/20', icon: Users },
-                        { label: 'Cleared', value: clearedCount, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/20', icon: CheckCircle2 },
-                        { label: 'Pending', value: pendingCount, color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-950/20', icon: Clock },
-                        { label: 'Partial', value: partialCount, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/20', icon: AlertCircle },
-                        { label: 'Deposits', value: `₹${totalDeposits}`, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950/20', icon: FileText },
-                        { label: 'Market', value: `₹${totalMarket}`, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950/20', icon: ShoppingBag },
-                    ].map((stat, i) => (
-                        <motion.div
-                            key={stat.label}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.04 }}
-                        >
-                            <Card className={`p-4 flex items-center gap-3 ${stat.bg} border-0`}>
-                                <stat.icon size={18} className={stat.color} />
-                                <div>
-                                    <div className={`text-lg font-black ${stat.color}`}>{stat.value}</div>
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{stat.label}</div>
-                                </div>
-                            </Card>
-                        </motion.div>
-                    ))}
-                </div>
-            )}
-
-            {/* ── Loading / Error ── */}
-            {loading && (
-                <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                    <Loader2 size={36} className="animate-spin mb-4 text-primary-500" />
-                    <p className="font-bold text-sm">Loading summary...</p>
-                </div>
-            )}
-
-            {error && !loading && (
-                <Card className="p-8 text-center border-rose-200/50 dark:border-rose-800/20 bg-rose-50 dark:bg-rose-950/10">
-                    <AlertCircle size={36} className="text-rose-400 mx-auto mb-3" />
-                    <p className="text-sm font-bold text-rose-600 dark:text-rose-400">{error}</p>
-                </Card>
-            )}
-
-            {/* ── Main Table ── */}
-            {!loading && data && (
-                <Card className="p-0 overflow-hidden border-slate-200/60 dark:border-white/5 bg-white dark:bg-slate-900/40">
-                    <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/60">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary-100 dark:bg-primary-950/40 rounded-xl">
-                                    <Users size={18} className="text-primary-600 dark:text-primary-400" />
-                                </div>
-                                <div>
-                                    <h2 className="text-base font-black text-slate-900 dark:text-white">Member Breakdown</h2>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Click payment badge to update status</p>
-                                </div>
-                            </div>
-                            {/* Member search bar */}
-                            <div className="flex-1 relative sm:max-w-xs">
-                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={e => setSearchQuery(e.target.value)}
-                                    placeholder="Search member name..."
-                                    className="w-full pl-8 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 outline-none transition-all"
-                                />
-                            </div>
-                            {/* Admin Expenses PDF button */}
-                            <button
-                                onClick={exportAdminExpensesPDF}
-                                disabled={exportingAdmin}
-                                title="Download Admin Expenses PDF for this month"
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-wide hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-all disabled:opacity-50 border border-indigo-200/60 dark:border-indigo-800/30"
-                            >
-                                {exportingAdmin ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
-                                Admin Expenses
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[1050px]">
-                            <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
-                                    <th className="px-5 py-3">Member</th>
-                                    <th className="px-4 py-3 text-center">Deposit<br /><span className="text-[9px] normal-case text-slate-400">(₹ this month)</span></th>
-                                    <th className="px-4 py-3 text-center">Market<br /><span className="text-[9px] normal-case text-slate-400">(expenses)</span></th>
-                                    <th className="px-4 py-3 text-center">WiFi</th>
-                                    <th className="px-4 py-3 text-center">Electric</th>
-                                    <th className="px-4 py-3 text-center">Meals<br /><span className="text-[9px] normal-case text-slate-400">(reg+guest)</span></th>
-                                    <th className="px-4 py-3 text-center text-blue-500">↑ Pay<br /><span className="text-[9px] normal-case text-slate-400">Member submitted</span></th>
-                                    <th className="px-4 py-3 text-center text-emerald-500">↓ Received<br /><span className="text-[9px] normal-case text-slate-400">Admin confirmed</span></th>
-                                    <th className="px-4 py-3 text-center">Due<br /><span className="text-[9px] normal-case text-slate-400">(₹ remaining)</span></th>
-                                    <th className="px-4 py-3 text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                <AnimatePresence mode="popLayout">
-                                    {(() => {
-                                        const filtered = searchQuery.trim()
-                                            ? data.members.filter(m =>
-                                                m.memberName.toLowerCase().includes(searchQuery.toLowerCase())
-                                            )
-                                            : data.members;
-
-                                        if (filtered.length === 0) {
-                                            return (
-                                                <tr>
-                                                    <td colSpan="12" className="py-16 text-center text-slate-400 dark:text-slate-500 text-sm font-bold italic">
-                                                        {searchQuery ? `No member found matching "${searchQuery}"` : 'No members found.'}
-                                                    </td>
-                                                </tr>
-                                            );
-                                        }
-
-                                        return filtered.map((member, idx) => (
-                                            <motion.tr
-                                                key={member.memberId}
-                                                layout
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: idx * 0.03 }}
-                                                className="hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
-                                            >
-                                                {/* Member name */}
-                                                <td className="px-5 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-black text-sm shadow-sm uppercase">
-                                                            {(member.memberName || '?').charAt(0)}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-black text-slate-900 dark:text-white text-sm">{member.memberName}</div>
-                                                            {member.note && (
-                                                                <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 italic">{member.note}</div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </td>
-
-                                                {/* Deposit — snapshot from MonthlySummary */}
-                                                <td className="px-4 py-4 text-center">
-                                                    <div className="flex flex-col items-center">
-                                                        <span className={`font-black text-sm ${((member.depositBalance || 0) + (member.expenses?.gas || 0) + (member.expenses?.wifi || 0) + (member.expenses?.electric || 0)) > 0 ? 'text-violet-600 dark:text-violet-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                            {((member.depositBalance || 0) + (member.expenses?.gas || 0) + (member.expenses?.wifi || 0) + (member.expenses?.electric || 0)) > 0 ? `₹${(member.depositBalance || 0) + (member.expenses?.gas || 0) + (member.expenses?.wifi || 0) + (member.expenses?.electric || 0)}` : '—'}
-                                                        </span>
-                                                        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
-                                                            Gen: ₹{member.depositBalance || 0}
-                                                            {member.depositDate && <span className="ml-1 opacity-60">({member.depositDate})</span>}
-                                                        </span>
-                                                    </div>
-                                                </td>
-
-                                                {/* Market */}
-                                                <td className="px-4 py-4 text-center">
-                                                    <span className={`font-black text-sm ${(member.expenses?.market || 0) > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                        {(member.expenses?.market || 0) > 0 ? `₹${member.expenses?.market}` : '—'}
-                                                    </span>
-                                                </td>
-
-                                                {/* WiFi */}
-                                                <td className="px-4 py-4 text-center">
-                                                    <span className={`font-black text-sm ${(member.expenses?.wifi || 0) > 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                        {(member.expenses?.wifi || 0) > 0 ? `₹${member.expenses?.wifi}` : '—'}
-                                                    </span>
-                                                </td>
-
-                                                {/* Electric */}
-                                                <td className="px-4 py-4 text-center">
-                                                    <span className={`font-black text-sm ${(member.expenses?.electric || 0) > 0 ? 'text-yellow-600 dark:text-yellow-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                        {(member.expenses?.electric || 0) > 0 ? `₹${member.expenses?.electric}` : '—'}
-                                                    </span>
-                                                </td>
-
-                                                {/* Meals */}
-                                                <td className="px-4 py-4 text-center">
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <Chip
-                                                            icon={Utensils}
-                                                            value={member.regularMeals}
-                                                            label="reg"
-                                                            color="bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400"
-                                                        />
-                                                        {member.guestMeals > 0 && (
-                                                            <Chip
-                                                                icon={Coffee}
-                                                                value={member.guestMeals}
-                                                                label="guest"
-                                                                color="bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                </td>
-
-                                                {/* Pay — Member submitted */}
-                                                <td className="px-4 py-4 text-center">
-                                                    <span className={`font-black text-sm ${member.submittedAmount > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                        {member.submittedAmount > 0 ? `₹${member.submittedAmount}` : '—'}
-                                                    </span>
-                                                </td>
-
-                                                {/* Received — Admin confirmed */}
-                                                <td className="px-4 py-4 text-center">
-                                                    <span className={`font-black text-sm ${(member.receivedAmount || 0) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                        {(member.receivedAmount || 0) > 0 ? `₹${member.receivedAmount}` : '—'}
-                                                    </span>
-                                                </td>
-
-                                                {/* Due = totalDeposit - receivedAmount, only when admin has confirmed receipt */}
-                                                <td className="px-4 py-4 text-center">
-                                                    {(() => {
-                                                        const totalDeposit = (member.depositBalance || 0) + (member.expenses?.gas || 0) + (member.expenses?.wifi || 0) + (member.expenses?.electric || 0);
-                                                        const rec = member.receivedAmount || 0;
-                                                        // Only show after admin has confirmed receiving something
-                                                        if (totalDeposit === 0 || rec === 0) {
-                                                            return <span className="font-black text-sm text-slate-300 dark:text-slate-600">—</span>;
-                                                        }
-                                                        const due = Math.max(0, totalDeposit - rec);
-                                                        return due === 0
-                                                            ? <span className="font-black text-sm text-emerald-600 dark:text-emerald-400">✓ Clear</span>
-                                                            : <span className="font-black text-sm text-rose-600 dark:text-rose-400">₹{due}</span>;
-                                                    })()}
-                                                </td>
-
-                                                {/* Payment status */}
-                                                <td className="px-4 py-4 text-center">
-                                                    <div className="flex flex-col items-center gap-1.5">
-                                                        <StatusBadge
-                                                            status={member.paymentStatus}
-                                                            onClick={() => setEditingMember(member)}
-                                                        />
-                                                        {/* Export Invoice button */}
-                                                        <button
-                                                            onClick={() => exportInvoice(member)}
-                                                            disabled={exportingId === member.memberId}
-                                                            title="Export PDF Invoice"
-                                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wide hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all disabled:opacity-50"
-                                                        >
-                                                            {exportingId === member.memberId
-                                                                ? <Loader2 size={10} className="animate-spin" />
-                                                                : <Download size={10} />}
-                                                            {exportingId === member.memberId ? 'Exporting...' : 'Invoice'}
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </motion.tr>
-                                        ));
-                                    })()}
-                                </AnimatePresence>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Footer totals */}
-                    {data.members.length > 0 && (
-                        <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/60 flex flex-wrap gap-4 text-xs font-black">
-                            <span className="text-slate-500 dark:text-slate-400 uppercase tracking-widest">Totals:</span>
-                            <span className="text-emerald-600 dark:text-emerald-400">
-                                Deposits: ₹{data.members.reduce((s, m) => s + (m.depositBalance || 0) + (m.expenses?.gas || 0) + (m.expenses?.wifi || 0) + (m.expenses?.electric || 0), 0)}
-                            </span>
-                            <span className="text-blue-600 dark:text-blue-400">
-                                Market: ₹{data.members.reduce((s, m) => s + (m.expenses?.market || 0), 0)}
-                            </span>
-                            <span className="text-cyan-600 dark:text-cyan-400">
-                                WiFi: ₹{data.members.reduce((s, m) => s + (m.expenses?.wifi || 0), 0)}
-                            </span>
-                            <span className="text-yellow-600 dark:text-yellow-400">
-                                Electric: ₹{data.members.reduce((s, m) => s + (m.expenses?.electric || 0), 0)}
-                            </span>
-                            <span className="text-amber-600 dark:text-amber-400">
-                                Meals: {data.members.reduce((s, m) => s + m.regularMeals, 0)} reg + {data.members.reduce((s, m) => s + m.guestMeals, 0)} guest
-                            </span>
-                        </div>
-                    )}
+            {/* ── Submission Warning ── */}
+            {data && !data.sharedExpense && !loading && (
+                <Card className="p-6 border-amber-200/50 dark:border-amber-800/20 bg-amber-50 dark:bg-amber-950/10 text-center">
+                    <AlertCircle size={32} className="text-amber-500 mx-auto mb-3" />
+                    <h2 className="text-lg font-black text-amber-700 dark:text-amber-400">Official Report Not Submitted</h2>
+                    <p className="text-sm font-bold text-amber-600 dark:text-amber-500 mt-1 max-w-md mx-auto">
+                        This month's official summary hasn't been finalized yet. Please go to the
+                        <a href="/calculator" className="mx-1 underline hover:text-amber-700">Calculator</a>
+                        and click "Submit to report" to generate this summary.
+                    </p>
                 </Card>
             )}
 
             {/* ── Shared Expenses Panel (Paper, Didi, House Rent) ── */}
-            {!loading && data && (
+            {!loading && data && data.sharedExpense && Object.keys(data.sharedExpense).length > 0 && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1094,7 +775,14 @@ const MonthlySummary = () => {
                                 <Wallet size={18} className="text-violet-600 dark:text-violet-400" />
                             </div>
                             <div>
-                                <h2 className="text-base font-black text-slate-900 dark:text-white">Shared Expenses</h2>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-base font-black text-slate-900 dark:text-white">Shared Expenses</h2>
+                                    {sharedExpenses.isSnapshot && (
+                                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest border border-emerald-200 dark:border-emerald-800/50">
+                                            Official Snapshot
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Bills · Paper · Didi · Rent — from approved expenses</p>
                             </div>
                         </div>
@@ -1215,6 +903,295 @@ const MonthlySummary = () => {
                     </Card>
                 </motion.div>
             )}
+
+            {/* ── Stats overview ── */}
+            {data && (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {[
+                        { label: 'Cleared', value: clearedCount, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/20', icon: CheckCircle2 },
+                        { label: 'Pending', value: pendingCount, color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-950/20', icon: Clock },
+                        { label: 'Partial', value: partialCount, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/20', icon: AlertCircle },
+                        { label: 'Meal Rate', value: `₹${mealRate}/meal`, color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-950/20', icon: Utensils },
+                    ].map((stat, i) => (
+                        <motion.div
+                            key={stat.label}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: i * 0.04 }}
+                        >
+                            <Card className={`p-4 flex items-center gap-3 ${stat.bg} border-0`}>
+                                <stat.icon size={18} className={stat.color} />
+                                <div>
+                                    <div className={`text-lg font-black ${stat.color}`}>{stat.value}</div>
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{stat.label}</div>
+                                </div>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
+
+            {/* ── Loading / Error ── */}
+            {loading && (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                    <Loader2 size={36} className="animate-spin mb-4 text-primary-500" />
+                    <p className="font-bold text-sm">Loading summary...</p>
+                </div>
+            )}
+
+            {error && !loading && (
+                <Card className="p-8 text-center border-rose-200/50 dark:border-rose-800/20 bg-rose-50 dark:bg-rose-950/10">
+                    <AlertCircle size={36} className="text-rose-400 mx-auto mb-3" />
+                    <p className="text-sm font-bold text-rose-600 dark:text-rose-400">{error}</p>
+                </Card>
+            )}
+
+            {/* ── Main Table ── */}
+            {!loading && data && (
+                <Card className="p-0 overflow-hidden border-slate-200/60 dark:border-white/5 bg-white dark:bg-slate-900/40">
+                    <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/60">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary-100 dark:bg-primary-950/40 rounded-xl">
+                                    <Users size={18} className="text-primary-600 dark:text-primary-400" />
+                                </div>
+                                <div>
+                                    <h2 className="text-base font-black text-slate-900 dark:text-white">Member Breakdown</h2>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Click payment badge to update status</p>
+                                </div>
+                            </div>
+                            {/* Member search bar */}
+                            <div className="flex-1 relative sm:max-w-xs">
+                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    placeholder="Search member name..."
+                                    className="w-full pl-8 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 outline-none transition-all"
+                                />
+                            </div>
+                            {/* Admin Expenses PDF button */}
+                            <button
+                                onClick={exportAdminExpensesPDF}
+                                disabled={exportingAdmin}
+                                title="Download Admin Expenses PDF for this month"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-wide hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-all disabled:opacity-50 border border-indigo-200/60 dark:border-indigo-800/30"
+                            >
+                                {exportingAdmin ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                                Admin Expenses
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse min-w-[1050px]">
+                            <thead>
+                                <tr className="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
+                                    <th className="px-5 py-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky left-0 top-0 z-20 bg-slate-50 dark:bg-slate-900 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Member</th>
+                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Deposit<br /><span className="text-[9px] font-black text-violet-500/70 lowercase opacity-60">(monthly)</span></th>
+                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Market<br /><span className="text-[9px] font-black text-blue-500/70 lowercase opacity-60">(paid)</span></th>
+                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Gas</th>
+                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">WiFi</th>
+                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Electric</th>
+                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Meals<br /><span className="text-[9px] font-black text-amber-500/70 lowercase opacity-60">(count)</span></th>
+                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Meals<br /><span className="text-[9px] font-black text-amber-500/70 lowercase opacity-60">(cost)</span></th>
+                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight italic sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                <AnimatePresence mode="popLayout">
+                                    {(() => {
+                                        const filtered = searchQuery.trim()
+                                            ? data.members.filter(m =>
+                                                m.memberName.toLowerCase().includes(searchQuery.toLowerCase())
+                                            )
+                                            : data.members;
+
+                                        if (filtered.length === 0) {
+                                            return (
+                                                <tr>
+                                                    <td colSpan="12" className="py-16 text-center text-slate-400 dark:text-slate-500 text-sm font-bold italic">
+                                                        {searchQuery ? `No member found matching "${searchQuery}"` : 'No members found.'}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        }
+
+                                        return filtered.map((member, idx) => {
+                                            const snapshotM = data?.sharedExpense?.memberBalances?.find(mb => mb.memberId === member.memberId);
+                                            return (
+                                                <motion.tr
+                                                    key={member.memberId}
+                                                    layout
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: idx * 0.03 }}
+                                                    className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group"
+                                                >
+                                                    {/* Member name */}
+                                                    <td className="px-5 py-4 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-black text-sm shadow-sm uppercase">
+                                                                {(member.memberName || '?').charAt(0)}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-black text-slate-900 dark:text-white text-sm">{member.memberName}</div>
+                                                                {member.note && (
+                                                                    <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 italic">{member.note}</div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Deposit — from General Deposit expenses this month */}
+                                                    <td className="px-4 py-4 text-center">
+                                                        {(() => {
+                                                            const genDep = member.expenses?.deposit || 0;
+                                                            return genDep > 0 ? (
+                                                                <span className="font-black text-sm text-emerald-600 dark:text-emerald-400">
+                                                                    ₹{Math.round(genDep)}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="font-black text-sm text-slate-300 dark:text-slate-600">₹0</span>
+                                                            );
+                                                        })()}
+                                                    </td>
+
+                                                    {/* Market */}
+                                                    <td className="px-4 py-4 text-center">
+                                                        <span className={`font-black text-sm ${(snapshotM?.marketCost || 0) > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-600'}`}>
+                                                            {(snapshotM?.marketCost || 0) > 0 ? `₹${Math.round(snapshotM.marketCost)}` : '—'}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Gas */}
+                                                    <td className="px-4 py-4 text-center">
+                                                        <span className={`font-black text-sm ${(member.expenses?.gas || 0) > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-300 dark:text-slate-600'}`}>
+                                                            {(member.expenses?.gas || 0) > 0 ? `₹${Math.round(member.expenses.gas)}` : '—'}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* WiFi */}
+                                                    <td className="px-4 py-4 text-center">
+                                                        <span className={`font-black text-sm ${(member.expenses?.wifi || 0) > 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-300 dark:text-slate-600'}`}>
+                                                            {(member.expenses?.wifi || 0) > 0 ? `₹${Math.round(member.expenses.wifi)}` : '—'}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Electric */}
+                                                    <td className="px-4 py-4 text-center">
+                                                        <span className={`font-black text-sm ${(member.expenses?.electric || 0) > 0 ? 'text-yellow-600 dark:text-yellow-400' : 'text-slate-300 dark:text-slate-600'}`}>
+                                                            {(member.expenses?.electric || 0) > 0 ? `₹${Math.round(member.expenses.electric)}` : '—'}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Meals — Count */}
+                                                    <td className="px-4 py-4 text-center">
+                                                        <div className="flex flex-col items-center">
+                                                            <span className="font-black text-sm text-slate-600 dark:text-slate-300">
+                                                                {member.regularMeals < 40 ? (
+                                                                    <span className="flex items-center gap-1">
+                                                                        40
+                                                                        <span className="text-[10px] text-slate-400 font-bold">({member.regularMeals})</span>
+                                                                    </span>
+                                                                ) : member.regularMeals}
+                                                            </span>
+                                                            <span className="text-[10px] font-bold text-amber-500/70 uppercase tracking-tighter">
+                                                                {member.guestMeals} Guest
+                                                            </span>
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Meals — Amount */}
+                                                    <td className="px-4 py-4 text-center">
+                                                        <span className="font-black text-sm text-amber-600 dark:text-amber-400">
+                                                            ₹{Number(snapshotM?.mealCost || 0).toFixed(2)}
+                                                        </span>
+                                                    </td>
+
+
+
+                                                    {/* Status = {amount} received or pay */}
+                                                    <td className="px-4 py-4 text-center">
+                                                        {(() => {
+                                                            if (!snapshotM) return <span className="text-slate-300">—</span>;
+
+                                                            const baseBalance = Math.round(snapshotM.balance) || 0;
+                                                            const submitted = member.submittedAmount || 0;
+                                                            const remaining = Math.max(0, baseBalance - submitted);
+
+                                                            return (
+                                                                <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
+                                                                    {remaining === 0 ? (
+                                                                        <span className="text-emerald-500 font-black uppercase tracking-widest text-[10px]">✓ Clear</span>
+                                                                    ) : snapshotM.type === 'Pay' ? (
+                                                                        <div className="px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 font-black uppercase tracking-widest text-[10px] shadow-sm ring-1 ring-rose-500/20">
+                                                                            ₹{remaining} Pay
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest text-[10px] shadow-sm ring-1 ring-emerald-500/20">
+                                                                            ₹{remaining} Get
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="mt-1 flex flex-col items-center gap-1">
+                                                                        <StatusBadge
+                                                                            status={member.paymentStatus}
+                                                                            onClick={() => setEditingMember({
+                                                                                ...member,
+                                                                                finalBalance: baseBalance, // Keep the modal's target amount un-shrunk
+                                                                                snapshotType: snapshotM.type
+                                                                            })}
+                                                                        />
+                                                                        {submitted > 0 && (
+                                                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">
+                                                                                {snapshotM.type === 'Pay' ? 'Paid' : 'Got'} ₹{submitted}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => exportInvoice(member)}
+                                                                        disabled={exportingId === member.memberId}
+                                                                        className="flex items-center gap-1 text-slate-400 hover:text-emerald-500 transition-colors font-black text-[9px] uppercase tracking-tighter mt-1"
+                                                                    >
+                                                                        <Download size={10} />
+                                                                        {exportingId === member.memberId ? '...' : 'Invoice'}
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </td>
+                                                </motion.tr>
+                                            );
+                                        });
+                                    })()}
+                                </AnimatePresence>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Footer totals */}
+                    {data.members.length > 0 && (
+                        <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/60 flex flex-wrap gap-4 text-xs font-black">
+                            <span className="text-slate-500 dark:text-slate-400 uppercase tracking-widest">Totals:</span>
+                            <span className="text-emerald-600 dark:text-emerald-400">
+                                Market: ₹{Math.round(data.sharedExpense?.memberBalances?.reduce((s, m) => s + (m.marketCost || 0), 0) || data.members.reduce((s, m) => s + (m.expenses?.market || 0), 0))}
+                            </span>
+                            <span className="text-cyan-600 dark:text-cyan-400">
+                                WiFi: ₹{Math.round(sharedExpenses.wifi || 0)}
+                            </span>
+                            <span className="text-yellow-600 dark:text-yellow-400">
+                                Electric: ₹{Math.round(sharedExpenses.electric || 0)}
+                            </span>
+                            <span className="text-amber-600 dark:text-amber-400">
+                                Guest Meals: {data.members.reduce((s, m) => s + (m.guestMeals || 0), 0)}
+                            </span>
+                        </div>
+                    )}
+                </Card>
+            )}
+
+
 
             {/* ── Payment modal ── */}
             <AnimatePresence>

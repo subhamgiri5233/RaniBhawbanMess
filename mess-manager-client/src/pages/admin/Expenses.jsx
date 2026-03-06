@@ -370,9 +370,9 @@ const Expenses = () => {
 
             {/* Expense Table */}
             <Card className="overflow-hidden p-0 border-slate-100 dark:border-white/5">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[11px] border-b border-slate-100 dark:border-white/5">
+                <div className="overflow-auto max-h-[600px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+                    <table className="w-full text-left relative border-collapse">
+                        <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 shadow-sm text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[11px] border-b border-slate-100 dark:border-white/5">
                             <tr>
                                 <th className="p-4">Date</th>
                                 <th className="p-4">Description</th>
