@@ -104,7 +104,7 @@ const Expenses = () => {
         : '';
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-32">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Expense Management</h1>
                 <button

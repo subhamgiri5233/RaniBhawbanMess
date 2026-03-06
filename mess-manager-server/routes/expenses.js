@@ -6,7 +6,7 @@ const MonthlySharedExpense = require('../models/MonthlySharedExpense');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 // Reject (Delete) all pending expenses - Admin only
-router.delete('/reject-all-pending', auth, requireAdmin, async (req, res) => {
+router.delete('/bulk/reject-pending', auth, requireAdmin, async (req, res) => {
     try {
         const result = await Expense.deleteMany({ status: 'pending' });
         res.json({
