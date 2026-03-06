@@ -1,12 +1,20 @@
 # Dependencies
+node_modules/
 mess-manager-server/node_modules/
 mess-manager-client/node_modules/
+mess-manager-mobile/node_modules/
 
 # Build output
 mess-manager-client/dist/
 mess-manager-client/dist-ssr/
+mess-manager-mobile/dist/
+mess-manager-mobile/.expo/
+mess-manager-mobile/android/
+mess-manager-mobile/ios/
 
 # Environment files (secrets)
+.env*
+!.env.example
 mess-manager-server/.env
 mess-manager-client/.env
 mess-manager-client/.env.local
@@ -14,6 +22,8 @@ mess-manager-client/.env.local
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # OS files
 .DS_Store
@@ -22,3 +32,8 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

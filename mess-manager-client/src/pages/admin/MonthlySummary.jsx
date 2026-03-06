@@ -908,10 +908,10 @@ const MonthlySummary = () => {
             {data && (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {[
-                        { label: 'Cleared', value: clearedCount, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/20', icon: CheckCircle2 },
-                        { label: 'Pending', value: pendingCount, color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-950/20', icon: Clock },
-                        { label: 'Partial', value: partialCount, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/20', icon: AlertCircle },
-                        { label: 'Meal Rate', value: `₹${mealRate}/meal`, color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-950/20', icon: Utensils },
+                        { label: 'Cleared', value: clearedCount, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20', icon: CheckCircle2 },
+                        { label: 'Pending', value: pendingCount, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-950/20', icon: Clock },
+                        { label: 'Partial', value: partialCount, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/20', icon: AlertCircle },
+                        { label: 'Rate', value: `₹${mealRate}`, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-950/20', icon: Utensils },
                     ].map((stat, i) => (
                         <motion.div
                             key={stat.label}
@@ -919,11 +919,11 @@ const MonthlySummary = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: i * 0.04 }}
                         >
-                            <Card className={`p-4 flex items-center gap-3 ${stat.bg} border-0`}>
+                            <Card className={`p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 ${stat.bg} border-0`}>
                                 <stat.icon size={18} className={stat.color} />
-                                <div>
-                                    <div className={`text-lg font-black ${stat.color}`}>{stat.value}</div>
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{stat.label}</div>
+                                <div className="text-center sm:text-left">
+                                    <div className={`text-sm sm:text-lg font-black ${stat.color}`}>{stat.value}</div>
+                                    <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{stat.label}</div>
                                 </div>
                             </Card>
                         </motion.div>
@@ -984,7 +984,8 @@ const MonthlySummary = () => {
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left border-collapse min-w-[1050px]">
                             <thead>
                                 <tr className="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
@@ -1044,7 +1045,7 @@ const MonthlySummary = () => {
                                                         </div>
                                                     </td>
 
-                                                    {/* Deposit — from General Deposit expenses this month */}
+                                                    {/* Deposit */}
                                                     <td className="px-4 py-4 text-center">
                                                         {(() => {
                                                             const genDep = member.expenses?.deposit || 0;
@@ -1110,9 +1111,7 @@ const MonthlySummary = () => {
                                                         </span>
                                                     </td>
 
-
-
-                                                    {/* Status = {amount} received or pay */}
+                                                    {/* Status */}
                                                     <td className="px-4 py-4 text-center">
                                                         {(() => {
                                                             if (!snapshotM) return <span className="text-slate-300">—</span>;
@@ -1139,7 +1138,7 @@ const MonthlySummary = () => {
                                                                             status={member.paymentStatus}
                                                                             onClick={() => setEditingMember({
                                                                                 ...member,
-                                                                                finalBalance: baseBalance, // Keep the modal's target amount un-shrunk
+                                                                                finalBalance: baseBalance,
                                                                                 snapshotType: snapshotM.type
                                                                             })}
                                                                         />
@@ -1168,6 +1167,118 @@ const MonthlySummary = () => {
                                 </AnimatePresence>
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden divide-y divide-slate-100 dark:divide-white/5">
+                        <AnimatePresence mode="popLayout">
+                            {(() => {
+                                const filtered = searchQuery.trim()
+                                    ? data.members.filter(m =>
+                                        m.memberName.toLowerCase().includes(searchQuery.toLowerCase())
+                                    )
+                                    : data.members;
+
+                                if (filtered.length === 0) {
+                                    return (
+                                        <div className="py-16 text-center text-slate-400 dark:text-slate-500 text-sm font-bold italic">
+                                            {searchQuery ? `No member found matching "${searchQuery}"` : 'No members found.'}
+                                        </div>
+                                    );
+                                }
+
+                                return filtered.map((member, idx) => {
+                                    const snapshotM = data?.sharedExpense?.memberBalances?.find(mb => mb.memberId === member.memberId);
+                                    const baseBalance = snapshotM ? Math.round(snapshotM.balance) : 0;
+                                    const submitted = member.submittedAmount || 0;
+                                    const remaining = Math.max(0, baseBalance - submitted);
+
+                                    return (
+                                        <motion.div
+                                            key={member.memberId}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: idx * 0.05 }}
+                                            className="p-4 bg-white dark:bg-slate-900/40"
+                                        >
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-black text-sm uppercase">
+                                                        {(member.memberName || '?').charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-black text-slate-900 dark:text-white text-sm">{member.memberName}</div>
+                                                        <div className="flex items-center gap-2 mt-0.5">
+                                                            <div className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-tighter bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-white/5">
+                                                                <Utensils size={8} /> {member.regularMeals < 40 ? 40 : member.regularMeals} Meals
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-[9px] font-black text-amber-500 uppercase tracking-tighter bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-100/50 dark:border-amber-800/20">
+                                                                <Users size={8} /> {member.guestMeals} Guest
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-col items-end gap-1">
+                                                    {remaining === 0 ? (
+                                                        <span className="text-emerald-500 font-black uppercase tracking-widest text-[9px] bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-200/50">✓ Clear</span>
+                                                    ) : snapshotM?.type === 'Pay' ? (
+                                                        <div className="px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 font-black uppercase tracking-widest text-[9px] ring-1 ring-rose-500/20">
+                                                            ₹{remaining} Pay
+                                                        </div>
+                                                    ) : (
+                                                        <div className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest text-[9px] ring-1 ring-emerald-500/20">
+                                                            ₹{remaining} Get
+                                                        </div>
+                                                    )}
+                                                    <StatusBadge
+                                                        status={member.paymentStatus}
+                                                        onClick={() => setEditingMember({
+                                                            ...member,
+                                                            finalBalance: baseBalance,
+                                                            snapshotType: snapshotM?.type
+                                                        })}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 gap-2 mb-3">
+                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-white/5">
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Deposit</p>
+                                                    <p className="font-black text-xs text-emerald-600">₹{Math.round(member.expenses?.deposit || 0)}</p>
+                                                </div>
+                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-white/5">
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Market</p>
+                                                    <p className="font-black text-xs text-blue-600">₹{Math.round(snapshotM?.marketCost || 0)}</p>
+                                                </div>
+                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-white/5">
+                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Expenses</p>
+                                                    <p className="font-black text-xs text-rose-600">₹{Math.round((member.expenses?.gas || 0) + (member.expenses?.wifi || 0) + (member.expenses?.electric || 0))}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5">
+                                                <div className="flex items-center gap-2">
+                                                    {submitted > 0 && (
+                                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">
+                                                            {snapshotM?.type === 'Pay' ? 'Paid' : 'Got'}: <span className="text-slate-600 dark:text-slate-300">₹{submitted}</span>
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => exportInvoice(member)}
+                                                    disabled={exportingId === member.memberId}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600  dark:text-indigo-400 rounded-lg font-black text-[9px] uppercase tracking-wider transition-all"
+                                                >
+                                                    <Download size={10} />
+                                                    {exportingId === member.memberId ? 'Exporting...' : 'Invoice'}
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                });
+                            })()}
+                        </AnimatePresence>
                     </div>
 
                     {/* Footer totals */}
