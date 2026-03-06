@@ -47,6 +47,19 @@ router.post('/', auth, async (req, res) => {
 
 // IMPORTANT: Specific routes MUST come BEFORE parameterized routes like /:id
 
+// Reject (Delete) all pending expenses - Admin only
+router.delete('/reject-all-pending', auth, requireAdmin, async (req, res) => {
+    try {
+        const result = await Expense.deleteMany({ status: 'pending' });
+        res.json({
+            message: 'All pending expenses rejected (deleted) successfully',
+            deletedCount: result.deletedCount
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Delete all admin expenses - Admin only (requires password verification)
 router.delete('/admin/clear-all', auth, requireAdmin, async (req, res) => {
     try {
@@ -88,18 +101,6 @@ router.put('/approve-all', auth, requireAdmin, async (req, res) => {
     }
 });
 
-// Reject (Delete) all pending expenses - Admin only
-router.delete('/pending', auth, requireAdmin, async (req, res) => {
-    try {
-        const result = await Expense.deleteMany({ status: 'pending' });
-        res.json({
-            message: 'All pending expenses rejected (deleted) successfully',
-            deletedCount: result.deletedCount
-        });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
 
 // Clear all expense history - Admin only
 router.delete('/clear-all-history', auth, requireAdmin, async (req, res) => {

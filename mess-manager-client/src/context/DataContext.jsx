@@ -258,7 +258,7 @@ export const DataProvider = ({ children }) => {
 
     const rejectAllExpenses = useCallback(async () => {
         try {
-            const response = await api.delete('/expenses/pending');
+            const response = await api.delete('/expenses/reject-all-pending');
             setExpenses(prev => prev.filter(e => e.status !== 'pending'));
             return { success: true, deletedCount: response.data.deletedCount };
         } catch (error) {
