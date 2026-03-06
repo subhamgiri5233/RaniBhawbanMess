@@ -10,7 +10,8 @@ router.get('/', auth, async (req, res) => {
         // Return all reports without PDF data for listing (to save bandwidth)
         const reports = await MonthlyReport.find()
             .select('-pdfData') // Exclude pdfData
-            .sort({ month: -1 });
+            .sort({ month: -1 })
+            .lean();
         res.json(reports);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -20,7 +21,7 @@ router.get('/', auth, async (req, res) => {
 // Get specific report with PDF data for download - Requires auth
 router.get('/:id', auth, async (req, res) => {
     try {
-        const report = await MonthlyReport.findById(req.params.id);
+        const report = await MonthlyReport.findById(req.params.id).lean();
         if (!report) {
             return res.status(404).json({ error: 'Report not found' });
         }
@@ -33,7 +34,7 @@ router.get('/:id', auth, async (req, res) => {
 // Get report by month - Requires auth
 router.get('/month/:month', auth, async (req, res) => {
     try {
-        const report = await MonthlyReport.findOne({ month: req.params.month });
+        const report = await MonthlyReport.findOne({ month: req.params.month }).lean();
         if (!report) {
             return res.status(404).json({ error: 'Report not found for this month' });
         }

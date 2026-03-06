@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
 const Settings = require('../models/Settings');
+const MonthlySharedExpense = require('../models/MonthlySharedExpense');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 // Get all expenses - Requires authentication
 router.get('/', auth, async (req, res) => {
     try {
-        const expenses = await Expense.find();
+        const expenses = await Expense.find().lean();
         res.json(expenses);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -136,6 +137,54 @@ router.delete('/:id', auth, requireAdmin, async (req, res) => {
         }
         res.json({ message: 'Expense deleted successfully', deletedExpense });
     } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Bulk update or create shared expenses for a month (dedicated collection)
+router.post('/bulk-shared', auth, requireAdmin, async (req, res) => {
+    try {
+        const { month, bills, mealInputs, perHeadResult, mealChargeResult, memberBalances } = req.body;
+        if (!month || !bills) {
+            return res.status(400).json({ message: 'Month and bills are required' });
+        }
+
+        // Upsert into MonthlySharedExpense collection
+        const updatedShared = await MonthlySharedExpense.findOneAndUpdate(
+            { month },
+            {
+                month,
+                bills,
+                mealInputs,
+                results: {
+                    perHeadAmount: perHeadResult?.perHeadAmount || 0,
+                    totalSharedAmount: perHeadResult?.totalAmount || 0,
+                    mealCharge: mealChargeResult?.mealCharge || 0
+                },
+                memberBalances: memberBalances || [],
+                submittedBy: req.user.id || req.user.userId,
+                submittedByName: req.user.name,
+                updatedAt: new Date()
+            },
+            { upsert: true, new: true }
+        );
+
+        // Auto-approve existing manual entries for these categories
+        const categories = Object.keys(bills);
+        for (const category of categories) {
+            await Expense.updateMany(
+                {
+                    date: { $regex: `^${month}` },
+                    category,
+                    status: 'pending'
+                },
+                { $set: { status: 'approved' } }
+            );
+        }
+
+        res.json({ message: 'Monthly shared expenses saved successfully', data: updatedShared });
+    } catch (err) {
+        console.error('Bulk shared expenses error:', err);
         res.status(500).json({ message: err.message });
     }
 });

@@ -123,10 +123,10 @@ router.get('/clear-month/preview', auth, requireAdmin, async (req, res) => {
     }
 });
 
-// DELETE /api/admin/clear-month - Clear all transaction data for a particular month
+// DELETE /api/admin/clear-month - Clear transaction data for a particular month (all or specific category)
 router.delete('/clear-month', auth, requireAdmin, async (req, res) => {
     try {
-        const { month, password } = req.body;
+        const { month, password, category } = req.body;
 
         if (!month || !password) {
             return res.status(400).json({ message: 'Month and password are required' });
@@ -144,31 +144,52 @@ router.delete('/clear-month', auth, requireAdmin, async (req, res) => {
         }
 
         const dateRegex = new RegExp(`^${month}`);
+        const deletedCounts = {};
 
-        // Perform deletions across all transaction models
-        const results = await Promise.all([
-            Meal.deleteMany({ date: { $regex: dateRegex } }),
-            GuestMeal.deleteMany({ date: { $regex: dateRegex } }),
-            Expense.deleteMany({ date: { $regex: dateRegex } }),
-            MarketRequest.deleteMany({ date: { $regex: dateRegex } }),
-            CookingRecord.deleteMany({ date: { $regex: dateRegex } }),
-            ManagerRecord.deleteMany({ date: { $regex: dateRegex } })
-        ]);
+        if (category) {
+            // Map category to model
+            const categoryMap = {
+                'meals': Meal,
+                'guestMeals': GuestMeal,
+                'expenses': Expense,
+                'marketRequests': MarketRequest,
+                'cookingRecords': CookingRecord,
+                'managerRecords': ManagerRecord
+            };
 
-        const deletedCounts = {
-            meals: results[0].deletedCount,
-            guestMeals: results[1].deletedCount,
-            expenses: results[2].deletedCount,
-            marketRequests: results[3].deletedCount,
-            cookingRecords: results[4].deletedCount,
-            managerRecords: results[5].deletedCount
-        };
+            const Model = categoryMap[category];
+            if (!Model) {
+                return res.status(400).json({ message: 'Invalid category specified' });
+            }
+
+            const result = await Model.deleteMany({ date: { $regex: dateRegex } });
+            deletedCounts[category] = result.deletedCount;
+        } else {
+            // Perform deletions across all transaction models
+            const results = await Promise.all([
+                Meal.deleteMany({ date: { $regex: dateRegex } }),
+                GuestMeal.deleteMany({ date: { $regex: dateRegex } }),
+                Expense.deleteMany({ date: { $regex: dateRegex } }),
+                MarketRequest.deleteMany({ date: { $regex: dateRegex } }),
+                CookingRecord.deleteMany({ date: { $regex: dateRegex } }),
+                ManagerRecord.deleteMany({ date: { $regex: dateRegex } })
+            ]);
+
+            deletedCounts.meals = results[0].deletedCount;
+            deletedCounts.guestMeals = results[1].deletedCount;
+            deletedCounts.expenses = results[2].deletedCount;
+            deletedCounts.marketRequests = results[3].deletedCount;
+            deletedCounts.cookingRecords = results[4].deletedCount;
+            deletedCounts.managerRecords = results[5].deletedCount;
+        }
 
         const totalDeleted = Object.values(deletedCounts).reduce((a, b) => a + b, 0);
 
         res.json({
             success: true,
-            message: `Successfully cleared all data for ${month}`,
+            message: category
+                ? `Successfully cleared ${category} for ${month}`
+                : `Successfully cleared all data for ${month}`,
             deletedCounts,
             totalDeleted
         });

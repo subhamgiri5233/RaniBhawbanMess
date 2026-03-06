@@ -6,58 +6,60 @@ const Meal = require('../models/Meal');
 const GuestMeal = require('../models/GuestMeal');
 const ManagerRecord = require('../models/ManagerRecord');
 const MonthlySummary = require('../models/MonthlySummary');
+const MonthlySharedExpense = require('../models/MonthlySharedExpense');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 /**
  * GET /api/summary/:month
  * Aggregates all monthly data for all members.
- * month format: YYYY-MM  (e.g. 2025-12)
- * Admin only.
  */
-router.get('/:month', auth, requireAdmin, async (req, res) => {
+router.get('/:month', auth, async (req, res) => {
     try {
-        const { month } = req.params; // e.g. "2025-12"
+        const { month } = req.params;
 
-        // 1. Get all active members
-        const members = await User.find({ role: 'member' }).select('_id userId name deposit');
+        // 1. Fetch all data in parallel for efficiency
+        const [
+            members,
+            expenses,
+            meals,
+            guestMeals,
+            guestMealsInMealCollection,
+            managerRecords,
+            sharedExpense,
+            initialPaymentStatuses
+        ] = await Promise.all([
+            User.find({ role: 'member' }).select('_id userId name deposit').lean(),
+            Expense.find({
+                date: { $regex: `^${month}` },
+                status: { $ne: 'rejected' }
+            }).lean(),
+            Meal.find({
+                date: { $regex: `^${month}` },
+                isGuest: false
+            }).lean(),
+            GuestMeal.find({
+                date: { $regex: `^${month}` }
+            }).lean(),
+            Meal.find({
+                date: { $regex: `^${month}` },
+                isGuest: true
+            }).lean(),
+            ManagerRecord.find({
+                date: { $regex: `^${month}` }
+            }).sort({ date: 1 }).lean(),
+            MonthlySharedExpense.findOne({ month }).lean(),
+            MonthlySummary.find({ month }).lean()
+        ]);
 
-        // 2. Get all expenses for this month (date starts with YYYY-MM)
-        const expenses = await Expense.find({
-            date: { $regex: `^${month}` },
-            status: { $ne: 'rejected' }
-        });
-
-        // 3. Get all regular meals for this month
-        const meals = await Meal.find({
-            date: { $regex: `^${month}` },
-            isGuest: false
-        });
-
-        // 4. Get all guest meals for this month (from GuestMeal collection)
-        const guestMeals = await GuestMeal.find({
-            date: { $regex: `^${month}` }
-        });
-
-        // Also check for guest meals stored in Meal collection
-        const guestMealsInMealCollection = await Meal.find({
-            date: { $regex: `^${month}` },
-            isGuest: true
-        });
-
-        // 5. Get manager(s) for this month
-        const managerRecords = await ManagerRecord.find({
-            date: { $regex: `^${month}` }
-        }).sort({ date: 1 });
-
-        // Unique managers for the month
+        // 5. Build managers map (unique managers for the month)
         const managersMap = {};
         managerRecords.forEach(r => {
             managersMap[r.memberId] = r.memberName;
         });
         const managers = Object.values(managersMap);
 
-        // 6. Get saved payment statuses for this month. If a member doesn't have one, initialize it with their current deposit.
-        let paymentStatuses = await MonthlySummary.find({ month });
+        // 7. Get saved payment statuses for this month. If a member doesn't have one, initialize it with their current deposit.
+        let paymentStatuses = initialPaymentStatuses;
         const existingMemberIds = new Set(paymentStatuses.map(ps => ps.memberId.toString()));
 
         const newSummaries = [];
@@ -82,7 +84,7 @@ router.get('/:month', auth, requireAdmin, async (req, res) => {
         if (newSummaries.length > 0) {
             await MonthlySummary.insertMany(newSummaries);
             // Re-fetch to include newly inserted
-            paymentStatuses = await MonthlySummary.find({ month });
+            paymentStatuses = await MonthlySummary.find({ month }).lean();
         }
 
         const paymentMap = {};
@@ -129,6 +131,15 @@ router.get('/:month', auth, requireAdmin, async (req, res) => {
 
             const totalGuestMeals = guestMealCount + guestMealInMealCount;
 
+            // Auto-calculate received and submitted amounts from 'deposit' category expenses
+            const approvedDeposits = memberExpenses
+                .filter(e => e.category === 'deposit' && e.status === 'approved')
+                .reduce((sum, e) => sum + (e.amount || 0), 0);
+
+            const pendingDeposits = memberExpenses
+                .filter(e => e.category === 'deposit' && e.status === 'pending')
+                .reduce((sum, e) => sum + (e.amount || 0), 0);
+
             // Payment status
             const payment = paymentMap[memberIdStr] || paymentMap[member.userId];
 
@@ -141,8 +152,11 @@ router.get('/:month', auth, requireAdmin, async (req, res) => {
                 guestMeals: totalGuestMeals,
                 paymentStatus: payment ? payment.paymentStatus : 'pending',
                 amountPaid: payment ? payment.amountPaid : 0,
+
+                // Directly use saved MonthlySummary values
                 submittedAmount: payment ? (payment.submittedAmount || 0) : 0,
                 receivedAmount: payment ? (payment.receivedAmount || 0) : 0,
+
                 // Use saved MonthlySummary depositBalance if available, otherwise 0
                 depositBalance: payment ? (payment.depositBalance || 0) : 0,
                 depositDate: payment ? (payment.depositDate || '') : '',
@@ -152,11 +166,26 @@ router.get('/:month', auth, requireAdmin, async (req, res) => {
             };
         });
 
-        res.json({
+        // 8. Calculate live shared totals (fallback if no snapshot)
+        const liveBills = {};
+        ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others'].forEach(cat => {
+            liveBills[cat] = expenses
+                .filter(e => e.category === cat)
+                .reduce((sum, e) => sum + (e.amount || 0), 0);
+        });
+
+        const responseData = {
             month,
             managers,
-            members: memberSummaries
-        });
+            liveBills,
+            totalMembersCount: members.length,
+            sharedExpense: sharedExpense || null,
+            members: req.user.role === 'admin'
+                ? memberSummaries
+                : memberSummaries.filter(m => m.memberId === req.user.id || m.userId === req.user.userId || m.userId === req.user.id)
+        };
+
+        res.json(responseData);
     } catch (err) {
         console.error('Summary route error:', err);
         res.status(500).json({ error: err.message });
@@ -214,7 +243,10 @@ router.get('/:month/admin-expenses', auth, requireAdmin, async (req, res) => {
         const totalMembers = await require('../models/User').countDocuments({ role: 'member' });
         const adminExpenses = await Expense.find({
             date: { $regex: `^${month}` },
-            paidBy: 'admin',
+            $or: [
+                { paidBy: 'admin' },
+                { category: { $in: ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others'] } }
+            ],
             status: { $ne: 'rejected' }
         }).sort({ date: 1 });
 
@@ -236,9 +268,14 @@ router.get('/:month/admin-expenses', auth, requireAdmin, async (req, res) => {
  * Returns all data needed to generate an invoice Excel for a specific member.
  * Admin only.
  */
-router.get('/:month/invoice/:memberId', auth, requireAdmin, async (req, res) => {
+router.get('/:month/invoice/:memberId', auth, async (req, res) => {
     try {
         const { month, memberId } = req.params;
+
+        // Security check: members can only fetch their own invoice
+        if (req.user.role !== 'admin' && req.user.id !== memberId && req.user.userId !== memberId) {
+            return res.status(403).json({ error: 'Access denied: You can only view your own invoice.' });
+        }
 
         // Find the member
         const member = await require('../models/User').findById(memberId).select('_id userId name deposit');
@@ -266,7 +303,10 @@ router.get('/:month/invoice/:memberId', auth, requireAdmin, async (req, res) => 
         // Admin expenses for this month (shared costs)
         const adminExpenses = await Expense.find({
             date: { $regex: `^${month}` },
-            paidBy: 'admin',
+            $or: [
+                { paidBy: 'admin' },
+                { category: { $in: ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent'] } }
+            ],
             status: { $ne: 'rejected' }
         }).sort({ date: 1 });
 

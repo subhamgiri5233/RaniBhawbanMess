@@ -15,6 +15,12 @@ const monthlySummarySchema = new mongoose.Schema({
     depositBalance: { type: Number, default: 0 }, // Snapshot of User.deposit for this month
     depositDate: { type: String, default: '' }, // Date when deposit was paid (YYYY-MM-DD)
     note: { type: String, default: '' },
+    paymentHistory: [{
+        amount: { type: Number, required: true },
+        date: { type: String, required: true },
+        note: { type: String, default: '' },
+        type: { type: String, default: 'received' } // e.g. 'received', 'refund'
+    }],
     updatedAt: { type: Date, default: Date.now }
 });
 
