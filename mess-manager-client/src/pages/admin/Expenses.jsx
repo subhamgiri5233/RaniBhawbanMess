@@ -198,6 +198,9 @@ const Expenses = () => {
                                     const riceTotal = memberExpenses.filter(e => e.category === 'rice').reduce((acc, e) => acc + e.amount, 0);
                                     const spicesOthersTotal = memberExpenses.filter(e => e.category === 'spices' || e.category === 'others').reduce((acc, e) => acc + e.amount, 0);
 
+                                    // Calculate deposits (they might be approved automatically depending on business logic, but check all deposits)
+                                    const depositTotal = expenses.filter(e => e.paidBy === selectedMember && e.category === 'deposit' && e.status !== 'rejected').reduce((acc, e) => acc + e.amount, 0);
+
                                     return (
                                         <>
                                             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
@@ -215,8 +218,12 @@ const Expenses = () => {
                                                 </div>
                                             </div>
 
-                                            <div className="mt-4 grid grid-cols-2 gap-3 pb-4 border-b border-primary-100/50 dark:border-primary-900/30">
+                                            <div className="mt-4 grid grid-cols-3 gap-3 pb-4 border-b border-primary-100/50 dark:border-primary-900/30">
                                                 <div className="flex flex-col">
+                                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Deposit</p>
+                                                    <p className="font-black text-sm text-blue-500">₹{depositTotal}</p>
+                                                </div>
+                                                <div className="flex flex-col items-center">
                                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Approved</p>
                                                     <p className="font-black text-sm text-emerald-500">₹{approvedTotal}</p>
                                                 </div>
@@ -227,7 +234,7 @@ const Expenses = () => {
                                             </div>
 
                                             <div className="mt-4 flex justify-between items-center">
-                                                <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Total Contribution:</span>
+                                                <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Total Expenses:</span>
                                                 <span className="font-black text-2xl text-primary-600 dark:text-primary-400">₹{approvedTotal + pendingTotal}</span>
                                             </div>
                                         </>
