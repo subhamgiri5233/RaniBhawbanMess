@@ -686,8 +686,9 @@ const MonthlySummary = () => {
     const pendingCount = data?.members?.filter(m => m.paymentStatus === 'pending').length || 0;
     const partialCount = data?.members?.filter(m => m.paymentStatus === 'partial').length || 0;
     const totalMeals = data?.members?.reduce((s, m) => s + (m.regularMeals || 0) + (m.guestMeals || 0), 0) || 0;
+    const officialMealCharge = data?.sharedExpense?.results?.mealCharge;
     const totalMealCharge = Math.round(data?.sharedExpense?.memberBalances?.reduce((s, m) => s + (m.mealCost || 0), 0) || 0);
-    const mealRate = totalMeals > 0 ? (totalMealCharge / totalMeals).toFixed(2) : '0';
+    const mealRate = officialMealCharge ? officialMealCharge.toFixed(2) : (totalMeals > 0 ? (totalMealCharge / totalMeals).toFixed(2) : '0');
     const totalMarket = data?.sharedExpense?.memberBalances?.reduce((s, m) => s + (m.marketCost || 0), 0) ||
         data?.members?.reduce((s, m) => s + (m.expenses?.market || 0), 0) || 0;
 
