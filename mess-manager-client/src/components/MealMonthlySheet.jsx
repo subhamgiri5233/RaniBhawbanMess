@@ -4,71 +4,69 @@ import { Check, X, Info, TrendingUp, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 
-const MealCell = React.memo(({ day, memberId, type, getStatus, todayStr, onClick, onMouseEnter, onMouseLeave, isHoveredRowDay }) => {
-    const hasStatus = getStatus(memberId, day.dateStr, type);
+const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMouseEnter, onMouseLeave, isHoveredRowDay }) => {
+    const lunchStatus = getStatus(memberId, day.dateStr, 'lunch');
+    const dinnerStatus = getStatus(memberId, day.dateStr, 'dinner');
     const isToday = day.dateStr === todayStr;
 
     return (
         <td
             className={cn(
-                "p-1 border-r border-slate-50 dark:border-white/5 text-center cursor-pointer transition-all relative group/cell",
-                isToday && (type === 'lunch' ? "bg-primary-500/10 dark:bg-primary-500/5" : "bg-indigo-500/10 dark:bg-indigo-500/5"),
-                !isToday && isHoveredRowDay && (type === 'lunch' ? "bg-primary-50 dark:bg-primary-500/5" : "bg-indigo-50 dark:bg-indigo-500/5")
+                "p-1.5 border-r border-slate-50 dark:border-white/5 text-center cursor-pointer transition-all relative group/cell",
+                isToday && "bg-primary-500/10 dark:bg-primary-500/5",
+                !isToday && isHoveredRowDay && "bg-slate-50 dark:bg-slate-800/20"
             )}
-            onClick={(e) => onClick(e, memberId, day.dateStr, type)}
-            onMouseEnter={() => onMouseEnter({ dateStr: day.dateStr, type, dayNum: day.dayNum, memberId })}
+            onMouseEnter={() => onMouseEnter({ dateStr: day.dateStr, dayNum: day.dayNum, memberId })}
             onMouseLeave={onMouseLeave}
         >
-            <div className="flex justify-center">
-                <div className={cn(
-                    "w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-300 relative z-10",
-                    hasStatus
-                        ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 scale-100"
-                        : (!hasStatus && day.dateStr < todayStr)
-                            ? "bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400 scale-100"
-                            : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 group-hover/cell:scale-110"
-                )}>
-                    {hasStatus ? <Check size={14} strokeWidth={3} /> : <X size={12} strokeWidth={3} />}
+            <div className="flex flex-col gap-1.5 items-center justify-center">
+                {/* Lunch Indicator */}
+                <div
+                    onClick={(e) => onClick(e, memberId, day.dateStr, 'lunch')}
+                    className={cn(
+                        "w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 relative z-10",
+                        lunchStatus
+                            ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 hover:scale-125"
+                    )}
+                    title="Lunch"
+                >
+                    {lunchStatus ? <Check size={10} strokeWidth={3} /> : <X size={8} strokeWidth={3} />}
                 </div>
-                {isToday && (
-                    <div className={cn(
-                        "absolute inset-y-0 left-0 right-0 border-x-2 pointer-events-none",
-                        type === 'lunch' ? "border-primary-500/10" : "border-indigo-500/10"
-                    )}></div>
-                )}
+                {/* Dinner Indicator */}
+                <div
+                    onClick={(e) => onClick(e, memberId, day.dateStr, 'dinner')}
+                    className={cn(
+                        "w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 relative z-10",
+                        dinnerStatus
+                            ? "bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                            : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 hover:scale-125"
+                    )}
+                    title="Dinner"
+                >
+                    {dinnerStatus ? <Check size={10} strokeWidth={3} /> : <X size={8} strokeWidth={3} />}
+                </div>
             </div>
         </td>
     );
 });
 
-const MealRow = React.memo(({ member, type, days, getStatus, todayStr, calculateTotal, onCellClick, onCellMouseEnter, onCellMouseLeave, hoveredCell }) => {
+const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellClick, onCellMouseEnter, onCellMouseLeave, hoveredCell }) => {
     const mId = member._id || member.id;
-    const total = useMemo(() => calculateTotal(mId, type), [mId, type, calculateTotal]);
-    const isLunch = type === 'lunch';
 
     return (
-        <tr className={cn(
-            "border-b group hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors",
-            isLunch ? "border-slate-50 dark:border-white/5" : "border-b-4 border-slate-100 dark:border-white/5"
-        )}>
+        <tr className="border-b group hover:bg-slate-100/30 dark:hover:bg-white/5 transition-colors border-slate-50 dark:border-white/5">
             <td className="p-4 min-w-[170px] border-r border-slate-50 dark:border-white/5 font-black text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-950 z-20 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)]">
                 <div className="flex flex-col">
                     <span className="font-black text-slate-900 dark:text-slate-100">{member.name}</span>
-                    <span className={cn(
-                        "text-[8px] uppercase tracking-widest mt-1 flex items-center gap-1",
-                        isLunch ? "text-primary-500 dark:text-primary-400" : "text-indigo-500 dark:text-indigo-400"
-                    )}>
-                        <div className={cn("w-1 h-1 rounded-full", isLunch ? "bg-primary-500" : "bg-indigo-500")}></div>
-                        {isLunch ? '🌞 Lunch' : '🌙 Dinner'}
-                    </span>
+                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">L & D Registry</span>
                 </div>
             </td>
             {days.map(day => (
                 <MealCell
-                    key={`${type} -${day.dayNum} `}
+                    key={`${mId}-${day.dayNum}`}
                     day={day}
                     memberId={mId}
-                    type={type}
                     getStatus={getStatus}
                     todayStr={todayStr}
                     onClick={onCellClick}
@@ -77,11 +75,9 @@ const MealRow = React.memo(({ member, type, days, getStatus, todayStr, calculate
                     isHoveredRowDay={hoveredCell?.dayNum === day.dayNum}
                 />
             ))}
-            <td className={cn(
-                "p-4 text-center font-black backdrop-blur-sm",
-                isLunch ? "text-primary-600 dark:text-primary-400 bg-primary-50/20 dark:bg-primary-500/5" : "text-indigo-600 dark:text-indigo-400 bg-indigo-50/20 dark:bg-indigo-500/5"
-            )}>
-                <div className="text-sm">{total}</div>
+            <td className="p-4 text-center font-black backdrop-blur-sm bg-indigo-50/10 dark:bg-indigo-500/5">
+                <div className="text-sm text-indigo-600 dark:text-indigo-400">{total}</div>
+                <div className="text-[7px] font-black text-slate-400 uppercase tracking-tight mt-0.5">Total meals</div>
             </td>
         </tr>
     );
@@ -125,8 +121,8 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
     // 4. Calculate Totals - Memoized per month/year
     const currentMonthStr = useMemo(() => format(currentDate, 'yyyy-MM'), [currentDate]);
 
-    const calculateTotal = useMemo(() => (memberId, type) => {
-        return (meals || []).filter(m => m && m.memberId === memberId && m.date && m.date.startsWith(currentMonthStr) && m.type === type).length;
+    const calculateTotal = useMemo(() => (memberId) => {
+        return (meals || []).filter(m => m && m.memberId === memberId && m.date && m.date.startsWith(currentMonthStr)).length;
     }, [meals, currentMonthStr]);
 
     // Calculate Grand Total — only for the members passed in (may be just 1 in member view)
@@ -207,37 +203,23 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                                     </th>
                                 );
                             })}
-                            <th className="p-4 min-w-[100px] font-black bg-slate-50 dark:bg-slate-900 text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center">Score</th>
+                            <th className="p-4 min-w-[100px] font-black bg-slate-50 dark:bg-slate-900 text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center">Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {(members || []).map(member => (
-                            <React.Fragment key={member._id || member.id}>
-                                <MealRow
-                                    member={member}
-                                    type="lunch"
-                                    days={days}
-                                    getStatus={getStatus}
-                                    todayStr={todayStr}
-                                    calculateTotal={calculateTotal}
-                                    onCellClick={handleCellClick}
-                                    onCellMouseEnter={setHoveredCell}
-                                    onCellMouseLeave={() => setHoveredCell(null)}
-                                    hoveredCell={hoveredCell}
-                                />
-                                <MealRow
-                                    member={member}
-                                    type="dinner"
-                                    days={days}
-                                    getStatus={getStatus}
-                                    todayStr={todayStr}
-                                    calculateTotal={calculateTotal}
-                                    onCellClick={handleCellClick}
-                                    onCellMouseEnter={setHoveredCell}
-                                    onCellMouseLeave={() => setHoveredCell(null)}
-                                    hoveredCell={hoveredCell}
-                                />
-                            </React.Fragment>
+                            <MealRow
+                                key={member._id || member.id}
+                                member={member}
+                                days={days}
+                                getStatus={getStatus}
+                                todayStr={todayStr}
+                                total={calculateTotal(member._id || member.id)}
+                                onCellClick={handleCellClick}
+                                onCellMouseEnter={setHoveredCell}
+                                onCellMouseLeave={() => setHoveredCell(null)}
+                                hoveredCell={hoveredCell}
+                            />
                         ))}
                     </tbody>
                 </table>
