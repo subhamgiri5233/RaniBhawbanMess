@@ -5,6 +5,19 @@ const Settings = require('../models/Settings');
 const MonthlySharedExpense = require('../models/MonthlySharedExpense');
 const { auth, requireAdmin } = require('../middleware/auth');
 
+// Reject (Delete) all pending expenses - Admin only
+router.delete('/reject-all-pending', auth, requireAdmin, async (req, res) => {
+    try {
+        const result = await Expense.deleteMany({ status: 'pending' });
+        res.json({
+            message: 'All pending expenses rejected (deleted) successfully',
+            deletedCount: result.deletedCount
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Get all expenses - Requires authentication
 router.get('/', auth, async (req, res) => {
     try {
@@ -47,18 +60,6 @@ router.post('/', auth, async (req, res) => {
 
 // IMPORTANT: Specific routes MUST come BEFORE parameterized routes like /:id
 
-// Reject (Delete) all pending expenses - Admin only
-router.delete('/reject-all-pending', auth, requireAdmin, async (req, res) => {
-    try {
-        const result = await Expense.deleteMany({ status: 'pending' });
-        res.json({
-            message: 'All pending expenses rejected (deleted) successfully',
-            deletedCount: result.deletedCount
-        });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
 
 // Delete all admin expenses - Admin only (requires password verification)
 router.delete('/admin/clear-all', auth, requireAdmin, async (req, res) => {
@@ -118,7 +119,7 @@ router.delete('/clear-all-history', auth, requireAdmin, async (req, res) => {
 });
 
 // Update Expense - Admin only
-router.put('/:id', auth, requireAdmin, async (req, res) => {
+router.put('/:id([0-9a-fA-F]{24})', auth, requireAdmin, async (req, res) => {
     const { status, description, amount, category, date, paidBy } = req.body;
 
     // Construct update object with only provided fields
@@ -143,7 +144,7 @@ router.put('/:id', auth, requireAdmin, async (req, res) => {
 });
 
 // Delete Expense - Admin only
-router.delete('/:id', auth, requireAdmin, async (req, res) => {
+router.delete('/:id([0-9a-fA-F]{24})', auth, requireAdmin, async (req, res) => {
     try {
         const deletedExpense = await Expense.findByIdAndDelete(req.params.id);
         if (!deletedExpense) {
