@@ -174,7 +174,7 @@ const Expenses = () => {
                             </h3>
                             <div className="mt-5 grid grid-cols-2 gap-3">
                                 {(() => {
-                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.category === 'market');
+                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status !== 'rejected');
                                     const approved = memberExpenses.filter(e => e.status === 'approved');
                                     const pending = memberExpenses.filter(e => e.status === 'pending');
                                     const approvedTotal = approved.reduce((acc, e) => acc + e.amount, 0);
@@ -191,7 +191,7 @@ const Expenses = () => {
                                                 <p className="font-black text-lg text-amber-700 dark:text-amber-400">₹{pendingTotal}</p>
                                             </div>
                                             <div className="col-span-2 mt-2 pt-4 border-t border-primary-100 dark:border-primary-900/30 flex justify-between items-center">
-                                                <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Total Market Selected:</span>
+                                                <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Total Contribution:</span>
                                                 <span className="font-black text-2xl text-primary-600 dark:text-primary-400">₹{approvedTotal + pendingTotal}</span>
                                             </div>
                                         </>
