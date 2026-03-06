@@ -8,7 +8,7 @@ import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
 const Expenses = () => {
-    const { expenses, members, approveExpense, approveAllExpenses, deleteExpense, refreshData, globalMonth } = useData();
+    const { expenses, members, approveExpense, approveAllExpenses, rejectAllExpenses, deleteExpense, refreshData, globalMonth } = useData();
     const [activeCategory, setActiveCategory] = useState('all');
     const [selectedMember, setSelectedMember] = useState('all');
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -138,7 +138,7 @@ const Expenses = () => {
                             <h2 className="text-5xl font-black mt-2 text-amber-600 dark:text-amber-500 tracking-tighter">{pendingCount}</h2>
                         </div>
                         {pendingCount > 0 && (
-                            <div className="mt-6">
+                            <div className="mt-6 flex flex-wrap gap-3">
                                 <button
                                     onClick={async () => {
                                         if (window.confirm(`Approve all ${pendingCount} pending expenses?`)) {
@@ -150,10 +150,26 @@ const Expenses = () => {
                                             }
                                         }
                                     }}
-                                    className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-xl transition-all flex items-center gap-2 text-xs uppercase tracking-widest shadow-sm shadow-amber-500/20 w-fit"
+                                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl transition-all flex items-center gap-2 text-xs uppercase tracking-widest shadow-sm shadow-emerald-500/20 w-fit"
                                 >
                                     <Check size={16} />
                                     Approve All
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        if (window.confirm(`Are you sure you want to REJECT (delete) all ${pendingCount} pending expenses? This action cannot be undone.`)) {
+                                            const result = await rejectAllExpenses();
+                                            if (result.success) {
+                                                alert(`❌ Successfully rejected ${result.deletedCount} expenses!`);
+                                            } else {
+                                                alert(`❌ Error: ${result.error}`);
+                                            }
+                                        }
+                                    }}
+                                    className="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-black rounded-xl transition-all flex items-center gap-2 text-xs uppercase tracking-widest shadow-sm shadow-rose-500/20 w-fit"
+                                >
+                                    <X size={16} />
+                                    Reject All
                                 </button>
                             </div>
                         )}

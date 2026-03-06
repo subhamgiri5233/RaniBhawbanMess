@@ -256,6 +256,17 @@ export const DataProvider = ({ children }) => {
         }
     }, []);
 
+    const rejectAllExpenses = useCallback(async () => {
+        try {
+            const response = await api.delete('/expenses/pending');
+            setExpenses(prev => prev.filter(e => e.status !== 'pending'));
+            return { success: true, deletedCount: response.data.deletedCount };
+        } catch (error) {
+            console.error('Reject all expenses failed', error);
+            return { success: false, error: error.response?.data?.message || 'Failed to reject all expenses' };
+        }
+    }, []);
+
     const updateExpense = useCallback(async (id, updatedData) => {
         try {
             const response = await api.put(`/expenses/${id}`, updatedData);
@@ -463,6 +474,7 @@ export const DataProvider = ({ children }) => {
         approveExpense,
         approveAllExpenses,
         rejectExpense,
+        rejectAllExpenses,
         updateExpense,
         deleteExpense,
         allocateMarketDay,
@@ -483,7 +495,7 @@ export const DataProvider = ({ children }) => {
         removeGuestMeal, sendNotification,
         sendPaymentNotifications, markPaymentAsPaid, updateNotification,
         deleteNotification, markAllAsRead, addExpense, approveExpense,
-        approveAllExpenses, rejectExpense, updateExpense, deleteExpense,
+        approveAllExpenses, rejectExpense, rejectAllExpenses, updateExpense, deleteExpense,
         allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, setManagerForMonth, markCookingFinished, getCookingDuty,
         sendBulkWhatsAppOfficial
