@@ -114,6 +114,7 @@ app.get('/', (req, res) => {
     res.json({
         message: 'Mess Manager API is running',
         version: '2.0.0',
+        fingerprint: 'prod-sync-v16.02', // Diagnostic ID
         security: 'enabled'
     });
 });
