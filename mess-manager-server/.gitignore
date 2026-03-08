@@ -4,3 +4,7 @@ node_modules/
 *.log
 npm-debug.log*
 .vscode/
+
+# AI Cache files
+data/aiCache.json
+data/aiGitaCache.json
