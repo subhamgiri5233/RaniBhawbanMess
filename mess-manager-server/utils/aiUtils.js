@@ -15,7 +15,7 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 const GEMINI_TIMEOUT = 45000;
 const MAX_RETRIES = 2;
 
-const MODEL_NAME = "gemini-2.0-flash";
+const MODEL_NAME = "gemini-1.5-flash"; // More stable for free tier quotas
 
 // Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
