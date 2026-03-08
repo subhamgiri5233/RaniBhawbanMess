@@ -1,6 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require("fs");
 const path = require("path");
+const aiSeed = require("../data/aiSeed");
 
 /* ==========================
    CONFIG & INITIALIZATION
@@ -411,6 +412,12 @@ async function getAIImportance(dateStr) {
 
         } catch (err) {
             logDebug("Final AI Importance error: " + err.message);
+            // Try high-quality Seed fallback first before generic fallback
+            const isoDate = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+            if (aiSeed[isoDate]) {
+                logDebug(`Serving Seed fallback for ${isoDate}`);
+                return aiSeed[isoDate];
+            }
             return getFallback(dateStr);
         } finally {
             inFlightRequests.delete(todayKey);
