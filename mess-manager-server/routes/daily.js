@@ -4,12 +4,12 @@ const { getCombinedDailyInfo } = require('../utils/dailyUtils');
 
 /**
  * @route   GET /api/daily/info
- * @desc    Get all daily information (Gita + Occasions)
+ * @desc    Get all daily information (Gita + Occasions + AI Insights)
  * @access  Public
  */
-router.get('/info', (req, res) => {
+router.get('/info', async (req, res) => {
     try {
-        const info = getCombinedDailyInfo();
+        const info = await getCombinedDailyInfo();
         res.json(info);
     } catch (error) {
         console.error('Error fetching combined daily info:', error);

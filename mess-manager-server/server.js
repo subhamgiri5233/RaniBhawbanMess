@@ -1,3 +1,4 @@
+// Server last updated: 2026-03-07T22:48
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -39,7 +40,7 @@ app.use(cors({
 // Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10000, // Increased for dev/testing
+    max: 300, // 300 requests per 15 min per IP
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
@@ -56,7 +57,7 @@ app.use('/api/', limiter);
 // Special rate limit for auth routes (stricter)
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1000, // Restored after testing
+    max: 20, // 20 login attempts per 15 min
     handler: (req, res, next, options) => {
         const remainingMs = req.rateLimit.resetTime - new Date();
         const remainingMins = Math.ceil(remainingMs / (60 * 1000));
@@ -99,6 +100,10 @@ mongoose.connect(MONGO_URI)
         const { initializeDefaultSettings } = require('./routes/settings');
         await initializeDefaultSettings();
         console.log('✅ Default settings initialized');
+
+        // Pre-warm Gemini AI cache in background (don't block server startup)
+        const { warmUpAICache } = require('./utils/aiUtils');
+        warmUpAICache().catch(err => console.error('[AI] Warm-up failed:', err.message));
     })
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 

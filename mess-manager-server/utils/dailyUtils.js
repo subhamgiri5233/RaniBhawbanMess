@@ -1,28 +1,42 @@
-const { getDailyGitaVerse } = require('./gitaUtils');
-const { SPECIAL_OCCASIONS, DATE_EFFECTS } = require('../data/dailyInfo');
+const { getAIGitaVerse, getAIImportance } = require('./aiUtils');
 
 /**
- * Gets the combined daily info (Gita verse + Special Occasion + Date Effects)
+ * Gets the combined daily info (Gita verse + AI-generated occasion & insights).
+ * dailyInfo.js is no longer needed — Gemini handles everything.
  * @param {Date} date - The date to check for.
- * @returns {Object} - Object containing gita, occasion, and effects.
+ * @returns {Promise<Object>}
  */
-function getCombinedDailyInfo(date = new Date()) {
+async function getCombinedDailyInfo(date = new Date()) {
     const key = `${date.getMonth() + 1}-${date.getDate()}`;
 
-    // Get Gita Verse
-    const gita = getDailyGitaVerse(date);
+    // Build date string for the AI prompt
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+    const dateStr = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 
-    // Get Occasion
-    const occasion = SPECIAL_OCCASIONS[key] || null;
+    // Get the correct sequential verse for today
+    const { getDailyGitaVerse } = require('./gitaUtils');
+    const baseVerse = getDailyGitaVerse(date);
 
-    // Get Effects
-    const effects = DATE_EFFECTS[key] || null;
+    // Get Gita Verse with AI Insights
+    const gita = await getAIGitaVerse(dateStr, baseVerse);
+
+    // Ask Gemini: "Why is today important?"
+    const aiResult = await getAIImportance(dateStr);
+
+    // Shape the occasion from AI output so the frontend reads it the same way
+    const occasion = aiResult
+        ? { name: aiResult.name, emoji: aiResult.emoji, color: 'text-emerald-600' }
+        : null;
+
+    const aiImportance = aiResult?.insights || [];
 
     return {
         gita,
         occasion,
-        effects,
-        dateKey: key
+        effects: null,   // Particle effects removed — fully AI-driven now
+        dateKey: key,
+        aiImportance
     };
 }
 

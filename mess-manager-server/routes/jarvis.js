@@ -9,9 +9,9 @@ const CookingRecord = require('../models/CookingRecord');
 const ManagerRecord = require('../models/ManagerRecord');
 const MarketRequest = require('../models/MarketRequest');
 const { getDailyGitaVerse } = require('../utils/gitaUtils');
+const { callGeminiAdvanced } = require('../utils/aiUtils');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 
 // Build mess context from live database data
@@ -21,7 +21,7 @@ const buildMessContext = async () => {
     const todayStr = today.toISOString().split('T')[0];
     const currentMonth = todayStr.substring(0, 7); // e.g. "2026-03"
 
-    const [members, expenses, meals, guestMeals, cookingRecords, managerRecords, marketRequests] = await Promise.all([
+    const [members, expenses, meals, guestMeals, cookingRecords, managerRecords, marketRequests, mealCountAgg] = await Promise.all([
         User.find({ $or: [{ role: 'member' }, { role: { $exists: false } }, { role: null }] })
             .select('name deposit joinedAt dateOfBirth mobile').lean(),
         Expense.find({ status: 'approved' }).lean(),
@@ -30,14 +30,20 @@ const buildMessContext = async () => {
         CookingRecord.find().sort({ date: -1 }).lean(),
         ManagerRecord.find().sort({ date: -1 }).lean(),
         MarketRequest.find().sort({ date: -1 }).limit(20).lean(),
+        // Single aggregation to count meals per member — replaces N separate countDocuments calls
+        Meal.aggregate([{ $group: { _id: "$memberId", count: { $sum: 1 } } }]),
     ]);
+
+    // Build a fast lookup map: memberId -> mealCount
+    const mealCountMap = {};
+    mealCountAgg.forEach(entry => { mealCountMap[entry._id] = entry.count; });
 
     // ── Current month string ──────────────────────────────────
     const monthLabel = new Date(`${currentMonth}-01`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 
     // ── Member summaries ──────────────────────────────────────
     const memberSummaries = await Promise.all(members.map(async (m) => {
-        const mealCount = await Meal.countDocuments({ memberId: m._id.toString() });
+        const mealCount = mealCountMap[m._id.toString()] || 0;
         let daysToBirthday = 'Unknown';
         let isBirthdayToday = false;
 
@@ -258,35 +264,12 @@ ${ctx.marketSchedule.map(r => `• ${r.date}: ${r.status.toUpperCase()} — Assi
 - If a member (non-admin) asks about another member's financial data, politely decline to share.
 - Always end complex data responses with a one-line insight or recommendation if appropriate.`;
 
-        const response = await fetch(GEMINI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [
-                    {
-                        role: 'user',
-                        parts: [{ text: question }]
-                    }
-                ],
-                tools: [{ googleSearch: {} }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 512,
-                }
-            })
+        const answer = await callGeminiAdvanced({
+            prompt: question,
+            systemInstruction: systemPrompt,
+            tools: [{ googleSearch: {} }]
         });
 
-        if (!response.ok) {
-            const err = await response.text();
-            console.error('[JARVIS] Gemini error:', err);
-            return res.status(502).json({ error: 'AI service error. Please try again.' });
-        }
-
-        const data = await response.json();
-        const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I was unable to generate a response.';
         res.json({ answer });
 
     } catch (err) {
