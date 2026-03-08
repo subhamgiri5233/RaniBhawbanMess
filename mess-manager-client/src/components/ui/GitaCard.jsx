@@ -3,12 +3,12 @@ import { Copy, Check } from 'lucide-react';
 import Card from './Card';
 import { toBengaliNumber } from '../../utils/bengaliCalendar';
 
-const GitaCard = memo(({ gitaVerse, loadingInfo }) => {
+const GitaCard = memo(({ gita: gitaVerse, loadingInfo }) => {
     const [copied, setCopied] = React.useState(false);
 
     const handleCopy = () => {
         if (!gitaVerse) return;
-        const textToCopy = `🕉️ ${gitaVerse.chapterName} • শ্লোক ${toBengaliNumber(gitaVerse.verse)}\n\n"${gitaVerse.sanskrit}"\n\nসরলার্থ: ${gitaVerse.meaning_bn}\n\n— শ্রীমদ্ভগবদ্গীতা • যথাযথ`;
+        const textToCopy = `🕉️ ${gitaVerse.chapterName} • শ্লোক ${toBengaliNumber(gitaVerse.verse)}\n\n"${gitaVerse.sanskrit}"\n\nসরলার্থ: ${gitaVerse.meaning_bn}${gitaVerse.insight ? `\n\nদিব্য অন্তর্দৃষ্টি: ${gitaVerse.insight}` : ''}\n\n— শ্রীমদ্ভগবদ্গীতা • যথাযথ`;
         navigator.clipboard.writeText(textToCopy);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -58,6 +58,21 @@ const GitaCard = memo(({ gitaVerse, loadingInfo }) => {
                                 {gitaVerse.meaning_bn}
                             </p>
                         </div>
+
+                        {gitaVerse.insight && (
+                            <div className="mt-6 p-5 bg-gradient-to-r from-orange-500/5 via-amber-500/10 to-orange-500/5 rounded-2xl border border-orange-200/30 dark:border-orange-500/10 text-left relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-2 opacity-10 pointer-events-none">
+                                    <span className="text-4xl">✨</span>
+                                </div>
+                                <h4 className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                                    দিব্য অন্তর্দৃষ্টি (Divine Insight)
+                                </h4>
+                                <p className="text-xs md:text-sm font-bold text-slate-800 dark:text-orange-100/90 leading-relaxed italic">
+                                    {gitaVerse.insight}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Subtle footer */}

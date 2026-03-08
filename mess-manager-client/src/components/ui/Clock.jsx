@@ -183,10 +183,16 @@ const Clock = ({ showGita = false }) => {
         const todayDay = today.getDate();
 
         return members.filter(member => {
-            if (!member.dateOfBirth) return false;
-            const dob = new Date(member.dateOfBirth);
-            const dobMonth = dob.getMonth() + 1;
-            const dobDay = dob.getDate();
+            if (!member.dateOfBirth || typeof member.dateOfBirth !== 'string') return false;
+
+            // Safer string-based comparison to avoid timezone shifts
+            // Format assumed: YYYY-MM-DD
+            const parts = member.dateOfBirth.split('-');
+            if (parts.length < 3) return false;
+
+            const dobMonth = parseInt(parts[1], 10);
+            const dobDay = parseInt(parts[2], 10);
+
             return dobMonth === todayMonth && dobDay === todayDay;
         });
     }, [members, today]);
@@ -195,45 +201,40 @@ const Clock = ({ showGita = false }) => {
     const todayImportance = useMemo(() => {
         const items = [];
 
+        // Birthday messages always come first (with category for color badge)
         if (birthdayMembers.length > 0) {
             birthdayMembers.forEach(member => {
                 const isCurrentUser = user && (member._id === user.id || member._id === user._id);
                 if (isCurrentUser) {
                     items.push({
                         icon: '🎂',
-                        text: `Happy Birthday ${member.name}! 🎉 Wishing you a wonderful day filled with joy and happiness!`
+                        category: 'Famous Birth',
+                        event: `${member.name}'s Birthday! 🎉`,
+                        text: `Happy Birthday! Wishing you a wonderful day filled with joy, laughter, and happiness!`,
+                        ai: false
                     });
                 } else {
-                    const pronoun = member.gender === 'female' ? 'her' : member.gender === 'male' ? 'him' : 'him';
+                    const pronoun = member.gender === 'female' ? 'her' : 'him';
                     items.push({
                         icon: '🎂',
-                        text: `Today is ${member.name}'s birthday! Wish ${pronoun} 🎂`
+                        category: 'Famous Birth',
+                        event: `${member.name}'s Birthday`,
+                        text: `Today is ${member.name}'s birthday! Don't forget to wish ${pronoun} 🎂`,
+                        ai: false
                     });
                 }
             });
         }
 
-        if (Array.isArray(occasionData)) {
-            occasionData.forEach(o => {
-                items.push({
-                    icon: o.emoji || '📌',
-                    text: o.name || `Special day message!`
-                });
-            });
-        } else if (occasionData) {
-            items.push({
-                icon: occasionData.emoji || '📌',
-                text: occasionData.name || `Today is ${dateInfo.formattedDate}. Make it memorable!`
-            });
-        } else {
-            items.push({
-                icon: '📅',
-                text: `Today is ${dateInfo.formattedDate}. Make it memorable!`
+        // All AI-searched events (Bengali festivals, national days, history, etc.)
+        if (dailyInfo?.aiImportance && Array.isArray(dailyInfo.aiImportance)) {
+            dailyInfo.aiImportance.forEach(insight => {
+                items.push({ ...insight, ai: true });
             });
         }
 
         return items;
-    }, [occasionData, dateInfo.formattedDate, birthdayMembers, user]);
+    }, [birthdayMembers, user, dailyInfo?.aiImportance]);
 
     // Memoize date effect - UPDATES ONLY ONCE PER DAY
     const combinedDateEffect = useMemo(() => {
@@ -351,7 +352,7 @@ const Clock = ({ showGita = false }) => {
 
             {showGita && (
                 <GitaCard
-                    gitaVerse={gitaVerse}
+                    gita={gitaVerse}
                     loadingInfo={loadingInfo}
                 />
             )}
@@ -360,6 +361,7 @@ const Clock = ({ showGita = false }) => {
                 specialOccasion={specialOccasion}
                 todayImportance={todayImportance}
                 dateInfo={dateInfo}
+                loadingInfo={loadingInfo}
             />
         </div>
     );

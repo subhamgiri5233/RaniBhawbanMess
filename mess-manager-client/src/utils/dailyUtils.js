@@ -6,7 +6,7 @@ import api from '../lib/api';
  * @returns {Promise<Object>} - The combined daily info or null on error.
  */
 export async function getDailyInfo() {
-    const CACHE_KEY = 'mess_daily_info';
+    const CACHE_KEY = 'mess_daily_info_v14'; // Fresh after insight fallback fix
     const today = new Date().toDateString();
 
     try {
