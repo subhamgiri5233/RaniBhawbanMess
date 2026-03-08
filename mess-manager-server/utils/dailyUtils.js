@@ -1,5 +1,7 @@
 const { getAIGitaVerse, getAIImportance } = require('./aiUtils');
 
+const BUILD_ID = "2026-03-08-CLEAN-PUSH-V3"; // Bump this to force a change
+
 /**
  * Gets the combined daily info (Gita verse + AI-generated occasion & insights).
  * dailyInfo.js is no longer needed — Gemini handles everything.
@@ -32,6 +34,7 @@ async function getCombinedDailyInfo(date = new Date()) {
     const aiImportance = aiResult?.insights || [];
 
     return {
+        buildId: BUILD_ID,
         gita,
         occasion,
         effects: null,   // Particle effects removed — fully AI-driven now
