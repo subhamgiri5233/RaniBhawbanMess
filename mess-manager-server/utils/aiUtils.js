@@ -69,11 +69,14 @@ function logDebug(msg) {
     console.log("[AI]", msg);
 }
 
+const CACHE_VERSION = "v16-clean-refresh"; // Bump this to force a server-side refresh
+
 function getTodayKey() {
-    // Returns YYYY-MM-DD for Kolkata timezone
-    return new Date().toLocaleDateString("en-CA", {
+    // Returns YYYY-MM-DD for Kolkata timezone prefixed with version
+    const dateStr = new Date().toLocaleDateString("en-CA", {
         timeZone: "Asia/Kolkata",
     });
+    return `${CACHE_VERSION}_${dateStr}`;
 }
 
 function loadCache(force = false) {
@@ -256,7 +259,7 @@ JSON ছাড়া অন্য কোনো লেখা পাঠাবেন �
 
 async function callGemini(prompt) {
     let retries = 0;
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 5; // Increased for production stability
 
     while (retries < MAX_RETRIES) {
         try {
@@ -274,8 +277,9 @@ async function callGemini(prompt) {
             const isRateLimit = error.message?.includes("429") || error.message?.includes("quota");
             if (isRateLimit && retries < MAX_RETRIES - 1) {
                 retries++;
-                const delay = Math.pow(2, retries) * 1000;
-                logDebug(`[AI] Standard Rate limit hit. Retrying in ${delay}ms... (Attempt ${retries})`);
+                // Stronger exponential backoff: 3s, 9s, 27s...
+                const delay = Math.pow(3, retries) * 1000;
+                logDebug(`[AI] Rate limit hit. Attempt ${retries}/${MAX_RETRIES}. Retrying in ${delay}ms...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
                 continue;
             }
