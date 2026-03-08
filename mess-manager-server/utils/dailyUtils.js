@@ -8,6 +8,8 @@ const BUILD_ID = "2026-03-08-CLEAN-PUSH-V5"; // Clear generic fallbacks
  * @param {Date} date - The date to check for.
  * @returns {Promise<Object>}
  */
+let lastAIError = null;
+
 async function getCombinedDailyInfo(date = new Date()) {
     const key = `${date.getMonth() + 1}-${date.getDate()}`;
 
@@ -20,27 +22,37 @@ async function getCombinedDailyInfo(date = new Date()) {
     const { getDailyGitaVerse } = require('./gitaUtils');
     const baseVerse = getDailyGitaVerse(date);
 
-    // Get Gita Verse with AI Insights
-    const gita = await getAIGitaVerse(dateStr, baseVerse);
+    try {
+        // Fetch both with error capturing
+        const gita = await getAIGitaVerse(dateStr, baseVerse).catch(err => {
+            lastAIError = `Gita Error: ${err.message}`;
+            return null; // Fallback handled inside getAIGitaVerse
+        });
 
-    // Ask Gemini: "Why is today important?"
-    const aiResult = await getAIImportance(dateStr);
+        const aiResult = await getAIImportance(dateStr).catch(err => {
+            lastAIError = `Importance Error: ${err.message}`;
+            return null; // Fallback handled inside getAIImportance
+        });
 
-    // Shape the occasion from AI output so the frontend reads it the same way
-    const occasion = aiResult
-        ? { name: aiResult.name, emoji: aiResult.emoji, color: 'text-emerald-600' }
-        : null;
+        // Shape the occasion from AI output
+        const occasion = aiResult
+            ? { name: aiResult.name, emoji: aiResult.emoji, color: 'text-emerald-600' }
+            : null;
 
-    const aiImportance = aiResult?.insights || [];
+        const aiImportance = aiResult?.insights || [];
 
-    return {
-        buildId: BUILD_ID,
-        gita,
-        occasion,
-        effects: null,   // Particle effects removed — fully AI-driven now
-        dateKey: key,
-        aiImportance
-    };
+        return {
+            buildId: BUILD_ID,
+            gita,
+            occasion,
+            effects: null,
+            dateKey: key,
+            aiImportance,
+            aiError: lastAIError
+        };
+    } catch (e) {
+        return { error: e.message, buildId: BUILD_ID };
+    }
 }
 
 module.exports = { getCombinedDailyInfo };

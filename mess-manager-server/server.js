@@ -101,9 +101,11 @@ mongoose.connect(MONGO_URI)
         await initializeDefaultSettings();
         console.log('✅ Default settings initialized');
 
-        // Pre-warm Gemini AI cache in background (don't block server startup)
+        // Pre-warm Gemini AI cache with a delay to avoid startup rate limits
         const { warmUpAICache } = require('./utils/aiUtils');
-        warmUpAICache().catch(err => console.error('[AI] Warm-up failed:', err.message));
+        setTimeout(() => {
+            warmUpAICache().catch(err => console.error('[AI] Warm-up failed:', err.message));
+        }, 10000);
     })
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
