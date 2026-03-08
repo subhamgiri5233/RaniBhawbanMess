@@ -573,11 +573,15 @@ async function warmUpAICache() {
     const { getDailyGitaVerse } = require('./gitaUtils');
     const baseVerse = getDailyGitaVerse(now);
 
-    // Parallel warm-up
-    await Promise.allSettled([
-        getAIImportance(dateStr),
-        getAIGitaVerse(dateStr, baseVerse)
-    ]);
+    try {
+        // Run sequentially to avoid 429 "Too Many Requests"
+        await getAIImportance(dateStr);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // 2s delay
+        await getAIGitaVerse(dateStr, baseVerse);
+        logDebug("Warmup complete.");
+    } catch (e) {
+        logDebug("Warmup failed partially: " + e.message);
+    }
 }
 
 module.exports = {
