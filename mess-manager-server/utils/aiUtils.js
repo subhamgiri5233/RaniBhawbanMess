@@ -293,7 +293,7 @@ async function callGemini(prompt) {
  */
 async function callGeminiAdvanced({ prompt, systemInstruction, tools = [] }) {
     let retries = 0;
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 5;
 
     while (retries < MAX_RETRIES) {
         try {
@@ -318,8 +318,8 @@ async function callGeminiAdvanced({ prompt, systemInstruction, tools = [] }) {
             const isRateLimit = error.message?.includes("429") || error.message?.includes("quota");
             if (isRateLimit && retries < MAX_RETRIES - 1) {
                 retries++;
-                const delay = Math.pow(2, retries) * 1000;
-                logDebug(`[AI] Advanced Rate limit hit. Retrying in ${delay}ms... (Attempt ${retries})`);
+                const delay = Math.pow(3, retries) * 1000;
+                logDebug(`[AI] Advanced Rate limit hit. Attempt ${retries}/${MAX_RETRIES}. Retrying in ${delay}ms...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
                 continue;
             }
