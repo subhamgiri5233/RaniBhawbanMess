@@ -255,45 +255,73 @@ JSON ছাড়া অন্য কোনো লেখা পাঠাবেন �
 ========================== */
 
 async function callGemini(prompt) {
-    const aiModel = getModel();
-    if (!aiModel) throw new Error("Gemini not initialized (Missing API Key)");
+    let retries = 0;
+    const MAX_RETRIES = 3;
 
-    const aiPromise = aiModel.generateContent(prompt);
+    while (retries < MAX_RETRIES) {
+        try {
+            const aiModel = getModel();
+            if (!aiModel) throw new Error("Gemini not initialized (Missing API Key)");
 
-    const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Gemini API timeout (45s)")), GEMINI_TIMEOUT)
-    );
+            const aiPromise = aiModel.generateContent(prompt);
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Gemini API timeout (45s)")), GEMINI_TIMEOUT)
+            );
 
-    const result = await Promise.race([aiPromise, timeout]);
-    return result.response.text();
+            const result = await Promise.race([aiPromise, timeout]);
+            return result.response.text();
+        } catch (error) {
+            const isRateLimit = error.message?.includes("429") || error.message?.includes("quota");
+            if (isRateLimit && retries < MAX_RETRIES - 1) {
+                retries++;
+                const delay = Math.pow(2, retries) * 1000;
+                logDebug(`[AI] Standard Rate limit hit. Retrying in ${delay}ms... (Attempt ${retries})`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                continue;
+            }
+            throw error;
+        }
+    }
 }
 
 /**
  * Advanced Gemini call for JARVIS with system instructions and tools.
  */
 async function callGeminiAdvanced({ prompt, systemInstruction, tools = [] }) {
-    const aiModel = getModel();
-    if (!aiModel) throw new Error("Gemini not initialized (Missing API Key)");
+    let retries = 0;
+    const MAX_RETRIES = 3;
 
-    // The SDK expects tools and systemInstruction during model initialization or as parameters
-    // For simplicity, we'll re-initialize a specific model instance if needed, 
-    // but the SDK actually allows passing these to generateContent in newer versions.
+    while (retries < MAX_RETRIES) {
+        try {
+            const aiModel = getModel();
+            if (!aiModel) throw new Error("Gemini not initialized (Missing API Key)");
 
-    const genAIInstance = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const advancedModel = genAIInstance.getGenerativeModel({
-        model: MODEL_NAME,
-        systemInstruction: systemInstruction,
-        tools: tools
-    });
+            const genAIInstance = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const advancedModel = genAIInstance.getGenerativeModel({
+                model: MODEL_NAME,
+                systemInstruction: systemInstruction,
+                tools: tools
+            });
 
-    const aiPromise = advancedModel.generateContent(prompt);
+            const aiPromise = advancedModel.generateContent(prompt);
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Gemini API timeout (45s)")), GEMINI_TIMEOUT)
+            );
 
-    const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Gemini API timeout (45s)")), GEMINI_TIMEOUT)
-    );
-
-    const result = await Promise.race([aiPromise, timeout]);
-    return result.response.text();
+            const result = await Promise.race([aiPromise, timeout]);
+            return result.response.text();
+        } catch (error) {
+            const isRateLimit = error.message?.includes("429") || error.message?.includes("quota");
+            if (isRateLimit && retries < MAX_RETRIES - 1) {
+                retries++;
+                const delay = Math.pow(2, retries) * 1000;
+                logDebug(`[AI] Advanced Rate limit hit. Retrying in ${delay}ms... (Attempt ${retries})`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                continue;
+            }
+            throw error;
+        }
+    }
 }
 
 /* ==========================

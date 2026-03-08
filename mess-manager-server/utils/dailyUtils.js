@@ -1,6 +1,6 @@
 const { getAIGitaVerse, getAIImportance } = require('./aiUtils');
 
-const BUILD_ID = "2026-03-08-CLEAN-PUSH-V4"; // Force clear bad fallback cache
+const BUILD_ID = "2026-03-08-CLEAN-PUSH-V5"; // Clear generic fallbacks
 
 /**
  * Gets the combined daily info (Gita verse + AI-generated occasion & insights).
