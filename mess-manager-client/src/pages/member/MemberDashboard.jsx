@@ -10,10 +10,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { MESS_CONFIG } from '../../config';
 import api from '../../lib/api';
+import Skeleton from '../../components/ui/Skeleton';
 
 const MemberDashboard = () => {
     const { user } = useAuth();
-    const { members, expenses, meals, guestMeals, marketSchedule, addExpense, globalMonth, settings } = useData();
+    const { members, expenses, meals, guestMeals, marketSchedule, addExpense, globalMonth, settings, loadingDaily } = useData();
 
     // Helper to get setting value
     const getSettingValue = (key, fallback) => {
@@ -167,58 +168,69 @@ const MemberDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 dark:bg-indigo-500/20 group-hover:scale-110 transition-transform">
-                            <Utensils size={24} />
-                        </div>
-                        <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
-                    </div>
-                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Monthly Consumption</p>
-                    <h3 className="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-2 tracking-tight">
-                        {myMeals} <span className="text-sm font-bold opacity-60">Meals</span>
-                    </h3>
-                    {myMeals < MIN_MEALS && (
-                        <p className="text-[10px] font-black text-rose-500/80 dark:text-rose-400/80 mt-1 uppercase tracking-widest italic group-hover:scale-105 transition-transform origin-left">
-                            * {MIN_MEALS} meal minimum applies
-                        </p>
-                    )}
-                </Card>
+                {loadingDaily && meals.length === 0 ? (
+                    <>
+                        <Skeleton.Card className="h-48" />
+                        <Skeleton.Card className="h-48" />
+                        <Skeleton.Card className="h-48" />
+                        <Skeleton.Card className="h-48" />
+                    </>
+                ) : (
+                    <>
+                        <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 dark:bg-indigo-500/20 group-hover:scale-110 transition-transform">
+                                    <Utensils size={24} />
+                                </div>
+                                <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
+                            </div>
+                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Monthly Consumption</p>
+                            <h3 className="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-2 tracking-tight">
+                                {myMeals} <span className="text-sm font-bold opacity-60">Meals</span>
+                            </h3>
+                            {myMeals < MIN_MEALS && (
+                                <p className="text-[10px] font-black text-rose-500/80 dark:text-rose-400/80 mt-1 uppercase tracking-widest italic group-hover:scale-105 transition-transform origin-left">
+                                    * {MIN_MEALS} meal minimum applies
+                                </p>
+                            )}
+                        </Card>
 
-                <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 dark:bg-emerald-500/20 group-hover:scale-110 transition-transform">
-                            <Wallet size={24} />
-                        </div>
-                        <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
-                    </div>
-                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Credit (Dep + Bills)</p>
-                    <h3 className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 tracking-tight">₹{myMonthlyDeposit + myBillPayments}</h3>
-                    <p className="text-[10px] font-black text-emerald-500/60 dark:text-emerald-400/60 mt-1 uppercase tracking-widest italic">Gen: ₹{myMonthlyDeposit}</p>
-                </Card>
+                        <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 dark:bg-emerald-500/20 group-hover:scale-110 transition-transform">
+                                    <Wallet size={24} />
+                                </div>
+                                <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
+                            </div>
+                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Credit (Dep + Bills)</p>
+                            <h3 className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 tracking-tight">₹{myMonthlyDeposit + myBillPayments}</h3>
+                            <p className="text-[10px] font-black text-emerald-500/60 dark:text-emerald-400/60 mt-1 uppercase tracking-widest italic">Gen: ₹{myMonthlyDeposit}</p>
+                        </Card>
 
-                <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20 group-hover:scale-110 transition-transform">
-                            <ShoppingCart size={24} />
-                        </div>
-                        <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
-                    </div>
-                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Market Spend</p>
-                    <h3 className="text-3xl font-black text-amber-600 dark:text-amber-400 mt-2 tracking-tight">₹{totalMarketAmount}</h3>
-                </Card>
+                        <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20 group-hover:scale-110 transition-transform">
+                                    <ShoppingCart size={24} />
+                                </div>
+                                <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
+                            </div>
+                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Market Spend</p>
+                            <h3 className="text-3xl font-black text-amber-600 dark:text-amber-400 mt-2 tracking-tight">₹{totalMarketAmount}</h3>
+                        </Card>
 
-                <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="p-4 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 dark:bg-purple-500/20 group-hover:scale-110 transition-transform">
-                            <Utensils size={24} />
-                        </div>
-                        <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
-                    </div>
-                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Guest Liability</p>
-                    <h3 className="text-3xl font-black text-purple-600 dark:text-purple-400 mt-2 tracking-tight">{myGuestMeals.length} <span className="text-sm font-bold opacity-60">Meals</span></h3>
-                    <p className="text-[10px] font-black text-purple-500/60 dark:text-purple-400/60 mt-1 uppercase tracking-widest italic">Est. Cost: ₹{totalGuestAmount}</p>
-                </Card>
+                        <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="p-4 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 dark:bg-purple-500/20 group-hover:scale-110 transition-transform">
+                                    <Utensils size={24} />
+                                </div>
+                                <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
+                            </div>
+                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Guest Liability</p>
+                            <h3 className="text-3xl font-black text-purple-600 dark:text-purple-400 mt-2 tracking-tight">{myGuestMeals.length} <span className="text-sm font-bold opacity-60">Meals</span></h3>
+                            <p className="text-[10px] font-black text-purple-500/60 dark:text-purple-400/60 mt-1 uppercase tracking-widest italic">Est. Cost: ₹{totalGuestAmount}</p>
+                        </Card>
+                    </>
+                )}
             </div>
 
             {/* Guest Meals Detail Card */}

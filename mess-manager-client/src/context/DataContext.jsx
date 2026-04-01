@@ -14,17 +14,31 @@ export const useData = () => {
     return context;
 };
 
+// Helper for hydration from localStorage
+const hydrateFromStorage = (key, fallback) => {
+    try {
+        const stored = localStorage.getItem(key);
+        return stored ? JSON.parse(stored) : fallback;
+    } catch (e) {
+        console.error(`Failed to hydrate ${key}:`, e);
+        return fallback;
+    }
+};
+
 export const DataProvider = ({ children }) => {
-    const [members, setMembers] = useState([]);
+    // Hydrate critical data from localStorage for near-instant rendering
+    const [members, setMembers] = useState(() => hydrateFromStorage('mess_members', []));
+    const [settings, setSettings] = useState(() => hydrateFromStorage('mess_settings', []));
+    const [dailyInfo, setDailyInfo] = useState(() => hydrateFromStorage('mess_daily_info', null));
+
+    // Fast-changing data is kept in state but not pre-hydrated for better consistency
     const [expenses, setExpenses] = useState([]);
     const [meals, setMeals] = useState([]);
     const [guestMeals, setGuestMeals] = useState([]);
     const [notifications, setNotifications] = useState([]);
-    const [marketSchedule, setMarketSchedule] = useState({}); // { 'YYYY-MM': [ { date, memberId, status } ] }
+    const [marketSchedule, setMarketSchedule] = useState({});
     const [managerAllocation, setManagerAllocation] = useState({});
     const [cookingDuties, setCookingDuties] = useState([]);
-    const [dailyInfo, setDailyInfo] = useState(null);
-    const [settings, setSettings] = useState([]);
     const [loadingDaily, setLoadingDaily] = useState(true);
 
     // Global Month Filter
@@ -36,64 +50,74 @@ export const DataProvider = ({ children }) => {
     const { isAuthenticated } = useAuth();
 
     const refreshData = useCallback(async () => {
-        try {
-            const results = await Promise.allSettled([
-                api.get('/members'),
-                api.get('/expenses'),
-                api.get('/market'),
-                api.get('/meals'),
-                api.get('/guest-meals'),
-                api.get('/notifications'),
-                getDailyInfo(),
-                api.get('/settings')
-            ]);
+        // Track the count of critical requests completed
+        let criticalCompleted = 0;
+        const totalCritical = 3; // members, settings, dailyInfo
 
-            const [membersRes, expensesRes, marketRes, mealsRes, guestMealsRes, notificationsRes, dailyRes, settingsRes] = results;
+        const markCritical = () => {
+            criticalCompleted++;
+            if (criticalCompleted >= totalCritical) {
+                setLoadingDaily(false);
+            }
+        };
 
-            if (membersRes.status === 'fulfilled') setMembers(membersRes.value.data);
-            if (expensesRes.status === 'fulfilled') setExpenses(expensesRes.value.data);
-            if (mealsRes.status === 'fulfilled') setMeals(mealsRes.value.data);
-            if (guestMealsRes.status === 'fulfilled') setGuestMeals(guestMealsRes.value.data);
-            if (notificationsRes.status === 'fulfilled') setNotifications(notificationsRes.value.data);
-            if (dailyRes.status === 'fulfilled') setDailyInfo(dailyRes.value);
-            if (settingsRes.status === 'fulfilled') setSettings(settingsRes.value.data);
-            setLoadingDaily(false);
+        // Helper to fetch one endpoint and update state + storage instantly
+        const fetchEndpoint = async (promise, setter, storageKey = null, isCritical = false) => {
+            try {
+                const res = await promise;
+                const data = res.data || res; // Handle cases where res is not an axios response (like getDailyInfo)
+                setter(data);
+                if (storageKey) localStorage.setItem(storageKey, JSON.stringify(data));
+                if (isCritical) markCritical();
+            } catch (e) {
+                console.error(`Refresh failed for ${storageKey || 'endpoint'}:`, e);
+                if (isCritical) markCritical();
+            }
+        };
 
-            if (marketRes.status === 'fulfilled') {
+        // Fire all requests simultaneously. Each will update state as soon as it resolves.
+        // This is much faster than waiting for all of them using Promise.allSettled.
+        fetchEndpoint(api.get('/members'), setMembers, 'mess_members', true);
+        fetchEndpoint(api.get('/settings'), setSettings, 'mess_settings', true);
+        fetchEndpoint(getDailyInfo(), setDailyInfo, 'mess_daily_info', true);
+
+        fetchEndpoint(api.get('/expenses'), setExpenses);
+        fetchEndpoint(api.get('/meals'), setMeals);
+        fetchEndpoint(api.get('/guest-meals'), setGuestMeals);
+        fetchEndpoint(api.get('/notifications'), setNotifications);
+        
+        // Market logic needs special handling for mapping
+        (async () => {
+            try {
+                const res = await api.get('/market');
                 const marketMap = {};
-                marketRes.value.data.forEach(item => {
+                res.data.forEach(item => {
                     const month = item.date.substring(0, 7);
                     if (!marketMap[month]) marketMap[month] = [];
                     marketMap[month].push(item);
                 });
                 setMarketSchedule(marketMap);
-            }
+            } catch (e) { console.error('Market fetch failed', e); }
+        })();
 
-            // Log errors if any
-            results.forEach((res, index) => {
-                if (res.status === 'rejected') {
-                    console.error(`Refresh failed for index ${index}:`, res.reason);
-                }
-            });
-
-        } catch (e) {
-            console.error('Refresh critically failed', e);
-        }
     }, []);
 
     // Fetch Initial Data
     useEffect(() => {
         if (isAuthenticated) {
-            const loadData = async () => {
-                await refreshData();
-            };
-            loadData();
+            refreshData();
+        } else {
+            setLoadingDaily(true); // Reset for next login
         }
     }, [isAuthenticated, refreshData]);
 
     // --- Targeted re-fetch helpers (more efficient than full refreshData) ---
     const refreshMembers = useCallback(async () => {
-        try { const r = await api.get('/members'); setMembers(r.data); } catch (e) { console.error('refreshMembers failed', e); }
+        try { 
+            const r = await api.get('/members'); 
+            setMembers(r.data);
+            localStorage.setItem('mess_members', JSON.stringify(r.data));
+        } catch (e) { console.error('refreshMembers failed', e); }
     }, []);
     const refreshExpenses = useCallback(async () => {
         try { const r = await api.get('/expenses'); setExpenses(r.data); } catch (e) { console.error('refreshExpenses failed', e); }
@@ -121,15 +145,20 @@ export const DataProvider = ({ children }) => {
         try {
             const response = await api.post('/members', member);
             setMembers(prev => [...prev, response.data]);
+            localStorage.setItem('mess_members', JSON.stringify([...members, response.data]));
         } catch (error) {
             console.error('Add Member failed:', error);
         }
-    }, []);
+    }, [members]);
 
     const removeMember = useCallback(async (id) => {
         try {
             await api.delete(`/members/${id}`);
-            setMembers(prev => prev.filter(m => m._id !== id && m.id !== id));
+            setMembers(prev => {
+                const updated = prev.filter(m => m._id !== id && m.id !== id);
+                localStorage.setItem('mess_members', JSON.stringify(updated));
+                return updated;
+            });
         } catch (error) {
             console.error('Remove member failed', error);
         }
@@ -138,7 +167,11 @@ export const DataProvider = ({ children }) => {
     const updateMember = useCallback(async (id, updates) => {
         try {
             const response = await api.put(`/members/${id}`, updates);
-            setMembers(prev => prev.map(m => (m._id === id || m.id === id) ? response.data : m));
+            setMembers(prev => {
+                const updated = prev.map(m => (m._id === id || m.id === id) ? response.data : m);
+                localStorage.setItem('mess_members', JSON.stringify(updated));
+                return updated;
+            });
         } catch (error) {
             console.error('Update Member failed:', error);
         }
@@ -154,9 +187,9 @@ export const DataProvider = ({ children }) => {
     }, []);
 
     // Send Payment Notifications to All Members
-    const sendPaymentNotifications = useCallback(async (members) => {
+    const sendPaymentNotifications = useCallback(async (membersToNotify) => {
         try {
-            const response = await api.post('/notifications/payment/bulk', { members });
+            const response = await api.post('/notifications/payment/bulk', { members: membersToNotify });
             await refreshNotifications();
             return { success: true, count: response.data.count };
         } catch (error) {
@@ -166,9 +199,9 @@ export const DataProvider = ({ children }) => {
     }, [refreshNotifications]);
 
     // Send Official WhatsApp Notifications to Multiple Members
-    const sendBulkWhatsAppOfficial = useCallback(async (members) => {
+    const sendBulkWhatsAppOfficial = useCallback(async (membersToNotify) => {
         try {
-            const response = await api.post('/notifications/whatsapp/official/bulk', { members });
+            const response = await api.post('/notifications/whatsapp/official/bulk', { members: membersToNotify });
             return { success: true, results: response.data.results };
         } catch (error) {
             console.error('Official WhatsApp Notifications failed', error);
@@ -261,21 +294,23 @@ export const DataProvider = ({ children }) => {
 
     const rejectAllExpenses = useCallback(async () => {
         try {
-            const response = await api.delete('/expenses/bulk/reject-pending');
-            setExpenses(prev => prev.filter(e => e.status !== 'pending'));
-            return { success: true, deletedCount: response.data.deletedCount };
+            await api.put('/expenses/reject-all');
+            setExpenses(prev => prev.map(e => e.status === 'pending' ? { ...e, status: 'rejected' } : e));
+            return { success: true };
         } catch (error) {
             console.error('Reject all expenses failed', error);
             return { success: false, error: error.response?.data?.message || 'Failed to reject all expenses' };
         }
     }, []);
 
-    const updateExpense = useCallback(async (id, updatedData) => {
+    const updateExpense = useCallback(async (id, updates) => {
         try {
-            const response = await api.put(`/expenses/${id}`, updatedData);
+            const response = await api.put(`/expenses/${id}`, updates);
             setExpenses(prev => prev.map(e => (e._id === id || e.id === id) ? response.data : e));
+            return { success: true };
         } catch (error) {
             console.error('Update Expense failed', error);
+            return { success: false, error: error.response?.data?.message || 'Failed to update expense' };
         }
     }, []);
 
@@ -283,71 +318,59 @@ export const DataProvider = ({ children }) => {
         try {
             await api.delete(`/expenses/${id}`);
             setExpenses(prev => prev.filter(e => e._id !== id && e.id !== id));
+            return { success: true };
         } catch (error) {
             console.error('Delete Expense failed', error);
+            return { success: false, error: error.response?.data?.message || 'Failed to delete expense' };
         }
     }, []);
 
     // Market Actions
-    const allocateMarketDay = useCallback(async (date, memberId, type = 'manual_assign', managerId = null) => {
+    const allocateMarketDay = useCallback(async (date, memberId) => {
         try {
-            const response = await api.post('/market', { date, assignedMemberId: memberId, requestType: type, managerId });
-            const newItem = response.data;
-            setMarketSchedule(prev => {
-                const month = date.substring(0, 7);
-                return { ...prev, [month]: [...(prev[month] || []), newItem] };
-            });
+            await api.post('/market', { date, memberId });
+            await refreshMarket();
         } catch (error) {
-            console.error('Allocate market failed', error);
+            console.error('Allocate market day failed', error);
+        }
+    }, [refreshMarket]);
+
+    const approveMarketRequest = useCallback(async (requestId) => {
+        try {
+            await api.put(`/market/requests/${requestId}/approve`);
+            await refreshMarket();
+        } catch (error) {
+            console.error('Approve market request failed', error);
+        }
+    }, [refreshMarket]);
+
+    const rejectMarketRequest = useCallback(async (requestId) => {
+        try {
+            await api.put(`/market/requests/${requestId}/reject`);
+            await refreshMarket();
+        } catch (error) {
+            console.error('Reject market request failed', error);
+        }
+    }, [refreshMarket]);
+
+    // Manager Allocation
+    const setManagerForMonth = useCallback(async (month, memberId) => {
+        try {
+            await api.post('/managers', { month, memberId });
+            setManagerAllocation(prev => ({ ...prev, [month]: memberId }));
+        } catch (error) {
+            console.error('Set manager failed', error);
         }
     }, []);
 
-    const approveMarketRequest = useCallback(async (idOrDate, shouldRefresh = true) => {
+    // Cooking Duties
+    const markCookingFinished = useCallback(async (date, memberId) => {
         try {
-            const isId = !idOrDate.includes('-') || idOrDate.length > 10;
-            const endpoint = isId ? `/market/id/${idOrDate}` : `/market/${idOrDate}`;
-            await api.put(endpoint, { status: 'approved' });
-            setMarketSchedule(prev => {
-                const updated = {};
-                for (const [month, items] of Object.entries(prev)) {
-                    updated[month] = items.map(item =>
-                        (item._id === idOrDate || item.id === idOrDate || item.date === idOrDate)
-                            ? { ...item, status: 'approved' } : item
-                    );
-                }
-                return updated;
-            });
+            await api.post('/cooking/finish', { date, memberId });
+            setCookingDuties(prev => [...prev, { date, memberId, finished: true }]);
         } catch (error) {
-            console.error('Approve market failed', error);
+            console.error('Mark cooking finished failed', error);
         }
-    }, []);
-
-    const rejectMarketRequest = useCallback(async (idOrDate, shouldRefresh = true) => {
-        try {
-            const isId = !idOrDate.includes('-') || idOrDate.length > 10;
-            const endpoint = isId ? `/market/id/${idOrDate}` : `/market/${idOrDate}`;
-            await api.put(endpoint, { status: 'rejected' });
-            setMarketSchedule(prev => {
-                const updated = {};
-                for (const [month, items] of Object.entries(prev)) {
-                    updated[month] = items.map(item =>
-                        (item._id === idOrDate || item.id === idOrDate || item.date === idOrDate)
-                            ? { ...item, status: 'rejected' } : item
-                    );
-                }
-                return updated;
-            });
-        } catch (error) {
-            console.error('Reject market failed', error);
-        }
-    }, []);
-
-    const setManagerForMonth = useCallback((month, memberId) => {
-        setManagerAllocation(prev => ({ ...prev, [month]: memberId }));
-    }, []);
-
-    const markCookingFinished = useCallback((date, memberId) => {
-        setCookingDuties(prev => [...prev, { date, memberId, finished: true }]);
     }, []);
 
     const getCookingDuty = useCallback((date) => cookingDuties.find(d => d.date === date), [cookingDuties]);
@@ -355,14 +378,14 @@ export const DataProvider = ({ children }) => {
     // Meal Actions
     const addMeal = useCallback(async (date, memberIds, type, isGuest = false, guestMealType = null, mealTime = null) => {
         try {
-            const newMeals = [];
+            const newMealsResult = [];
             for (const memberId of memberIds) {
                 const payload = { date, memberId, type };
                 if (isGuest) { payload.isGuest = true; payload.guestMealType = guestMealType; payload.mealTime = mealTime; }
                 const response = await api.post('/meals', payload);
-                newMeals.push(response.data);
+                newMealsResult.push(response.data);
             }
-            setMeals(prev => [...prev, ...newMeals]);
+            setMeals(prev => [...prev, ...newMealsResult]);
         } catch (error) {
             console.error('Add meal failed', error);
         }
@@ -373,7 +396,6 @@ export const DataProvider = ({ children }) => {
             const payload = { date, memberId, type };
             if (mealId) payload.mealId = mealId;
             await api.delete('/meals', { data: payload });
-            // Remove by mealId if provided, otherwise remove the first matching meal
             setMeals(prev => {
                 if (mealId) return prev.filter(m => m._id !== mealId && m.id !== mealId);
                 const idx = prev.findIndex(m => m.date === date && m.memberId === memberId && m.type === type);
@@ -388,8 +410,6 @@ export const DataProvider = ({ children }) => {
     // Guest Meal Functions
     const addGuestMeal = useCallback(async (date, memberId, guestMealType, mealTime) => {
         try {
-            // Priority 1: DB Settings
-            // Priority 2: MESS_CONFIG Hardcoded
             const settingKey = `guest_price_${guestMealType}`;
             const dbSetting = settings.find(s => s.key === settingKey);
             const amount = dbSetting ? Number(dbSetting.value) : (MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0);
@@ -400,7 +420,7 @@ export const DataProvider = ({ children }) => {
             console.error('Add guest meal failed', error);
             throw error;
         }
-    }, []);
+    }, [settings]);
 
     const removeGuestMeal = useCallback(async (guestMealId) => {
         try {
@@ -425,7 +445,11 @@ export const DataProvider = ({ children }) => {
     const updateSystemSetting = useCallback(async (key, value) => {
         try {
             await api.put(`/settings/${key}`, { value });
-            setSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
+            setSettings(prev => {
+                const updated = prev.map(s => s.key === key ? { ...s, value } : s);
+                localStorage.setItem('mess_settings', JSON.stringify(updated));
+                return updated;
+            });
             return { success: true };
         } catch (error) {
             console.error('Update setting failed', error);
@@ -442,8 +466,6 @@ export const DataProvider = ({ children }) => {
             return { success: false, error: error.response?.data?.message || 'Failed to fetch preview' };
         }
     }, []);
-
-
 
     const filteredExpenses = useMemo(() => {
         if (!Array.isArray(expenses)) return [];
@@ -465,7 +487,7 @@ export const DataProvider = ({ children }) => {
         expenses: filteredExpenses,
         meals: filteredMeals,
         guestMeals: filteredGuestMeals,
-        allExpenses: expenses, // Keep raw data just in case
+        allExpenses: expenses,
         allMeals: meals,
         allGuestMeals: guestMeals,
         globalMonth,

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock, CheckCircle2, Clock, X } from 'lucide-react';
+import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock, CheckCircle2, Clock, X, BookOpen, ChevronUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
@@ -115,7 +115,9 @@ const Management = () => {
             console.error('Error adding manager record:', error);
             alert(error.response?.data?.error || 'Failed to add manager record');
         }
-    };    // Delete cooking record
+    };
+
+    // Delete cooking record
     const handleDeleteCooking = async (id) => {
         if (!window.confirm('Do you want to delete?')) return;
         try {
@@ -183,7 +185,7 @@ const Management = () => {
                             initial={{ opacity: 0, x: 10, scale: 0.8 }}
                             animate={{ opacity: 1, x: 0, scale: 1 }}
                             exit={{ opacity: 0, x: 10, scale: 0.8 }}
-                            className="absolute right-3 bottom-4 z-20"
+                            className="absolute right-3 bottom-0.5 z-20"
                         >
                             <button
                                 onClick={handleSave}
@@ -214,6 +216,77 @@ const Management = () => {
                         Synced Successfully
                     </motion.div>
                 )}
+            </div>
+        );
+    };
+
+    // Gita Logic
+    const totalShlokas = 700;
+    const gitaCompleted = parseInt(settings.find(s => s.key === 'gita_shlokas_completed')?.value || '0');
+
+    const GitaDateItem = ({ label, settingKey, icon: Icon }) => {
+        const globalValue = settings.find(s => s.key === settingKey)?.value || '';
+        const [localValue, setLocalValue] = useState(globalValue);
+        const [status, setStatus] = useState('idle');
+
+        useEffect(() => {
+            if (status === 'idle') setLocalValue(globalValue);
+        }, [globalValue, status]);
+
+        const isDirty = localValue !== globalValue;
+
+        const handleSave = async () => {
+            if (!isDirty || status === 'loading') return;
+            setStatus('loading');
+            const res = await updateSystemSetting(settingKey, localValue);
+            if (res.success) {
+                setStatus('success');
+                setTimeout(() => setStatus('idle'), 2000);
+            } else {
+                setStatus('error');
+                alert(res.error);
+                setTimeout(() => setStatus('idle'), 3000);
+            }
+        };
+
+        return (
+            <div className="relative group">
+                <Input
+                    label={label}
+                    type="date"
+                    value={localValue}
+                    onChange={(e) => setLocalValue(e.target.value)}
+                    icon={Icon}
+                    className="pr-12"
+                />
+                
+                <AnimatePresence>
+                    {(isDirty || status !== 'idle') && (
+                        <motion.div
+                            initial={{ opacity: 0, x: 10, scale: 0.8 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            exit={{ opacity: 0, x: 10, scale: 0.8 }}
+                            className="absolute right-3 bottom-0.5 z-20"
+                        >
+                            <button
+                                onClick={handleSave}
+                                disabled={status === 'loading'}
+                                className={cn(
+                                    "p-2.5 rounded-xl transition-all shadow-lg active:scale-90",
+                                    status === 'loading' && "bg-slate-100 dark:bg-slate-800 text-slate-400 rotate-180 duration-1000",
+                                    status === 'success' && "bg-emerald-500 text-white",
+                                    status === 'error' && "bg-rose-500 text-white",
+                                    status === 'idle' && isDirty && "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/30"
+                                )}
+                            >
+                                {status === 'loading' && <div className="w-4 h-4 border-2 border-slate-300 border-t-white rounded-full animate-spin" />}
+                                {status === 'success' && <CheckCircle2 size={16} />}
+                                {status === 'error' && <X size={16} />}
+                                {status === 'idle' && isDirty && <Rocket size={16} />}
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         );
     };
@@ -586,6 +659,100 @@ const Management = () => {
                         </div>
                     </div>
                 </div>
+            </motion.div>
+
+            {/* Gita Progress Tracker Section */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18 }}
+            >
+                <Card className="p-0 overflow-hidden border-indigo-100/50 dark:border-indigo-900/20 shadow-indigo-500/5">
+                    <div className="p-6 border-b border-indigo-100 dark:border-indigo-900/30 bg-indigo-50/50 dark:bg-indigo-950/20">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl text-indigo-600 dark:text-indigo-400">
+                                <BookOpen size={20} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Gita Progress Tracker</h2>
+                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Track daily shloka progress</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Configuration Column */}
+                            <div className="space-y-6">
+                                <div className="p-6 bg-slate-50 dark:bg-slate-900/40 rounded-[2rem] border border-slate-100 dark:border-white/5 shadow-sm">
+                                    <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400"></div> Settings
+                                    </h3>
+                                    <div className="space-y-6">
+                                        <GitaDateItem 
+                                            label="Gita Starting Date" 
+                                            settingKey="gita_start_date" 
+                                            icon={Calendar} 
+                                        />
+                                        <SettingItem 
+                                            label="Slogans (Shlokas) Seen" 
+                                            settingKey="gita_shlokas_completed" 
+                                            icon={CheckCircle2} 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Statistics Card */}
+                            <div className="lg:col-span-2 p-8 bg-gradient-to-br from-indigo-600 to-primary-600 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl shadow-indigo-500/20 min-h-[250px]">
+                                {/* Decorative Background */}
+                                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 blur-3xl transition-transform duration-1000"></div>
+                                <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary-400/20 rounded-full -ml-32 -mb-32 blur-3xl"></div>
+                                
+                                <div className="relative z-10 flex flex-col h-full justify-between gap-10">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Knowledge Progress</p>
+                                            <h3 className="text-5xl font-black tracking-tighter">
+                                                {Math.round((gitaCompleted / totalShlokas) * 100)}% <span className="text-xl opacity-60 font-medium">Read</span>
+                                            </h3>
+                                        </div>
+                                        <div className="p-5 bg-white/10 backdrop-blur-md rounded-[2rem] border border-white/20 shadow-xl">
+                                            <BookOpen size={40} className="text-white" />
+                                        </div>
+                                    </div>
+
+                                    {/* Progress Bar Container */}
+                                    <div className="space-y-6">
+                                        <div className="h-6 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden border border-white/10 p-1.5 relative shadow-inner">
+                                            <motion.div 
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${(gitaCompleted / totalShlokas) * 100}%` }}
+                                                transition={{ duration: 1.5, ease: "easeOut" }}
+                                                className="h-full bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                                            />
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-3 gap-6 text-center">
+                                            <div className="p-5 bg-white/10 rounded-[2rem] border border-white/10 backdrop-blur-sm group/stat hover:bg-white/20 transition-all duration-300">
+                                                <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1.5">Total Gita</p>
+                                                <p className="text-2xl font-black group-hover:scale-110 transition-transform">{totalShlokas}</p>
+                                            </div>
+                                            <div className="p-5 bg-white/10 rounded-[2rem] border border-white/10 backdrop-blur-sm shadow-xl group/stat hover:bg-white/20 transition-all duration-300">
+                                                <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1.5">Shlokas Seen</p>
+                                                <p className="text-2xl font-black group-hover:scale-110 transition-transform">{gitaCompleted}</p>
+                                            </div>
+                                            <div className="p-5 bg-rose-500/20 rounded-[2rem] border border-rose-500/30 backdrop-blur-sm group/stat hover:bg-rose-500/30 transition-all duration-300">
+                                                <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-1.5">Still Left</p>
+                                                <p className="text-2xl font-black text-rose-100 group-hover:scale-110 transition-transform">{totalShlokas - gitaCompleted}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
             </motion.div>
 
             {/* System Configuration Section */}

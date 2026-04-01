@@ -7,9 +7,10 @@ import Clock from '../../components/ui/Clock';
 import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, TrendingUp, ArrowUpRight, Crown, Wallet, ShoppingCart, Flame, Wheat, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
+import Skeleton from '../../components/ui/Skeleton';
 
 const AdminDashboard = () => {
-    const { members, expenses, meals, globalMonth } = useData();
+    const { members, expenses, meals, globalMonth, loadingDaily } = useData();
     const navigate = useNavigate();
 
     const memberSummary = useMemo(() => {
@@ -99,86 +100,102 @@ const AdminDashboard = () => {
             <Clock showGita={true} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-                {stats.map((stat, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                    >
-                        <Card className={cn(
-                            "p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden",
-                            "bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5",
-                            stat.bg
-                        )}>
-                            {/* Background decoration */}
-                            <div className={cn(
-                                "absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 pointer-events-none",
-                                stat.color
-                            )}>
-                                <stat.icon size={120} />
-                            </div>
-
-                            <div className="relative z-10 flex items-start justify-between">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <div className={cn("p-2.5 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
-                                            <stat.icon size={20} />
-                                        </div>
-                                        <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{stat.title}</p>
-                                    </div>
-                                    <h3 className={cn("text-4xl sm:text-5xl font-black tracking-tighter mt-1", stat.color)}>
-                                        {stat.value}
-                                    </h3>
-                                </div>
-                                <div className="p-2 bg-white/50 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-slate-100 dark:border-white/5 shadow-sm">
-                                    <ArrowUpRight size={16} className="text-slate-400" />
-                                </div>
-                            </div>
-                        </Card>
-                    </motion.div>
-                ))}
-            </div>
-
-            {/* Expense Category Breakdown */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-                {expenseBreakdown.map((item, index) => {
-                    const Icon = item.icon;
-                    return (
+                {(loadingDaily && meals.length === 0) ? (
+                    <>
+                        <Skeleton.Card className="h-40" />
+                        <Skeleton.Card className="h-40" />
+                    </>
+                ) : (
+                    stats.map((stat, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 + index * 0.05 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.1 }}
                         >
                             <Card className={cn(
-                                "p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden",
+                                "p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden",
                                 "bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5",
-                                item.bg
+                                stat.bg
                             )}>
                                 {/* Background decoration */}
                                 <div className={cn(
                                     "absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 pointer-events-none",
-                                    item.color
+                                    stat.color
                                 )}>
-                                    <Icon size={100} />
+                                    <stat.icon size={120} />
                                 </div>
 
-                                <div className="relative z-10">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className={cn("p-2 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", item.color)}>
-                                            <Icon size={16} />
+                                <div className="relative z-10 flex items-start justify-between">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className={cn("p-2.5 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
+                                                <stat.icon size={20} />
+                                            </div>
+                                            <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{stat.title}</p>
                                         </div>
-                                        <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{item.title}</p>
+                                        <h3 className={cn("text-4xl sm:text-5xl font-black tracking-tighter mt-1", stat.color)}>
+                                            {stat.value}
+                                        </h3>
                                     </div>
-                                    <h3 className={cn("text-2xl sm:text-3xl font-black tracking-tighter mt-1", item.color)}>
-                                        {item.value}
-                                    </h3>
+                                    <div className="p-2 bg-white/50 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-slate-100 dark:border-white/5 shadow-sm">
+                                        <ArrowUpRight size={16} className="text-slate-400" />
+                                    </div>
                                 </div>
                             </Card>
                         </motion.div>
-                    );
-                })}
+                    ))
+                )}
+            </div>
+
+            {/* Expense Category Breakdown */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                {(loadingDaily && expenses.length === 0) ? (
+                    <>
+                        <Skeleton.Card className="h-32" />
+                        <Skeleton.Card className="h-32" />
+                        <Skeleton.Card className="h-32" />
+                        <Skeleton.Card className="h-32" />
+                    </>
+                ) : (
+                    expenseBreakdown.map((item, index) => {
+                        const Icon = item.icon;
+                        return (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 + index * 0.05 }}
+                            >
+                                <Card className={cn(
+                                    "p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden",
+                                    "bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5",
+                                    item.bg
+                                )}>
+                                    {/* Background decoration */}
+                                    <div className={cn(
+                                        "absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 pointer-events-none",
+                                        item.color
+                                    )}>
+                                        <Icon size={100} />
+                                    </div>
+
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className={cn("p-2 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", item.color)}>
+                                                <Icon size={16} />
+                                            </div>
+                                            <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{item.title}</p>
+                                        </div>
+                                        <h3 className={cn("text-2xl sm:text-3xl font-black tracking-tighter mt-1", item.color)}>
+                                            {item.value}
+                                        </h3>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        );
+                    })
+                )}
             </div>
 
             {/* Member Summary Section */}
@@ -213,35 +230,43 @@ const AdminDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                <AnimatePresence mode="popLayout">
-                                    {(memberSummary || []).map((member, index) => (
-                                        <motion.tr
-                                            key={member._id}
-                                            layout
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.1 + index * 0.05 }}
-                                            className="hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
-                                        >
-                                            <td className="p-4 md:p-6">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-slate-500 dark:text-slate-400 group-hover:from-primary-500 group-hover:to-primary-600 group-hover:text-white transition-all duration-500 shadow-sm uppercase shrink-0">
-                                                        {(member.name || '?').charAt(0)}
+                                {loadingDaily && members.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="3" className="p-0">
+                                            <Skeleton.Table rows={6} />
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    <AnimatePresence mode="popLayout">
+                                        {(memberSummary || []).map((member, index) => (
+                                            <motion.tr
+                                                key={member._id}
+                                                layout
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.1 + index * 0.05 }}
+                                                className="hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
+                                            >
+                                                <td className="p-4 md:p-6">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-slate-500 dark:text-slate-400 group-hover:from-primary-500 group-hover:to-primary-600 group-hover:text-white transition-all duration-500 shadow-sm uppercase shrink-0">
+                                                            {(member.name || '?').charAt(0)}
+                                                        </div>
+                                                        <span className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-sm md:text-base">{member.name}</span>
                                                     </div>
-                                                    <span className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-sm md:text-base">{member.name}</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-4 md:p-6 text-center">
-                                                <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-black border border-amber-100 dark:border-amber-900/30 text-xs md:text-sm">
-                                                    {member.totalMeals}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 md:p-6 text-center">
-                                                <span className="font-black text-violet-600 dark:text-violet-400 text-sm md:text-lg">₹{member.monthlyDeposit}</span>
-                                            </td>
-                                        </motion.tr>
-                                    ))}
-                                </AnimatePresence>
+                                                </td>
+                                                <td className="p-4 md:p-6 text-center">
+                                                    <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-black border border-amber-100 dark:border-amber-900/30 text-xs md:text-sm">
+                                                        {member.totalMeals}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 md:p-6 text-center">
+                                                    <span className="font-black text-violet-600 dark:text-violet-400 text-sm md:text-lg">₹{member.monthlyDeposit}</span>
+                                                </td>
+                                            </motion.tr>
+                                        ))}
+                                    </AnimatePresence>
+                                )}
                             </tbody>
                         </table>
                     </div>

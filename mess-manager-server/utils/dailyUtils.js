@@ -1,4 +1,5 @@
 const { getDailyGitaVerse } = require('./gitaUtils');
+const Settings = require('../models/Settings');
 
 const BUILD_ID = "2026-04-01-NO-AI";
 
@@ -12,7 +13,10 @@ async function getCombinedDailyInfo(date = new Date()) {
     const key = `${date.getMonth() + 1}-${date.getDate()}`;
 
     try {
-        const gita = getDailyGitaVerse(date);
+        const gitaSetting = await Settings.findOne({ key: 'gita_start_date' });
+        const startDate = gitaSetting ? gitaSetting.value : null;
+        
+        const gita = getDailyGitaVerse(date, startDate);
 
         // Build a simple static verse result
         const gitaResult = gita ? {
