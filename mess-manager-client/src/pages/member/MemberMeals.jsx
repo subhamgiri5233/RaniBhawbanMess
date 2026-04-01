@@ -11,6 +11,7 @@ import { cn } from '../../lib/utils';
 import { MESS_CONFIG } from '../../config';
 
 const MemberMeals = () => {
+    const { user } = useAuth();
     const {
         members, meals, guestMeals, addMeal, removeMeal,
         addGuestMeal, removeGuestMeal, globalMonth, setGlobalMonth, settings
