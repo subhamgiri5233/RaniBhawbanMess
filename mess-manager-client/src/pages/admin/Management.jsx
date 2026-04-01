@@ -11,7 +11,7 @@ import api from '../../lib/api';
 
 const Management = () => {
     const { user } = useAuth();
-    const { members } = useData();
+    const { members, settings, updateSystemSetting } = useData();
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
     // Cooking state
@@ -127,16 +127,18 @@ const Management = () => {
     };
 
     // Delete manager record
-    const handleDeleteManager = async (id) => {
-        if (!window.confirm('Do you want to delete?')) return;
-        try {
-            await api.delete(`/managers/${id}`);
-            fetchManagerRecords();
-        } catch (error) {
-            console.error('Error deleting manager record:', error);
-            alert('Failed to delete manager record');
-        }
+    const handleDeleteManager = async (id) => { ... };
+
+    // Settings Management
+    const [isSaving, setIsSaving] = useState(false);
+    const handleUpdateSetting = async (key, value) => {
+        setIsSaving(true);
+        const res = await updateSystemSetting(key, value);
+        setIsSaving(false);
+        if (!res.success) alert(res.error);
     };
+
+    const getSettingValue = (key) => settings.find(s => s.key === key)?.value || '';
 
 
     return (
@@ -506,6 +508,95 @@ const Management = () => {
                         </div>
                     </div>
                 </div>
+            </motion.div>
+
+            {/* System Configuration Section */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+            >
+                <Card className="p-0 overflow-hidden border-slate-200 dark:border-white/5 shadow-xl shadow-slate-200/40 dark:shadow-none">
+                    <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-slate-200 dark:bg-white/10 rounded-xl">
+                                <Rocket className="text-slate-600 dark:text-slate-300" size={20} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">System Configuration</h2>
+                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Manage global meal prices and rules</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {/* Min Meals */}
+                            <div className="space-y-4 p-6 bg-slate-50 dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-white/5">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                                        <Calendar size={16} className="text-indigo-600 dark:text-indigo-400" />
+                                    </div>
+                                    <h3 className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Monthly Rules</h3>
+                                </div>
+                                <Input
+                                    label="Min Meals Per Month"
+                                    type="number"
+                                    value={getSettingValue('min_meals_month')}
+                                    onChange={(e) => handleUpdateSetting('min_meals_month', e.target.value)}
+                                    placeholder="e.g. 40"
+                                />
+                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-relaxed pl-1">Members will be charged for at least this many meals each month.</p>
+                            </div>
+
+                            {/* Guest Prices */}
+                            <div className="md:col-span-1 lg:col-span-2 space-y-4 p-6 bg-slate-50 dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-white/5">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                        <ShoppingCart size={16} className="text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <h3 className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Guest Meal Pricing (৳)</h3>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <Input
+                                        label="🐟 Fish Price"
+                                        type="number"
+                                        value={getSettingValue('guest_price_fish')}
+                                        onChange={(e) => handleUpdateSetting('guest_price_fish', e.target.value)}
+                                    />
+                                    <Input
+                                        label="🍖 Meat Price"
+                                        type="number"
+                                        value={getSettingValue('guest_price_meat')}
+                                        onChange={(e) => handleUpdateSetting('guest_price_meat', e.target.value)}
+                                    />
+                                    <Input
+                                        label="🥗 Veg Price"
+                                        type="number"
+                                        value={getSettingValue('guest_price_veg')}
+                                        onChange={(e) => handleUpdateSetting('guest_price_veg', e.target.value)}
+                                    />
+                                    <Input
+                                        label="🥚 Egg Price"
+                                        type="number"
+                                        value={getSettingValue('guest_price_egg')}
+                                        onChange={(e) => handleUpdateSetting('guest_price_egg', e.target.value)}
+                                    />
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-relaxed pl-1">These prices will be applied instantly to all new guest meals recorded.</p>
+                            </div>
+                        </div>
+
+                        {isSaving && (
+                            <div className="mt-6 flex justify-center">
+                                <div className="flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full animate-pulse">
+                                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-ping" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Saving Changes...</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </Card>
             </motion.div>
         </motion.div>
     );

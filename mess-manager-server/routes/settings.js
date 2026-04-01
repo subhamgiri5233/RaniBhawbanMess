@@ -29,6 +29,36 @@ const initializeDefaultSettings = async () => {
             value: 'hdelall',
             category: 'feature',
             description: 'Password required to clear all admin expense history'
+        },
+        {
+            key: 'min_meals_month',
+            value: '40',
+            category: 'system',
+            description: 'Minimum monthly meals a member must pay for'
+        },
+        {
+            key: 'guest_price_fish',
+            value: '40',
+            category: 'system',
+            description: 'Price for a Fish guest meal'
+        },
+        {
+            key: 'guest_price_egg',
+            value: '40',
+            category: 'system',
+            description: 'Price for an Egg guest meal'
+        },
+        {
+            key: 'guest_price_veg',
+            value: '35',
+            category: 'system',
+            description: 'Price for a Veg guest meal'
+        },
+        {
+            key: 'guest_price_meat',
+            value: '50',
+            category: 'system',
+            description: 'Price for a Meat guest meal'
         }
     ];
 
@@ -44,7 +74,8 @@ const initializeDefaultSettings = async () => {
 
 
 // Get all settings (admin only - includes values)
-router.get('/', auth, requireAdmin, async (req, res) => {
+// Get all settings (all auth users can see, but values might be filtered)
+router.get('/', auth, async (req, res) => {
     try {
         const settings = await Settings.find();
 

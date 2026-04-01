@@ -24,6 +24,7 @@ export const DataProvider = ({ children }) => {
     const [managerAllocation, setManagerAllocation] = useState({});
     const [cookingDuties, setCookingDuties] = useState([]);
     const [dailyInfo, setDailyInfo] = useState(null);
+    const [settings, setSettings] = useState([]);
     const [loadingDaily, setLoadingDaily] = useState(true);
 
     // Global Month Filter
@@ -43,10 +44,11 @@ export const DataProvider = ({ children }) => {
                 api.get('/meals'),
                 api.get('/guest-meals'),
                 api.get('/notifications'),
-                getDailyInfo()
+                getDailyInfo(),
+                api.get('/settings')
             ]);
 
-            const [membersRes, expensesRes, marketRes, mealsRes, guestMealsRes, notificationsRes, dailyRes] = results;
+            const [membersRes, expensesRes, marketRes, mealsRes, guestMealsRes, notificationsRes, dailyRes, settingsRes] = results;
 
             if (membersRes.status === 'fulfilled') setMembers(membersRes.value.data);
             if (expensesRes.status === 'fulfilled') setExpenses(expensesRes.value.data);
@@ -54,6 +56,7 @@ export const DataProvider = ({ children }) => {
             if (guestMealsRes.status === 'fulfilled') setGuestMeals(guestMealsRes.value.data);
             if (notificationsRes.status === 'fulfilled') setNotifications(notificationsRes.value.data);
             if (dailyRes.status === 'fulfilled') setDailyInfo(dailyRes.value);
+            if (settingsRes.status === 'fulfilled') setSettings(settingsRes.value.data);
             setLoadingDaily(false);
 
             if (marketRes.status === 'fulfilled') {
@@ -385,7 +388,12 @@ export const DataProvider = ({ children }) => {
     // Guest Meal Functions
     const addGuestMeal = useCallback(async (date, memberId, guestMealType, mealTime) => {
         try {
-            const amount = MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0;
+            // Priority 1: DB Settings
+            // Priority 2: MESS_CONFIG Hardcoded
+            const settingKey = `guest_price_${guestMealType}`;
+            const dbSetting = settings.find(s => s.key === settingKey);
+            const amount = dbSetting ? Number(dbSetting.value) : (MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0);
+
             const response = await api.post('/guest-meals', { date, memberId, guestMealType, mealTime, amount });
             setGuestMeals(prev => [...prev, response.data]);
         } catch (error) {
@@ -403,16 +411,18 @@ export const DataProvider = ({ children }) => {
         }
     }, [refreshGuestMeals]);
 
-    const clearMonthlyData = useCallback(async (month, password, category = null) => {
+    const clearMonthlyData = useCallback(async (month, password, category = null) => { ... }, [refreshData]);
+
+    const updateSystemSetting = useCallback(async (key, value) => {
         try {
-            const response = await api.delete('/admin/clear-month', { data: { month, password, category } });
-            await refreshData();
-            return { success: true, data: response.data };
+            await api.put(`/settings/${key}`, { value });
+            setSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
+            return { success: true };
         } catch (error) {
-            console.error('Clear monthly data failed', error);
-            return { success: false, error: error.response?.data?.message || 'Failed to clear monthly data' };
+            console.error('Update setting failed', error);
+            return { success: false, error: error.response?.data?.message || 'Update failed' };
         }
-    }, [refreshData]);
+    }, []);
 
     const getMonthlyDataPreview = useCallback(async (month) => {
         try {
@@ -485,12 +495,15 @@ export const DataProvider = ({ children }) => {
         getCookingDuty,
         refreshData,
         dailyInfo,
+        settings,
+        updateSystemSetting,
         loadingDaily,
         sendBulkWhatsAppOfficial
     }), [
         members, expenses, filteredExpenses, meals, filteredMeals, guestMeals, filteredGuestMeals,
         globalMonth, setGlobalMonth, notifications, marketSchedule,
-        managerAllocation, cookingDuties, clearMonthlyData, getMonthlyDataPreview, dailyInfo, loadingDaily, refreshData,
+        managerAllocation, cookingDuties, clearMonthlyData, getMonthlyDataPreview, dailyInfo, settings, 
+        updateSystemSetting, loadingDaily, refreshData,
         addMember, removeMember, updateMember, addMeal, removeMeal, addGuestMeal,
         removeGuestMeal, sendNotification,
         sendPaymentNotifications, markPaymentAsPaid, updateNotification,

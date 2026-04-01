@@ -310,7 +310,13 @@ const Chip = ({ icon: Icon, value, label, color }) => (
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 const MonthlySummary = () => {
-    const { globalMonth, setGlobalMonth } = useData();
+    const { globalMonth, setGlobalMonth, settings } = useData();
+
+    // Helper to get setting value
+    const getSettingValue = (key, fallback) => {
+        const s = settings.find(item => item.key === key);
+        return s ? Number(s.value) : fallback;
+    };
 
     // Sync local selection with global selection
     // Parse globalMonth safely
@@ -517,7 +523,12 @@ const MonthlySummary = () => {
             // ── Guest meals (detailed: date, type, time, amount) ──
             if (inv.guestMeals.length > 0) {
                 sectionHeader('GUEST MEALS', 168, 85, 247);
-                const guestPrices = MESS_CONFIG.GUEST_CONFIG.PRICES;
+                const guestPrices = {
+                    fish: getSettingValue('guest_price_fish', MESS_CONFIG.GUEST_CONFIG.PRICES.fish),
+                    meat: getSettingValue('guest_price_meat', MESS_CONFIG.GUEST_CONFIG.PRICES.meat),
+                    veg: getSettingValue('guest_price_veg', MESS_CONFIG.GUEST_CONFIG.PRICES.veg),
+                    egg: getSettingValue('guest_price_egg', MESS_CONFIG.GUEST_CONFIG.PRICES.egg)
+                };
                 const guestRows = inv.guestMeals.map(g => {
                     const price = g.amount || guestPrices[g.guestMealType] || 0;
                     return [

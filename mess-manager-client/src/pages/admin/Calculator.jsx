@@ -17,9 +17,22 @@ const Calculator = () => {
     const { user } = useAuth();
     const {
         members, expenses, meals, guestMeals, sendNotification,
-        sendPaymentNotifications, sendBulkWhatsAppOfficial, globalMonth
+        sendPaymentNotifications, sendBulkWhatsAppOfficial, globalMonth, settings
     } = useData();
-    const MIN_MEALS = MESS_CONFIG.MIN_MEALS_PER_MONTH;
+
+    // Dynamic Settings with Fallbacks
+    const getSettingValue = (key, fallback) => {
+        const s = settings.find(item => item.key === key);
+        return s ? Number(s.value) : fallback;
+    };
+
+    const MIN_MEALS = getSettingValue('min_meals_month', MESS_CONFIG.MIN_MEALS_PER_MONTH);
+    const guestMealPrices = {
+        fish: getSettingValue('guest_price_fish', MESS_CONFIG.GUEST_CONFIG.PRICES.fish),
+        meat: getSettingValue('guest_price_meat', MESS_CONFIG.GUEST_CONFIG.PRICES.meat),
+        veg: getSettingValue('guest_price_veg', MESS_CONFIG.GUEST_CONFIG.PRICES.veg),
+        egg: getSettingValue('guest_price_egg', MESS_CONFIG.GUEST_CONFIG.PRICES.egg)
+    };
 
     // -- State for Inputs --
 
@@ -114,13 +127,8 @@ const Calculator = () => {
             return sum + Math.max(MIN_MEALS, mealCount);
         }, 0);
 
-        // Guest meal price mapping
-        const guestMealPrices = {
-            fish: 40,
-            egg: 40,
-            veg: 35,
-            meat: 50
-        };
+        // Guest meal price mapping - already defined above at component level
+        // const guestMealPrices = { ... };
 
         // Calculate guest adjustment (total guest meal cost)
         const guestAdjustment = guestMeals.reduce((sum, g) => {
@@ -153,10 +161,10 @@ const Calculator = () => {
         }));
     };
 
-    // Initialize individual inputs when members change, auto-fetch from database
+    //    // Initialize individual inputs when members change, auto-fetch from database
     useEffect(() => {
-        const guestMealPrices = MESS_CONFIG.GUEST_CONFIG.PRICES;
-
+        // guestMealPrices and MIN_MEALS are already defined at the component level via settings
+        
         console.log('Auto-fetching individual data...');
         console.log('Members:', members);
         console.log('Meals:', meals);

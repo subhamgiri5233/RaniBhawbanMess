@@ -285,6 +285,9 @@ const MemberReportTable = React.memo(({ member, snapshotM, exportingId, onExport
                                         </div>
                                     </div>
                                 </td>
+                                
+                                {/* ... skipping other tds for brevity in targetContent match but I need to reach the meal count td ... */}
+                                {/* Actually I'll just replace the whole tbody content for that row */}
 
                                 {/* Deposit */}
                                 <td className="px-4 py-4 text-center">
@@ -332,9 +335,9 @@ const MemberReportTable = React.memo(({ member, snapshotM, exportingId, onExport
                                 <td className="px-4 py-4 text-center">
                                     <div className="flex flex-col items-center">
                                         <span className="font-black text-sm text-slate-600 dark:text-slate-300">
-                                            {member.regularMeals < 40 ? (
+                                            {member.regularMeals < MIN_MEALS ? (
                                                 <span className="flex items-center gap-1">
-                                                    40
+                                                    {MIN_MEALS}
                                                     <span className="text-[10px] text-slate-400 font-bold">({member.regularMeals})</span>
                                                 </span>
                                             ) : member.regularMeals}
@@ -503,7 +506,15 @@ const MemberReportTable = React.memo(({ member, snapshotM, exportingId, onExport
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const Reports = () => {
-    const { globalMonth } = useData();
+    const { globalMonth, settings } = useData();
+
+    // Helper to get setting value
+    const getSettingValue = (key, fallback) => {
+        const s = settings.find(item => item.key === key);
+        return s ? Number(s.value) : fallback;
+    };
+
+    const MIN_MEALS = getSettingValue('min_meals_month', MESS_CONFIG.MIN_MEALS_PER_MONTH);
 
     const [year, month] = useMemo(() => {
         if (!globalMonth || typeof globalMonth !== 'string') {
@@ -700,7 +711,12 @@ const Reports = () => {
             // ── Guest meals (detailed) ──
             if (inv.guestMeals.length > 0) {
                 sectionHeader('GUEST MEALS', 168, 85, 247);
-                const guestPrices = MESS_CONFIG.GUEST_CONFIG.PRICES;
+                const guestPrices = {
+                    fish: getSettingValue('guest_price_fish', MESS_CONFIG.GUEST_CONFIG.PRICES.fish),
+                    meat: getSettingValue('guest_price_meat', MESS_CONFIG.GUEST_CONFIG.PRICES.meat),
+                    veg: getSettingValue('guest_price_veg', MESS_CONFIG.GUEST_CONFIG.PRICES.veg),
+                    egg: getSettingValue('guest_price_egg', MESS_CONFIG.GUEST_CONFIG.PRICES.egg)
+                };
                 const guestRows = inv.guestMeals.map(g => {
                     const price = g.amount || guestPrices[g.guestMealType] || 0;
                     return [
