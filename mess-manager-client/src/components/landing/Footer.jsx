@@ -49,7 +49,7 @@ const Footer = () => {
                 <div>
                     <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Built With</p>
                     <div className="flex flex-wrap gap-2">
-                        {['React', 'Node.js', 'MongoDB', 'Gemini AI'].map(tech => (
+                        {['React', 'Node.js', 'MongoDB', 'Express'].map(tech => (
                             <span key={tech} className="px-3 py-1 bg-white/5 border border-white/10 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-lg">
                                 {tech}
                             </span>

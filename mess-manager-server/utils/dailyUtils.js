@@ -1,54 +1,37 @@
-const { getAIGitaVerse, getAIImportance } = require('./aiUtils');
+const { getDailyGitaVerse } = require('./gitaUtils');
 
-const BUILD_ID = "2026-03-08-CLEAN-PUSH-V5"; // Clear generic fallbacks
+const BUILD_ID = "2026-04-01-NO-AI";
 
 /**
- * Gets the combined daily info (Gita verse + AI-generated occasion & insights).
- * dailyInfo.js is no longer needed — Gemini handles everything.
+ * Gets the combined daily info (Gita verse + static occasion info).
+ * AI has been removed — uses only static data from gitaUtils.
  * @param {Date} date - The date to check for.
  * @returns {Promise<Object>}
  */
-let lastAIError = null;
-
 async function getCombinedDailyInfo(date = new Date()) {
     const key = `${date.getMonth() + 1}-${date.getDate()}`;
 
-    // Build date string for the AI prompt
-    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'];
-    const dateStr = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
-
-    // Get the correct sequential verse for today
-    const { getDailyGitaVerse } = require('./gitaUtils');
-    const baseVerse = getDailyGitaVerse(date);
-
     try {
-        // Fetch both with error capturing
-        const gita = await getAIGitaVerse(dateStr, baseVerse).catch(err => {
-            lastAIError = `Gita Error: ${err.message}`;
-            return null; // Fallback handled inside getAIGitaVerse
-        });
+        const gita = getDailyGitaVerse(date);
 
-        const aiResult = await getAIImportance(dateStr).catch(err => {
-            lastAIError = `Importance Error: ${err.message}`;
-            return null; // Fallback handled inside getAIImportance
-        });
-
-        // Shape the occasion from AI output
-        const occasion = aiResult
-            ? { name: aiResult.name, emoji: aiResult.emoji, color: 'text-emerald-600' }
-            : null;
-
-        const aiImportance = aiResult?.insights || [];
+        // Build a simple static verse result
+        const gitaResult = gita ? {
+            chapterName: gita.chapterName,
+            verse: String(gita.verse),
+            sanskrit: gita.sanskrit,
+            meaning_bn: gita.meaning_bn,
+            insight: gita.insight || "প্রতিদিন গীতার একটি শ্লোক পাঠ জীবনকে অর্থবহ করে তোলে।",
+            ai: false
+        } : null;
 
         return {
             buildId: BUILD_ID,
-            gita,
-            occasion,
+            gita: gitaResult,
+            occasion: null,
             effects: null,
             dateKey: key,
-            aiImportance,
-            aiError: lastAIError
+            aiImportance: [],
+            aiError: null
         };
     } catch (e) {
         return { error: e.message, buildId: BUILD_ID };

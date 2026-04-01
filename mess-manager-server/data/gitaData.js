@@ -1046,8 +1046,6 @@ const GITA_CHAPTER_3 = {
     ]
 };
 
-
-
 const GITA_CHAPTER_4 = {
     "chapter": 4,
     "chapter_name_bn": "জ্ঞানযোগ",

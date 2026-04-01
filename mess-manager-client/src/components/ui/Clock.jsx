@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import AnalogClock from './AnalogClock';
 import DigitalClock from './DigitalClock';
 import GitaCard from './GitaCard';
-import ImportanceCard from './ImportanceCard';
+
 
 
 // ==================== STYLES ====================
@@ -165,15 +165,7 @@ const Clock = ({ showGita = false }) => {
     // Memoize Bengali date - UPDATES ONLY ONCE PER DAY
     const bengaliDate = useMemo(() => formatBengaliDate(today), [today]);
 
-    const specialOccasion = useMemo(() => {
-        const occasion = occasionData;
-        const primary = Array.isArray(occasion) ? occasion[0] : occasion;
-        return primary || {
-            name: `Regular Day - ${dateInfo.formattedDate}`,
-            emoji: '📅',
-            color: 'text-gray-600'
-        };
-    }, [occasionData, dateInfo.formattedDate]);
+
 
     // Check for birthdays - UPDATES ONLY ONCE PER DAY
     const birthdayMembers = useMemo(() => {
@@ -198,43 +190,7 @@ const Clock = ({ showGita = false }) => {
     }, [members, today]);
 
     // Memoize today's importance - UPDATES ONLY ONCE PER DAY
-    const todayImportance = useMemo(() => {
-        const items = [];
 
-        // Birthday messages always come first (with category for color badge)
-        if (birthdayMembers.length > 0) {
-            birthdayMembers.forEach(member => {
-                const isCurrentUser = user && (member._id === user.id || member._id === user._id);
-                if (isCurrentUser) {
-                    items.push({
-                        icon: '🎂',
-                        category: 'Famous Birth',
-                        event: `${member.name}'s Birthday! 🎉`,
-                        text: `Happy Birthday! Wishing you a wonderful day filled with joy, laughter, and happiness!`,
-                        ai: false
-                    });
-                } else {
-                    const pronoun = member.gender === 'female' ? 'her' : 'him';
-                    items.push({
-                        icon: '🎂',
-                        category: 'Famous Birth',
-                        event: `${member.name}'s Birthday`,
-                        text: `Today is ${member.name}'s birthday! Don't forget to wish ${pronoun} 🎂`,
-                        ai: false
-                    });
-                }
-            });
-        }
-
-        // All AI-searched events (Bengali festivals, national days, history, etc.)
-        if (dailyInfo?.aiImportance && Array.isArray(dailyInfo.aiImportance)) {
-            dailyInfo.aiImportance.forEach(insight => {
-                items.push({ ...insight, ai: true });
-            });
-        }
-
-        return items;
-    }, [birthdayMembers, user, dailyInfo?.aiImportance]);
 
     // Memoize date effect - UPDATES ONLY ONCE PER DAY
     const combinedDateEffect = useMemo(() => {
@@ -357,12 +313,7 @@ const Clock = ({ showGita = false }) => {
                 />
             )}
 
-            <ImportanceCard
-                specialOccasion={specialOccasion}
-                todayImportance={todayImportance}
-                dateInfo={dateInfo}
-                loadingInfo={loadingInfo}
-            />
+
         </div>
     );
 };

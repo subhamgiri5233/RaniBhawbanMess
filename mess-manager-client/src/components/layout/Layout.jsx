@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import AnimatedRoutes from '../transitions/AnimatedRoutes';
-import JarvisAssistant from '../ui/JarvisAssistant';
+
 import GlobalMonthSelector from '../ui/GlobalMonthSelector';
 
 import { useState } from 'react';
@@ -98,8 +98,7 @@ const Layout = () => {
                 </div>
             </main>
 
-            {/* JARVIS — Global AI Voice Assistant */}
-            <JarvisAssistant />
+
         </div>
     );
 };
