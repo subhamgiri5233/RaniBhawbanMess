@@ -13,8 +13,16 @@ const Meals = () => {
     const {
         members, meals, guestMeals, addMeal, removeMeal,
         addGuestMeal, removeGuestMeal,
-        refreshData, globalMonth, setGlobalMonth
+        refreshData, globalMonth, setGlobalMonth, settings
     } = useData();
+
+    // Helper to get setting value
+    const getSettingValue = (key, fallback) => {
+        const s = settings.find(item => item.key === key);
+        return s ? Number(s.value) : fallback;
+    };
+
+    const MIN_MEALS = getSettingValue('min_meals_month', MESS_CONFIG.MIN_MEALS_PER_MONTH);
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [showGuestDialog, setShowGuestDialog] = useState(false);
     const [selectedMember, setSelectedMember] = useState('');
@@ -51,10 +59,15 @@ const Meals = () => {
 
     // Guest meal helpers from global config - Memoized
     const { guestMealPrices, guestMealIcons, guestMealLabels } = useMemo(() => ({
-        guestMealPrices: MESS_CONFIG.GUEST_CONFIG.PRICES,
+        guestMealPrices: {
+            fish: getSettingValue('guest_price_fish', MESS_CONFIG.GUEST_CONFIG.PRICES.fish),
+            meat: getSettingValue('guest_price_meat', MESS_CONFIG.GUEST_CONFIG.PRICES.meat),
+            veg: getSettingValue('guest_price_veg', MESS_CONFIG.GUEST_CONFIG.PRICES.veg),
+            egg: getSettingValue('guest_price_egg', MESS_CONFIG.GUEST_CONFIG.PRICES.egg)
+        },
         guestMealIcons: MESS_CONFIG.GUEST_CONFIG.ICONS,
         guestMealLabels: MESS_CONFIG.GUEST_CONFIG.LABELS
-    }), []);
+    }), [settings]);
 
     const handleAddGuest = async () => {
         if (!selectedMember) {
@@ -85,55 +98,72 @@ const Meals = () => {
     };
 
 
-    // Get guest meals for current month from context - now global
-    const currentMonth = globalMonth;
+    // --- PERFORMANCE OPTIMIZATION: CENTRALIZED INDEXING ---
+    // Instead of filtering the entire 'meals' and 'guestMeals' array for every member (O(N*M)),
+    // we process it once per render (O(N+M)) to build a lookup map.
+    const memberStats = useMemo(() => {
+        const stats = {};
+        const currentM = globalMonth;
 
-    const allGuestMeals = useMemo(() =>
-        (guestMeals || []).filter(m => m?.date && m.date.startsWith(currentMonth))
-        , [guestMeals, currentMonth]);
+        // Initialize stats for each member
+        (members || []).forEach(m => {
+            const mId = m._id || m.id;
+            stats[mId] = { mealCount: 0, guestCount: 0, guestTotal: 0, guestMeals: [] };
+        });
 
-    // Filter by selected member - Memoized
-    const filteredGuestMeals = useMemo(() =>
-        filterByMember === 'all'
-            ? allGuestMeals
-            : allGuestMeals.filter(m => m?.memberId === filterByMember)
-        , [allGuestMeals, filterByMember]);
+        // Single pass on meals
+        (meals || []).forEach(meal => {
+            if (meal?.memberId && meal?.date?.startsWith(currentM)) {
+                if (stats[meal.memberId]) stats[meal.memberId].mealCount++;
+            }
+        });
 
-    const memberGuestTotals = useMemo(() =>
-        (members || []).map(member => {
-            const mId = member?._id || member?.id;
-            if (!mId) return null;
-            const memberGuests = allGuestMeals.filter(g => g?.memberId === mId);
-            const total = memberGuests.reduce((sum, g) => sum + (guestMealPrices[g?.guestMealType] || 0), 0);
+        // Single pass on guest meals
+        (guestMeals || []).forEach(gm => {
+            if (gm?.memberId && gm?.date?.startsWith(currentM)) {
+                if (stats[gm.memberId]) {
+                    stats[gm.memberId].guestCount++;
+                    const price = guestMealPrices[gm.guestMealType] || 0;
+                    stats[gm.memberId].guestTotal += price;
+                    stats[gm.memberId].guestMeals.push(gm);
+                }
+            }
+        });
+
+        return stats;
+    }, [members, meals, guestMeals, globalMonth, guestMealPrices]);
+
+    // Derived statistics using the map (O(1) lookups)
+    const membersBelowMinCount = useMemo(() => {
+        return (members || []).filter(m => (memberStats[m._id || m.id]?.mealCount || 0) < MIN_MEALS).length;
+    }, [members, memberStats, MIN_MEALS]);
+
+    const memberGuestTotals = useMemo(() => {
+        return (members || []).map(member => {
+            const s = memberStats[member._id || member.id];
+            if (!s || s.guestCount === 0) return null;
             return {
                 member,
-                count: memberGuests.length,
-                total,
-                meals: memberGuests
+                count: s.guestCount,
+                total: s.guestTotal,
+                meals: s.guestMeals
             };
-        }).filter(m => m && m.count > 0)
-        , [members, allGuestMeals, guestMealPrices]);
+        }).filter(Boolean);
+    }, [members, memberStats]);
 
     const totalGuestCost = useMemo(() =>
         memberGuestTotals.reduce((sum, m) => sum + m.total, 0)
         , [memberGuestTotals]);
 
-    // Calculate selected member's total (for individual filter view) - Memoized
-    const selectedMemberInfo = useMemo(() =>
-        filterByMember !== 'all'
-            ? (members || []).find(m => m && (m._id || m.id) === filterByMember)
-            : null
-        , [members, filterByMember]);
+    const allGuestMeals = useMemo(() => {
+        return Object.values(memberStats).flatMap(s => s.guestMeals);
+    }, [memberStats]);
 
-    // Calculate members below minimum - Memoized
-    const membersBelowMinCount = useMemo(() => {
-        return (members || []).filter(m => {
-            if (!m) return false;
-            const mId = m._id || m.id;
-            const memberMeals = (meals || []).filter(meal => meal && meal.memberId === mId && meal.date && meal.date.startsWith(currentMonth)).length;
-            return memberMeals < MESS_CONFIG.MIN_MEALS_PER_MONTH;
-        }).length;
-    }, [members, meals, currentMonth]);
+    const filteredGuestMeals = useMemo(() =>
+        filterByMember === 'all'
+            ? allGuestMeals
+            : memberStats[filterByMember]?.guestMeals || []
+        , [allGuestMeals, filterByMember, memberStats]);
 
     return (
         <motion.div
@@ -171,7 +201,7 @@ const Meals = () => {
                         <span className="text-[10px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Billing Rule:</span>
                     </div>
                     <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-tight">
-                        <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-md font-black">{MESS_CONFIG.MIN_MEALS_PER_MONTH} MEALS MINIMUM</span>
+                        <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-md font-black">{MIN_MEALS} MEALS MINIMUM</span>
                         PER PERSON PER MONTH
                     </div>
                     {membersBelowMinCount > 0 && (
@@ -354,7 +384,7 @@ const Meals = () => {
                 </div>
             </div>
 
-            {/* Add Guest Dialog */}
+            {/* Add Guest Dialog - WOW Premium Style */}
             <AnimatePresence>
                 {showGuestDialog && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
@@ -363,30 +393,34 @@ const Meals = () => {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setShowGuestDialog(false)}
-                            className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+                            className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl"
                         />
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            initial={{ opacity: 0, scale: 0.9, y: 30 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-xl"
+                            exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                            className="relative w-full max-w-xl group"
                         >
-                            <Card className="p-10 shadow-2xl shadow-black/50 border-white/10 overflow-hidden relative">
-                                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                            {/* Animated Background Glow */}
+                            <div className="absolute -inset-1 bg-gradient-to-r from-primary-500 via-indigo-500 to-purple-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                            
+                            <Card className="p-10 shadow-3xl shadow-black/60 border-white/10 dark:bg-slate-900/90 overflow-hidden relative backdrop-blur-2xl rounded-[2.5rem]">
+                                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none group-hover:scale-125 transition-transform duration-700">
                                     <UtensilsCrossed size={160} />
                                 </div>
 
                                 <div className="flex justify-between items-start mb-10">
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <Sparkles size={16} className="text-primary-500" />
-                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">External Registry</span>
+                                            <Sparkles size={16} className="text-primary-500 animate-pulse" />
+                                            <span className="text-[10px] font-black text-primary-500 uppercase tracking-[0.4em]">Administrative Registry</span>
                                         </div>
-                                        <h3 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Add Guest Record</h3>
+                                        <h3 className="text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tighter">Add Guest Record</h3>
+                                        <p className="text-xs font-bold text-slate-400 mt-1">Manual entry for host member accounts</p>
                                     </div>
                                     <button
                                         onClick={() => setShowGuestDialog(false)}
-                                        className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl transition-all active:scale-95"
+                                        className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-2xl transition-all active:scale-90 hover:rotate-90 duration-300"
                                     >
                                         <X size={20} />
                                     </button>
@@ -396,12 +430,15 @@ const Meals = () => {
                                     <div className="space-y-6">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Target Date</label>
-                                            <input
-                                                type="date"
-                                                value={guestDate}
-                                                onChange={(e) => setGuestDate(e.target.value)}
-                                                className="w-full p-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-white/5 rounded-2xl focus:ring-4 focus:ring-primary-500/10 outline-none text-slate-900 dark:text-slate-100 font-black uppercase tracking-tight transition-all"
-                                            />
+                                            <div className="relative group/input">
+                                                <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/input:text-primary-500 transition-colors" />
+                                                <input
+                                                    type="date"
+                                                    value={guestDate}
+                                                    onChange={(e) => setGuestDate(e.target.value)}
+                                                    className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-white/5 rounded-2xl focus:ring-4 focus:ring-primary-500/10 outline-none text-slate-900 dark:text-slate-100 font-black uppercase tracking-tight transition-all"
+                                                />
+                                            </div>
                                         </div>
 
                                         <div className="space-y-2">
@@ -427,13 +464,14 @@ const Meals = () => {
                                                         type="button"
                                                         onClick={() => setGuestMealTime(time)}
                                                         className={cn(
-                                                            "p-4 rounded-2xl border-2 transition-all font-black uppercase tracking-widest text-[10px]",
+                                                            "p-4 rounded-2xl border-2 transition-all font-black uppercase tracking-widest text-[10px] flex flex-col items-center gap-1",
                                                             guestMealTime === time
-                                                                ? "border-primary-500 bg-primary-500/10 text-primary-600 shadow-lg shadow-primary-500/10"
+                                                                ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
                                                                 : "border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200"
                                                         )}
                                                     >
-                                                        {time === 'lunch' ? '🌞 Lunch' : '🌙 Dinner'}
+                                                        <span className="text-lg">{time === 'lunch' ? '☀️' : '🌙'}</span>
+                                                        {time}
                                                     </button>
                                                 ))}
                                             </div>
@@ -441,7 +479,7 @@ const Meals = () => {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Select Menu Item</label>
+                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Selection Menu</label>
                                         <div className="grid grid-cols-2 gap-4">
                                             {Object.entries(guestMealLabels)
                                                 .filter(([key]) => ['fish', 'egg', 'veg', 'meat'].includes(key))
@@ -450,33 +488,43 @@ const Meals = () => {
                                                         key={key}
                                                         onClick={() => setSelectedMealType(key)}
                                                         className={cn(
-                                                            "p-5 rounded-3xl border-2 transition-all group flex flex-col items-center justify-center gap-1",
+                                                            "p-5 rounded-[2rem] border-2 transition-all group flex flex-col items-center justify-center gap-1 relative overflow-hidden",
                                                             selectedMealType === key
-                                                                ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-xl shadow-emerald-500/10 hover:scale-[1.02]"
-                                                                : "border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200"
+                                                                ? "border-emerald-500 bg-emerald-500 text-white shadow-xl shadow-emerald-500/30 scale-105"
+                                                                : "border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200 hover:bg-white dark:hover:bg-slate-800"
                                                         )}
                                                     >
-                                                        <div className="text-3xl mb-1 transition-transform group-hover:scale-125 duration-500">{guestMealIcons[key]}</div>
-                                                        <div className="font-black text-[10px] uppercase tracking-widest">{label}</div>
-                                                        <div className="text-sm font-black mt-1">₹{guestMealPrices[key]}</div>
+                                                        {selectedMealType === key && (
+                                                            <motion.div
+                                                                layoutId="admin-selection-glow"
+                                                                className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
+                                                            />
+                                                        )}
+                                                        <div className="text-3xl mb-1 group-hover:scale-125 transition-transform duration-500">{guestMealIcons[key]}</div>
+                                                        <div className="font-black text-[10px] uppercase tracking-widest opacity-80">{label}</div>
+                                                        <div className={cn(
+                                                            "text-sm font-black mt-1",
+                                                            selectedMealType === key ? "text-white" : "text-slate-900 dark:text-white"
+                                                        )}>₹{guestMealPrices[key]}</div>
                                                     </button>
                                                 ))}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4 mt-12">
+                                <div className="flex gap-4 mt-12 pt-8 border-t border-slate-100 dark:border-white/5">
                                     <button
                                         onClick={() => setShowGuestDialog(false)}
-                                        className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95"
+                                        className="flex-1 py-5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-black uppercase tracking-widest text-[10px] rounded-[1.5rem] hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-500 transition-all active:scale-95"
                                     >
                                         Abort
                                     </button>
                                     <button
                                         onClick={handleAddGuest}
-                                        className="flex-2 py-4 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl shadow-primary-500/30 hover:shadow-primary-500/50 transition-all active:scale-95 flex items-center justify-center gap-2"
+                                        className="flex-[2] py-5 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-[1.5rem] shadow-2xl shadow-primary-500/40 hover:shadow-primary-500/60 transition-all active:scale-95 flex items-center justify-center gap-3 relative overflow-hidden group/btn"
                                     >
-                                        Finalize Registry <ArrowRight size={16} />
+                                        <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000"></div>
+                                        Finalize Registry <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
                                     </button>
                                 </div>
                             </Card>

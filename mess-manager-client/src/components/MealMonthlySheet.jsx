@@ -122,21 +122,29 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
         return mealsMap.has(`${memberId}| ${dateStr}| ${type} `);
     };
 
-    // 4. Calculate Totals - Memoized per month/year
+    // 4. Calculate All Member Totals in ONE PASS (O(N + M))
     const currentMonthStr = useMemo(() => format(currentDate, 'yyyy-MM'), [currentDate]);
-
-    const calculateTotal = useMemo(() => (memberId) => {
-        return (meals || []).filter(m => m && m.memberId === memberId && m.date && m.date.startsWith(currentMonthStr)).length;
-    }, [meals, currentMonthStr]);
-
-    // Calculate Grand Total — only for the members passed in (may be just 1 in member view)
-    const memberIds = useMemo(() => (members || []).map(m => m._id || m.id), [members]);
-    const monthlyGrandTotal = useMemo(() => {
-        return (meals || []).filter(m =>
-            m && m.date && m.date.startsWith(currentMonthStr) &&
-            memberIds.includes(m.memberId)
-        ).length;
-    }, [meals, currentMonthStr, memberIds]);
+    
+    const { memberTotals, monthlyGrandTotal } = useMemo(() => {
+        const totals = {};
+        let grandTotal = 0;
+        const currentMemberIds = new Set((members || []).map(m => m._id || m.id));
+        
+        // Initialize totals
+        currentMemberIds.forEach(id => totals[id] = 0);
+        
+        // Single pass on meals
+        (meals || []).forEach(m => {
+            if (m && m.memberId && m.date && m.date.startsWith(currentMonthStr)) {
+                if (totals[m.memberId] !== undefined) {
+                    totals[m.memberId]++;
+                    grandTotal++;
+                }
+            }
+        });
+        
+        return { memberTotals: totals, monthlyGrandTotal: grandTotal };
+    }, [meals, currentMonthStr, members]);
 
     // Interaction Logic
     const [activeCell, setActiveCell] = useState(null);
@@ -172,61 +180,81 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
         setActiveCell(null);
     };
 
+    // 5. MEMOIZED GRID - THIS IS THE CRITICAL UI PERFORMANCE FIX
+    // We isolate the grid so it only re-renders when data (meals/members) changes,
+    // not when the 'activeCell' (popup) state changes.
+    const MealGrid = useMemo(() => {
+        return (
+            <table className="w-full text-[10px] md:text-xs border-collapse bg-transparent transition-colors">
+                <thead>
+                    <tr className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-white/5 sticky top-0 z-20">
+                        <th className="p-4 border-r border-slate-100 dark:border-white/5 text-left min-w-[180px] sticky left-0 bg-slate-50 dark:bg-slate-900 z-30 font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Inventory Registry</th>
+                        {days.map(day => {
+                            const isToday = day.dateStr === todayStr;
+                            return (
+                                <th
+                                    key={day.dayNum}
+                                    className={cn(
+                                        "p-1 border-r border-slate-100 dark:border-white/5 w-10 font-black transition-all relative",
+                                        isToday
+                                            ? 'bg-primary-600 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+                                            : hoveredCell?.dayNum === day.dayNum
+                                                ? 'bg-primary-500 text-white'
+                                                : 'text-slate-400 dark:text-slate-500 bg-white/40 dark:bg-slate-950/40'
+                                    )}
+                                >
+                                    <div className="flex flex-col items-center gap-0.5">
+                                        <span>{day.dayNum}</span>
+                                        {isToday && (
+                                            <span className="text-[6px] text-white/80 font-black tracking-tighter animate-pulse">
+                                                NOW
+                                            </span>
+                                        )}
+                                    </div>
+                                    {isToday && (
+                                        <div className="absolute inset-0 border-x-2 border-primary-400/30 pointer-events-none"></div>
+                                    )}
+                                </th>
+                            );
+                        })}
+                        <th className="p-4 min-w-[100px] font-black bg-slate-50 dark:bg-slate-900 text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {(members || []).map(member => (
+                        <MealRow
+                            key={member._id || member.id}
+                            member={member}
+                            days={days}
+                            getStatus={getStatus}
+                            todayStr={todayStr}
+                            total={memberTotals[member._id || member.id] || 0}
+                            onCellClick={handleCellClick}
+                            onCellMouseEnter={setHoveredCell}
+                            onCellMouseLeave={() => setHoveredCell(null)}
+                            hoveredCell={hoveredCell}
+                        />
+                    ))}
+                </tbody>
+            </table>
+        );
+    }, [members, days, getStatus, todayStr, memberTotals, handleCellClick, hoveredCell]);
+
+    // Pre-calculate popup labels - extremely fast
+    const popupLabel = useMemo(() => {
+        if (!activeCell) return null;
+        const member = (members || []).find(m => (m._id || m.id) === activeCell.memberId);
+        return {
+            name: member?.name || 'User',
+            date: format(parseISO(activeCell.date), 'dd MMMM yyyy'),
+            type: activeCell.type === 'lunch' ? '🌞 Lunch' : '🌙 Dinner'
+        };
+    }, [activeCell, members]);
+
     return (
         <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-indigo-100 dark:border-white/5 rounded-[2rem] shadow-[0_4px_24px_rgba(79,70,229,0.13)] dark:shadow-premium-dark flex flex-col relative max-h-[700px]">
             <div className="overflow-auto custom-scrollbar flex-1 rounded-t-[2rem]">
-                <table className="w-full text-[10px] md:text-xs border-collapse bg-transparent transition-colors">
-                    <thead>
-                        <tr className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-white/5 sticky top-0 z-20">
-                            <th className="p-4 border-r border-slate-100 dark:border-white/5 text-left min-w-[180px] sticky left-0 bg-slate-50 dark:bg-slate-900 z-30 font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Inventory Registry</th>
-                            {days.map(day => {
-                                const isToday = day.dateStr === todayStr;
-                                return (
-                                    <th
-                                        key={day.dayNum}
-                                        className={cn(
-                                            "p-1 border-r border-slate-100 dark:border-white/5 w-10 font-black transition-all relative",
-                                            isToday
-                                                ? 'bg-primary-600 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
-                                                : hoveredCell?.dayNum === day.dayNum
-                                                    ? 'bg-primary-500 text-white'
-                                                    : 'text-slate-400 dark:text-slate-500 bg-white/40 dark:bg-slate-950/40'
-                                        )}
-                                    >
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <span>{day.dayNum}</span>
-                                            {isToday && (
-                                                <span className="text-[6px] text-white/80 font-black tracking-tighter animate-pulse">
-                                                    NOW
-                                                </span>
-                                            )}
-                                        </div>
-                                        {isToday && (
-                                            <div className="absolute inset-0 border-x-2 border-primary-400/30 pointer-events-none"></div>
-                                        )}
-                                    </th>
-                                );
-                            })}
-                            <th className="p-4 min-w-[100px] font-black bg-slate-50 dark:bg-slate-900 text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {(members || []).map(member => (
-                            <MealRow
-                                key={member._id || member.id}
-                                member={member}
-                                days={days}
-                                getStatus={getStatus}
-                                todayStr={todayStr}
-                                total={calculateTotal(member._id || member.id)}
-                                onCellClick={handleCellClick}
-                                onCellMouseEnter={setHoveredCell}
-                                onCellMouseLeave={() => setHoveredCell(null)}
-                                hoveredCell={hoveredCell}
-                            />
-                        ))}
-                    </tbody>
-                </table>
+                {MealGrid}
             </div>
 
             <div className="p-6 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 rounded-b-[2rem] z-20 relative">
@@ -257,7 +285,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
             </div>
 
             <AnimatePresence>
-                {activeCell && (
+                {activeCell && popupLabel && (
                     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -284,10 +312,10 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                                         <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Logistics Update</span>
                                     </div>
                                     <h3 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
-                                        {(members || []).find(m => (m._id || m.id) === activeCell?.memberId)?.name}'s {activeCell?.type === 'lunch' ? '🌞 Lunch' : '🌙 Dinner'}
+                                        {popupLabel.name}'s {popupLabel.type}
                                     </h3>
                                     <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
-                                        Recording for {activeCell?.date ? format(parseISO(activeCell.date), 'dd MMMM yyyy') : 'Loading...'}
+                                        Recording for {popupLabel.date}
                                     </p>
                                 </div>
 

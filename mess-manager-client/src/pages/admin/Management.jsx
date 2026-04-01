@@ -4,9 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock, CheckCircle2, Clock } from 'lucide-react';
+import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock, CheckCircle2, Clock, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
 const Management = () => {
@@ -138,16 +139,84 @@ const Management = () => {
         }
     };
 
-    // Settings Management
-    const [isSaving, setIsSaving] = useState(false);
-    const handleUpdateSetting = async (key, value) => {
-        setIsSaving(true);
-        const res = await updateSystemSetting(key, value);
-        setIsSaving(false);
-        if (!res.success) alert(res.error);
-    };
+    // System Settings Logic - Manual Save Pattern
+    const SettingItem = ({ label, settingKey, icon: Icon, unit = '' }) => {
+        const globalValue = settings.find(s => s.key === settingKey)?.value || '';
+        const [localValue, setLocalValue] = useState(globalValue);
+        const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
-    const getSettingValue = (key) => settings.find(s => s.key === key)?.value || '';
+        // Sync with global if it changes from outside
+        useEffect(() => {
+            if (status === 'idle') setLocalValue(globalValue);
+        }, [globalValue, status]);
+
+        const isDirty = localValue !== globalValue;
+
+        const handleSave = async () => {
+            if (!isDirty || status === 'loading') return;
+            setStatus('loading');
+            const res = await updateSystemSetting(settingKey, localValue);
+            if (res.success) {
+                setStatus('success');
+                setTimeout(() => setStatus('idle'), 2000);
+            } else {
+                setStatus('error');
+                alert(res.error);
+                setTimeout(() => setStatus('idle'), 3000);
+            }
+        };
+
+        return (
+            <div className="relative group">
+                <Input
+                    label={label}
+                    type="number"
+                    value={localValue}
+                    onChange={(e) => setLocalValue(e.target.value)}
+                    icon={Icon}
+                    className="pr-12"
+                />
+                
+                <AnimatePresence>
+                    {(isDirty || status !== 'idle') && (
+                        <motion.div
+                            initial={{ opacity: 0, x: 10, scale: 0.8 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            exit={{ opacity: 0, x: 10, scale: 0.8 }}
+                            className="absolute right-3 bottom-4 z-20"
+                        >
+                            <button
+                                onClick={handleSave}
+                                disabled={status === 'loading'}
+                                className={cn(
+                                    "p-2.5 rounded-xl transition-all shadow-lg active:scale-90",
+                                    status === 'loading' && "bg-slate-100 dark:bg-slate-800 text-slate-400 rotate-180 duration-1000",
+                                    status === 'success' && "bg-emerald-500 text-white",
+                                    status === 'error' && "bg-rose-500 text-white",
+                                    status === 'idle' && isDirty && "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/30"
+                                )}
+                            >
+                                {status === 'loading' && <div className="w-4 h-4 border-2 border-slate-300 border-t-white rounded-full animate-spin" />}
+                                {status === 'success' && <CheckCircle2 size={16} />}
+                                {status === 'error' && <X size={16} />}
+                                {status === 'idle' && isDirty && <Rocket size={16} />}
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                
+                {status === 'success' && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute -bottom-5 right-2 text-[8px] font-black text-emerald-500 uppercase tracking-widest"
+                    >
+                        Synced Successfully
+                    </motion.div>
+                )}
+            </div>
+        );
+    };
 
 
     return (
@@ -541,69 +610,42 @@ const Management = () => {
                     <div className="p-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {/* Min Meals */}
-                            <div className="space-y-4 p-6 bg-slate-50 dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-white/5">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                                        <Calendar size={16} className="text-indigo-600 dark:text-indigo-400" />
-                                    </div>
-                                    <h3 className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Monthly Rules</h3>
+                            <div className="space-y-4 p-7 bg-slate-50 dark:bg-slate-900/40 rounded-[2rem] border border-slate-100 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
+                                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover/card:scale-125 transition-transform duration-700">
+                                    <Calendar size={80} />
                                 </div>
-                                <Input
-                                    label="Min Meals Per Month"
-                                    type="number"
-                                    value={getSettingValue('min_meals_month')}
-                                    onChange={(e) => handleUpdateSetting('min_meals_month', e.target.value)}
-                                    placeholder="e.g. 40"
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Monthly Rules
+                                    </h3>
+                                </div>
+                                <SettingItem 
+                                    label="Min Meals Per Month" 
+                                    settingKey="min_meals_month" 
+                                    icon={Calendar} 
                                 />
-                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-relaxed pl-1">Members will be charged for at least this many meals each month.</p>
+                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-relaxed italic pr-4">Set the baseline meal count for monthly billing cycles.</p>
                             </div>
 
                             {/* Guest Prices */}
-                            <div className="md:col-span-1 lg:col-span-2 space-y-4 p-6 bg-slate-50 dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-white/5">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                                        <ShoppingCart size={16} className="text-emerald-600 dark:text-emerald-400" />
-                                    </div>
-                                    <h3 className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Guest Meal Pricing (৳)</h3>
+                            <div className="md:col-span-1 lg:col-span-2 space-y-4 p-7 bg-slate-50 dark:bg-slate-900/40 rounded-[2rem] border border-slate-100 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
+                                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover/card:scale-125 transition-transform duration-700">
+                                    <ShoppingCart size={80} />
+                                </div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Guest Meal Pricing (৳)
+                                    </h3>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <Input
-                                        label="🐟 Fish Price"
-                                        type="number"
-                                        value={getSettingValue('guest_price_fish')}
-                                        onChange={(e) => handleUpdateSetting('guest_price_fish', e.target.value)}
-                                    />
-                                    <Input
-                                        label="🍖 Meat Price"
-                                        type="number"
-                                        value={getSettingValue('guest_price_meat')}
-                                        onChange={(e) => handleUpdateSetting('guest_price_meat', e.target.value)}
-                                    />
-                                    <Input
-                                        label="🥗 Veg Price"
-                                        type="number"
-                                        value={getSettingValue('guest_price_veg')}
-                                        onChange={(e) => handleUpdateSetting('guest_price_veg', e.target.value)}
-                                    />
-                                    <Input
-                                        label="🥚 Egg Price"
-                                        type="number"
-                                        value={getSettingValue('guest_price_egg')}
-                                        onChange={(e) => handleUpdateSetting('guest_price_egg', e.target.value)}
-                                    />
+                                    <SettingItem label="🐟 Fish" settingKey="guest_price_fish" />
+                                    <SettingItem label="🍖 Meat" settingKey="guest_price_meat" />
+                                    <SettingItem label="🥗 Veg" settingKey="guest_price_veg" />
+                                    <SettingItem label="🥚 Egg" settingKey="guest_price_egg" />
                                 </div>
-                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-relaxed pl-1">These prices will be applied instantly to all new guest meals recorded.</p>
+                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-relaxed italic">Changes will only apply once you click the sync button on each item.</p>
                             </div>
                         </div>
-
-                        {isSaving && (
-                            <div className="mt-6 flex justify-center">
-                                <div className="flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full animate-pulse">
-                                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-ping" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Saving Changes...</span>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </Card>
             </motion.div>

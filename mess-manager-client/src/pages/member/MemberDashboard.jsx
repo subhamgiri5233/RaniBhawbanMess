@@ -13,8 +13,15 @@ import api from '../../lib/api';
 
 const MemberDashboard = () => {
     const { user } = useAuth();
-    const { members, expenses, meals, guestMeals, marketSchedule, addExpense, globalMonth } = useData();
-    const MIN_MEALS = MESS_CONFIG.MIN_MEALS_PER_MONTH;
+    const { members, expenses, meals, guestMeals, marketSchedule, addExpense, globalMonth, settings } = useData();
+
+    // Helper to get setting value
+    const getSettingValue = (key, fallback) => {
+        const s = settings.find(item => item.key === key);
+        return s ? Number(s.value) : fallback;
+    };
+
+    const MIN_MEALS = getSettingValue('min_meals_month', MESS_CONFIG.MIN_MEALS_PER_MONTH);
 
     // Avatar state — read from members list
     const [avatarSeed, setAvatarSeed] = useState(null);
@@ -103,8 +110,13 @@ const MemberDashboard = () => {
     // Calculate guest meals for this member
     const myGuestMeals = useMemo(() => (guestMeals || []).filter(g => g.memberId === user.id), [guestMeals, user.id]);
 
-    // Use centralized configuration
-    const guestMealPrices = MESS_CONFIG.GUEST_CONFIG.PRICES;
+    // Use dynamic settings for prices
+    const guestMealPrices = useMemo(() => ({
+        fish: getSettingValue('guest_price_fish', MESS_CONFIG.GUEST_CONFIG.PRICES.fish),
+        meat: getSettingValue('guest_price_meat', MESS_CONFIG.GUEST_CONFIG.PRICES.meat),
+        veg: getSettingValue('guest_price_veg', MESS_CONFIG.GUEST_CONFIG.PRICES.veg),
+        egg: getSettingValue('guest_price_egg', MESS_CONFIG.GUEST_CONFIG.PRICES.egg)
+    }), [settings]);
 
     const totalGuestAmount = useMemo(() => myGuestMeals.reduce((sum, g) => sum + (guestMealPrices[g.guestMealType] || 0), 0), [myGuestMeals, guestMealPrices]);
 
