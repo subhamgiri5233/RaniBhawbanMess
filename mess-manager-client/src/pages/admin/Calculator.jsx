@@ -249,20 +249,22 @@ const Calculator = () => {
     }, [members, meals, guestMeals, expenses, globalMonth]);
 
     const handleBillChange = (e) => {
-        setBills({ ...bills, [e.target.name]: parseFloat(e.target.value) || 0 });
+        const val = e.target.value;
+        const num = parseFloat(val);
+        setBills({ ...bills, [e.target.name]: isNaN(num) ? 0 : num });
     };
 
     const handleMealInputChange = (e) => {
-        setMealInputs({ ...mealInputs, [e.target.name]: parseFloat(e.target.value) || 0 });
+        const val = e.target.value;
+        const num = parseFloat(val);
+        setMealInputs({ ...mealInputs, [e.target.name]: isNaN(num) ? 0 : num });
     };
 
     const handleIndividualChange = (memberId, field, value) => {
+        const num = parseFloat(value);
         setIndividualInputs(prev => ({
             ...prev,
-            [memberId]: {
-                ...prev[memberId],
-                [field]: parseFloat(value) || 0
-            }
+            [memberId]: { ...prev[memberId], [field]: isNaN(num) ? 0 : num }
         }));
     };
 
@@ -838,8 +840,10 @@ const Calculator = () => {
                                     label={key.replace(/([A-Z])/g, ' $1').trim().toUpperCase() + " (₹)"}
                                     type="number"
                                     name={key}
-                                    value={bills[key]}
+                                    value={bills[key] === 0 ? '' : bills[key]}
                                     onChange={handleBillChange}
+                                    onFocus={(e) => e.target.select()}
+                                    onWheel={(e) => e.target.blur()}
                                     readOnly={isAutoFetched}
                                     className={isAutoFetched ? "opacity-90" : ""}
                                     inputClassName={isAutoFetched ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 font-black" : ""}
@@ -870,9 +874,11 @@ const Calculator = () => {
                             label="TOTAL MARKET (₹)"
                             type="number"
                             name="totalMarket"
-                            value={mealInputs.totalMarket}
+                            value={mealInputs.totalMarket === 0 ? '' : mealInputs.totalMarket}
                             onChange={handleMealInputChange}
                             readOnly
+                            onFocus={(e) => e.target.select()}
+                            onWheel={(e) => e.target.blur()}
                             inputClassName="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
                         />
                         <div className="grid grid-cols-2 gap-4">
@@ -880,18 +886,22 @@ const Calculator = () => {
                                 label="RICE (₹)"
                                 type="number"
                                 name="rice"
-                                value={mealInputs.rice}
+                                value={mealInputs.rice === 0 ? '' : mealInputs.rice}
                                 onChange={handleMealInputChange}
                                 readOnly
+                                onFocus={(e) => e.target.select()}
+                                onWheel={(e) => e.target.blur()}
                                 inputClassName="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
                             />
                             <Input
                                 label="GUEST ADJ. (₹)"
                                 type="number"
                                 name="guest"
-                                value={mealInputs.guest}
+                                value={mealInputs.guest === 0 ? '' : mealInputs.guest}
                                 onChange={handleMealInputChange}
                                 readOnly
+                                onFocus={(e) => e.target.select()}
+                                onWheel={(e) => e.target.blur()}
                                 inputClassName="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
                             />
                         </div>
@@ -899,9 +909,11 @@ const Calculator = () => {
                             label="TOTAL MEALS (ADJUSTED)"
                             type="number"
                             name="totalMeal"
-                            value={mealInputs.totalMeal}
+                            value={mealInputs.totalMeal === 0 ? '' : mealInputs.totalMeal}
                             onChange={handleMealInputChange}
                             readOnly
+                            onFocus={(e) => e.target.select()}
+                            onWheel={(e) => e.target.blur()}
                             inputClassName="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
                         />
                         <p className="text-[10px] font-black text-rose-500 dark:text-rose-400 uppercase tracking-widest text-right mt-1">
@@ -1000,8 +1012,10 @@ const Calculator = () => {
                                                     <div className="flex flex-col gap-1">
                                                         <input
                                                             type="number"
-                                                            value={individualInputs[memberId]?.deposit || 0}
+                                                            value={individualInputs[memberId]?.deposit === 0 ? '' : (individualInputs[memberId]?.deposit || '')}
                                                             onChange={(e) => handleIndividualChange(memberId, 'deposit', e.target.value)}
+                                                            onFocus={(e) => e.target.select()}
+                                                            onWheel={(e) => e.target.blur()}
                                                             className="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-black text-slate-900 dark:text-slate-100 text-center focus:ring-2 focus:ring-primary-500/20 outline-none transition-all"
                                                             title="Total monthly deposit (editable)"
                                                         />

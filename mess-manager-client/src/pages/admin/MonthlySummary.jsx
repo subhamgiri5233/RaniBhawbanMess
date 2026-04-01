@@ -88,7 +88,8 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
     }, [autoStatus]);
 
     const handleBalanceChange = (val) => {
-        setDepositBalance(val.toString());
+        const cleanVal = val.toString().replace(/^0+(?!$)/, '');
+        setDepositBalance(cleanVal);
     };
 
     const handleSave = async () => {
@@ -181,8 +182,10 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
                     </p>
                     <input
                         type="number"
-                        value={depositBalance}
+                        value={depositBalance === '0' ? '' : depositBalance}
                         onChange={e => handleBalanceChange(e.target.value)}
+                        onFocus={e => e.target.select()}
+                        onWheel={e => e.target.blur()}
                         min="0"
                         className="w-full px-4 py-2.5 bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800/50 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500 outline-none transition-all"
                         placeholder="0"
@@ -213,8 +216,10 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
                     </p>
                     <input
                         type="number"
-                        value={submittedAmount}
-                        onChange={e => setSubmittedAmount(e.target.value)}
+                        value={submittedAmount === '0' ? '' : submittedAmount}
+                        onChange={e => setSubmittedAmount(e.target.value.replace(/^0+(?!$)/, ''))}
+                        onFocus={e => e.target.select()}
+                        onWheel={e => e.target.blur()}
                         min="0"
                         className={`w-full px-4 py-2.5 ${member.snapshotType === 'Get' ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 focus:ring-emerald-500/30 focus:border-emerald-500' : 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/50 text-slate-900 dark:text-white focus:ring-blue-500/30 focus:border-blue-500'} border rounded-xl text-sm font-bold outline-none transition-all`}
                         placeholder="0"
