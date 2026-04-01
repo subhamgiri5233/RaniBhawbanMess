@@ -241,7 +241,7 @@ const SharedExpenseGrid = React.memo(({ loading, data, sharedExpenses, member })
     );
 });
 
-const MemberReportTable = React.memo(({ member, snapshotM, exportingId, onExport }) => {
+const MemberReportTable = React.memo(({ member, snapshotM, exportingId, onExport, MIN_MEALS }) => {
     if (!member) return null;
 
     return (
@@ -411,7 +411,7 @@ const MemberReportTable = React.memo(({ member, snapshotM, exportingId, onExport
                                 <div className="font-black text-slate-900 dark:text-white text-sm">{member.memberName}</div>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-tighter bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-white/5">
-                                        <Utensils size={8} /> {member.regularMeals < 40 ? 40 : member.regularMeals} Meals
+                                        <Utensils size={8} /> {member.regularMeals < MIN_MEALS ? MIN_MEALS : member.regularMeals} Meals
                                     </div>
                                     <div className="flex items-center gap-1 text-[9px] font-black text-amber-500 uppercase tracking-tighter bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-100/50 dark:border-amber-800/20">
                                         <Users size={8} /> {member.guestMeals} Guest
@@ -834,6 +834,7 @@ const Reports = () => {
                 snapshotM={snapshotM}
                 exportingId={exportingId}
                 onExport={exportInvoice}
+                MIN_MEALS={MIN_MEALS}
             />
         </motion.div>
     );
