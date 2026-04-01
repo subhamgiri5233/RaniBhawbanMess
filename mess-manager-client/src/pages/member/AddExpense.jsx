@@ -111,32 +111,7 @@ const AddExpense = () => {
         alert(`Transaction successful! ₹${depositAmount} ${isGeneral ? 'added to balance' : 'recorded as ' + paymentPurpose} for ${member.name}.`);
     };
 
-    const handleDeletePayment = async (expense) => {
-        const member = members.find(m => m.id === expense.paidBy || m._id === expense.paidBy);
 
-        if (member) {
-            const potentialBalance = (member.deposit || 0) - expense.amount;
-            if (potentialBalance < 0) {
-                alert(`❌ Cannot reverse this transaction. Member ${member.name}'s balance would become negative (₹${potentialBalance.toFixed(2)}).`);
-                return;
-            }
-        }
-
-        if (!window.confirm(`Reverse this transaction? ₹${expense.amount} will be deducted from the member's balance.`)) return;
-
-        try {
-            const member = members.find(m => m.id === expense.paidBy || m._id === expense.paidBy);
-            if (member) {
-                const newTotal = (member.deposit || 0) - expense.amount;
-                await updateMember(member.id || member._id, { deposit: newTotal });
-            }
-            await deleteExpense(expense._id || expense.id);
-            alert('Transaction reversed and record deleted.');
-        } catch (error) {
-            console.error('Failed to reverse transaction:', error);
-            alert('Error reversing transaction.');
-        }
-    };
 
     // Filter history based on active tab
     const historyItems = expenses.filter(e => {
@@ -435,22 +410,7 @@ const AddExpense = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    {isAdmin && (
-                                        <button
-                                            onClick={() => {
-                                                if (activeTab === 'deposit') {
-                                                    handleDeletePayment(expense);
-                                                } else {
-                                                    if (window.confirm('Erase this record from history?')) {
-                                                        deleteExpense(expense._id || expense.id);
-                                                    }
-                                                }
-                                            }}
-                                            className="opacity-0 group-hover:opacity-100 transition-all text-slate-300 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    )}
+
                                 </div>
                             </motion.div>
                         ))}

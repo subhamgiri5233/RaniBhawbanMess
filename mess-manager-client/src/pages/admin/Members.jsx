@@ -11,31 +11,14 @@ import { getBirthdayStatus } from '../../utils/dateUtils';
 import api from '../../lib/api';
 
 const Members = () => {
-    const { members, addMember, removeMember } = useData();
+    const { members, addMember, updateMember, removeMember } = useData();
     const [showAddForm, setShowAddForm] = useState(false);
     const [newMember, setNewMember] = useState({ name: '', email: '', userId: '', password: '', mobile: '', dateOfBirth: '' });
     const [search, setSearch] = useState('');
-    const [showMemberPasswords, setShowMemberPasswords] = useState({});
-    const [editingPassword, setEditingPassword] = useState(null);
-    const [newPasswordValue, setNewPasswordValue] = useState('');
-    const [passwordChangeStatus, setPasswordChangeStatus] = useState({});
     const [confirmDelete, setConfirmDelete] = useState(null);
-
-    const handleChangePassword = async (memberId) => {
-        if (!newPasswordValue || newPasswordValue.length < 4) {
-            setPasswordChangeStatus({ [memberId]: { error: 'Min 4 characters' } });
-            return;
-        }
-        try {
-            await api.patch(`/members/${memberId}/password`, { newPassword: newPasswordValue });
-            setPasswordChangeStatus({ [memberId]: { success: 'Password updated!' } });
-            setEditingPassword(null);
-            setNewPasswordValue('');
-            setTimeout(() => window.location.reload(), 1000);
-        } catch (err) {
-            setPasswordChangeStatus({ [memberId]: { error: err.response?.data?.message || 'Failed to update' } });
-        }
-    };
+    const [editingMember, setEditingMember] = useState(null);
+    const [editForm, setEditForm] = useState({ name: '', email: '', mobile: '', dateOfBirth: '', password: '' });
+    const [showEditPassword, setShowEditPassword] = useState(false);
 
     const headerRef = useRef(null);
     const tableRef = useRef(null);
@@ -45,50 +28,6 @@ const Members = () => {
         m.name?.toLowerCase().includes(search.toLowerCase()) ||
         m.email?.toLowerCase().includes(search.toLowerCase())
     );
-
-    /*
-    // Animate header on mount
-    useEffect(() => {
-        if (headerRef.current && typeof anime !== 'undefined') {
-            anime({
-                targets: headerRef.current,
-                translateY: [-50, 0],
-                opacity: [0, 1],
-                duration: 800,
-                easing: 'easeOutExpo'
-            });
-        }
-    }, []);
-
-    // Animate table rows on mount or when members change
-    useEffect(() => {
-        const rows = tableRef.current?.querySelectorAll('tbody tr');
-        if (rows && rows.length > 0 && typeof anime !== 'undefined') {
-            anime({
-                targets: rows,
-                translateX: [-30, 0],
-                opacity: [0, 1],
-                delay: anime.stagger(50, { start: 300 }),
-                duration: 600,
-                easing: 'easeOutQuad'
-            });
-        }
-    }, [members, search]);
-
-    // Animate form when it appears
-    useEffect(() => {
-        if (showAddForm && formRef.current && typeof anime !== 'undefined') {
-            anime({
-                targets: formRef.current,
-                translateY: [-30, 0],
-                opacity: [0, 1],
-                scale: [0.95, 1],
-                duration: 500,
-                easing: 'easeOutBack'
-            });
-        }
-    }, [showAddForm]);
-    */
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -109,6 +48,41 @@ const Members = () => {
             removeMember(confirmDelete._id || confirmDelete.id);
             setConfirmDelete(null);
         }
+    };
+
+    const startEditing = (member) => {
+        setEditingMember(member);
+        setEditForm({
+            name: member.name || '',
+            email: member.email || '',
+            mobile: member.mobile || '',
+            dateOfBirth: member.dateOfBirth ? member.dateOfBirth.split('T')[0] : '',
+            password: member.password || ''
+        });
+        setShowEditPassword(false);
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        if (!editingMember) return;
+        
+        const memberId = editingMember._id || editingMember.id;
+        
+        // Update basic profile
+        const { password, ...profileUpdates } = editForm;
+        await updateMember(memberId, profileUpdates);
+        
+        // Update password if changed
+        if (password && password !== editingMember.password) {
+            try {
+                await api.patch(`/members/${memberId}/password`, { newPassword: password });
+            } catch (err) {
+                console.error('Failed to update password during edit:', err);
+                alert('Profile updated, but password change failed.');
+            }
+        }
+        
+        setEditingMember(null);
     };
 
 
@@ -257,7 +231,7 @@ const Members = () => {
                             <tr className="border-b border-slate-200 dark:border-white/5">
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Identity</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Contact</th>
-                                <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Access</th>
+                                <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Birthday</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -303,53 +277,7 @@ const Members = () => {
                                         </td>
                                         <td className="p-4 sm:p-6">
                                             <div className="flex flex-col gap-2">
-                                                <div className="flex items-center gap-1.5">
-                                                    <Shield size={10} className="text-slate-400" />
-                                                    <span className="font-mono text-[10px] font-black text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-200 dark:border-white/10 group-hover:border-primary-500 transition-colors">
-                                                        {showMemberPasswords[member._id || member.id] ? member.password : '••••••••'}
-                                                    </span>
-                                                    <button
-                                                        onClick={() => setShowMemberPasswords(prev => ({ ...prev, [member._id || member.id]: !prev[member._id || member.id] }))}
-                                                        className="text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors p-0.5"
-                                                        title={showMemberPasswords[member._id || member.id] ? 'Hide password' : 'Show password'}
-                                                    >
-                                                        {showMemberPasswords[member._id || member.id] ? <EyeOff size={12} /> : <Eye size={12} />}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => { setEditingPassword(member._id || member.id); setNewPasswordValue(''); setPasswordChangeStatus({}); }}
-                                                        className="text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors p-0.5"
-                                                        title="Change password"
-                                                    >
-                                                        <Pencil size={12} />
-                                                    </button>
-                                                </div>
-                                                {/* Inline password change form */}
-                                                {editingPassword === (member._id || member.id) && (
-                                                    <div className="flex items-center gap-1.5 mt-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="New password"
-                                                            value={newPasswordValue}
-                                                            onChange={(e) => setNewPasswordValue(e.target.value)}
-                                                            className="font-mono text-[10px] font-black px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-900/20 text-slate-700 dark:text-slate-200 outline-none focus:ring-1 focus:ring-amber-400 w-24"
-                                                            autoFocus
-                                                            onKeyDown={(e) => { if (e.key === 'Enter') handleChangePassword(member._id || member.id); if (e.key === 'Escape') setEditingPassword(null); }}
-                                                        />
-                                                        <button onClick={() => handleChangePassword(member._id || member.id)} className="text-emerald-500 hover:text-emerald-600 transition-colors p-0.5" title="Save">
-                                                            <Check size={14} />
-                                                        </button>
-                                                        <button onClick={() => setEditingPassword(null)} className="text-red-400 hover:text-red-500 transition-colors p-0.5" title="Cancel">
-                                                            <X size={14} />
-                                                        </button>
-                                                    </div>
-                                                )}
-                                                {/* Status messages */}
-                                                {passwordChangeStatus[member._id || member.id]?.success && (
-                                                    <p className="text-[9px] font-bold text-emerald-500 mt-1">{passwordChangeStatus[member._id || member.id].success}</p>
-                                                )}
-                                                {passwordChangeStatus[member._id || member.id]?.error && (
-                                                    <p className="text-[9px] font-bold text-red-500 mt-1">{passwordChangeStatus[member._id || member.id].error}</p>
-                                                )}
+
                                                 {member.dateOfBirth && (() => {
                                                     const { isToday, daysLeft } = getBirthdayStatus(member.dateOfBirth);
                                                     return (
@@ -375,13 +303,22 @@ const Members = () => {
                                             </div>
                                         </td>
                                         <td className="p-6 text-right">
-                                            <button
-                                                onClick={() => handleDelete(member)}
-                                                className="p-2.5 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10 opacity-0 group-hover:opacity-100"
-                                                title="Remove Member"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                                <button
+                                                    onClick={() => startEditing(member)}
+                                                    className="p-2.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500 hover:bg-indigo-500 hover:text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10"
+                                                    title="Edit Member"
+                                                >
+                                                    <Pencil size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(member)}
+                                                    className="p-2.5 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10"
+                                                    title="Remove Member"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </motion.tr>
                                 ))}
@@ -420,6 +357,99 @@ const Members = () => {
                 )}
             </Card>
 
+            {/* Edit Member Modal */}
+            <AnimatePresence>
+                {editingMember && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-white/5"
+                        >
+                            <div className="flex items-center gap-5 pb-6 border-b border-slate-100 dark:border-white/5 mb-8">
+                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-primary-500 flex items-center justify-center shadow-xl shadow-primary-500/20 rotate-3">
+                                    <Pencil className="text-white" size={26} />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Edit Member</h3>
+                                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Update profile details</p>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleEditSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 gap-6">
+                                    <Input
+                                        label="Full Name"
+                                        icon={User}
+                                        value={editForm.name}
+                                        onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                        required
+                                    />
+                                    <Input
+                                        label="Email"
+                                        icon={Mail}
+                                        type="email"
+                                        value={editForm.email}
+                                        onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                                        required
+                                    />
+                                    <Input
+                                        label="Mobile"
+                                        icon={Phone}
+                                        value={editForm.mobile}
+                                        onChange={e => setEditForm({ ...editForm, mobile: e.target.value })}
+                                        required
+                                    />
+                                    <Input
+                                        label="Date of Birth"
+                                        icon={Cake}
+                                        type="date"
+                                        value={editForm.dateOfBirth}
+                                        onChange={e => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
+                                        required
+                                    />
+                                    <div className="relative group/pass">
+                                        <Input
+                                            label="Access Password"
+                                            icon={Shield}
+                                            type={showEditPassword ? "text" : "password"}
+                                            value={editForm.password}
+                                            onChange={e => setEditForm({ ...editForm, password: e.target.value })}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowEditPassword(!showEditPassword)}
+                                            className="absolute right-4 top-[38px] text-slate-400 hover:text-indigo-500 transition-colors"
+                                            title={showEditPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showEditPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditingMember(null)}
+                                        className="flex-1 py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <Button
+                                        type="submit"
+                                        className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 shadow-xl shadow-indigo-600/20 active:scale-95 transition-all"
+                                    >
+                                        Update Profile
+                                    </Button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {confirmDelete && (
@@ -428,7 +458,7 @@ const Members = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-white/5"
+                            className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-sm w-full shadow-2xl border border-slate-200 dark:border-white/5"
                         >
                             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center text-red-600 mb-6 mx-auto">
                                 <Trash2 size={32} />
