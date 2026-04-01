@@ -127,7 +127,16 @@ const Management = () => {
     };
 
     // Delete manager record
-    const handleDeleteManager = async (id) => { ... };
+    const handleDeleteManager = async (id) => {
+        if (!window.confirm('Do you want to delete?')) return;
+        try {
+            await api.delete(`/managers/${id}`);
+            fetchManagerRecords();
+        } catch (error) {
+            console.error('Error deleting manager record:', error);
+            alert('Failed to delete manager record');
+        }
+    };
 
     // Settings Management
     const [isSaving, setIsSaving] = useState(false);

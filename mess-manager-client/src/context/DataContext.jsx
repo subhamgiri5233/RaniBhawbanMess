@@ -411,7 +411,16 @@ export const DataProvider = ({ children }) => {
         }
     }, [refreshGuestMeals]);
 
-    const clearMonthlyData = useCallback(async (month, password, category = null) => { ... }, [refreshData]);
+    const clearMonthlyData = useCallback(async (month, password, category = null) => {
+        try {
+            const response = await api.delete('/admin/clear-month', { data: { month, password, category } });
+            await refreshData();
+            return { success: true, data: response.data };
+        } catch (error) {
+            console.error('Clear monthly data failed', error);
+            return { success: false, error: error.response?.data?.message || 'Failed to clear monthly data' };
+        }
+    }, [refreshData]);
 
     const updateSystemSetting = useCallback(async (key, value) => {
         try {

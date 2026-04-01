@@ -286,10 +286,6 @@ const MemberReportTable = React.memo(({ member, snapshotM, exportingId, onExport
                                     </div>
                                 </td>
                                 
-                                {/* ... skipping other tds for brevity in targetContent match but I need to reach the meal count td ... */}
-                                {/* Actually I'll just replace the whole tbody content for that row */}
-
-                                {/* Deposit */}
                                 <td className="px-4 py-4 text-center">
                                     {(() => {
                                         const genDep = member.expenses?.deposit || 0;
