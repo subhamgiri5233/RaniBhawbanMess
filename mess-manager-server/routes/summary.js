@@ -7,6 +7,7 @@ const GuestMeal = require('../models/GuestMeal');
 const ManagerRecord = require('../models/ManagerRecord');
 const MonthlySummary = require('../models/MonthlySummary');
 const MonthlySharedExpense = require('../models/MonthlySharedExpense');
+const MarketRequest = require('../models/MarketRequest');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 /**
@@ -26,7 +27,8 @@ router.get('/:month', auth, async (req, res) => {
             guestMealsInMealCollection,
             managerRecords,
             sharedExpense,
-            initialPaymentStatuses
+            initialPaymentStatuses,
+            marketRequests
         ] = await Promise.all([
             User.find({ role: 'member' }).select('_id userId name deposit').lean(),
             Expense.find({
@@ -48,8 +50,19 @@ router.get('/:month', auth, async (req, res) => {
                 date: { $regex: `^${month}` }
             }).sort({ date: 1 }).lean(),
             MonthlySharedExpense.findOne({ month }).lean(),
-            MonthlySummary.find({ month }).lean()
+            MonthlySummary.find({ month }).lean(),
+            MarketRequest.find({
+                date: { $regex: `^${month}` },
+                status: 'approved'
+            }).lean()
         ]);
+
+        // 2. Build market duty map
+        const dutyCounts = {};
+        marketRequests.forEach(r => {
+            const id = r.assignedMemberId;
+            dutyCounts[id] = (dutyCounts[id] || 0) + 1;
+        });
 
         // 5. Build managers map (unique managers for the month)
         const managersMap = {};
@@ -172,7 +185,7 @@ router.get('/:month', auth, async (req, res) => {
                 depositBalance: payment ? (payment.depositBalance || 0) : 0,
                 depositDate: payment ? (payment.depositDate || '') : '',
                 depositBalanceLocked: !!payment,
-                marketDays: payment ? (payment.marketDays || 4) : 4,
+                marketDays: dutyCounts[memberIdStr] || (member.userId ? (dutyCounts[member.userId] || 4) : 4),
                 note: payment ? payment.note : '',
                 deposit: member.deposit // Keep live profile deposit for reference only
             };

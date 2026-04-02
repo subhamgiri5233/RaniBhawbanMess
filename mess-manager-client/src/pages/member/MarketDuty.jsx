@@ -157,11 +157,17 @@ const MarketDuty = () => {
 
     // Calculate my requests (pending + approved) for dynamic limit
     const myLimit = marketDutyLimits[user.id] || 4;
-    const myRequestsThisMonth = currentMonthSchedule.filter(d => d.assignedMemberId === user.id).length;
+    const myRequestsThisMonth = currentMonthSchedule.filter(d => 
+        (d.assignedMemberId === user.id || d.memberId === user.id) && 
+        (d.status === 'pending' || d.status === 'approved')
+    ).length;
     const canRequestMore = myRequestsThisMonth < myLimit && !isPastMonth;
 
     // Calculate my approved days
-    const myDaysCount = currentMonthSchedule.filter(d => d.assignedMemberId === user.id && d.status === 'approved').length;
+    const myDaysCount = currentMonthSchedule.filter(d => 
+        (d.assignedMemberId === user.id || d.memberId === user.id) && 
+        d.status === 'approved'
+    ).length;
 
     // Pending Requests for Manager
     const pendingRequests = currentMonthSchedule.filter(d => d.status === 'pending');
