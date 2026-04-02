@@ -92,10 +92,11 @@ router.post('/', auth, requireAdmin, async (req, res) => {
 router.put('/:id', auth, requireAdmin, async (req, res) => {
     try {
         // Whitelist allowed fields to prevent mass assignment (e.g. role escalation)
-        const { name, email, mobile, dateOfBirth, deposit, avatar } = req.body;
+        const { name, email, userId, mobile, dateOfBirth, deposit, avatar } = req.body;
         const updateData = {};
         if (name !== undefined) updateData.name = name;
         if (email !== undefined) updateData.email = email;
+        if (userId !== undefined) updateData.userId = userId;
         if (mobile !== undefined) updateData.mobile = mobile;
         if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
         if (deposit !== undefined) updateData.deposit = deposit;

@@ -17,7 +17,7 @@ const Members = () => {
     const [search, setSearch] = useState('');
     const [confirmDelete, setConfirmDelete] = useState(null);
     const [editingMember, setEditingMember] = useState(null);
-    const [editForm, setEditForm] = useState({ name: '', email: '', mobile: '', dateOfBirth: '', password: '' });
+    const [editForm, setEditForm] = useState({ name: '', email: '', userId: '', mobile: '', dateOfBirth: '', password: '' });
     const [showEditPassword, setShowEditPassword] = useState(false);
 
     const headerRef = useRef(null);
@@ -55,6 +55,7 @@ const Members = () => {
         setEditForm({
             name: member.name || '',
             email: member.email || '',
+            userId: member.userId || '',
             mobile: member.mobile || '',
             dateOfBirth: member.dateOfBirth ? member.dateOfBirth.split('T')[0] : '',
             password: member.password || ''
@@ -392,6 +393,13 @@ const Members = () => {
                                         type="email"
                                         value={editForm.email}
                                         onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                                        required
+                                    />
+                                    <Input
+                                        label="User ID"
+                                        icon={Shield}
+                                        value={editForm.userId}
+                                        onChange={e => setEditForm({ ...editForm, userId: e.target.value })}
                                         required
                                     />
                                     <Input
