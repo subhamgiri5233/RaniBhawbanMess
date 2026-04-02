@@ -11,8 +11,9 @@ const mealSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// Optimization: Index memberId for faster grouping/summary counts
+mealSchema.index({ memberId: 1 });
 // For regular meals: unique per member per type (lunch/dinner) per day
-// For guest meals: allow multiple guests per member per day
 mealSchema.index({ date: 1, memberId: 1, type: 1, isGuest: 1 });
 
 module.exports = mongoose.model('Meal', mealSchema);

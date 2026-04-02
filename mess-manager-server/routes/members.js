@@ -16,21 +16,37 @@ router.get('/summary', auth, async (req, res) => {
             $or: [{ role: 'member' }, { role: { $exists: false } }, { role: null }]
         }).lean();
 
-        const summary = await Promise.all(members.map(async (member) => {
-            // Check meals by both _id and userId to cover all cases
-            const mealCount = await Meal.countDocuments({
-                $or: [
-                    { memberId: member._id.toString() },
-                    { memberId: member.userId }
-                ]
-            });
+        // Single aggregation to get counts for all members at once
+        const mealCounts = await Meal.aggregate([
+            { $group: { _id: "$memberId", count: { $sum: 1 } } }
+        ]);
+
+        // Create a map for quick lookup
+        const mealCountMap = mealCounts.reduce((acc, curr) => {
+            acc[curr._id] = curr.count;
+            return acc;
+        }, {});
+
+        const summary = members.map(member => {
+            // Check meals by both _id and userId as per original logic
+            const countByObjectId = mealCountMap[member._id.toString()] || 0;
+            const countByUserId = mealCountMap[member.userId] || 0;
+            
+            // To avoid double-counting if anyone used both, but usually they only use one
+            // However, to keep it exactly as it was: the original used $or which is NOT additive
+            // if both match, it's just 1 count. 
+            // In a better system we'd use set count, but here we'll just sum them if they are distinct
+            // Wait, countDocuments with $or counts the same document only once.
+            // My aggregate counts GROUPED by memberId. So if a member has some meals with _id and some with userId,
+            // the original countDocuments({ $or: [{_id}, {userId}] }) would return the TOTAL sum of both types.
+            
             return {
                 _id: member._id,
                 userId: member.userId,
                 name: member.name,
-                totalMeals: mealCount
+                totalMeals: countByObjectId + countByUserId
             };
-        }));
+        });
 
         res.json(summary);
     } catch (err) {

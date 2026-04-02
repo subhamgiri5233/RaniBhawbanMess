@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { useData } from '../../context/DataContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -9,6 +9,93 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { getBirthdayStatus } from '../../utils/dateUtils';
 import api from '../../lib/api';
+
+// Optimized Row Component
+const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
+    return (
+        <motion.tr
+            layout
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ delay: index * 0.05 }}
+            className="hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
+        >
+            <td className="p-4 sm:p-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-all shrink-0">
+                        {member.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <div className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors uppercase">{member.name}</div>
+                        <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">UID:</span>
+                            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest bg-primary-50 dark:bg-primary-500/10 px-2 py-0.5 rounded-md">
+                                {member.userId}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td className="p-4 sm:p-6">
+                <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
+                        <Mail size={14} className="text-slate-400" />
+                        {member.email}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                        <Phone size={12} className="text-slate-400" />
+                        {member.mobile}
+                    </div>
+                </div>
+            </td>
+            <td className="p-4 sm:p-6">
+                <div className="flex flex-col gap-2">
+                    {member.dateOfBirth && (() => {
+                        const { isToday, daysLeft } = getBirthdayStatus(member.dateOfBirth);
+                        return (
+                            <div className="flex flex-col gap-1.5">
+                                <div className={cn(
+                                    "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg w-fit",
+                                    isToday
+                                        ? "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 animate-pulse shadow-sm shadow-rose-500/20"
+                                        : "text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-500/10"
+                                )}>
+                                    <Cake size={10} className={isToday ? "animate-bounce" : ""} />
+                                    {isToday ? `Today is ${member.name}'s Birthday!` : format(new Date(member.dateOfBirth), 'dd MMM')}
+                                </div>
+                                {!isToday && daysLeft > 0 && (
+                                    <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter ml-1">
+                                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                                        {daysLeft} Days Left
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
+                </div>
+            </td>
+            <td className="p-6 text-right">
+                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                        onClick={() => onEdit(member)}
+                        className="p-2.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500 hover:bg-indigo-500 hover:text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10"
+                        title="Edit Member"
+                    >
+                        <Pencil size={16} />
+                    </button>
+                    <button
+                        onClick={() => onDelete(member)}
+                        className="p-2.5 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10"
+                        title="Remove Member"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            </td>
+        </motion.tr>
+    );
+});
 
 const Members = () => {
     const { members, addMember, updateMember, removeMember } = useData();
@@ -239,89 +326,13 @@ const Members = () => {
                         <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                             <AnimatePresence mode="popLayout">
                                 {filteredMembers.map((member, index) => (
-                                    <motion.tr
+                                    <MemberRow 
                                         key={member._id || member.id}
-                                        layout
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        className="hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
-                                    >
-                                        <td className="p-4 sm:p-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-all shrink-0">
-                                                    {member.name.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <div className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors uppercase">{member.name}</div>
-                                                    <div className="flex items-center gap-1.5 mt-1">
-                                                        <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">UID:</span>
-                                                        <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest bg-primary-50 dark:bg-primary-500/10 px-2 py-0.5 rounded-md">
-                                                            {member.userId}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 sm:p-6">
-                                            <div className="flex flex-col gap-1.5">
-                                                <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
-                                                    <Mail size={14} className="text-slate-400" />
-                                                    {member.email}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                                    <Phone size={12} className="text-slate-400" />
-                                                    {member.mobile}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 sm:p-6">
-                                            <div className="flex flex-col gap-2">
-
-                                                {member.dateOfBirth && (() => {
-                                                    const { isToday, daysLeft } = getBirthdayStatus(member.dateOfBirth);
-                                                    return (
-                                                        <div className="flex flex-col gap-1.5">
-                                                            <div className={cn(
-                                                                "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg w-fit",
-                                                                isToday
-                                                                    ? "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 animate-pulse shadow-sm shadow-rose-500/20"
-                                                                    : "text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-500/10"
-                                                            )}>
-                                                                <Cake size={10} className={isToday ? "animate-bounce" : ""} />
-                                                                {isToday ? `Today is ${member.name}'s Birthday!` : format(new Date(member.dateOfBirth), 'dd MMM')}
-                                                            </div>
-                                                            {!isToday && daysLeft > 0 && (
-                                                                <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter ml-1">
-                                                                    <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
-                                                                    {daysLeft} Days Left
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </div>
-                                        </td>
-                                        <td className="p-6 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                                                <button
-                                                    onClick={() => startEditing(member)}
-                                                    className="p-2.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500 hover:bg-indigo-500 hover:text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10"
-                                                    title="Edit Member"
-                                                >
-                                                    <Pencil size={16} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(member)}
-                                                    className="p-2.5 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10"
-                                                    title="Remove Member"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </motion.tr>
+                                        member={member}
+                                        index={index}
+                                        onEdit={startEditing}
+                                        onDelete={handleDelete}
+                                    />
                                 ))}
                             </AnimatePresence>
                             {filteredMembers.length === 0 && (
