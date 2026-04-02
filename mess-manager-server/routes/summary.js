@@ -64,6 +64,14 @@ router.get('/:month', auth, async (req, res) => {
             dutyCounts[id] = (dutyCounts[id] || 0) + 1;
         });
 
+        // Also build a name-based or userId-based map if needed, but assignedMemberId is usually the primary key.
+        // Let's ensure we have a mapping from _id to userId for lookups.
+        const userToIdMap = {};
+        members.forEach(m => {
+            userToIdMap[m.userId] = m._id.toString();
+            userToIdMap[m._id.toString()] = m.userId;
+        });
+
         // 5. Build managers map (unique managers for the month)
         const managersMap = {};
         managerRecords.forEach(r => {
@@ -185,7 +193,7 @@ router.get('/:month', auth, async (req, res) => {
                 depositBalance: payment ? (payment.depositBalance || 0) : 0,
                 depositDate: payment ? (payment.depositDate || '') : '',
                 depositBalanceLocked: !!payment,
-                marketDays: dutyCounts[memberIdStr] || (member.userId ? (dutyCounts[member.userId] || 4) : 4),
+                marketDays: dutyCounts[memberIdStr] || dutyCounts[member.userId] || (userToIdMap[memberIdStr] ? dutyCounts[userToIdMap[memberIdStr]] : 0) || (userToIdMap[member.userId] ? dutyCounts[userToIdMap[member.userId]] : 0) || 4,
                 note: payment ? payment.note : '',
                 deposit: member.deposit // Keep live profile deposit for reference only
             };
