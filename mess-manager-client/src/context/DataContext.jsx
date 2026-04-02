@@ -105,7 +105,7 @@ export const DataProvider = ({ children }) => {
             } catch (e) { console.error('Market fetch failed', e); }
         })();
 
-    }, []);
+    }, [globalMonth]);
 
     // Fetch Initial Data
     useEffect(() => {
