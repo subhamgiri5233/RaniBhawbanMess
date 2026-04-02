@@ -31,11 +31,12 @@ export const DataProvider = ({ children }) => {
     const [settings, setSettings] = useState(() => hydrateFromStorage('mess_settings', []));
     const [dailyInfo, setDailyInfo] = useState(() => hydrateFromStorage('mess_daily_info', null));
 
-    // Fast-changing data is kept in state but not pre-hydrated for better consistency
-    const [expenses, setExpenses] = useState([]);
-    const [meals, setMeals] = useState([]);
-    const [guestMeals, setGuestMeals] = useState([]);
-    const [notifications, setNotifications] = useState([]);
+    // Transactional data hydrated from storage for instant "Recent" view
+    const [expenses, setExpenses] = useState(() => hydrateFromStorage('mess_expenses', []));
+    const [meals, setMeals] = useState(() => hydrateFromStorage('mess_meals', []));
+    const [guestMeals, setGuestMeals] = useState(() => hydrateFromStorage('mess_guest_meals', []));
+    const [notifications, setNotifications] = useState(() => hydrateFromStorage('mess_notifications', []));
+    
     const [marketSchedule, setMarketSchedule] = useState({});
     const [managerAllocation, setManagerAllocation] = useState({});
     const [cookingDuties, setCookingDuties] = useState([]);
@@ -81,10 +82,14 @@ export const DataProvider = ({ children }) => {
         fetchEndpoint(api.get('/settings'), setSettings, 'mess_settings', true);
         fetchEndpoint(getDailyInfo(), setDailyInfo, 'mess_daily_info', true);
 
-        fetchEndpoint(api.get('/expenses'), setExpenses);
-        fetchEndpoint(api.get('/meals'), setMeals);
-        fetchEndpoint(api.get('/guest-meals'), setGuestMeals);
-        fetchEndpoint(api.get('/notifications'), setNotifications);
+        // Fetch transactional data restricted to globalMonth for speed
+        // Only save to localStorage if it's the current month (for "instant load" next time)
+        const isCurrentMonth = globalMonth === `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+        
+        fetchEndpoint(api.get(`/expenses?month=${globalMonth}`), setExpenses, isCurrentMonth ? 'mess_expenses' : null);
+        fetchEndpoint(api.get(`/meals?month=${globalMonth}`), setMeals, isCurrentMonth ? 'mess_meals' : null);
+        fetchEndpoint(api.get(`/guest-meals?month=${globalMonth}`), setGuestMeals, isCurrentMonth ? 'mess_guest_meals' : null);
+        fetchEndpoint(api.get(`/notifications?limit=50`), setNotifications, 'mess_notifications');
         
         // Market logic needs special handling for mapping
         (async () => {
@@ -109,7 +114,7 @@ export const DataProvider = ({ children }) => {
         } else {
             setLoadingDaily(true); // Reset for next login
         }
-    }, [isAuthenticated, refreshData]);
+    }, [isAuthenticated, refreshData, globalMonth]);
 
     // --- Targeted re-fetch helpers (more efficient than full refreshData) ---
     const refreshMembers = useCallback(async () => {
@@ -120,8 +125,8 @@ export const DataProvider = ({ children }) => {
         } catch (e) { console.error('refreshMembers failed', e); }
     }, []);
     const refreshExpenses = useCallback(async () => {
-        try { const r = await api.get('/expenses'); setExpenses(r.data); } catch (e) { console.error('refreshExpenses failed', e); }
-    }, []);
+        try { const r = await api.get(`/expenses?month=${globalMonth}`); setExpenses(r.data); } catch (e) { console.error('refreshExpenses failed', e); }
+    }, [globalMonth]);
     const refreshMarket = useCallback(async () => {
         try {
             const r = await api.get('/market');
@@ -131,13 +136,13 @@ export const DataProvider = ({ children }) => {
         } catch (e) { console.error('refreshMarket failed', e); }
     }, []);
     const refreshMeals = useCallback(async () => {
-        try { const r = await api.get('/meals'); setMeals(r.data); } catch (e) { console.error('refreshMeals failed', e); }
-    }, []);
+        try { const r = await api.get(`/meals?month=${globalMonth}`); setMeals(r.data); } catch (e) { console.error('refreshMeals failed', e); }
+    }, [globalMonth]);
     const refreshGuestMeals = useCallback(async () => {
-        try { const r = await api.get('/guest-meals'); setGuestMeals(r.data); } catch (e) { console.error('refreshGuestMeals failed', e); }
-    }, []);
+        try { const r = await api.get(`/guest-meals?month=${globalMonth}`); setGuestMeals(r.data); } catch (e) { console.error('refreshGuestMeals failed', e); }
+    }, [globalMonth]);
     const refreshNotifications = useCallback(async () => {
-        try { const r = await api.get('/notifications'); setNotifications(r.data); } catch (e) { console.error('refreshNotifications failed', e); }
+        try { const r = await api.get('/notifications?limit=50'); setNotifications(r.data); } catch (e) { console.error('refreshNotifications failed', e); }
     }, []);
 
     // Admin Actions

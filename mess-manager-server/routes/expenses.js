@@ -18,10 +18,17 @@ router.delete('/bulk/reject-pending', auth, requireAdmin, async (req, res) => {
     }
 });
 
-// Get all expenses - Requires authentication
+// Get all expenses - Requires authentication (optional: filter by month)
 router.get('/', auth, async (req, res) => {
     try {
-        const expenses = await Expense.find().lean();
+        const { month } = req.query;
+        let query = {};
+        if (month) {
+            // Escape special regex characters to prevent injection
+            const escapedMonth = month.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            query.date = { $regex: `^${escapedMonth}` };
+        }
+        const expenses = await Expense.find(query).lean().sort({ date: -1 });
         res.json(expenses);
     } catch (err) {
         res.status(500).json({ message: err.message });

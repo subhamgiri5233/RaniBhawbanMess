@@ -568,16 +568,29 @@ const Calculator = () => {
             doc.rect(0, 0, pw, 28, 'F');
             doc.setFillColor(99, 102, 241);
             doc.rect(0, 24, pw, 4, 'F');
-            doc.setFont('helvetica', 'bold');
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
             doc.setFontSize(16);
             doc.setTextColor(255, 255, 255);
             doc.text('RANI BHAWBAN MESS', pw / 2, 12, { align: 'center' });
             doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
+            try {
+                doc.setFont('NotoSansBengali', 'normal');
+            } catch (e) {
+                doc.setFont('helvetica', 'normal');
+            }
             doc.text('MONTHLY INVOICE', pw / 2, 19, { align: 'center' });
 
             // ── Meta ──
-            doc.setFontSize(9); doc.setTextColor(30, 30, 60); doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9); doc.setTextColor(30, 30, 60); 
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
             doc.text(`Month: ${reportMonthText}`, 14, 36);
             doc.text(`Generated: ${dateStr}`, pw - 14, 36, { align: 'right' });
 
@@ -619,7 +632,7 @@ const Calculator = () => {
                     ['Per Head', perHeadResult.perHeadAmount.toFixed(2)]
                 ],
                 margin: { left: 15 },
-                styles: { fontSize: 10, cellPadding: 3, font: 'helvetica' },
+                styles: { fontSize: 10, cellPadding: 3, font: 'NotoSansBengali' },
                 theme: 'grid'
             });
             const perHeadFinalY = doc.lastAutoTable.finalY;
@@ -645,7 +658,7 @@ const Calculator = () => {
                     ['MEAL CHARGE', mealChargeResult.mealCharge.toFixed(2)]
                 ],
                 margin: { left: 110 },
-                styles: { fontSize: 10, cellPadding: 3, font: 'helvetica' },
+                styles: { fontSize: 10, cellPadding: 3, font: 'NotoSansBengali' },
                 theme: 'grid'
             });
 
@@ -677,8 +690,8 @@ const Calculator = () => {
                 startY: individualStartY + 5,
                 head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
                 body: tableBody,
-                styles: { fontSize: 9, cellPadding: 2, font: 'helvetica' },
-                headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold' }, // blue-500
+                styles: { fontSize: 9, cellPadding: 2, font: 'NotoSansBengali' },
+                headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold', font: 'NotoSansBengali' }, // blue-500
                 theme: 'grid',
                 margin: { bottom: 10 }
             });
@@ -718,16 +731,29 @@ const Calculator = () => {
             doc.rect(0, 0, pw, 28, 'F');
             doc.setFillColor(99, 102, 241);
             doc.rect(0, 24, pw, 4, 'F');
-            doc.setFont('helvetica', 'bold');
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
             doc.setFontSize(16);
             doc.setTextColor(255, 255, 255);
             doc.text('RANI BHAWBAN MESS', pw / 2, 12, { align: 'center' });
             doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
+            try {
+                doc.setFont('NotoSansBengali', 'normal');
+            } catch (e) {
+                doc.setFont('helvetica', 'normal');
+            }
             doc.text('MONTHLY INVOICE', pw / 2, 19, { align: 'center' });
 
             // ── Meta ──
-            doc.setFontSize(9); doc.setTextColor(30, 30, 60); doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9); doc.setTextColor(30, 30, 60); 
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
             doc.text(`Month: ${monthTitleText}`, 14, 36);
             doc.text(`Generated: ${dateStr}`, pw - 14, 36, { align: 'right' });
 
@@ -755,7 +781,14 @@ const Calculator = () => {
                 ['Total', `₹${perHeadResult.totalAmount.toFixed(2)}`],
                 ['Per Head', `₹${perHeadResult.perHeadAmount.toFixed(2)}`]
             ];
-            autoTable(doc, { startY: startY + 5, head: [['Category', 'Amount']], body: perHeadData, headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 10, font: 'helvetica' }, theme: 'grid' });
+            autoTable(doc, { 
+                startY: startY + 5, 
+                head: [['Category', 'Amount']], 
+                body: perHeadData, 
+                headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', font: 'NotoSansBengali' }, 
+                styles: { fontSize: 10, font: 'NotoSansBengali' }, 
+                theme: 'grid' 
+            });
 
             // Meal Charge Section
             const mealStartY = doc.lastAutoTable.finalY + 10;
@@ -768,7 +801,14 @@ const Calculator = () => {
                 ['Guest Adjustment', `₹${mealInputs.guest}`], ['Total Meals', mealInputs.totalMeal],
                 ['Per Meal Charge', `₹${mealChargeResult.mealCharge.toFixed(2)}`]
             ];
-            autoTable(doc, { startY: mealStartY + 5, head: [['Category', 'Value']], body: mealData, headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 10, font: 'helvetica' }, theme: 'grid' });
+            autoTable(doc, { 
+                startY: mealStartY + 5, 
+                head: [['Category', 'Value']], 
+                body: mealData, 
+                headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold', font: 'NotoSansBengali' }, 
+                styles: { fontSize: 10, font: 'NotoSansBengali' }, 
+                theme: 'grid' 
+            });
 
             // Individual Member Table
             const individualStartY = doc.lastAutoTable.finalY + 10;
@@ -786,8 +826,8 @@ const Calculator = () => {
                 startY: individualStartY + 5,
                 head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
                 body: tableBody,
-                styles: { fontSize: 9, cellPadding: 2, font: 'helvetica' },
-                headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold' },
+                styles: { fontSize: 9, cellPadding: 2, font: 'NotoSansBengali' },
+                headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold', font: 'NotoSansBengali' },
                 theme: 'grid'
             });
 

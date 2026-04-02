@@ -12,6 +12,7 @@ import api from '../../lib/api';
 import Card from '../../components/ui/Card';
 import { MESS_CONFIG } from '../../config';
 import { useData } from '../../context/DataContext';
+import { addBengaliFont } from '../../utils/bengaliFont';
 
 // ─── Month/year helpers ─────────────────────────────────────────────────────
 
@@ -416,6 +417,10 @@ const MonthlySummary = () => {
             const inv = res.data;
             const monthLabel = MONTHS[selectedMonth - 1] ? `${MONTHS[selectedMonth - 1]} ${selectedYear}` : `${selectedYear}-${selectedMonth}`;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            
+            // Load Bengali font
+            await addBengaliFont(doc);
+            
             const pw = doc.internal.pageSize.getWidth();
 
             // ── Banner ──
@@ -423,29 +428,55 @@ const MonthlySummary = () => {
             doc.rect(0, 0, pw, 28, 'F');
             doc.setFillColor(99, 102, 241);
             doc.rect(0, 24, pw, 4, 'F');
-            doc.setFont('helvetica', 'bold');
+            
+            // Set font - use NotoSansBengali for everything to support names/notes
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
+            
             doc.setFontSize(16);
             doc.setTextColor(255, 255, 255);
             doc.text('RANI BHAWBAN MESS', pw / 2, 12, { align: 'center' });
             doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
+            try {
+                doc.setFont('NotoSansBengali', 'normal');
+            } catch (e) {
+                doc.setFont('helvetica', 'normal');
+            }
             doc.text('MONTHLY INVOICE', pw / 2, 19, { align: 'center' });
 
             // ── Meta ──
             let y = 36;
-            doc.setFontSize(9); doc.setTextColor(30, 30, 60); doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9); doc.setTextColor(30, 30, 60); 
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
             doc.text(`Month: ${monthLabel}`, 14, y);
             doc.text(`Member: ${inv.member.name}`, pw / 2, y, { align: 'center' });
             doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, pw - 14, y, { align: 'right' });
             y += 5;
-            doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 120);
+            try {
+                doc.setFont('NotoSansBengali', 'normal');
+            } catch (e) {
+                doc.setFont('helvetica', 'normal');
+            }
+            doc.setTextColor(80, 80, 120);
             doc.text(`Manager(s): ${inv.managers.join(', ') || 'N/A'}`, 14, y);
             y += 8;
 
             const sectionHeader = (label, r, g, b) => {
                 doc.setFillColor(r, g, b);
                 doc.roundedRect(14, y, pw - 28, 7, 1, 1, 'F');
-                doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
+                try {
+                    doc.setFont('NotoSansBengali', 'bold');
+                } catch (e) {
+                    doc.setFont('helvetica', 'bold');
+                }
+                doc.setFontSize(8); doc.setTextColor(255, 255, 255);
                 doc.text(label, 18, y + 4.8);
                 y += 10;
             };
@@ -466,8 +497,8 @@ const MonthlySummary = () => {
                 autoTable(doc, {
                     startY: y, head: [['Date', 'Description', 'Amount (Rs.)']],
                     body: [['—', 'No market expenses', '—']], theme: 'grid',
-                    headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60] },
+                    headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
+                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
                     margin: { left: 14, right: 14 },
                 });
             } else {
@@ -477,8 +508,8 @@ const MonthlySummary = () => {
                 autoTable(doc, {
                     startY: y, head: [['Date', 'Description', 'Amount (Rs.)']],
                     body: marketRows, theme: 'grid',
-                    headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60] },
+                    headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
+                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
                     alternateRowStyles: { fillColor: [236, 253, 245] },
                     margin: { left: 14, right: 14 }, tableLineColor: [200, 240, 220], tableLineWidth: 0.2,
                     didParseCell(data) {
@@ -499,8 +530,8 @@ const MonthlySummary = () => {
                 autoTable(doc, {
                     startY: y, head: [['Date', 'Description', 'Amount (Rs.)']],
                     body: otherRows, theme: 'grid',
-                    headStyles: { fillColor: [100, 116, 139], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60] },
+                    headStyles: { fillColor: [100, 116, 139], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
+                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
                     alternateRowStyles: { fillColor: [248, 250, 252] },
                     margin: { left: 14, right: 14 }, tableLineColor: [220, 220, 230], tableLineWidth: 0.2,
                 });
@@ -518,8 +549,8 @@ const MonthlySummary = () => {
                 startY: y, head: [['Lunch Count', 'Dinner Count', 'Total Meals']],
                 body: [[lunchCount, dinnerCount, inv.regularMeals.length]],
                 theme: 'grid',
-                headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-                bodyStyles: { fontSize: 8, textColor: [30, 30, 60], fontStyle: 'bold' },
+                headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
+                bodyStyles: { fontSize: 8, textColor: [30, 30, 60], fontStyle: 'bold', font: 'NotoSansBengali' },
                 alternateRowStyles: { fillColor: [255, 251, 235] },
                 margin: { left: 14, right: 14 },
             });
@@ -548,8 +579,8 @@ const MonthlySummary = () => {
                 autoTable(doc, {
                     startY: y, head: [['Date', 'Meal Type', 'Meal Time', 'Amount (Rs.)']],
                     body: guestRows, theme: 'grid',
-                    headStyles: { fillColor: [168, 85, 247], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60] },
+                    headStyles: { fillColor: [168, 85, 247], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
+                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
                     alternateRowStyles: { fillColor: [250, 245, 255] },
                     margin: { left: 14, right: 14 },
                 });
@@ -572,8 +603,8 @@ const MonthlySummary = () => {
                         ['Market Paid (Deducted)', `Rs.${snapshotM.marketCost}`]
                     ],
                     theme: 'grid',
-                    headStyles: { fillColor: [67, 56, 202], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60] },
+                    headStyles: { fillColor: [67, 56, 202], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
+                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
                     margin: { left: 14, right: 14 },
                 });
                 y = doc.lastAutoTable.finalY + 8;
@@ -599,8 +630,8 @@ const MonthlySummary = () => {
                     note || '—'
                 ]],
                 theme: 'grid',
-                headStyles: { fillColor: [239, 68, 68], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-                bodyStyles: { fontSize: 8, textColor: [30, 30, 60] },
+                headStyles: { fillColor: [239, 68, 68], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
+                bodyStyles: { fontSize: 8, textColor: [30, 30, 60], font: 'NotoSansBengali' },
                 columnStyles: { 3: { fontStyle: 'bold', textColor: sc } },
                 margin: { left: 14, right: 14 },
             });
@@ -629,6 +660,10 @@ const MonthlySummary = () => {
             const { adminExpenses, totalMembers, managers } = res.data;
             const monthLabel = MONTHS[selectedMonth - 1] ? `${MONTHS[selectedMonth - 1]} ${selectedYear}` : `${selectedYear}-${selectedMonth}`;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            
+            // Load Bengali font
+            await addBengaliFont(doc);
+            
             const pw = doc.internal.pageSize.getWidth();
 
             // ── Banner ──
@@ -636,24 +671,49 @@ const MonthlySummary = () => {
             doc.rect(0, 0, pw, 28, 'F');
             doc.setFillColor(129, 140, 248);
             doc.rect(0, 24, pw, 4, 'F');
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(255, 255, 255);
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
+            doc.setFontSize(16); doc.setTextColor(255, 255, 255);
             doc.text('RANI BHAWBAN MESS', pw / 2, 12, { align: 'center' });
-            doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            try {
+                doc.setFont('NotoSansBengali', 'normal');
+            } catch (e) {
+                doc.setFont('helvetica', 'normal');
+            }
             doc.text('ADMIN / SHARED EXPENSES — ' + monthLabel.toUpperCase(), pw / 2, 19, { align: 'center' });
 
             let y = 36;
-            doc.setFontSize(9); doc.setTextColor(30, 30, 60); doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9); doc.setTextColor(30, 30, 60);
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
             doc.text(`Month: ${monthLabel}`, 14, y);
             doc.text(`Total Members: ${totalMembers}`, pw / 2, y, { align: 'center' });
             doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, pw - 14, y, { align: 'right' });
             y += 5;
-            doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 120);
+            try {
+                doc.setFont('NotoSansBengali', 'normal');
+            } catch (e) {
+                doc.setFont('helvetica', 'normal');
+            }
+            doc.setTextColor(80, 80, 120);
             doc.text(`Manager(s): ${managers.join(', ') || 'N/A'}`, 14, y);
             y += 10;
 
             doc.setFillColor(99, 102, 241);
             doc.roundedRect(14, y, pw - 28, 7, 1, 1, 'F');
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
+            try {
+                doc.setFont('NotoSansBengali', 'bold');
+            } catch (e) {
+                doc.setFont('helvetica', 'bold');
+            }
+            doc.setFontSize(8); doc.setTextColor(255, 255, 255);
             doc.text('SHARED EXPENSES', 18, y + 4.8);
             y += 10;
 
@@ -674,8 +734,8 @@ const MonthlySummary = () => {
                 startY: y,
                 head: [['Date', 'Description', 'Category', 'Total (Rs.)', `Per Member (÷${totalMembers})`]],
                 body: rows, theme: 'grid',
-                headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-                bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60] },
+                headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
+                bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
                 alternateRowStyles: { fillColor: [238, 237, 255] },
                 margin: { left: 14, right: 14 },
                 tableLineColor: [200, 200, 240], tableLineWidth: 0.2,

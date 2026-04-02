@@ -6,7 +6,7 @@ const Admin = require('../models/Admin');
 
 // Simple JWT token generator
 const generateToken = (user) => {
-    return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '7d' });
+    return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
 // SIMPLE LOGIN - No complicated logic

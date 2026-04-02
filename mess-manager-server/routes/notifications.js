@@ -4,14 +4,29 @@ const Notification = require('../models/Notification');
 const Settings = require('../models/Settings');
 const { auth, requireAdmin } = require('../middleware/auth');
 
-// Get All Notifications - Admin only, or restricted to current user
+// Get All Notifications - Admin only, or restricted to current user (optional: limit/month)
 router.get('/', auth, async (req, res) => {
     try {
+        const { limit = 100, month } = req.query;
         let query = {};
         if (req.user.role !== 'admin') {
             query = { $or: [{ userId: req.user.id || req.user.userId }, { userId: 'all' }] };
         }
-        const notifications = await Notification.find(query);
+        
+        if (month) {
+            const escapedMonth = month.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // If date is stored as YYYY-MM-DD in metadata or we check createdAt
+            // Notifications usually have createdAt, but maybe we want to filter by sent month
+            // If No specific date string, we can use createdAt date range
+            const start = new Date(`${month}-01`);
+            const end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+            query.createdAt = { $gte: start, $lt: end };
+        }
+        
+        const notifications = await Notification.find(query)
+            .sort({ createdAt: -1 })
+            .limit(parseInt(limit));
+            
         res.json(notifications);
     } catch (err) {
         res.status(500).json({ message: err.message });
