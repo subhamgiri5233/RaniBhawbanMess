@@ -4,16 +4,99 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { ChefHat, UserCheck, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock, CheckCircle2, Clock, X, BookOpen, ChevronUp } from 'lucide-react';
+import { ChefHat, UserCheck, UserRound, Users, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock, CheckCircle2, Clock, X, BookOpen, ChevronUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
+const MarketDutyItem = ({ member, month, initialValue, onSave }) => {
+    const [localValue, setLocalValue] = useState(initialValue || 4);
+    const [status, setStatus] = useState('idle');
+
+    useEffect(() => {
+        setLocalValue(initialValue || 4);
+    }, [initialValue]);
+
+    const isDirty = Number(localValue) !== Number(initialValue || 4);
+
+    const handleSave = async () => {
+        if (status === 'loading') return;
+        setStatus('loading');
+        try {
+            await api.put(`/market/duty/${month}`, {
+                memberId: member._id || member.id,
+                marketDays: localValue
+            });
+            setStatus('success');
+            onSave(member._id || member.id, localValue);
+            setTimeout(() => setStatus('idle'), 2000);
+        } catch (error) {
+            console.error('Error saving market duty:', error);
+            setStatus('error');
+            setTimeout(() => setStatus('idle'), 3000);
+        }
+    };
+
+    return (
+        <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-950/40 border border-slate-100 dark:border-white/5 rounded-2xl group transition-all hover:shadow-lg hover:shadow-indigo-500/5">
+            <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <UserRound size={18} className="text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                    <p className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">{member.name}</p>
+                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Market Participation</p>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+                <input
+                    type="number"
+                    value={localValue}
+                    onChange={(e) => setLocalValue(e.target.value)}
+                    className="w-16 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                />
+                
+                <AnimatePresence mode="wait">
+                    {(isDirty || status !== 'idle') && (
+                        <motion.button
+                            key={status}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            onClick={handleSave}
+                            disabled={status === 'loading'}
+                            className={cn(
+                                "p-2 rounded-xl transition-all shadow-sm active:scale-90",
+                                status === 'loading' && "bg-slate-100 dark:bg-slate-800 text-slate-400 animate-pulse",
+                                status === 'success' && "bg-emerald-500 text-white",
+                                status === 'error' && "bg-rose-500 text-white",
+                                status === 'idle' && isDirty && "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20"
+                            )}
+                        >
+                            {status === 'loading' && <Clock size={14} className="animate-spin" />}
+                            {status === 'success' && <CheckCircle2 size={14} />}
+                            {status === 'error' && <X size={14} />}
+                            {status === 'idle' && isDirty && <Rocket size={14} />}
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+};
+
 const Management = () => {
     const { user } = useAuth();
-    const { members, settings, updateSystemSetting } = useData();
+    const { members, settings, updateSystemSetting, globalMonth } = useData();
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    
+    // Market Duty state
+    const [marketDuties, setMarketDuties] = useState({});
+    const [loadingDuties, setLoadingDuties] = useState(false);
+
+    const activeMonth = globalMonth || format(new Date(), 'yyyy-MM');
 
     // Cooking state
     const [cookingRecords, setCookingRecords] = useState([]);
@@ -34,23 +117,30 @@ const Management = () => {
         }
     }, []);
 
-    // Fetch manager records
-    const fetchManagerRecords = useCallback(async () => {
+    // Fetch market duty counts
+    const fetchMarketDuties = useCallback(async () => {
+        if (!activeMonth) return;
+        setLoadingDuties(true);
         try {
-            const response = await api.get('/managers');
-            setManagerRecords(response.data);
+            const response = await api.get(`/market/duty/${activeMonth}`);
+            setMarketDuties(response.data);
         } catch (error) {
-            console.error('Error fetching manager records:', error);
+            console.error('Error fetching market duties:', error);
+        } finally {
+            setLoadingDuties(false);
         }
-    }, []);
+    }, [activeMonth]);
 
     useEffect(() => {
         const load = async () => {
-            await fetchCookingRecords();
-            await fetchManagerRecords();
+            await Promise.all([
+                fetchCookingRecords(),
+                fetchManagerRecords(),
+                fetchMarketDuties()
+            ]);
         };
         load();
-    }, [fetchCookingRecords, fetchManagerRecords]);
+    }, [fetchCookingRecords, fetchManagerRecords, fetchMarketDuties]);
 
     // All non-admin members
     const memberList = members.filter(m => m.role !== 'admin');
@@ -607,58 +697,52 @@ const Management = () => {
                 </Card>
             </div>
 
-            {/* Market Duty - Coming Soon */}
+            {/* Monthly Market Duty Section */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="relative overflow-hidden rounded-[1.5rem] md:rounded-[2rem] border-2 border-dashed border-indigo-200 dark:border-indigo-500/20 bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/80 dark:from-indigo-950/30 dark:via-slate-900 dark:to-purple-950/30 p-8 md:p-10"
             >
-                {/* Background decoration */}
-                <div className="absolute -top-16 -right-16 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                    {/* Icon Block */}
-                    <div className="flex-shrink-0">
-                        <div className="relative w-20 h-20 rounded-3xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shadow-xl shadow-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20">
-                            <ShoppingCart size={36} className="text-indigo-500 dark:text-indigo-400" />
-                            <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg">
-                                <Lock size={12} className="text-white" />
+                <Card className="p-0 overflow-hidden border-indigo-100/50 dark:border-indigo-900/20 shadow-indigo-500/5">
+                    <div className="p-6 border-b border-indigo-100 dark:border-indigo-900/30 bg-indigo-50/50 dark:bg-indigo-950/20">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl">
+                                    <ShoppingCart className="text-indigo-600 dark:text-indigo-400" size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Market Duty Assignment</h2>
+                                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Assign market days per member for {format(new Date(activeMonth), 'MMMM yyyy')}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-white/50 dark:bg-white/5 rounded-full border border-indigo-100 dark:border-white/5">
+                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Default: 4 Days</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Text Content */}
-                    <div className="flex-1 text-center md:text-left">
-                        <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Market Duty</h2>
-                            <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-indigo-500/30">
-                                <Rocket size={10} />
-                                Version 3.0
-                            </span>
-                        </div>
-                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                            Comprehensive market duty management for members — track, assign, and monitor who goes to the market, all from one place.
-                        </p>
-                        <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                            {['Per-member duty calendar', 'Monthly duty history', 'Duty swap requests', 'Smart auto-assignment'].map(feature => (
-                                <span key={feature} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800/60 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-sm">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 inline-block" />
-                                    {feature}
-                                </span>
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                            {memberList.map((member) => (
+                                <MarketDutyItem
+                                    key={member._id || member.id}
+                                    member={member}
+                                    month={activeMonth}
+                                    initialValue={marketDuties[member._id || member.id]}
+                                    onSave={(id, val) => setMarketDuties(prev => ({ ...prev, [id]: val }))}
+                                />
                             ))}
                         </div>
-                    </div>
 
-                    {/* Coming Soon Badge */}
-                    <div className="flex-shrink-0">
-                        <div className="px-6 py-3 rounded-2xl bg-white dark:bg-slate-800/60 border-2 border-indigo-200 dark:border-indigo-500/30 shadow-xl shadow-indigo-500/10 text-center">
-                            <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-0.5">Coming Soon</p>
-                            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight">v3.0</p>
-                        </div>
+                        {memberList.length === 0 && (
+                            <div className="py-20 text-center space-y-3">
+                                <Users size={40} className="mx-auto text-slate-200 dark:text-slate-800" />
+                                <p className="text-slate-400 font-bold italic text-sm">No members available to assign duty</p>
+                            </div>
+                        )}
                     </div>
-                </div>
+                </Card>
             </motion.div>
 
             {/* Gita Progress Tracker Section */}

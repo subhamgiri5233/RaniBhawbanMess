@@ -15,6 +15,7 @@ const monthlySummarySchema = new mongoose.Schema({
     depositBalance: { type: Number, default: 0 }, // Snapshot of User.deposit for this month
     depositDate: { type: String, default: '' }, // Date when deposit was paid (YYYY-MM-DD)
     note: { type: String, default: '' },
+    marketDays: { type: Number, default: 4 }, // Added: Assigned market duty days (default 4)
     paymentHistory: [{
         amount: { type: Number, required: true },
         date: { type: String, required: true },

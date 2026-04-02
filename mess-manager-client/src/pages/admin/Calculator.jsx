@@ -239,7 +239,8 @@ const Calculator = () => {
                     genDeposit: generalDeposit,
                     genDepositDate: snapshotDepositDate,
                     guest: guestCost,
-                    marketExpense: marketTotal
+                    marketExpense: marketTotal,
+                    marketDays: summary ? (summary.marketDays || 4) : 4 // Snapshot or default 4
                 };
             });
 
@@ -676,6 +677,7 @@ const Calculator = () => {
                 `${d.meals}${d.isBelowMinimum ? ` (${MIN_MEALS})` : ''}`,
                 mealChargeResult.mealCharge.toFixed(2),
                 d.mealCost.toFixed(2),
+                d.marketDays || 4,
                 d.fixedCost.toFixed(2),
                 d.guest.toFixed(2),
                 d.marketExpense.toFixed(2),
@@ -688,7 +690,7 @@ const Calculator = () => {
 
             autoTable(doc, {
                 startY: individualStartY + 5,
-                head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
+                head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'M.Days', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
                 body: tableBody,
                 styles: { fontSize: 9, cellPadding: 2, font: 'NotoSansBengali' },
                 headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold', font: 'NotoSansBengali' }, // blue-500
@@ -818,13 +820,13 @@ const Calculator = () => {
             doc.setTextColor(0, 0, 0);
             const tableBody = calculatedData.data.map(d => [
                 d.name, `${d.meals || 0}${d.isBelowMinimum ? ` (${MIN_MEALS})` : ''}`, `₹${mealChargeResult.mealCharge.toFixed(2)}`,
-                `₹${d.mealCost.toFixed(2)}`, `₹${d.fixedCost.toFixed(2)}`,
+                `₹${d.mealCost.toFixed(2)}`, `${d.marketDays || 4}`, `₹${d.fixedCost.toFixed(2)}`,
                 `₹${d.guest || 0}`, `₹${d.marketExpense || 0}`, `₹${((d.deposit || 0) + (d.genDeposit || 0)).toFixed(0)}`,
                 d.balance >= 0 ? `Pay ₹${Math.abs(Math.round(d.balance))}` : `Get ₹${Math.abs(Math.round(d.balance))}`
             ]);
             autoTable(doc, {
                 startY: individualStartY + 5,
-                head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
+                head: [['Name', 'Meals', 'Charge', 'Meal Cost', 'M.Days', 'Per Head', 'Guest', 'Market', 'Deposit', 'Status']],
                 body: tableBody,
                 styles: { fontSize: 9, cellPadding: 2, font: 'NotoSansBengali' },
                 headStyles: { fillColor: [63, 131, 248], textColor: 255, fontStyle: 'bold', font: 'NotoSansBengali' },
@@ -986,6 +988,7 @@ const Calculator = () => {
                                     <tr>
                                         <th className="p-4">Member</th>
                                         <th className="p-4 w-24">Meals</th>
+                                        <th className="p-4 w-20">M.Days</th>
                                         <th className="p-4 w-32">Market (₹)</th>
                                         <th className="p-4 w-28">Guest (₹)</th>
                                         <th className="p-4 w-32">Per Head (₹)</th>
@@ -1020,6 +1023,11 @@ const Calculator = () => {
                                                             </div>
                                                         </div>
                                                     )}
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="w-full p-1.5 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50 rounded-lg text-xs font-black text-indigo-700 dark:text-indigo-400 text-center" title="Assigned market duty days">
+                                                        {individualInputs[memberId]?.marketDays || 4}
+                                                    </div>
                                                 </td>
                                                 <td className="p-4">
                                                     <input

@@ -76,6 +76,7 @@ router.get('/:month', auth, async (req, res) => {
                     receivedAmount: 0,
                     depositBalance: 0, // Starts fresh each month
                     depositDate: '',
+                    marketDays: 4, // Default 4 days as per new policy
                     note: '',
                 });
             }

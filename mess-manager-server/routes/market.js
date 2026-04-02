@@ -1,7 +1,60 @@
 const express = require('express');
 const router = express.Router();
 const MarketRequest = require('../models/MarketRequest');
+const MonthlySummary = require('../models/MonthlySummary');
+const User = require('../models/User'); // For member list
 const { auth, requireAdmin } = require('../middleware/auth');
+
+// --- Manual Market Duty Routes ---
+
+// Get Duty counts for a month
+router.get('/duty/:month', auth, async (req, res) => {
+    try {
+        const { month } = req.params;
+        const duties = await MonthlySummary.find({ month }).select('memberId marketDays');
+        
+        // Return a map of memberId -> marketDays
+        const dutyMap = {};
+        duties.forEach(d => {
+            dutyMap[d.memberId] = d.marketDays;
+        });
+        
+        res.json(dutyMap);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Update Duty count for a member
+router.put('/duty/:month', auth, requireAdmin, async (req, res) => {
+    try {
+        const { month } = req.params;
+        const { memberId, marketDays } = req.body;
+
+        if (!memberId) return res.status(400).json({ message: 'memberId is required' });
+
+        // Fetch user to get name if creating new summary record
+        const user = await User.findById(memberId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const updated = await MonthlySummary.findOneAndUpdate(
+            { month, memberId },
+            { 
+                $set: { 
+                    marketDays: Number(marketDays),
+                    memberName: user.name,
+                    month,
+                    memberId
+                } 
+            },
+            { upsert: true, new: true }
+        );
+
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 // Get Schedule (by month or all)
 router.get('/', auth, async (req, res) => {
