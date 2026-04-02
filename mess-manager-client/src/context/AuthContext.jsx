@@ -13,7 +13,6 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [notification, setNotification] = useState(null);
 
     // User object: { id, name, role: 'admin' | 'member', avatar? }
     const [user, setUser] = useState(() => {
@@ -36,15 +35,10 @@ export const AuthProvider = ({ children }) => {
         return () => clearTimeout(timer);
     }, []);
 
-    // Listen for forced logout events (e.g. session replaced by another device)
     useEffect(() => {
-        const handleForceLogout = (e) => {
-            const message = e.detail?.message;
+        const handleForceLogout = () => {
             setUser(null);
             setToken(null);
-            if (message) {
-                setNotification({ message, type: 'error' });
-            }
         };
         window.addEventListener('auth:logout', handleForceLogout);
         return () => window.removeEventListener('auth:logout', handleForceLogout);
@@ -93,8 +87,6 @@ export const AuthProvider = ({ children }) => {
             user,
             token,
             isLoading,
-            notification,
-            setNotification,
             login,
             setUser,
             logout,

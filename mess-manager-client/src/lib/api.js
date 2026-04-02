@@ -23,18 +23,11 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            const code = error.response?.data?.code;
             // Clear auth state
             localStorage.removeItem('mess_token');
             localStorage.removeItem('mess_user');
-            // Dispatch custom event that AuthContext can listen to
-            if (code === 'SESSION_REPLACED') {
-                window.dispatchEvent(new CustomEvent('auth:logout', {
-                    detail: { message: 'You have been logged in on another device. Please login again.' }
-                }));
-            } else {
-                window.dispatchEvent(new CustomEvent('auth:logout', { detail: {} }));
-            }
+            // Dispatch logout event
+            window.dispatchEvent(new CustomEvent('auth:logout', { detail: {} }));
         }
         return Promise.reject(error);
     }

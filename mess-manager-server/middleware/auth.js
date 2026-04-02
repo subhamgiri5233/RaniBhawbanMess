@@ -14,22 +14,6 @@ const auth = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
 
-        // Validate sessionToken to enforce single-device login
-        if (decoded.sessionToken) {
-            let dbUser;
-            if (decoded.role === 'admin') {
-                dbUser = await Admin.findById(decoded.id).select('sessionToken');
-            } else {
-                dbUser = await User.findById(decoded.id).select('sessionToken');
-            }
-            if (!dbUser || dbUser.sessionToken !== decoded.sessionToken) {
-                return res.status(401).json({
-                    message: 'Session expired. You have been logged in on another device.',
-                    code: 'SESSION_REPLACED'
-                });
-            }
-        }
-
         next();
     } catch (err) {
         res.status(401).json({ message: 'Token is not valid' });
