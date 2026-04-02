@@ -6,7 +6,6 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import AnalogClock from './AnalogClock';
 import DigitalClock from './DigitalClock';
-import GitaCard from './GitaCard';
 
 
 
@@ -306,12 +305,6 @@ const Clock = ({ showGita = false }) => {
                 />
             </div>
 
-            {showGita && (
-                <GitaCard
-                    gita={gitaVerse}
-                    loadingInfo={loadingInfo}
-                />
-            )}
 
 
         </div>

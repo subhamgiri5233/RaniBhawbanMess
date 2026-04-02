@@ -12,7 +12,7 @@ const MarketDuty = () => {
     const {
         marketSchedule, allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, members, managerAllocation,
-        refreshData, globalMonth, setGlobalMonth
+        refreshData, globalMonth, setGlobalMonth, marketDutyLimits
     } = useData();
     const { user, isLoading } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -122,9 +122,10 @@ const MarketDuty = () => {
             return;
         }
 
-        // Check 4-day limit for members
-        if (myRequestsThisMonth >= 4) {
-            alert('⚠️ You can only request maximum 4 days per month');
+        // Check member-specific limit (default 4)
+        const myLimit = marketDutyLimits[user.id] || 4;
+        if (myRequestsThisMonth >= myLimit) {
+            alert(`⚠️ You can only request maximum ${myLimit} days per month`);
             return;
         }
 
@@ -132,7 +133,11 @@ const MarketDuty = () => {
         allocateMarketDay(dateStr, user.id, 'request', currentManagerId);
     };
 
-    const getMemberName = (id) => members.find(m => (m._id === id || m.id === id))?.name;
+    const getMemberName = (id) => {
+        if (!id) return 'Unknown';
+        const member = members.find(m => (m._id === id || m.id === id));
+        return member ? member.name : 'Unknown Member';
+    };
 
     const getMemberColor = (id) => {
         const colors = [
@@ -150,9 +155,10 @@ const MarketDuty = () => {
         return colors[hash % colors.length];
     };
 
-    // Calculate my requests (pending + approved) for 4-day limit
+    // Calculate my requests (pending + approved) for dynamic limit
+    const myLimit = marketDutyLimits[user.id] || 4;
     const myRequestsThisMonth = currentMonthSchedule.filter(d => d.assignedMemberId === user.id).length;
-    const canRequestMore = myRequestsThisMonth < 4 && !isPastMonth;
+    const canRequestMore = myRequestsThisMonth < myLimit && !isPastMonth;
 
     // Calculate my approved days
     const myDaysCount = currentMonthSchedule.filter(d => d.assignedMemberId === user.id && d.status === 'approved').length;
@@ -182,7 +188,7 @@ const MarketDuty = () => {
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Monthly Quota</span>
                             <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-                                <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{myRequestsThisMonth} / 4 Slots Used</span>
+                                <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{myRequestsThisMonth} / {myLimit} Slots Used</span>
                             </div>
                         </div>
                     )}
@@ -295,7 +301,7 @@ const MarketDuty = () => {
                     <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-center md:justify-end">
                         {!isAdmin && (
                             <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 px-3 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl border border-amber-200 dark:border-amber-500/30">
-                                Requests: <span className="text-sm md:text-lg leading-none align-middle ml-1">{myRequestsThisMonth}</span>/4
+                                Requests: <span className="text-sm md:text-lg leading-none align-middle ml-1">{myRequestsThisMonth}</span>/{myLimit}
                             </div>
                         )}
                         {!isAdmin && (
@@ -485,7 +491,10 @@ const MarketDuty = () => {
 
                     {members.map(member => {
                         const dayInfos = selectedModalDate ? getDaysInfo(selectedModalDate) : [];
-                        const memberRequest = dayInfos.find(d => d.assignedMemberId === (member._id || member.id));
+                        const memberRequest = dayInfos.find(d => 
+                            (d.assignedMemberId === (member._id || member.id)) || 
+                            (d.memberId === (member._id || member.id))
+                        );
                         const isApprovedForThisDate = memberRequest?.status === 'approved';
                         const isPending = memberRequest?.status === 'pending';
                         const memberColor = getMemberColor(member._id || member.id);
@@ -494,7 +503,9 @@ const MarketDuty = () => {
                         const memberApprovedDuties = currentMonthSchedule.filter(
                             d => d.assignedMemberId === (member._id || member.id) && d.status === 'approved'
                         ).length;
-                        const hasMaxDuties = memberApprovedDuties >= 4 && !isApprovedForThisDate;
+                        
+                        const memberLimit = marketDutyLimits[member._id || member.id] || 4;
+                        const hasMaxDuties = memberApprovedDuties >= memberLimit && !isApprovedForThisDate;
 
                         return (
                             <button
@@ -507,14 +518,14 @@ const MarketDuty = () => {
                                             setIsModalOpen(false);
                                         }
                                     } else if (hasMaxDuties) {
-                                        // 4-duty limit warning
-                                        alert(`⚠️ Member "${member.name}" already has ${memberApprovedDuties} days duty this month. Please select another member.`);
+                                        // Dynamic duty limit warning
+                                        alert(`⚠️ Member "${member.name}" already has ${memberApprovedDuties} days duty this month. Current Limit: ${memberLimit}.`);
                                     } else if (isPending) {
                                         // Approve specific request
                                         approveMarketRequest(memberRequest._id || memberRequest.id);
                                         setIsModalOpen(false);
                                     } else {
-                                        // Manual assign
+                                        // Manual assign - passing type 'manual_assign'
                                         allocateMarketDay(format(selectedModalDate, 'yyyy-MM-dd'), member._id || member.id, 'manual_assign');
                                         setIsModalOpen(false);
                                     }
@@ -538,7 +549,7 @@ const MarketDuty = () => {
                                         <p className={cn("font-black text-sm", isApprovedForThisDate ? "text-white" : "text-slate-900 dark:text-white")}>{member.name}</p>
                                         {isPending && <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Has Pending Request</p>}
                                         {isApprovedForThisDate && <p className="text-[10px] font-bold text-indigo-100 uppercase tracking-widest">Currently Assigned</p>}
-                                        {hasMaxDuties && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">4 Days Duty — Limit Reached</p>}
+                                        {hasMaxDuties && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">{memberLimit} Days Duty — Limit Reached</p>}
                                     </div>
                                 </div>
                                 <div className={cn(

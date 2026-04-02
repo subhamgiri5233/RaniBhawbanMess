@@ -6,7 +6,7 @@ import {
     ClipboardList, ChevronDown, X, Save, Crown,
     CheckCircle2, Clock, AlertCircle, Users,
     ShoppingBag, Wifi, Zap, User, Utensils,
-    Coffee, FileText, Loader2, RefreshCw, Search, Download, Wallet, Home, Newspaper, UserRound, Calendar
+    Coffee, FileText, Loader2, RefreshCw, Search, Download, Wallet, Home, Newspaper, UserRound, Calendar, Calculator
 } from 'lucide-react';
 import api from '../../lib/api';
 import Card from '../../components/ui/Card';
@@ -318,33 +318,10 @@ const Chip = ({ icon: Icon, value, label, color }) => (
 const MonthlySummary = () => {
     const { globalMonth, setGlobalMonth, settings } = useData();
 
-    // Helper to get setting value
-    const getSettingValue = (key, fallback) => {
-        const s = settings.find(item => item.key === key);
-        return s ? Number(s.value) : fallback;
-    };
-
-    // Sync local selection with global selection
-    // Parse globalMonth safely
-    const [year, month] = useMemo(() => {
-        if (!globalMonth || typeof globalMonth !== 'string') {
-            const now = new Date();
-            return [now.getFullYear(), now.getMonth() + 1];
-        }
-        const parts = globalMonth.split('-').map(Number);
-        return parts.length === 2 ? parts : [new Date().getFullYear(), new Date().getMonth() + 1];
-    }, [globalMonth]);
-
-    const [selectedYear, setSelectedYear] = useState(year);
-    const [selectedMonth, setSelectedMonth] = useState(month);
-
-    useEffect(() => {
-        if (globalMonth && typeof globalMonth === 'string' && globalMonth.includes('-')) {
-            const [y, m] = globalMonth.split('-').map(Number);
-            setSelectedYear(y || new Date().getFullYear());
-            setSelectedMonth(m || new Date().getMonth() + 1);
-        }
-    }, [globalMonth]);
+    // Split 'YYYY-MM' into [year, month]
+    const [yearPart, monthPart] = globalMonth.split('-');
+    const [selectedYear, setSelectedYear] = useState(parseInt(yearPart));
+    const [selectedMonth, setSelectedMonth] = useState(parseInt(monthPart));
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -353,7 +330,7 @@ const MonthlySummary = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [exportingId, setExportingId] = useState(null);
     const [exportingAdmin, setExportingAdmin] = useState(false);
-    const [sharedExpenses, setSharedExpenses] = useState({ paper: 0, didi: 0, houseRent: 0, gas: 0, wifi: 0, electric: 0 });
+    const [sharedExpenses, setSharedExpenses] = useState({ paper: 0, didi: 0, houseRent: 0, gas: 0, wifi: 0, electric: 0, spices: 0, others: 0 });
 
     const monthStr = `${selectedYear}-${pad(selectedMonth)}`;
 
@@ -381,7 +358,6 @@ const MonthlySummary = () => {
                     isSnapshot: true
                 });
             } else {
-                // FALLBACK REMOVED: strictly use snapshot
                 setSharedExpenses({
                     paper: 0, didi: 0, houseRent: 0, gas: 0, wifi: 0, electric: 0, spices: 0, others: 0,
                     isSnapshot: false
@@ -398,489 +374,216 @@ const MonthlySummary = () => {
         fetchSummary();
     }, [fetchSummary]);
 
-    const handlePaymentSaved = ({ memberId, paymentStatus, amountPaid, submittedAmount, receivedAmount, depositBalance, depositDate, depositBalanceLocked, note }) => {
-        setData(prev => ({
-            ...prev,
-            members: prev.members.map(m =>
-                m.memberId === memberId
-                    ? { ...m, paymentStatus, amountPaid, submittedAmount: submittedAmount || 0, receivedAmount: receivedAmount || 0, depositBalance, depositDate, depositBalanceLocked: true, note }
-                    : m
-            )
-        }));
+    const handleMonthChange = (e) => {
+        const m = parseInt(e.target.value);
+        setSelectedMonth(m);
+        setGlobalMonth(`${selectedYear}-${pad(m)}`);
     };
+
+    const handleYearChange = (e) => {
+        const y = parseInt(e.target.value);
+        setSelectedYear(y);
+        setGlobalMonth(`${y}-${pad(selectedMonth)}`);
+    };
+
+    const handlePaymentSaved = (updatedMember) => {
+        setData(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                members: prev.members.map(m =>
+                    m.memberId === updatedMember.memberId
+                        ? { ...m, ...updatedMember }
+                        : m
+                )
+            };
+        });
+    };
+
+    const filteredMembers = useMemo(() => {
+        if (!data || !data.members) return [];
+        return searchQuery.trim()
+            ? data.members.filter(m =>
+                m.memberName.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            : data.members;
+    }, [data, searchQuery]);
 
     // ── Export PDF Invoice (member) ────────────────────────────────────────────
     const exportInvoice = async (member) => {
         setExportingId(member.memberId);
         try {
-            const res = await api.get(`/summary/${monthStr}/invoice/${member.memberId}`);
-            const inv = res.data;
-            const monthLabel = MONTHS[selectedMonth - 1] ? `${MONTHS[selectedMonth - 1]} ${selectedYear}` : `${selectedYear}-${selectedMonth}`;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            
-            // Load Bengali font
-            await addBengaliFont(doc);
-            
-            const pw = doc.internal.pageSize.getWidth();
+            const snapshotM = data?.sharedExpense?.memberBalances?.find(mb => mb.memberId === member.memberId);
+            const doc = new jsPDF();
+            addBengaliFont(doc);
 
-            // ── Banner ──
-            doc.setFillColor(67, 56, 202);
-            doc.rect(0, 0, pw, 28, 'F');
-            doc.setFillColor(99, 102, 241);
-            doc.rect(0, 24, pw, 4, 'F');
-            
-            // Set font - use NotoSansBengali for everything to support names/notes
-            try {
-                doc.setFont('NotoSansBengali', 'bold');
-            } catch (e) {
-                doc.setFont('helvetica', 'bold');
-            }
-            
-            doc.setFontSize(16);
-            doc.setTextColor(255, 255, 255);
-            doc.text('RANI BHAWBAN MESS', pw / 2, 12, { align: 'center' });
-            doc.setFontSize(9);
-            try {
-                doc.setFont('NotoSansBengali', 'normal');
-            } catch (e) {
-                doc.setFont('helvetica', 'normal');
-            }
-            doc.text('MONTHLY INVOICE', pw / 2, 19, { align: 'center' });
+            doc.setFontSize(22);
+            doc.setTextColor(40, 44, 52);
+            doc.text(MESS_CONFIG.name, 105, 20, { align: 'center' });
 
-            // ── Meta ──
-            let y = 36;
-            doc.setFontSize(9); doc.setTextColor(30, 30, 60); 
-            try {
-                doc.setFont('NotoSansBengali', 'bold');
-            } catch (e) {
-                doc.setFont('helvetica', 'bold');
-            }
-            doc.text(`Month: ${monthLabel}`, 14, y);
-            doc.text(`Member: ${inv.member.name}`, pw / 2, y, { align: 'center' });
-            doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, pw - 14, y, { align: 'right' });
-            y += 5;
-            try {
-                doc.setFont('NotoSansBengali', 'normal');
-            } catch (e) {
-                doc.setFont('helvetica', 'normal');
-            }
-            doc.setTextColor(80, 80, 120);
-            doc.text(`Manager(s): ${inv.managers.join(', ') || 'N/A'}`, 14, y);
-            y += 8;
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Monthly Summary Invoice · ${MONTHS[selectedMonth - 1]} ${selectedYear}`, 105, 28, { align: 'center' });
 
-            const sectionHeader = (label, r, g, b) => {
-                doc.setFillColor(r, g, b);
-                doc.roundedRect(14, y, pw - 28, 7, 1, 1, 'F');
-                try {
-                    doc.setFont('NotoSansBengali', 'bold');
-                } catch (e) {
-                    doc.setFont('helvetica', 'bold');
-                }
-                doc.setFontSize(8); doc.setTextColor(255, 255, 255);
-                doc.text(label, 18, y + 4.8);
-                y += 10;
-            };
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, 35, 190, 35);
 
-            const pmt = inv.payment;
-            const submittedAmt = pmt?.submittedAmount || pmt?.amountPaid || 0;
-            const depositBalance = pmt?.depositBalance || inv.member.deposit || 0;
-            const payStatus = pmt?.paymentStatus || 'pending';
-            const note = pmt?.note || '';
+            doc.setFontSize(12);
+            doc.setTextColor(40, 44, 52);
+            doc.text(`Member: ${member.memberName}`, 20, 45);
+            doc.text(`Month: ${MONTHS[selectedMonth - 1]} ${selectedYear}`, 190, 45, { align: 'right' });
 
-            // ── Market expenses ──
-            const marketExpenses = inv.memberExpenses.filter(e => e.category === 'market');
-            const otherExpenses = inv.memberExpenses.filter(e => e.category !== 'market');
-            const marketTotal = marketExpenses.reduce((s, e) => s + (e.amount || 0), 0);
-
-            sectionHeader('MARKET EXPENSES', 16, 185, 129);
-            if (marketExpenses.length === 0) {
-                autoTable(doc, {
-                    startY: y, head: [['Date', 'Description', 'Amount (Rs.)']],
-                    body: [['—', 'No market expenses', '—']], theme: 'grid',
-                    headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
-                    margin: { left: 14, right: 14 },
-                });
-            } else {
-                const marketRows = marketExpenses.map(e => [e.date, e.description, `Rs.${e.amount || 0}`]);
-                marketRows.push(['', 'Market Total', `Rs.${marketTotal}`]);
-                const totalRowIdx = marketRows.length - 1;
-                autoTable(doc, {
-                    startY: y, head: [['Date', 'Description', 'Amount (Rs.)']],
-                    body: marketRows, theme: 'grid',
-                    headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
-                    alternateRowStyles: { fillColor: [236, 253, 245] },
-                    margin: { left: 14, right: 14 }, tableLineColor: [200, 240, 220], tableLineWidth: 0.2,
-                    didParseCell(data) {
-                        if (data.section === 'body' && data.row.index === totalRowIdx) {
-                            data.cell.styles.fillColor = [16, 185, 129];
-                            data.cell.styles.textColor = [255, 255, 255];
-                            data.cell.styles.fontStyle = 'bold';
-                        }
-                    }
-                });
-            }
-            y = doc.lastAutoTable.finalY + 6;
-
-            // ── Other member expenses ──
-            if (otherExpenses.length > 0) {
-                sectionHeader('OTHER EXPENSES', 100, 116, 139);
-                const otherRows = otherExpenses.map(e => [e.date, e.description, `Rs.${e.amount || 0}`]);
-                autoTable(doc, {
-                    startY: y, head: [['Date', 'Description', 'Amount (Rs.)']],
-                    body: otherRows, theme: 'grid',
-                    headStyles: { fillColor: [100, 116, 139], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
-                    alternateRowStyles: { fillColor: [248, 250, 252] },
-                    margin: { left: 14, right: 14 }, tableLineColor: [220, 220, 230], tableLineWidth: 0.2,
-                });
-                y = doc.lastAutoTable.finalY + 8;
-            } else {
-                y = doc.lastAutoTable.finalY + 8;
-            }
-
-
-            // ── Regular meals (count only) ──
-            sectionHeader('REGULAR MEALS', 245, 158, 11);
-            const lunchCount = inv.regularMeals.filter(m => m.type === 'lunch').length;
-            const dinnerCount = inv.regularMeals.filter(m => m.type === 'dinner').length;
-            autoTable(doc, {
-                startY: y, head: [['Lunch Count', 'Dinner Count', 'Total Meals']],
-                body: [[lunchCount, dinnerCount, inv.regularMeals.length]],
-                theme: 'grid',
-                headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
-                bodyStyles: { fontSize: 8, textColor: [30, 30, 60], fontStyle: 'bold', font: 'NotoSansBengali' },
-                alternateRowStyles: { fillColor: [255, 251, 235] },
-                margin: { left: 14, right: 14 },
-            });
-            y = doc.lastAutoTable.finalY + 8;
-
-            // ── Guest meals (detailed: date, type, time, amount) ──
-            if (inv.guestMeals.length > 0) {
-                sectionHeader('GUEST MEALS', 168, 85, 247);
-                const guestPrices = {
-                    fish: getSettingValue('guest_price_fish', MESS_CONFIG.GUEST_CONFIG.PRICES.fish),
-                    meat: getSettingValue('guest_price_meat', MESS_CONFIG.GUEST_CONFIG.PRICES.meat),
-                    veg: getSettingValue('guest_price_veg', MESS_CONFIG.GUEST_CONFIG.PRICES.veg),
-                    egg: getSettingValue('guest_price_egg', MESS_CONFIG.GUEST_CONFIG.PRICES.egg)
-                };
-                const guestRows = inv.guestMeals.map(g => {
-                    const price = g.amount || guestPrices[g.guestMealType] || 0;
-                    return [
-                        g.date,
-                        (g.guestMealType || '—').charAt(0).toUpperCase() + (g.guestMealType || '').slice(1),
-                        g.mealTime ? (g.mealTime.charAt(0).toUpperCase() + g.mealTime.slice(1)) : '—',
-                        `Rs.${price}`
-                    ];
-                });
-                const guestTotal = inv.guestMeals.reduce((s, g) => s + (g.amount || guestPrices[g.guestMealType] || 0), 0);
-                guestRows.push(['', '', 'Total', `Rs.${guestTotal}`]);
-                autoTable(doc, {
-                    startY: y, head: [['Date', 'Meal Type', 'Meal Time', 'Amount (Rs.)']],
-                    body: guestRows, theme: 'grid',
-                    headStyles: { fillColor: [168, 85, 247], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
-                    alternateRowStyles: { fillColor: [250, 245, 255] },
-                    margin: { left: 14, right: 14 },
-                });
-                y = doc.lastAutoTable.finalY + 8;
-            }
-
-
-            // ── Monthly Charges (Snapshot) ──
-            const snapshotM = data?.sharedExpense?.memberBalances?.find(mb => mb.memberId === inv.member.memberId);
-            if (snapshotM) {
-                sectionHeader('MONTHLY CHARGES (OFFICIAL)', 67, 56, 202);
-                autoTable(doc, {
-                    startY: y,
-                    head: [['Description', 'Amount (Rs.)']],
-                    body: [
-                        ['Meal Cost', `Rs.${snapshotM.mealCost}`],
-                        ['Shared/Fixed Cost', `Rs.${snapshotM.sharedCost}`],
-                        ['Guest Adjustment', `Rs.${snapshotM.guestCost}`],
-                        ['TOTAL GROSS CHARGE', `Rs.${snapshotM.totalCost}`],
-                        ['Market Paid (Deducted)', `Rs.${snapshotM.marketCost}`]
-                    ],
-                    theme: 'grid',
-                    headStyles: { fillColor: [67, 56, 202], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
-                    bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
-                    margin: { left: 14, right: 14 },
-                });
-                y = doc.lastAutoTable.finalY + 8;
-            }
-
-            // ── Payment summary ──
-            sectionHeader('PAYMENT SUMMARY', 239, 68, 68);
-            const statusColors = { clear: [16, 185, 129], partial: [245, 158, 11], pending: [239, 68, 68] };
-            const sc = statusColors[payStatus] || statusColors.pending;
-
-            // Due logic: (TotalCost - MarketPaid) - CashReceived
-            const payableBase = snapshotM ? (snapshotM.totalCost - snapshotM.marketCost) : Math.round(depositBalance);
-            const cashReceived = (inv.payment?.receivedAmount || 0);
+            const rows = [
+                ['Market Days', `${member.marketDays || 4} Days`, 'Count of days attended market'],
+                ['Deposit (Monthly)', `₹${Math.round(member.expenses?.deposit || 0)}`, 'Initial contribution'],
+                ['Market Cost', `₹${Math.round(snapshotM?.marketCost || 0)}`, 'Proportional market cost'],
+                ['Gas Bill', `₹${Math.round(member.expenses?.gas || 0)}`, 'Shared gas cost'],
+                ['WiFi Bill', `₹${Math.round(member.expenses?.wifi || 0)}`, 'Shared internet cost'],
+                ['Electric Bill', `₹${Math.round(member.expenses?.electric || 0)}`, 'Shared electricity cost'],
+                ['Meal Count', `${member.regularMeals} R + ${member.guestMeals} G`, 'Regular and guest meals'],
+                ['Total Meal Cost', `₹${Math.round(snapshotM?.mealCost || 0)}`, 'Calculated based on meal rate'],
+            ];
 
             autoTable(doc, {
-                startY: y,
-                head: [['Payable Base (Rs.)', 'Confirmed Paid (Rs.)', 'Due (Rs.)', 'Payment Status', 'Note']],
-                body: [[
-                    `Rs.${Math.round(payableBase)}`,
-                    `Rs.${Math.round(cashReceived)}`,
-                    `Rs.${Math.round(Math.max(0, payableBase - cashReceived))}`,
-                    payStatus.toUpperCase(),
-                    note || '—'
-                ]],
-                theme: 'grid',
-                headStyles: { fillColor: [239, 68, 68], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
-                bodyStyles: { fontSize: 8, textColor: [30, 30, 60], font: 'NotoSansBengali' },
-                columnStyles: { 3: { fontStyle: 'bold', textColor: sc } },
-                margin: { left: 14, right: 14 },
+                startY: 55,
+                head: [['Description', 'Amount', 'Note']],
+                body: rows,
+                theme: 'striped',
+                headStyles: { fillColor: [63, 81, 181], textColor: 255, fontStyle: 'bold' },
+                styles: { fontSize: 10, cellPadding: 5 },
             });
 
-            // ── Footer ──
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(7); doc.setTextColor(160, 160, 180);
-                doc.text(`Rani Bhawban Mess  •  Page ${i} of ${pageCount}`, pw / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-            }
-            doc.save(`Invoice_${inv.member.name}_${monthLabel.replace(' ', '_')}.pdf`);
+            const finalY = doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(14);
+            const baseBalance = Math.round(snapshotM?.balance || 0);
+            const typeText = snapshotM?.type === 'Pay' ? 'Total to Pay:' : 'Total to Get:';
+            doc.text(`${typeText} ₹${baseBalance}`, 190, finalY, { align: 'right' });
+
+            doc.save(`Invoice_${member.memberName}_${monthStr}.pdf`);
         } catch (err) {
-            console.error('Invoice export error:', err);
-            alert('Failed to export invoice. Please try again.');
+            console.error('PDF export failed:', err);
+            alert('Failed to generate PDF');
         } finally {
             setExportingId(null);
         }
     };
 
-    // ── Export Admin Expenses PDF ─────────────────────────────────────────────
+    // ── Export Admin Expenses PDF ──────────────────────────────────────────────
     const exportAdminExpensesPDF = async () => {
         setExportingAdmin(true);
         try {
             const res = await api.get(`/summary/${monthStr}/admin-expenses`);
-            const { adminExpenses, totalMembers, managers } = res.data;
-            const monthLabel = MONTHS[selectedMonth - 1] ? `${MONTHS[selectedMonth - 1]} ${selectedYear}` : `${selectedYear}-${selectedMonth}`;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            
-            // Load Bengali font
-            await addBengaliFont(doc);
-            
-            const pw = doc.internal.pageSize.getWidth();
+            const adminExpenses = res.data;
+            const doc = new jsPDF();
+            addBengaliFont(doc);
 
-            // ── Banner ──
-            doc.setFillColor(99, 102, 241);
-            doc.rect(0, 0, pw, 28, 'F');
-            doc.setFillColor(129, 140, 248);
-            doc.rect(0, 24, pw, 4, 'F');
-            try {
-                doc.setFont('NotoSansBengali', 'bold');
-            } catch (e) {
-                doc.setFont('helvetica', 'bold');
-            }
-            doc.setFontSize(16); doc.setTextColor(255, 255, 255);
-            doc.text('RANI BHAWBAN MESS', pw / 2, 12, { align: 'center' });
-            doc.setFontSize(9);
-            try {
-                doc.setFont('NotoSansBengali', 'normal');
-            } catch (e) {
-                doc.setFont('helvetica', 'normal');
-            }
-            doc.text('ADMIN / SHARED EXPENSES — ' + monthLabel.toUpperCase(), pw / 2, 19, { align: 'center' });
+            doc.setFontSize(20);
+            doc.text('Admin Shared Expenses Breakdown', 105, 20, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text(`${MONTHS[selectedMonth - 1]} ${selectedYear}`, 105, 28, { align: 'center' });
 
-            let y = 36;
-            doc.setFontSize(9); doc.setTextColor(30, 30, 60);
-            try {
-                doc.setFont('NotoSansBengali', 'bold');
-            } catch (e) {
-                doc.setFont('helvetica', 'bold');
-            }
-            doc.text(`Month: ${monthLabel}`, 14, y);
-            doc.text(`Total Members: ${totalMembers}`, pw / 2, y, { align: 'center' });
-            doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, pw - 14, y, { align: 'right' });
-            y += 5;
-            try {
-                doc.setFont('NotoSansBengali', 'normal');
-            } catch (e) {
-                doc.setFont('helvetica', 'normal');
-            }
-            doc.setTextColor(80, 80, 120);
-            doc.text(`Manager(s): ${managers.join(', ') || 'N/A'}`, 14, y);
-            y += 10;
-
-            doc.setFillColor(99, 102, 241);
-            doc.roundedRect(14, y, pw - 28, 7, 1, 1, 'F');
-            try {
-                doc.setFont('NotoSansBengali', 'bold');
-            } catch (e) {
-                doc.setFont('helvetica', 'bold');
-            }
-            doc.setFontSize(8); doc.setTextColor(255, 255, 255);
-            doc.text('SHARED EXPENSES', 18, y + 4.8);
-            y += 10;
-
-            const rows = adminExpenses.length === 0
-                ? [['—', 'No admin expenses recorded', '—', '—', '—']]
-                : adminExpenses.map(e => {
-                    const total = e.amount || 0;
-                    const share = Math.round(total / (totalMembers || 1));
-                    return [e.date, e.description, e.category, `Rs.${total}`, `Rs.${share}`];
-                });
-            if (adminExpenses.length > 0) {
-                const grandTotal = adminExpenses.reduce((s, e) => s + (e.amount || 0), 0);
-                const grandShare = Math.round(grandTotal / (totalMembers || 1));
-                rows.push(['', '', 'TOTAL', `Rs.${grandTotal}`, `Rs.${grandShare}/member`]);
-            }
+            const tableRows = adminExpenses.map(exp => [
+                exp.date ? new Date(exp.date).toLocaleDateString() : 'N/A',
+                exp.itemName || 'Unnamed',
+                `₹${exp.amount}`,
+                exp.paidByMemberName || 'Admin'
+            ]);
 
             autoTable(doc, {
-                startY: y,
-                head: [['Date', 'Description', 'Category', 'Total (Rs.)', `Per Member (÷${totalMembers})`]],
-                body: rows, theme: 'grid',
-                headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold', fontSize: 8, font: 'NotoSansBengali' },
-                bodyStyles: { fontSize: 7.5, textColor: [30, 30, 60], font: 'NotoSansBengali' },
-                alternateRowStyles: { fillColor: [238, 237, 255] },
-                margin: { left: 14, right: 14 },
-                tableLineColor: [200, 200, 240], tableLineWidth: 0.2,
+                startY: 35,
+                head: [['Date', 'Item Name', 'Amount', 'Paid By']],
+                body: tableRows,
+                headStyles: { fillColor: [156, 39, 176] },
             });
 
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(7); doc.setTextColor(160, 160, 180);
-                doc.text(`Rani Bhawban Mess  •  Page ${i} of ${pageCount}`, pw / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-            }
-            doc.save(`AdminExpenses_${monthLabel.replace(' ', '_')}.pdf`);
+            const total = adminExpenses.reduce((sum, e) => sum + e.amount, 0);
+            doc.text(`Total Official Admin Spending: ₹${total}`, 190, doc.lastAutoTable.finalY + 10, { align: 'right' });
+
+            doc.save(`AdminExpenses_${monthStr}.pdf`);
         } catch (err) {
-            console.error('Admin expenses export error:', err);
-            alert('Failed to export admin expenses. Please try again.');
+            console.error('Admin PDF failed:', err);
+            alert('Failed to load admin expenses');
         } finally {
-            setExportingAdmin(false);
+            setExportingAdmin(null);
         }
     };
 
-    // Summary stats
-    const totalMembers = data?.members?.length || 0;
+    const mealRate = data?.sharedExpense?.results?.mealRate || data?.mealRate || 0;
     const clearedCount = data?.members?.filter(m => m.paymentStatus === 'clear').length || 0;
     const pendingCount = data?.members?.filter(m => m.paymentStatus === 'pending').length || 0;
     const partialCount = data?.members?.filter(m => m.paymentStatus === 'partial').length || 0;
-    const totalMeals = data?.members?.reduce((s, m) => s + (m.regularMeals || 0) + (m.guestMeals || 0), 0) || 0;
-    const officialMealCharge = data?.sharedExpense?.results?.mealCharge;
-    const totalMealCharge = Math.round(data?.sharedExpense?.memberBalances?.reduce((s, m) => s + (m.mealCost || 0), 0) || 0);
-    const mealRate = officialMealCharge ? officialMealCharge.toFixed(2) : (totalMeals > 0 ? (totalMealCharge / totalMeals).toFixed(2) : '0');
-    const totalMarket = data?.sharedExpense?.memberBalances?.reduce((s, m) => s + (m.marketCost || 0), 0) ||
-        data?.members?.reduce((s, m) => s + (m.expenses?.market || 0), 0) || 0;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-6 pb-12"
+            className="flex flex-col gap-6"
         >
-            {/* ── Header ── */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
-                        <ClipboardList size={28} className="text-primary-500" />
-                        Monthly Summary
-                    </h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">
-                        Complete breakdown of member activity for the selected month.
-                    </p>
+            {/* Header / Selector */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-lg shadow-primary-500/20">
+                        <ClipboardList className="text-white" size={24} />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                            Monthly Summary
+                            <span className="px-2 py-0.5 rounded-lg bg-primary-100 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 text-[10px] uppercase font-black border border-primary-200 dark:border-primary-800/30">
+                                Official Snapshot
+                            </span>
+                        </h1>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5">Final accounting for the month</p>
+                    </div>
                 </div>
 
-                {/* Refresh button */}
-                <button
-                    onClick={fetchSummary}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-950/20 text-primary-600 dark:text-primary-400 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-100 dark:hover:bg-primary-950/40 transition-all disabled:opacity-50"
-                >
-                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                    Refresh
-                </button>
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-1.5 shadow-sm">
+                        <select
+                            value={selectedMonth}
+                            onChange={handleMonthChange}
+                            className="bg-transparent border-none text-sm font-black text-slate-700 dark:text-slate-300 focus:ring-0 cursor-pointer px-3"
+                        >
+                            {MONTHS.map((m, i) => (
+                                <option key={m} value={i + 1}>{m}</option>
+                            ))}
+                        </select>
+                        <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
+                        <select
+                            value={selectedYear}
+                            onChange={handleYearChange}
+                            className="bg-transparent border-none text-sm font-black text-slate-700 dark:text-slate-300 focus:ring-0 cursor-pointer px-3"
+                        >
+                            {getYearOptions().map(y => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <button
+                        onClick={fetchSummary}
+                        className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-500 hover:text-primary-500 transition-all shadow-sm active:scale-95"
+                    >
+                        <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                    </button>
+                </div>
             </div>
 
-            {/* ── Timeline Info ── */}
-            <Card className="p-4 bg-white/90 dark:bg-slate-900/40 border-indigo-100/50 dark:border-white/5">
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-950/20 rounded-xl border border-primary-200/50 dark:border-primary-800/30">
-                        <Calendar size={16} className="text-primary-500" />
-                        <span className="text-sm font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest">
-                            Viewing: {MONTHS[selectedMonth - 1] || '---'} {selectedYear}
-                        </span>
-                    </div>
-
-                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 max-w-[200px]">
-                        Data below is synced with the global timeline at the top.
-                    </p>
-
-                    {/* Manager display */}
-                    {data?.managers && data.managers.length > 0 && (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200/50 dark:border-amber-800/30 ml-auto">
-                            <Crown size={14} className="text-amber-500" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                                Manager{data.managers.length > 1 ? 's' : ''}:
-                            </span>
-                            <span className="text-xs font-black text-amber-700 dark:text-amber-300">
-                                {data.managers.join(', ')}
+            {/* ── SHARED EXPENSES CARDS ── */}
+            {!loading && data && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <Card className="p-0 overflow-hidden border-indigo-200/50 dark:border-white/5 bg-white dark:bg-slate-900/40">
+                        <div className="p-4 sm:p-6 border-b border-indigo-50 dark:border-white/5 bg-indigo-50/30 dark:bg-indigo-900/10 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl">
+                                    <ShoppingBag size={18} className="text-indigo-600 dark:text-indigo-400" />
+                                </div>
+                                <h2 className="text-sm sm:text-base font-black text-indigo-900 dark:text-indigo-300">Shared Bills & Managed Expenses</h2>
+                            </div>
+                            <span className="px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-[10px] font-black text-indigo-600 border border-indigo-200 text-center">
+                                DIVIDED BY {data.members.length} MEMBERS
                             </span>
                         </div>
-                    )}
-                </div>
-            </Card>
 
-            {/* ── Submission Warning ── */}
-            {data && !data.sharedExpense && !loading && (
-                <Card className="p-6 border-amber-200/50 dark:border-amber-800/20 bg-amber-50 dark:bg-amber-950/10 text-center">
-                    <AlertCircle size={32} className="text-amber-500 mx-auto mb-3" />
-                    <h2 className="text-lg font-black text-amber-700 dark:text-amber-400">Official Report Not Submitted</h2>
-                    <p className="text-sm font-bold text-amber-600 dark:text-amber-500 mt-1 max-w-md mx-auto">
-                        This month's official summary hasn't been finalized yet. Please go to the
-                        <a href="/calculator" className="mx-1 underline hover:text-amber-700">Calculator</a>
-                        and click "Submit to report" to generate this summary.
-                    </p>
-                </Card>
-            )}
-
-            {/* ── Shared Expenses Panel (Paper, Didi, House Rent) ── */}
-            {!loading && data && data.sharedExpense && Object.keys(data.sharedExpense).length > 0 && (
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                >
-                    <Card className="p-0 overflow-hidden border-slate-200/60 dark:border-white/5 bg-white dark:bg-slate-900/40">
-                        <div className="p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/60 flex items-center gap-3">
-                            <div className="p-2 bg-violet-100 dark:bg-violet-950/40 rounded-xl">
-                                <Wallet size={18} className="text-violet-600 dark:text-violet-400" />
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-base font-black text-slate-900 dark:text-white">Shared Expenses</h2>
-                                    {sharedExpenses.isSnapshot && (
-                                        <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-[8px] font-black uppercase tracking-widest border border-emerald-200 dark:border-emerald-800/50">
-                                            Official Snapshot
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Bills · Paper · Didi · Rent — from approved expenses</p>
-                            </div>
-                        </div>
-                        <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            {/* Gas */}
-                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30">
-                                <div className="p-3 bg-rose-100 dark:bg-rose-900/40 rounded-xl">
-                                    <AlertCircle size={20} className="text-rose-600 dark:text-rose-400" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-rose-500 dark:text-rose-400">Gas</p>
-                                    <p className={`text-2xl font-black ${sharedExpenses.gas > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-slate-300 dark:text-slate-600'}`}>
-                                        {sharedExpenses.gas > 0 ? `₹${sharedExpenses.gas}` : '—'}
-                                    </p>
-                                    {sharedExpenses.gas > 0 && data.members.length > 0 && (
-                                        <p className="text-[10px] font-bold text-rose-400 dark:text-rose-500 mt-0.5">
-                                            ₹{Math.round(sharedExpenses.gas / data.members.length)} / member
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 sm:p-6">
                             {/* WiFi */}
                             <div className="flex items-center gap-4 p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
                                 <div className="p-3 bg-blue-100 dark:bg-blue-900/40 rounded-xl">
@@ -966,17 +669,24 @@ const MonthlySummary = () => {
                                     )}
                                 </div>
                             </div>
-                        </div>
-                        {(sharedExpenses.paper + sharedExpenses.didi + sharedExpenses.houseRent) > 0 && (
-                            <div className="px-6 pb-5">
-                                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-white/5 flex items-center justify-between">
-                                    <span className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Total Shared</span>
-                                    <span className="text-lg font-black text-slate-900 dark:text-white">
-                                        ₹{sharedExpenses.paper + sharedExpenses.didi + sharedExpenses.houseRent + sharedExpenses.gas + sharedExpenses.wifi + sharedExpenses.electric}
-                                    </span>
+                            {/* Per Head Cost (Fixed) */}
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-primary-50 dark:bg-primary-950/20 border border-primary-100 dark:border-primary-900/30">
+                                <div className="p-3 bg-primary-100 dark:bg-primary-900/40 rounded-xl">
+                                    <Calculator size={20} className="text-primary-600 dark:text-primary-400" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary-500 dark:text-primary-400">Fixed Cost / Per Head</p>
+                                    <p className={`text-2xl font-black ${data?.sharedExpense?.results?.perHeadAmount > 0 ? 'text-primary-700 dark:text-primary-300' : 'text-slate-300 dark:text-slate-600'}`}>
+                                        {data?.sharedExpense?.results?.perHeadAmount > 0 ? `₹${Math.round(data.sharedExpense.results.perHeadAmount)}` : '—'}
+                                    </p>
+                                    {(data?.sharedExpense?.results?.perHeadAmount || 0) > 0 && (
+                                        <p className="text-[10px] font-bold text-primary-400 dark:text-primary-500 mt-0.5 whitespace-nowrap">
+                                            Total Official Snapshot
+                                        </p>
+                                    )}
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </Card>
                 </motion.div>
             )}
@@ -1032,9 +742,9 @@ const MonthlySummary = () => {
                                 <div className="p-2 bg-primary-100 dark:bg-primary-950/40 rounded-xl">
                                     <Users size={18} className="text-primary-600 dark:text-primary-400" />
                                 </div>
-                                <div>
+                                <div className="flex flex-col">
                                     <h2 className="text-base font-black text-slate-900 dark:text-white">Member Breakdown</h2>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Click payment badge to update status</p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Calculated from snapshot</p>
                                 </div>
                             </div>
                             {/* Member search bar */}
@@ -1048,338 +758,189 @@ const MonthlySummary = () => {
                                     className="w-full pl-8 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 outline-none transition-all"
                                 />
                             </div>
-                            {/* Admin Expenses PDF button */}
                             <button
                                 onClick={exportAdminExpensesPDF}
                                 disabled={exportingAdmin}
-                                title="Download Admin Expenses PDF for this month"
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-wide hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-all disabled:opacity-50 border border-indigo-200/60 dark:border-indigo-800/30"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-wide hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-all border border-indigo-200/60 dark:border-indigo-800/30"
                             >
                                 {exportingAdmin ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
-                                Admin Expenses
+                                Admin Exp. PDF
                             </button>
                         </div>
                     </div>
 
                     {/* Desktop Table View */}
                     <div className="hidden md:block overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[1050px]">
+                        <table className="w-full text-left min-w-[1050px]">
                             <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
-                                    <th className="px-5 py-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky left-0 top-0 z-20 bg-slate-50 dark:bg-slate-900 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Member</th>
-                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Deposit<br /><span className="text-[9px] font-black text-violet-500/70 lowercase opacity-60">(monthly)</span></th>
-                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Market<br /><span className="text-[9px] font-black text-blue-500/70 lowercase opacity-60">(paid)</span></th>
-                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Gas</th>
-                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">WiFi</th>
-                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Electric</th>
-                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Meals<br /><span className="text-[9px] font-black text-amber-500/70 lowercase opacity-60">(count)</span></th>
-                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Meals<br /><span className="text-[9px] font-black text-amber-500/70 lowercase opacity-60">(cost)</span></th>
-                                    <th className="px-4 py-3 text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-tight italic sticky top-0 z-10 bg-slate-50 dark:bg-slate-900">Status</th>
+                                <tr className="bg-slate-50 dark:bg-slate-900 text-slate-500 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
+                                    <th className="px-5 py-3 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Member</th>
+                                    <th className="px-4 py-3 text-center">M. Duty(d)</th>
+                                    <th className="px-4 py-3 text-center">Deposit</th>
+                                    <th className="px-4 py-3 text-center">Market</th>
+                                    <th className="px-4 py-3 text-center">Gas</th>
+                                    <th className="px-4 py-3 text-center">WiFi</th>
+                                    <th className="px-4 py-3 text-center">Electric</th>
+                                    <th className="px-4 py-3 text-center">Meals(n)</th>
+                                    <th className="px-4 py-3 text-center">Meals(₹)</th>
+                                    <th className="px-5 py-3 text-right">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                                 <AnimatePresence mode="popLayout">
-                                    {(() => {
-                                        const filtered = searchQuery.trim()
-                                            ? data.members.filter(m =>
-                                                m.memberName.toLowerCase().includes(searchQuery.toLowerCase())
-                                            )
-                                            : data.members;
-
-                                        if (filtered.length === 0) {
-                                            return (
-                                                <tr>
-                                                    <td colSpan="12" className="py-16 text-center text-slate-400 dark:text-slate-500 text-sm font-bold italic">
-                                                        {searchQuery ? `No member found matching "${searchQuery}"` : 'No members found.'}
-                                                    </td>
-                                                </tr>
-                                            );
-                                        }
-
-                                        return filtered.map((member, idx) => {
+                                    {(!filteredMembers || filteredMembers.length === 0) ? (
+                                        <tr>
+                                            <td colSpan="13" className="py-16 text-center text-slate-400 text-sm font-bold italic">
+                                                {searchQuery ? `No match for "${searchQuery}"` : 'No members found.'}
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredMembers.map((member, idx) => {
                                             const snapshotM = data?.sharedExpense?.memberBalances?.find(mb => mb.memberId === member.memberId);
+                                            const baseBalance = snapshotM ? Math.round(snapshotM.balance) : 0;
+                                            const submitted = member.submittedAmount || 0;
+                                            const remaining = Math.max(0, baseBalance - submitted);
+
                                             return (
                                                 <motion.tr
                                                     key={member.memberId}
                                                     layout
                                                     initial={{ opacity: 0, x: -10 }}
                                                     animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: idx * 0.03 }}
+                                                    transition={{ delay: idx * 0.02 }}
                                                     className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group"
                                                 >
-                                                    {/* Member name */}
-                                                    <td className="px-5 py-4 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors">
+                                                    <td className="px-5 py-4 sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-black text-sm shadow-sm uppercase">
+                                                            <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white font-black text-xs">
                                                                 {(member.memberName || '?').charAt(0)}
                                                             </div>
-                                                            <div>
-                                                                <div className="font-black text-slate-900 dark:text-white text-sm">{member.memberName}</div>
-                                                                {member.note && (
-                                                                    <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 italic">{member.note}</div>
-                                                                )}
-                                                            </div>
+                                                            <div className="font-black text-slate-900 dark:text-white text-sm">{member.memberName}</div>
                                                         </div>
                                                     </td>
-
-                                                    {/* Deposit */}
-                                                    <td className="px-4 py-4 text-center">
-                                                        {(() => {
-                                                            const genDep = member.expenses?.deposit || 0;
-                                                            return genDep > 0 ? (
-                                                                <span className="font-black text-sm text-emerald-600 dark:text-emerald-400">
-                                                                    ₹{Math.round(genDep)}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="font-black text-sm text-slate-300 dark:text-slate-600">₹0</span>
-                                                            );
-                                                        })()}
-                                                    </td>
-
-                                                    {/* Market */}
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className={`font-black text-sm ${(snapshotM?.marketCost || 0) > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                            {(snapshotM?.marketCost || 0) > 0 ? `₹${Math.round(snapshotM.marketCost)}` : '—'}
-                                                        </span>
-                                                    </td>
-
-                                                    {/* Gas */}
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className={`font-black text-sm ${(member.expenses?.gas || 0) > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                            {(member.expenses?.gas || 0) > 0 ? `₹${Math.round(member.expenses.gas)}` : '—'}
-                                                        </span>
-                                                    </td>
-
-                                                    {/* WiFi */}
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className={`font-black text-sm ${(member.expenses?.wifi || 0) > 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                            {(member.expenses?.wifi || 0) > 0 ? `₹${Math.round(member.expenses.wifi)}` : '—'}
-                                                        </span>
-                                                    </td>
-
-                                                    {/* Electric */}
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className={`font-black text-sm ${(member.expenses?.electric || 0) > 0 ? 'text-yellow-600 dark:text-yellow-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                                                            {(member.expenses?.electric || 0) > 0 ? `₹${Math.round(member.expenses.electric)}` : '—'}
-                                                        </span>
-                                                    </td>
-
-                                                    {/* Meals — Count */}
+                                                    <td className="px-4 py-4 text-center font-black text-xs text-indigo-500">{member.marketDays || 4}</td>
+                                                    <td className="px-4 py-4 text-center font-black text-xs text-emerald-600">₹{Math.round(member.expenses?.deposit || 0)}</td>
+                                                    <td className="px-4 py-4 text-center font-black text-xs text-blue-600">₹{Math.round(snapshotM?.marketCost || 0)}</td>
+                                                    <td className="px-4 py-4 text-center font-black text-xs text-rose-500">₹{Math.round(member.expenses?.gas || 0)}</td>
+                                                    <td className="px-4 py-4 text-center font-black text-xs text-cyan-500">₹{Math.round(member.expenses?.wifi || 0)}</td>
+                                                    <td className="px-4 py-4 text-center font-black text-xs text-amber-500">₹{Math.round(member.expenses?.electric || 0)}</td>
                                                     <td className="px-4 py-4 text-center">
                                                         <div className="flex flex-col items-center">
-                                                            <span className="font-black text-sm text-slate-600 dark:text-slate-300">
-                                                                {member.regularMeals < 40 ? (
-                                                                    <span className="flex items-center gap-1">
-                                                                        40
-                                                                        <span className="text-[10px] text-slate-400 font-bold">({member.regularMeals})</span>
-                                                                    </span>
-                                                                ) : member.regularMeals}
-                                                            </span>
-                                                            <span className="text-[10px] font-bold text-amber-500/70 uppercase tracking-tighter">
-                                                                {member.guestMeals} Guest
-                                                            </span>
+                                                            <span className="font-black text-xs">{member.regularMeals < 40 ? 40 : member.regularMeals} R</span>
+                                                            <span className="text-[9px] font-bold text-slate-400">{member.guestMeals} G</span>
                                                         </div>
                                                     </td>
-
-                                                    {/* Meals — Amount */}
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className="font-black text-sm text-amber-600 dark:text-amber-400">
-                                                            ₹{Number(snapshotM?.mealCost || 0).toFixed(2)}
-                                                        </span>
-                                                    </td>
-
-                                                    {/* Status */}
-                                                    <td className="px-4 py-4 text-center">
-                                                        {(() => {
-                                                            if (!snapshotM) return <span className="text-slate-300">—</span>;
-
-                                                            const baseBalance = Math.round(snapshotM.balance) || 0;
-                                                            const submitted = member.submittedAmount || 0;
-                                                            const remaining = Math.max(0, baseBalance - submitted);
-
-                                                            return (
-                                                                <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
-                                                                    {remaining === 0 ? (
-                                                                        <span className="text-emerald-500 font-black uppercase tracking-widest text-[10px]">✓ Clear</span>
-                                                                    ) : snapshotM.type === 'Pay' ? (
-                                                                        <div className="px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 font-black uppercase tracking-widest text-[10px] shadow-sm ring-1 ring-rose-500/20">
-                                                                            ₹{remaining} Pay
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest text-[10px] shadow-sm ring-1 ring-emerald-500/20">
-                                                                            ₹{remaining} Get
-                                                                        </div>
-                                                                    )}
-                                                                    <div className="mt-1 flex flex-col items-center gap-1">
-                                                                        <StatusBadge
-                                                                            status={member.paymentStatus}
-                                                                            onClick={() => setEditingMember({
-                                                                                ...member,
-                                                                                finalBalance: baseBalance,
-                                                                                snapshotType: snapshotM.type
-                                                                            })}
-                                                                        />
-                                                                        {submitted > 0 && (
-                                                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">
-                                                                                {snapshotM.type === 'Pay' ? 'Paid' : 'Got'} ₹{submitted}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                    <button
-                                                                        onClick={() => exportInvoice(member)}
-                                                                        disabled={exportingId === member.memberId}
-                                                                        className="flex items-center gap-1 text-slate-400 hover:text-emerald-500 transition-colors font-black text-[9px] uppercase tracking-tighter mt-1"
-                                                                    >
-                                                                        <Download size={10} />
-                                                                        {exportingId === member.memberId ? '...' : 'Invoice'}
-                                                                    </button>
-                                                                </div>
-                                                            );
-                                                        })()}
+                                                    <td className="px-4 py-4 text-center font-black text-xs text-amber-600">₹{Math.round(snapshotM?.mealCost || 0)}</td>
+                                                    <td className="px-5 py-4 text-right">
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <div className="flex items-center gap-2">
+                                                                {remaining === 0 ? (
+                                                                    <span className="text-[10px] font-black text-emerald-500">CLEAR</span>
+                                                                ) : (
+                                                                    <span className={`text-[10px] font-black ${snapshotM?.type === 'Pay' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                                                        ₹{remaining} {snapshotM?.type === 'Pay' ? 'PAY' : 'GET'}
+                                                                    </span>
+                                                                )}
+                                                                <StatusBadge
+                                                                    status={member.paymentStatus}
+                                                                    onClick={() => setEditingMember({
+                                                                        ...member,
+                                                                        finalBalance: baseBalance,
+                                                                        snapshotType: snapshotM?.type
+                                                                    })}
+                                                                />
+                                                            </div>
+                                                            <button
+                                                                onClick={() => exportInvoice(member)}
+                                                                className="text-[9px] font-black text-slate-400 hover:text-primary-500 uppercase flex items-center gap-1"
+                                                            >
+                                                                <Download size={10} /> Invoice
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </motion.tr>
-                                            );
-                                        });
-                                    })()}
+                                            )
+                                        })
+                                    )}
                                 </AnimatePresence>
                             </tbody>
                         </table>
                     </div>
 
-                    {/* Mobile Card View */}
+                    {/* Mobile View */}
                     <div className="md:hidden divide-y divide-slate-100 dark:divide-white/5">
                         <AnimatePresence mode="popLayout">
-                            {(() => {
-                                const filtered = searchQuery.trim()
-                                    ? data.members.filter(m =>
-                                        m.memberName.toLowerCase().includes(searchQuery.toLowerCase())
-                                    )
-                                    : data.members;
+                            {filteredMembers.map((member, idx) => {
+                                const snapshotM = data?.sharedExpense?.memberBalances?.find(mb => mb.memberId === member.memberId);
+                                const baseBalance = snapshotM ? Math.round(snapshotM.balance) : 0;
+                                const submitted = member.submittedAmount || 0;
+                                const remaining = Math.max(0, baseBalance - submitted);
 
-                                if (filtered.length === 0) {
-                                    return (
-                                        <div className="py-16 text-center text-slate-400 dark:text-slate-500 text-sm font-bold italic">
-                                            {searchQuery ? `No member found matching "${searchQuery}"` : 'No members found.'}
+                                return (
+                                    <motion.div
+                                        key={member.memberId}
+                                        layout
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="p-4 bg-white dark:bg-slate-900"
+                                    >
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white font-black text-xs">
+                                                    {(member.memberName || '?').charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <div className="font-black text-sm">{member.memberName}</div>
+                                                    <div className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">{member.marketDays || 0} Market Days</div>
+                                                </div>
+                                            </div>
+                                            <StatusBadge
+                                                status={member.paymentStatus}
+                                                onClick={() => setEditingMember({
+                                                    ...member,
+                                                    finalBalance: baseBalance,
+                                                    snapshotType: snapshotM?.type
+                                                })}
+                                            />
                                         </div>
-                                    );
-                                }
-
-                                return filtered.map((member, idx) => {
-                                    const snapshotM = data?.sharedExpense?.memberBalances?.find(mb => mb.memberId === member.memberId);
-                                    const baseBalance = snapshotM ? Math.round(snapshotM.balance) : 0;
-                                    const submitted = member.submittedAmount || 0;
-                                    const remaining = Math.max(0, baseBalance - submitted);
-
-                                    return (
-                                        <motion.div
-                                            key={member.memberId}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: idx * 0.05 }}
-                                            className="p-4 bg-white dark:bg-slate-900/40"
-                                        >
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-black text-sm uppercase">
-                                                        {(member.memberName || '?').charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-black text-slate-900 dark:text-white text-sm">{member.memberName}</div>
-                                                        <div className="flex items-center gap-2 mt-0.5">
-                                                            <div className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-tighter bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-white/5">
-                                                                <Utensils size={8} /> {member.regularMeals < 40 ? 40 : member.regularMeals} Meals
-                                                            </div>
-                                                            <div className="flex items-center gap-1 text-[9px] font-black text-amber-500 uppercase tracking-tighter bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-100/50 dark:border-amber-800/20">
-                                                                <Users size={8} /> {member.guestMeals} Guest
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex flex-col items-end gap-1">
-                                                    {remaining === 0 ? (
-                                                        <span className="text-emerald-500 font-black uppercase tracking-widest text-[9px] bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-200/50">✓ Clear</span>
-                                                    ) : snapshotM?.type === 'Pay' ? (
-                                                        <div className="px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 font-black uppercase tracking-widest text-[9px] ring-1 ring-rose-500/20">
-                                                            ₹{remaining} Pay
-                                                        </div>
-                                                    ) : (
-                                                        <div className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-widest text-[9px] ring-1 ring-emerald-500/20">
-                                                            ₹{remaining} Get
-                                                        </div>
-                                                    )}
-                                                    <StatusBadge
-                                                        status={member.paymentStatus}
-                                                        onClick={() => setEditingMember({
-                                                            ...member,
-                                                            finalBalance: baseBalance,
-                                                            snapshotType: snapshotM?.type
-                                                        })}
-                                                    />
+                                        <div className="grid grid-cols-2 gap-2 mb-3">
+                                            <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                                                <div className="text-[8px] font-black text-slate-400 uppercase">Meal Cost</div>
+                                                <div className="text-xs font-black">₹{Math.round(snapshotM?.mealCost || 0)}</div>
+                                            </div>
+                                            <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                                                <div className="text-[8px] font-black text-slate-400 uppercase">Balance</div>
+                                                <div className={`text-xs font-black ${snapshotM?.type === 'Pay' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                                    ₹{remaining}
                                                 </div>
                                             </div>
-
-                                            <div className="grid grid-cols-3 gap-2 mb-3">
-                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-white/5">
-                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Deposit</p>
-                                                    <p className="font-black text-xs text-emerald-600">₹{Math.round(member.expenses?.deposit || 0)}</p>
-                                                </div>
-                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-white/5">
-                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Market</p>
-                                                    <p className="font-black text-xs text-blue-600">₹{Math.round(snapshotM?.marketCost || 0)}</p>
-                                                </div>
-                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-white/5">
-                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Expenses</p>
-                                                    <p className="font-black text-xs text-rose-600">₹{Math.round((member.expenses?.gas || 0) + (member.expenses?.wifi || 0) + (member.expenses?.electric || 0))}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5">
-                                                <div className="flex items-center gap-2">
-                                                    {submitted > 0 && (
-                                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">
-                                                            {snapshotM?.type === 'Pay' ? 'Paid' : 'Got'}: <span className="text-slate-600 dark:text-slate-300">₹{submitted}</span>
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <button
-                                                    onClick={() => exportInvoice(member)}
-                                                    disabled={exportingId === member.memberId}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600  dark:text-indigo-400 rounded-lg font-black text-[9px] uppercase tracking-wider transition-all"
-                                                >
-                                                    <Download size={10} />
-                                                    {exportingId === member.memberId ? 'Exporting...' : 'Invoice'}
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    );
-                                });
-                            })()}
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Snapshot Details</span>
+                                            <button
+                                                onClick={() => exportInvoice(member)}
+                                                className="text-[10px] font-black text-primary-500 flex items-center gap-1"
+                                            >
+                                                <Download size={12} /> DEPOSIT ₹{Math.round(member.expenses?.deposit || 0)}
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
                         </AnimatePresence>
                     </div>
 
-                    {/* Footer totals */}
+                    {/* Totals Footer */}
                     {data.members.length > 0 && (
-                        <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/60 flex flex-wrap gap-4 text-xs font-black">
-                            <span className="text-slate-500 dark:text-slate-400 uppercase tracking-widest">Totals:</span>
-                            <span className="text-emerald-600 dark:text-emerald-400">
-                                Market: ₹{Math.round(data.sharedExpense?.memberBalances?.reduce((s, m) => s + (m.marketCost || 0), 0) || data.members.reduce((s, m) => s + (m.expenses?.market || 0), 0))}
-                            </span>
-                            <span className="text-cyan-600 dark:text-cyan-400">
-                                WiFi: ₹{Math.round(sharedExpenses.wifi || 0)}
-                            </span>
-                            <span className="text-yellow-600 dark:text-yellow-400">
-                                Electric: ₹{Math.round(sharedExpenses.electric || 0)}
-                            </span>
-                            <span className="text-amber-600 dark:text-amber-400">
-                                Guest Meals: {data.members.reduce((s, m) => s + (m.guestMeals || 0), 0)}
-                            </span>
+                        <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/60 flex flex-wrap gap-4 text-[10px] font-black uppercase tracking-widest">
+                            <span className="text-slate-500">Totals:</span>
+                            <span className="text-indigo-600">Market: ₹{Math.round(data?.sharedExpense?.results?.totalMarketCost || 0)}</span>
+                            <span className="text-emerald-600">Fixed Cost: ₹{Math.round(data?.sharedExpense?.results?.totalSharedExpense || 0)}</span>
+                            <span className="text-amber-600">Meals: {data.members.reduce((s, m) => s + (m.regularMeals < 40 ? 40 : m.regularMeals) + m.guestMeals, 0)}</span>
                         </div>
                     )}
                 </Card>
             )}
-
-
 
             {/* ── Payment modal ── */}
             <AnimatePresence>

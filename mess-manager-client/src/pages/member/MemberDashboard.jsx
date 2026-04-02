@@ -164,7 +164,7 @@ const MemberDashboard = () => {
 
             {/* Clock Component */}
             <div className="rounded-[2rem] overflow-hidden shadow-sm border border-indigo-100/50 dark:border-white/5 bg-white/90 backdrop-blur-xl dark:bg-slate-900/40">
-                <Clock showGita={true} />
+                <Clock />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

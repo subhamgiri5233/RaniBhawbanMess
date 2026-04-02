@@ -1026,7 +1026,7 @@ const Calculator = () => {
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="w-full p-1.5 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50 rounded-lg text-xs font-black text-indigo-700 dark:text-indigo-400 text-center" title="Assigned market duty days">
-                                                        {individualInputs[memberId]?.marketDays || 4}
+                                                        {individualInputs[memberId]?.marketDays || data.marketDays || 0}
                                                     </div>
                                                 </td>
                                                 <td className="p-4">

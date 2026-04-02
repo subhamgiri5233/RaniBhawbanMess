@@ -38,6 +38,7 @@ export const DataProvider = ({ children }) => {
     const [notifications, setNotifications] = useState(() => hydrateFromStorage('mess_notifications', []));
     
     const [marketSchedule, setMarketSchedule] = useState({});
+    const [marketDutyLimits, setMarketDutyLimits] = useState({});
     const [managerAllocation, setManagerAllocation] = useState({});
     const [cookingDuties, setCookingDuties] = useState([]);
     const [loadingDaily, setLoadingDaily] = useState(true);
@@ -105,6 +106,14 @@ export const DataProvider = ({ children }) => {
             } catch (e) { console.error('Market fetch failed', e); }
         })();
 
+        // Fetch market duty limits for the chosen month
+        (async () => {
+            try {
+                const res = await api.get(`/market/duty/${globalMonth}`);
+                setMarketDutyLimits(res.data);
+            } catch (e) { console.error('Market duty limits fetch failed', e); }
+        })();
+
     }, [globalMonth]);
 
     // Fetch Initial Data
@@ -133,8 +142,19 @@ export const DataProvider = ({ children }) => {
             const map = {};
             r.data.forEach(item => { const m = item.date.substring(0, 7); if (!map[m]) map[m] = []; map[m].push(item); });
             setMarketSchedule(map);
+            
+            // Also refresh limits while we're at it
+            const limitsRes = await api.get(`/market/duty/${globalMonth}`);
+            setMarketDutyLimits(limitsRes.data);
         } catch (e) { console.error('refreshMarket failed', e); }
-    }, []);
+    }, [globalMonth]);
+
+    const refreshMarketDutyLimits = useCallback(async (month) => {
+        try {
+            const res = await api.get(`/market/duty/${month || globalMonth}`);
+            setMarketDutyLimits(res.data);
+        } catch (e) { console.error('refreshMarketDutyLimits failed', e); }
+    }, [globalMonth]);
     const refreshMeals = useCallback(async () => {
         try { const r = await api.get(`/meals?month=${globalMonth}`); setMeals(r.data); } catch (e) { console.error('refreshMeals failed', e); }
     }, [globalMonth]);
@@ -331,9 +351,9 @@ export const DataProvider = ({ children }) => {
     }, []);
 
     // Market Actions
-    const allocateMarketDay = useCallback(async (date, memberId) => {
+    const allocateMarketDay = useCallback(async (date, assignedMemberId, requestType = 'request', managerId = null) => {
         try {
-            await api.post('/market', { date, memberId });
+            await api.post('/market', { date, assignedMemberId, requestType, managerId });
             await refreshMarket();
         } catch (error) {
             console.error('Allocate market day failed', error);
@@ -342,7 +362,7 @@ export const DataProvider = ({ children }) => {
 
     const approveMarketRequest = useCallback(async (requestId) => {
         try {
-            await api.put(`/market/requests/${requestId}/approve`);
+            await api.put(`/market/id/${requestId}`, { status: 'approved' });
             await refreshMarket();
         } catch (error) {
             console.error('Approve market request failed', error);
@@ -351,7 +371,7 @@ export const DataProvider = ({ children }) => {
 
     const rejectMarketRequest = useCallback(async (requestId) => {
         try {
-            await api.put(`/market/requests/${requestId}/reject`);
+            await api.put(`/market/id/${requestId}`, { status: 'rejected' });
             await refreshMarket();
         } catch (error) {
             console.error('Reject market request failed', error);
@@ -499,6 +519,7 @@ export const DataProvider = ({ children }) => {
         setGlobalMonth,
         notifications,
         marketSchedule,
+        marketDutyLimits,
         managerAllocation,
         cookingDuties,
         clearMonthlyData,
@@ -537,9 +558,9 @@ export const DataProvider = ({ children }) => {
         sendBulkWhatsAppOfficial
     }), [
         members, expenses, filteredExpenses, meals, filteredMeals, guestMeals, filteredGuestMeals,
-        globalMonth, setGlobalMonth, notifications, marketSchedule,
+        globalMonth, setGlobalMonth, notifications, marketSchedule, marketDutyLimits,
         managerAllocation, cookingDuties, clearMonthlyData, getMonthlyDataPreview, dailyInfo, settings, 
-        updateSystemSetting, loadingDaily, refreshData,
+        updateSystemSetting, loadingDaily, refreshData, refreshMarketDutyLimits,
         addMember, removeMember, updateMember, addMeal, removeMeal, addGuestMeal,
         removeGuestMeal, sendNotification,
         sendPaymentNotifications, markPaymentAsPaid, updateNotification,

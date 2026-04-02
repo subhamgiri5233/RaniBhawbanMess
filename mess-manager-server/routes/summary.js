@@ -63,9 +63,10 @@ router.get('/:month', auth, async (req, res) => {
         const existingMemberIds = new Set(paymentStatuses.map(ps => ps.memberId.toString()));
 
         const newSummaries = [];
+        const addedIds = new Set();
         members.forEach(member => {
             const memberIdStr = member._id.toString();
-            if (!existingMemberIds.has(memberIdStr)) {
+            if (!existingMemberIds.has(memberIdStr) && !addedIds.has(memberIdStr)) {
                 newSummaries.push({
                     month,
                     memberId: memberIdStr,
@@ -74,17 +75,26 @@ router.get('/:month', auth, async (req, res) => {
                     amountPaid: 0,
                     submittedAmount: 0,
                     receivedAmount: 0,
-                    depositBalance: 0, // Starts fresh each month
+                    depositBalance: member.deposit || 0, // Carry over current deposit as initial balance
                     depositDate: '',
-                    marketDays: 4, // Default 4 days as per new policy
+                    marketDays: 4, 
                     note: '',
                 });
+                addedIds.add(memberIdStr);
             }
         });
 
         if (newSummaries.length > 0) {
-            await MonthlySummary.insertMany(newSummaries);
-            // Re-fetch to include newly inserted
+            try {
+                // Use ordered: false so valid inserts continue if some fail with duplicate keys
+                await MonthlySummary.insertMany(newSummaries, { ordered: false });
+            } catch (err) {
+                // Ignore duplicate key errors (code 11000) which happen during concurrent initialization
+                if (err.code !== 11000 && !err.writeErrors?.every(e => e.code === 11000)) {
+                    console.error('Non-duplicate error during summary initialization:', err);
+                }
+            }
+            // Re-fetch to include newly inserted (or existing if they were just inserted by another request)
             paymentStatuses = await MonthlySummary.find({ month }).lean();
         }
 
@@ -142,7 +152,7 @@ router.get('/:month', auth, async (req, res) => {
                 .reduce((sum, e) => sum + (e.amount || 0), 0);
 
             // Payment status
-            const payment = paymentMap[memberIdStr] || paymentMap[member.userId];
+            const payment = paymentMap[memberIdStr] || (member.userId ? paymentMap[member.userId] : null);
 
             return {
                 memberId: memberIdStr,
@@ -162,6 +172,7 @@ router.get('/:month', auth, async (req, res) => {
                 depositBalance: payment ? (payment.depositBalance || 0) : 0,
                 depositDate: payment ? (payment.depositDate || '') : '',
                 depositBalanceLocked: !!payment,
+                marketDays: payment ? (payment.marketDays || 4) : 4,
                 note: payment ? payment.note : '',
                 deposit: member.deposit // Keep live profile deposit for reference only
             };
@@ -241,7 +252,7 @@ router.put('/:month/payment', auth, requireAdmin, async (req, res) => {
 router.get('/:month/admin-expenses', auth, requireAdmin, async (req, res) => {
     try {
         const { month } = req.params;
-        const totalMembers = await require('../models/User').countDocuments({ role: 'member' });
+        const totalMembers = await User.countDocuments({ role: 'member' });
         const adminExpenses = await Expense.find({
             date: { $regex: `^${month}` },
             $or: [
@@ -279,7 +290,7 @@ router.get('/:month/invoice/:memberId', auth, async (req, res) => {
         }
 
         // Find the member
-        const member = await require('../models/User').findById(memberId).select('_id userId name deposit');
+        const member = await User.findById(memberId).select('_id userId name deposit');
         if (!member) {
             return res.status(404).json({ error: 'Member not found' });
         }
@@ -288,7 +299,7 @@ router.get('/:month/invoice/:memberId', auth, async (req, res) => {
         const memberIdStr = member._id.toString();
 
         // Count all members (for share calculation)
-        const totalMembers = await require('../models/User').countDocuments({ role: 'member' });
+        const totalMembers = await User.countDocuments({ role: 'member' });
 
         // Member's own expenses for this month
         const memberExpenses = await Expense.find({
