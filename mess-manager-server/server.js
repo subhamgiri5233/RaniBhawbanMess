@@ -43,7 +43,7 @@ app.use(cors({
 // Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 300, // 300 requests per 15 min per IP
+    max: 1000, // Increased to 1000 for high-performance dashboard stability
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {

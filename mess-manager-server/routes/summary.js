@@ -148,6 +148,48 @@ router.get('/:month', auth, async (req, res) => {
             }
         });
 
+        // --- NITRO PRE-GROUPING (O(N) Complexity) ---
+        // Instead of filtering inside the member loop, we group once.
+        const mealsByMember = {};
+        (meals || []).forEach(m => {
+            if (!m.memberId) return;
+            const mid = m.memberId.toString();
+            if (!mealsByMember[mid]) mealsByMember[mid] = [];
+            mealsByMember[mid].push(m);
+        });
+
+        const guestMealsByMember = {};
+        (guestMeals || []).forEach(g => {
+            if (!g.memberId) return;
+            const mid = g.memberId.toString();
+            if (!guestMealsByMember[mid]) guestMealsByMember[mid] = [];
+            guestMealsByMember[mid].push(g);
+        });
+
+        const guestInMealsByMember = {};
+        (guestMealsInMealCollection || []).forEach(m => {
+            if (!m.memberId) return;
+            const mid = m.memberId.toString();
+            if (!guestInMealsByMember[mid]) guestInMealsByMember[mid] = [];
+            guestInMealsByMember[mid].push(m);
+        });
+
+        const expensesByMember = {};
+        (expenses || []).forEach(e => {
+            if (!e.paidBy) return;
+            const pid = e.paidBy.toString();
+            if (!expensesByMember[pid]) expensesByMember[pid] = [];
+            expensesByMember[pid].push(e);
+        });
+
+        const marketByMember = {};
+        (marketRequests || []).forEach(r => {
+            if (!r.assignedMemberId) return;
+            const mid = r.assignedMemberId.toString();
+            if (!marketByMember[mid]) marketByMember[mid] = [];
+            marketByMember[mid].push(r);
+        });
+
         // 7. Build per-member summary with safe property access (Nuclear Hardening)
         const EXPENSE_CATEGORIES = ['market', 'wifi', 'electric', 'gas', 'houseRent', 'spices', 'rice', 'others', 'deposit'];
 
@@ -155,12 +197,15 @@ router.get('/:month', auth, async (req, res) => {
             try {
                 const memberIdStr = member._id?.toString();
                 const memberName = member.name || 'Unknown Member';
+                const memberUserId = member.userId;
                 if (!memberIdStr) return null;
 
-                // Match expenses by paidBy (name or ID)
-                const memberExpenses = (expenses || []).filter(e =>
-                    e && (e.paidBy === memberName || e.paidBy === memberIdStr || e.paidBy === member.userId)
-                );
+                // Match expenses by paidBy (name or ID) - O(1) Lookups
+                const memberExpenses = [
+                    ...(expensesByMember[memberName] || []),
+                    ...(expensesByMember[memberIdStr] || []),
+                    ...(memberUserId ? (expensesByMember[memberUserId] || []) : [])
+                ];
 
                 // Build category totals
                 const expenseByCategory = {};
@@ -170,29 +215,35 @@ router.get('/:month', auth, async (req, res) => {
                         .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
                 });
 
-                // Regular meal count (Actual vs Charged)
-                const actualRegularMeals = (meals || []).filter(m =>
-                    m && (m.memberId === memberIdStr || m.memberId === member.userId)
-                ).length;
+                // Regular meal count (Actual vs Charged) - O(1) Lookups
+                const myRegMeals = [
+                    ...(mealsByMember[memberIdStr] || []),
+                    ...(memberUserId ? (mealsByMember[memberUserId] || []) : [])
+                ];
+                const actualRegularMeals = myRegMeals.length;
                 const chargedRegularMeals = Math.max(minMealsLimit, actualRegularMeals);
 
-                // Guest meal count
-                const guestMealCount = (guestMeals || []).filter(g =>
-                    g && (g.memberId === memberIdStr || g.memberId === member.userId)
-                ).length;
+                // Guest meal count - O(1) Lookups
+                const myGstMeals = [
+                    ...(guestMealsByMember[memberIdStr] || []),
+                    ...(memberUserId ? (guestMealsByMember[memberUserId] || []) : [])
+                ];
+                const guestMealCount = myGstMeals.length;
 
-                const guestMealInMealCount = (guestMealsInMealCollection || []).filter(m =>
-                    m && (m.memberId === memberIdStr || m.memberId === member.userId)
-                ).length;
+                const myGstInMeals = [
+                    ...(guestInMealsByMember[memberIdStr] || []),
+                    ...(memberUserId ? (guestInMealsByMember[memberUserId] || []) : [])
+                ];
+                const guestMealInMealCount = myGstInMeals.length;
 
                 const totalGuestMeals = guestMealCount + guestMealInMealCount;
 
                 // Payment status
-                const payment = (memberIdStr ? paymentMap[memberIdStr] : null) || (member.userId ? paymentMap[member.userId] : null);
+                const payment = paymentMap[memberIdStr] || (memberUserId ? paymentMap[memberUserId] : null);
 
                 return {
                     memberId: memberIdStr,
-                    userId: member.userId || null,
+                    userId: memberUserId || null,
                     memberName,
                     expenses: expenseByCategory,
                     regularMeals: actualRegularMeals,
@@ -205,10 +256,11 @@ router.get('/:month', auth, async (req, res) => {
                     depositBalance: payment ? (Number(payment.depositBalance) || 0) : 0,
                     depositDate: payment ? (payment.depositDate || '') : '',
                     depositBalanceLocked: !!payment,
-                    marketDays: dutyCounts[memberIdStr] || dutyCounts[member.userId] || (userToIdMap[memberIdStr] ? dutyCounts[userToIdMap[memberIdStr]] : 0) || (userToIdMap[member.userId] ? dutyCounts[userToIdMap[member.userId]] : 0),
-                    marketDates: (marketRequests || [])
-                        .filter(r => r.assignedMemberId === memberIdStr || r.assignedMemberId === member.userId)
-                        .map(r => r.date),
+                    marketDays: dutyCounts[memberIdStr] || dutyCounts[memberUserId] || 0,
+                    marketDates: [
+                        ...(marketByMember[memberIdStr] || []),
+                        ...(memberUserId ? (marketByMember[memberUserId] || []) : [])
+                    ].map(r => r.date),
                     note: payment ? (payment.note || '') : '',
                     deposit: member.deposit || 0
                 };
@@ -216,38 +268,52 @@ router.get('/:month', auth, async (req, res) => {
                 console.error(`Error mapping summary for member ${member?.name}:`, err);
                 return null;
             }
-        }).filter(Boolean); // Clear out any members that crashed
+        }).filter(Boolean);
 
-        // 8. Build a unified list of ALL individual guest records for the log
+        // --- NITRO GUEST ARCHIVE RESTORATION ---
+        const userMap = {};
+        members.forEach(m => {
+            const mid = m._id.toString();
+            userMap[mid] = m.name;
+            if (m.userId) userMap[m.userId] = m.name;
+        });
+
         const guestRecords = [
-            ...(guestMeals || []).map(g => ({
-                _id: g._id,
-                date: g.date,
-                memberId: g.memberId,
-                memberName: g.memberName || (members.find(m => m._id.toString() === g.memberId || m.userId === g.memberId)?.name || 'Unknown'),
-                guestMealType: g.guestMealType || 'veg',
-                mealTime: g.mealTime || 'lunch',
-                amount: g.amount || guestPrices[g.guestMealType || 'veg'] || 0,
-                source: 'guest_meal'
-            })),
-            ...(guestMealsInMealCollection || []).map(m => ({
-                _id: m._id,
-                date: m.date,
-                memberId: m.memberId,
-                memberName: members.find(u => u._id.toString() === m.memberId || u.userId === m.memberId)?.name || 'Unknown',
-                guestMealType: m.guestMealType || 'veg',
-                mealTime: m.type || 'lunch',
-                amount: m.amount || 0,
-                source: 'meal_collection'
-            }))
-        ].sort((a, b) => b.date.localeCompare(a.date)); // Sort by date descending
+            ...(guestMeals || []).map(g => {
+                const type = (g.guestMealType || 'veg').toLowerCase();
+                return {
+                    _id: g._id,
+                    date: g.date,
+                    memberId: g.memberId,
+                    memberName: g.memberName || userMap[g.memberId] || 'Unknown',
+                    guestMealType: type,
+                    mealTime: g.mealTime || 'lunch',
+                    amount: g.amount || guestPrices[type] || 0,
+                    source: 'guest_meal'
+                };
+            }),
+            ...(guestMealsInMealCollection || []).map(m => {
+                const type = (m.guestMealType || 'veg').toLowerCase();
+                return {
+                    _id: m._id,
+                    date: m.date,
+                    memberId: m.memberId,
+                    memberName: userMap[m.memberId] || 'Unknown',
+                    guestMealType: type,
+                    mealTime: m.type || 'lunch',
+                    amount: m.amount || 0,
+                    source: 'meal_collection'
+                };
+            })
+        ].sort((a, b) => b.date.localeCompare(a.date));
 
-        // 9. Calculate live shared totals (fallback if no snapshot)
+        // 9. Calculate live shared totals (Universal Sweep)
         const liveBills = {};
-        ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'rice', 'others'].forEach(cat => {
-            liveBills[cat] = expenses
-                .filter(e => e.category === cat)
-                .reduce((sum, e) => sum + (e.amount || 0), 0);
+        const allCategories = ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'rice', 'others', 'market', 'deposit'];
+        
+        allCategories.forEach(cat => {
+            liveBills[cat] = (expensesByMember[cat] || []).reduce((sum, e) => sum + (Number(e.amount) || 0), 0) || 
+                             (expenses || []).filter(e => e.category === cat).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
         });
 
         const responseData = {
