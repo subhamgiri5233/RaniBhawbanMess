@@ -216,7 +216,7 @@ const Meals = () => {
                     members={members}
                     meals={meals}
                     selectedDate={selectedDate}
-                    handleToggleMeal={handleToggleMeal}
+                    onToggleMeal={handleToggleMeal}
                 />
             </div>
 
