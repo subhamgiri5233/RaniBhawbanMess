@@ -19,6 +19,10 @@ router.get('/:month', auth, async (req, res) => {
         const { month } = req.params;
 
         // 1. Fetch all data in parallel for efficiency
+        // Robust Month Filter: handle both "2026-03" and potentially "2026-3" if any data was saved without padding
+        const monthAlt = month.includes('-0') ? month.replace('-0', '-') : month;
+        const monthRegex = `^(${month}|${monthAlt})`;
+
         const [
             members,
             expenses,
@@ -32,27 +36,27 @@ router.get('/:month', auth, async (req, res) => {
         ] = await Promise.all([
             User.find({ role: 'member' }).select('_id userId name deposit').lean(),
             Expense.find({
-                date: { $regex: `^${month}` },
+                date: { $regex: monthRegex },
                 status: { $ne: 'rejected' }
             }).lean(),
             Meal.find({
-                date: { $regex: `^${month}` },
+                date: { $regex: monthRegex },
                 isGuest: false
             }).lean(),
             GuestMeal.find({
-                date: { $regex: `^${month}` }
+                date: { $regex: monthRegex }
             }).lean(),
             Meal.find({
-                date: { $regex: `^${month}` },
+                date: { $regex: monthRegex },
                 isGuest: true
             }).lean(),
             ManagerRecord.find({
-                date: { $regex: `^${month}` }
+                date: { $regex: monthRegex }
             }).sort({ date: 1 }).lean(),
             MonthlySharedExpense.findOne({ month }).lean(),
             MonthlySummary.find({ month }).lean(),
             MarketRequest.find({
-                date: { $regex: `^${month}` },
+                date: { $regex: monthRegex },
                 status: 'approved'
             }).lean()
         ]);
@@ -130,81 +134,70 @@ router.get('/:month', auth, async (req, res) => {
             }
         });
 
-        // 7. Build per-member summary
+        // 7. Build per-member summary with safe property access (Nuclear Hardening)
         const EXPENSE_CATEGORIES = ['market', 'wifi', 'electric', 'gas', 'houseRent', 'spices', 'rice', 'others', 'deposit'];
 
         const memberSummaries = members.map(member => {
-            const memberIdStr = member._id.toString();
-            const memberName = member.name;
+            try {
+                const memberIdStr = member._id?.toString();
+                const memberName = member.name || 'Unknown Member';
+                if (!memberIdStr) return null;
 
-            // Match expenses by paidBy (name or ID)
-            const memberExpenses = expenses.filter(e =>
-                e.paidBy === memberName ||
-                e.paidBy === memberIdStr ||
-                e.paidBy === member.userId
-            );
+                // Match expenses by paidBy (name or ID)
+                const memberExpenses = (expenses || []).filter(e =>
+                    e && (e.paidBy === memberName || e.paidBy === memberIdStr || e.paidBy === member.userId)
+                );
 
-            // Build category totals
-            const expenseByCategory = {};
-            EXPENSE_CATEGORIES.forEach(cat => {
-                expenseByCategory[cat] = memberExpenses
-                    .filter(e => e.category === cat)
-                    .reduce((sum, e) => sum + (e.amount || 0), 0);
-            });
+                // Build category totals
+                const expenseByCategory = {};
+                EXPENSE_CATEGORIES.forEach(cat => {
+                    expenseByCategory[cat] = memberExpenses
+                        .filter(e => e.category === cat)
+                        .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+                });
 
-            // Regular meal count
-            const regularMeals = meals.filter(m =>
-                m.memberId === memberIdStr || m.memberId === member.userId
-            ).length;
+                // Regular meal count
+                const regularMeals = (meals || []).filter(m =>
+                    m && (m.memberId === memberIdStr || m.memberId === member.userId)
+                ).length;
 
-            // Guest meal count (GuestMeal collection)
-            const guestMealCount = guestMeals.filter(g =>
-                g.memberId === memberIdStr || g.memberId === member.userId
-            ).length;
+                // Guest meal count
+                const guestMealCount = (guestMeals || []).filter(g =>
+                    g && (g.memberId === memberIdStr || g.memberId === member.userId)
+                ).length;
 
-            // Guest meals stored in Meal collection
-            const guestMealInMealCount = guestMealsInMealCollection.filter(m =>
-                m.memberId === memberIdStr || m.memberId === member.userId
-            ).length;
+                const guestMealInMealCount = (guestMealsInMealCollection || []).filter(m =>
+                    m && (m.memberId === memberIdStr || m.memberId === member.userId)
+                ).length;
 
-            const totalGuestMeals = guestMealCount + guestMealInMealCount;
+                const totalGuestMeals = guestMealCount + guestMealInMealCount;
 
-            // Auto-calculate received and submitted amounts from 'deposit' category expenses
-            const approvedDeposits = memberExpenses
-                .filter(e => e.category === 'deposit' && e.status === 'approved')
-                .reduce((sum, e) => sum + (e.amount || 0), 0);
+                // Payment status
+                const payment = (memberIdStr ? paymentMap[memberIdStr] : null) || (member.userId ? paymentMap[member.userId] : null);
 
-            const pendingDeposits = memberExpenses
-                .filter(e => e.category === 'deposit' && e.status === 'pending')
-                .reduce((sum, e) => sum + (e.amount || 0), 0);
-
-            // Payment status
-            const payment = paymentMap[memberIdStr] || (member.userId ? paymentMap[member.userId] : null);
-
-            return {
-                memberId: memberIdStr,
-                userId: member.userId,
-                memberName,
-                expenses: expenseByCategory,
-                regularMeals,
-                guestMeals: totalGuestMeals,
-                paymentStatus: payment ? payment.paymentStatus : 'pending',
-                amountPaid: payment ? payment.amountPaid : 0,
-
-                // Directly use saved MonthlySummary values
-                submittedAmount: payment ? (payment.submittedAmount || 0) : 0,
-                receivedAmount: payment ? (payment.receivedAmount || 0) : 0,
-
-                // Use saved MonthlySummary depositBalance if available, otherwise 0
-                depositBalance: payment ? (payment.depositBalance || 0) : 0,
-                depositDate: payment ? (payment.depositDate || '') : '',
-                depositBalanceLocked: !!payment,
-                // ALWAYS use live calculation for marketDays to prevent stale data
-                marketDays: dutyCounts[memberIdStr] || dutyCounts[member.userId] || (userToIdMap[memberIdStr] ? dutyCounts[userToIdMap[memberIdStr]] : 0) || (userToIdMap[member.userId] ? dutyCounts[userToIdMap[member.userId]] : 0) || 4,
-                note: payment ? payment.note : '',
-                deposit: member.deposit // Keep live profile deposit for reference only
-            };
-        });
+                return {
+                    memberId: memberIdStr,
+                    userId: member.userId || null,
+                    memberName,
+                    expenses: expenseByCategory,
+                    regularMeals,
+                    guestMeals: totalGuestMeals,
+                    paymentStatus: payment ? (payment.paymentStatus || 'pending') : 'pending',
+                    amountPaid: payment ? (Number(payment.amountPaid) || 0) : 0,
+                    submittedAmount: payment ? (Number(payment.submittedAmount) || 0) : 0,
+                    receivedAmount: payment ? (Number(payment.receivedAmount) || 0) : 0,
+                    depositBalance: payment ? (Number(payment.depositBalance) || 0) : 0,
+                    depositDate: payment ? (payment.depositDate || '') : '',
+                    depositBalanceLocked: !!payment,
+                    marketDays: dutyCounts[memberIdStr] || dutyCounts[member.userId] || (userToIdMap[memberIdStr] ? dutyCounts[userToIdMap[memberIdStr]] : 0) || (userToIdMap[member.userId] ? dutyCounts[userToIdMap[member.userId]] : 0) || 4,
+                    note: payment ? (payment.note || '') : '',
+                    deposit: member.deposit || 0
+                };
+            } catch (err) {
+                console.error(`Error mapping summary for member ${member?.name}:`, err);
+                return null;
+            }
+        }).filter(Boolean); // Clear out any members that crashed
 
         // 8. Calculate live shared totals (fallback if no snapshot)
         const liveBills = {};

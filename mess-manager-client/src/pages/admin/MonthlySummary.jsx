@@ -369,7 +369,9 @@ const MonthlySummary = () => {
             }
         } catch (err) {
             console.error('Summary fetch error:', err);
-            setError(err.response?.data?.error || 'Failed to load summary. Data might not be initialized for this month.');
+            const status = err.response?.status;
+            const message = err.response?.data?.error || err.message || 'Unknown Error';
+            setError(`[Error ${status || 'Network'}] ${message}`);
         } finally {
             setLoading(false);
         }
@@ -697,10 +699,25 @@ const MonthlySummary = () => {
             )}
 
             {error && !loading && (
-                <Card className="p-8 text-center border-rose-200/50 dark:border-rose-800/20 bg-rose-50 dark:bg-rose-950/10">
-                    <AlertCircle size={36} className="text-rose-400 mx-auto mb-3" />
-                    <p className="text-sm font-bold text-rose-600 dark:text-rose-400">{error}</p>
-                </Card>
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-8 rounded-[2rem] bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/30 backdrop-blur-xl flex flex-col items-center justify-center text-center gap-4 shadow-2xl shadow-rose-500/5"
+                >
+                    <div className="p-4 bg-rose-500/10 rounded-full">
+                        <AlertCircle className="text-rose-500" size={32} />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">System Exception</h3>
+                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">{error}</p>
+                    </div>
+                    <button 
+                        onClick={fetchSummary}
+                        className="mt-2 px-6 py-2 bg-rose-500 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-rose-600 transition-all active:scale-95 shadow-lg shadow-rose-500/20"
+                    >
+                        Try Diagnostic Re-fetch
+                    </button>
+                </motion.div>
             )}
 
             {/* ── Main Table ── */}
