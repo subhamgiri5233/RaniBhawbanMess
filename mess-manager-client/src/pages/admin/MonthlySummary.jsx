@@ -421,6 +421,7 @@ const MonthlySummary = () => {
     const clearedCount = data?.members?.filter(m => m.paymentStatus === 'clear').length || 0;
     const pendingCount = data?.members?.filter(m => m.paymentStatus === 'pending').length || 0;
     const partialCount = data?.members?.filter(m => m.paymentStatus === 'partial').length || 0;
+    const totalGuests = data?.guestRecords?.length || 0;
 
     return (
         <motion.div
@@ -641,12 +642,13 @@ const MonthlySummary = () => {
 
             {/* ── Stats overview ── */}
             {data && (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                     {[
                         { label: 'Cleared', value: clearedCount, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20', icon: CheckCircle2 },
                         { label: 'Pending', value: pendingCount, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-950/20', icon: Clock },
                         { label: 'Partial', value: partialCount, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/20', icon: AlertCircle },
                         { label: 'Official Rate', value: `₹${mealRate}`, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50 dark:bg-violet-950/20', icon: Utensils },
+                        { label: 'Total Guests', value: totalGuests, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/20', icon: Users },
                     ].map((stat, i) => (
                         <motion.div
                             key={stat.label}
@@ -851,6 +853,30 @@ const MonthlySummary = () => {
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                                            <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-800/30">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
+                                                        <Users size={16} />
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em]">Total Members</span>
+                                                </div>
+                                                <div className="text-xl font-black text-slate-800 dark:text-white leading-none">
+                                                    {data?.totalMembersCount || 0}
+                                                </div>
+                                            </div>
+
+                                            {/* Total Guests */}
+                                            <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-800/30">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <div className="p-2 bg-amber-500/10 text-amber-500 rounded-lg">
+                                                        <Users size={16} />
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">Total Guests</span>
+                                                </div>
+                                                <div className="text-xl font-black text-slate-800 dark:text-white leading-none">
+                                                    {totalGuests}
+                                                </div>
+                                            </div>
                                             <div className="p-2.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl">
                                                 <div className="text-[8px] font-black text-blue-500 uppercase tracking-tighter mb-0.5">Market Cost</div>
                                                 <div className="text-sm font-black text-blue-700 dark:text-blue-300">₹{Math.round(snapshotM?.marketCost || 0)}</div>
@@ -948,6 +974,78 @@ const MonthlySummary = () => {
                     />
                 )}
             </AnimatePresence>
+
+            {/* ── GUEST RECORD LOG ── */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-8">
+                <Card className="p-0 overflow-hidden border-orange-200/50 dark:border-white/5 bg-white dark:bg-slate-900/40">
+                    <div className="p-4 sm:p-6 border-b border-orange-50 dark:border-white/5 bg-orange-50/30 dark:bg-orange-900/10 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-orange-100 dark:bg-orange-900/40 rounded-xl">
+                                <Users size={18} className="text-orange-600 dark:text-orange-400" />
+                            </div>
+                            <h2 className="text-sm sm:text-base font-black text-orange-900 dark:text-orange-300 uppercase tracking-tight">Monthly Guest Archive</h2>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="hidden sm:block text-right">
+                                <p className="text-[10px] font-black uppercase text-orange-500 tracking-widest">{totalGuests} Individual Sessions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="overflow-x-auto overflow-y-auto max-h-[500px]">
+                        <table className="w-full text-left border-collapse min-w-[700px]">
+                            <thead className="sticky top-0 z-10">
+                                <tr className="bg-slate-50 dark:bg-slate-950 backdrop-blur-md">
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5">Date</th>
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5">Member</th>
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5">Meal Category</th>
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5">Session</th>
+                                    <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 dark:border-white/5 text-right">Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {!data?.guestRecords?.length ? (
+                                    <tr>
+                                        <td colSpan="5" className="p-12 text-center text-slate-400 font-bold uppercase tracking-widest text-xs italic">
+                                            No guests registered for this month.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    data.guestRecords.map((record, idx) => (
+                                        <tr key={record._id || idx} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                                            <td className="p-4 border-b border-slate-50 dark:border-white/5">
+                                                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono tracking-tight">{record.date}</span>
+                                            </td>
+                                            <td className="p-4 border-b border-slate-50 dark:border-white/5">
+                                                <span className="text-sm font-black text-slate-900 dark:text-slate-200">{record.memberName}</span>
+                                            </td>
+                                            <td className="p-4 border-b border-slate-50 dark:border-white/5">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-lg group-hover:scale-110 transition-transform">
+                                                        {record.guestMealType === 'fish' ? '🐟' : record.guestMealType === 'egg' ? '🥚' : record.guestMealType === 'meat' ? '🍗' : '🥦'}
+                                                    </div>
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{record.guestMealType}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 border-b border-slate-50 dark:border-white/5">
+                                                <div className={cn(
+                                                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
+                                                    record.mealTime === 'lunch' ? "text-blue-500 bg-blue-50 dark:bg-blue-900/20" : "text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                                                )}>
+                                                    {record.mealTime === 'lunch' ? '☀️ Lunch' : '🌙 Dinner'}
+                                                </div>
+                                            </td>
+                                            <td className="p-4 border-b border-slate-50 dark:border-white/5 text-right font-mono text-sm font-black text-slate-900 dark:text-white">
+                                                ₹{record.amount}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
+            </motion.div>
         </motion.div>
     );
 };
