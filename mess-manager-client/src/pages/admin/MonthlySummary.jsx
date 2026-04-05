@@ -446,30 +446,6 @@ const MonthlySummary = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="relative group">
-                        {/* Premium Calendar Pill Selector */}
-                        <div className="flex items-center gap-4 bg-slate-900 dark:bg-black/40 border border-slate-200/20 dark:border-white/10 px-6 py-3 rounded-full shadow-2xl hover:bg-slate-800 dark:hover:bg-white/5 transition-all cursor-pointer ring-1 ring-white/5 backdrop-blur-md">
-                            <Calendar size={18} className="text-primary-500" />
-                            <div className="flex flex-col">
-                                <span className="text-[11px] font-black text-white dark:text-slate-100 uppercase tracking-[0.2em] px-1">
-                                    {MONTHS[selectedMonth - 1]}, {selectedYear}
-                                </span>
-                            </div>
-                            <Calendar size={14} className="text-slate-600 dark:text-slate-500 opacity-40 ml-2" />
-                        </div>
-
-                        <input
-                            type="month"
-                            value={globalMonth}
-                            onChange={(e) => {
-                                if (e.target.value) {
-                                    setGlobalMonth(e.target.value);
-                                }
-                            }}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                            title="Click to change month"
-                        />
-                    </div>
                     <button
                         onClick={fetchSummary}
                         className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-500 hover:text-primary-500 transition-all shadow-sm active:scale-95"
