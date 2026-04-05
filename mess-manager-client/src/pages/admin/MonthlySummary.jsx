@@ -418,7 +418,6 @@ const MonthlySummary = () => {
 
 
     const mealRate = data?.sharedExpense?.results?.mealRate || data?.mealRate || 0;
-    const sharedExpenses = data?.sharedExpense?.results || {};
     const clearedCount = data?.members?.filter(m => m.paymentStatus === 'clear').length || 0;
     const pendingCount = data?.members?.filter(m => m.paymentStatus === 'pending').length || 0;
     const partialCount = data?.members?.filter(m => m.paymentStatus === 'partial').length || 0;
