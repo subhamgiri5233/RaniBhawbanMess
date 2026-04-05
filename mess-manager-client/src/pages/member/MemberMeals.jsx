@@ -131,9 +131,7 @@ const MemberMeals = () => {
                         className="bg-transparent outline-none text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight"
                     />
                 </div>
-            </div>
-
-            {/* Regular Meals Monthly Sheet */}
+            </div>            {/* Regular Meals Monthly Sheet */}
             <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-4 px-6 py-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-500/10 rounded-2xl">
                     <div className="flex items-center gap-2">
@@ -153,8 +151,8 @@ const MemberMeals = () => {
                 />
             </div>
 
-            {/* Guest Meals Section */}
-            <div className="space-y-6">
+            {/* Guest Records Section - MOVED TO BOTTOM */}
+            <div className="space-y-6 pt-12 border-t border-slate-100 dark:border-white/5">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-primary-100 dark:bg-primary-950/40 rounded-2xl">
@@ -165,9 +163,9 @@ const MemberMeals = () => {
 
                     <Button
                         onClick={() => setShowGuestDialog(true)}
-                        className="flex items-center gap-2 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest"
+                        className="hidden md:flex items-center gap-2 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 active:scale-95 transition-all text-xs font-black uppercase tracking-widest px-6"
                     >
-                        <Plus size={16} /> Record Guest Meal
+                        <Plus size={18} /> Record Guest Meal
                     </Button>
                 </div>
 
@@ -267,6 +265,18 @@ const MemberMeals = () => {
                     </Card>
                 </div>
             </div>
+         </div>
+
+            {/* Floating Action Button (FAB) for Mobile */}
+            <motion.button
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowGuestDialog(true)}
+                className="md:hidden fixed bottom-8 right-6 z-50 w-16 h-16 bg-gradient-to-br from-indigo-600 to-primary-600 text-white rounded-3xl shadow-2xl shadow-indigo-500/40 flex items-center justify-center transition-all active:rotate-12"
+            >
+                <Plus size={28} strokeWidth={3} />
+            </motion.button>
 
             {/* Add Guest Dialog - WOW Premium Style */}
             <AnimatePresence>
@@ -288,29 +298,29 @@ const MemberMeals = () => {
                             {/* Animated Background Glow */}
                             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-primary-500 to-emerald-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                             
-                            <Card className="p-10 shadow-3xl shadow-black/60 border-white/10 dark:bg-slate-900/90 overflow-hidden relative backdrop-blur-2xl rounded-[2.5rem]">
-                                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none group-hover:scale-125 transition-transform duration-700">
-                                    <UtensilsCrossed size={160} />
+                            <Card className="p-5 md:p-10 shadow-3xl shadow-black/60 border-white/10 dark:bg-slate-900/90 overflow-hidden relative backdrop-blur-2xl rounded-[2.5rem] flex flex-col max-h-[90vh]">
+                                <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:scale-125 transition-transform duration-700">
+                                    <Sparkles size={160} />
                                 </div>
 
-                                <div className="flex justify-between items-start mb-10">
+                                <div className="flex justify-between items-start mb-6 md:mb-10 flex-shrink-0">
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <div className="w-6 h-1 bg-primary-500 rounded-full"></div>
-                                            <span className="text-[10px] font-black text-primary-500 uppercase tracking-[0.4em]">Personal Registry</span>
+                                            <Sparkles size={16} className="text-primary-500 animate-pulse" />
+                                            <span className="text-[10px] font-black text-primary-500 uppercase tracking-[0.4em]">Guest Registration</span>
                                         </div>
-                                        <h3 className="text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tighter">New Guest Meal</h3>
-                                        <p className="text-xs font-bold text-slate-400 mt-1">Real-time dynamic pricing applied</p>
+                                        <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tighter">Add Guest Record</h3>
+                                        <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-tight">Real-time dynamic pricing applied</p>
                                     </div>
                                     <button
                                         onClick={() => setShowGuestDialog(false)}
-                                        className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-2xl transition-all active:scale-90 hover:rotate-90 duration-300"
+                                        className="p-2 md:p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-2xl transition-all active:scale-90 hover:rotate-90 duration-300"
                                     >
                                         <X size={20} />
                                     </button>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="flex-1 overflow-y-auto pr-4 -mr-4 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent space-y-8">
                                     <div className="space-y-6">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Target Date</label>
@@ -326,7 +336,7 @@ const MemberMeals = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Meal Session</label>
+                                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Meal Timing</label>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {['lunch', 'dinner'].map(time => (
                                                     <button
@@ -334,13 +344,13 @@ const MemberMeals = () => {
                                                         type="button"
                                                         onClick={() => setGuestMealTime(time)}
                                                         className={cn(
-                                                            "p-4 rounded-2xl border-2 transition-all font-black uppercase tracking-widest text-[10px] flex flex-col items-center gap-1",
+                                                            "p-5 rounded-[2rem] border-2 transition-all font-black uppercase tracking-widest text-[10px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
                                                             guestMealTime === time
                                                                 ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
-                                                                : "border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200"
+                                                                : "border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-slate-900/60 text-slate-400 hover:border-slate-200 hover:text-slate-600 dark:hover:text-slate-300"
                                                         )}
                                                     >
-                                                        <span className="text-lg">{time === 'lunch' ? '☀️' : '🌙'}</span>
+                                                        <span className="text-lg group-hover:scale-125 transition-transform">{time === 'lunch' ? '☀️' : '🌙'}</span>
                                                         {time}
                                                     </button>
                                                 ))}
@@ -358,9 +368,9 @@ const MemberMeals = () => {
                                                         key={key}
                                                         onClick={() => setSelectedMealType(key)}
                                                         className={cn(
-                                                            "p-5 rounded-[2rem] border-2 transition-all group flex flex-col items-center justify-center gap-1 relative overflow-hidden",
+                                                            "p-5 rounded-[2rem] border-2 transition-all group flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
                                                             selectedMealType === key
-                                                                ? "border-emerald-500 bg-emerald-500 text-white shadow-xl shadow-emerald-500/30 scale-105"
+                                                                ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
                                                                 : "border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200 hover:bg-white dark:hover:bg-slate-800"
                                                         )}
                                                     >
@@ -382,7 +392,7 @@ const MemberMeals = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4 mt-12 pt-8 border-t border-slate-100 dark:border-white/5">
+                                <div className="flex gap-4 mt-8 md:mt-12 pt-6 md:pt-8 border-t border-slate-100 dark:border-white/5 flex-shrink-0">
                                     <button
                                         onClick={() => setShowGuestDialog(false)}
                                         className="flex-1 py-5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-black uppercase tracking-widest text-[10px] rounded-[1.5rem] hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-500 transition-all active:scale-95"
@@ -394,7 +404,7 @@ const MemberMeals = () => {
                                         className="flex-[2] py-5 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-[1.5rem] shadow-2xl shadow-primary-500/40 hover:shadow-primary-500/60 transition-all active:scale-95 flex items-center justify-center gap-3 relative overflow-hidden group/btn"
                                     >
                                         <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000"></div>
-                                        Submit Registration <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                                        Confirm Registration <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
                                     </button>
                                 </div>
                             </Card>

@@ -80,8 +80,12 @@ router.get('/:month', auth, async (req, res) => {
         const managers = Object.values(managersMap);
 
         // 7. Get saved payment statuses for this month. If a member doesn't have one, initialize it with their current deposit.
-        let paymentStatuses = initialPaymentStatuses;
-        const existingMemberIds = new Set(paymentStatuses.map(ps => ps.memberId.toString()));
+        let paymentStatuses = initialPaymentStatuses || [];
+        const existingMemberIds = new Set(
+            paymentStatuses
+                .filter(ps => ps && ps.memberId)
+                .map(ps => ps.memberId.toString())
+        );
 
         const newSummaries = [];
         const addedIds = new Set();
@@ -98,7 +102,7 @@ router.get('/:month', auth, async (req, res) => {
                     receivedAmount: 0,
                     depositBalance: member.deposit || 0, // Carry over current deposit as initial balance
                     depositDate: '',
-                    marketDays: 4, 
+                    marketDays: dutyCounts[memberIdStr] || dutyCounts[member.userId] || (userToIdMap[memberIdStr] ? dutyCounts[userToIdMap[memberIdStr]] : 0) || (userToIdMap[member.userId] ? dutyCounts[userToIdMap[member.userId]] : 4), 
                     note: '',
                 });
                 addedIds.add(memberIdStr);
@@ -121,7 +125,9 @@ router.get('/:month', auth, async (req, res) => {
 
         const paymentMap = {};
         paymentStatuses.forEach(ps => {
-            paymentMap[ps.memberId.toString()] = ps;
+            if (ps && ps.memberId) {
+                paymentMap[ps.memberId.toString()] = ps;
+            }
         });
 
         // 7. Build per-member summary
@@ -193,6 +199,7 @@ router.get('/:month', auth, async (req, res) => {
                 depositBalance: payment ? (payment.depositBalance || 0) : 0,
                 depositDate: payment ? (payment.depositDate || '') : '',
                 depositBalanceLocked: !!payment,
+                // ALWAYS use live calculation for marketDays to prevent stale data
                 marketDays: dutyCounts[memberIdStr] || dutyCounts[member.userId] || (userToIdMap[memberIdStr] ? dutyCounts[userToIdMap[memberIdStr]] : 0) || (userToIdMap[member.userId] ? dutyCounts[userToIdMap[member.userId]] : 0) || 4,
                 note: payment ? payment.note : '',
                 deposit: member.deposit // Keep live profile deposit for reference only
@@ -283,17 +290,26 @@ router.get('/:month/admin-expenses', auth, requireAdmin, async (req, res) => {
             status: { $ne: 'rejected' }
         }).sort({ date: 1 });
 
+        // Manager(s) for this month
         const managerRecords = await ManagerRecord.find({
             date: { $regex: `^${month}` }
         }).sort({ date: 1 });
+        
         const managersMap = {};
-        managerRecords.forEach(r => { managersMap[r.memberId] = r.memberName; });
+        managerRecords.forEach(r => { 
+            if (r.memberId) managersMap[r.memberId] = r.memberName; 
+        });
         const managers = Object.values(managersMap);
 
-        res.json({ month, totalMembers, managers, adminExpenses });
+        res.json({ 
+            month, 
+            totalMembers: totalMembers || 0, 
+            managers: managers || [], 
+            adminExpenses: adminExpenses || [] 
+        });
     } catch (err) {
         console.error('Admin expenses route error:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Failed to load admin expenses: ' + err.message });
     }
 });
 /**

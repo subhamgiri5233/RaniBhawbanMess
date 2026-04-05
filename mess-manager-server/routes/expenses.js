@@ -3,6 +3,7 @@ const router = express.Router();
 const Expense = require('../models/Expense');
 const Settings = require('../models/Settings');
 const MonthlySharedExpense = require('../models/MonthlySharedExpense');
+const MonthlySummary = require('../models/MonthlySummary');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 // Reject (Delete) all pending expenses - Admin only
@@ -200,6 +201,17 @@ router.post('/bulk-shared', auth, requireAdmin, async (req, res) => {
             },
             { upsert: true, new: true }
         );
+
+        // Sync marketDays to MonthlySummary for each member included in the snapshot
+        if (memberBalances && memberBalances.length > 0) {
+            for (const mb of memberBalances) {
+                await MonthlySummary.findOneAndUpdate(
+                    { month, memberId: mb.memberId },
+                    { $set: { marketDays: mb.marketDays || 4 } },
+                    { upsert: true }
+                );
+            }
+        }
 
         // Auto-approve existing manual entries for these categories
         const categories = Object.keys(bills);

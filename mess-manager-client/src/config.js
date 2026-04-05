@@ -3,6 +3,9 @@
  * You can change the behavior of the application by modifying these values.
  */
 export const MESS_CONFIG = {
+    // The official name of the mess
+    name: 'Rani Bhawani Mess',
+
     // The minimum number of meals every member must pay for each month.
     // Set this according to your mess rules.
     MIN_MEALS_PER_MONTH: 40,

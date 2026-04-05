@@ -3,12 +3,15 @@ import { useData } from '../../context/DataContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { Trash2, UserPlus, Search, Calendar, Cake, User, Mail, Shield, Phone, History, Info, Eye, EyeOff, Pencil, Check, X } from 'lucide-react';
+import { Trash2, UserPlus, Search, Calendar, Cake, User, Mail, Shield, Phone, History, Info, Eye, EyeOff, Pencil, Check, X, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { getBirthdayStatus } from '../../utils/dateUtils';
 import api from '../../lib/api';
+import jsPDF from 'jspdf';
+import { addBengaliFont } from '../../utils/bengaliFont';
+import { MESS_CONFIG } from '../../config';
 
 // Optimized Row Component
 const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
@@ -171,6 +174,60 @@ const Members = () => {
         }
         
         setEditingMember(null);
+    };
+
+    const downloadMemberProfile = async (member) => {
+        try {
+            const doc = new jsPDF('p', 'mm', 'a4');
+            await addBengaliFont(doc);
+            doc.setFont('NotoSansBengali');
+
+            // Header Background
+            doc.setFillColor(79, 70, 229); // indigo-600
+            doc.rect(0, 0, 210, 40, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.text(MESS_CONFIG.name || 'Mess Manager', 105, 20, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text('OFFICIAL MEMBER PROFILE RECORD', 105, 28, { align: 'center' });
+
+            // Member Info Card Box
+            doc.setDrawColor(220, 220, 220);
+            doc.setFillColor(250, 251, 255);
+            doc.roundedRect(15, 60, 180, 80, 5, 5, 'FD');
+
+            // Initial Circle
+            doc.setFillColor(79, 70, 229);
+            doc.circle(45, 100, 20, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(40);
+            doc.text((member.name || '?').charAt(0).toUpperCase(), 45, 112, { align: 'center' });
+
+            // Details
+            doc.setTextColor(30, 40, 60);
+            doc.setFontSize(22);
+            doc.text(member.name, 75, 85);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(70, 80, 100);
+            doc.text(`User ID: ${member.userId}`, 75, 95);
+            doc.text(`Email: ${member.email}`, 75, 104);
+            doc.text(`Mobile: ${member.mobile}`, 75, 113);
+            doc.text(`Date of Birth: ${member.dateOfBirth ? format(new Date(member.dateOfBirth), 'dd MMMM yyyy') : 'Not Set'}`, 75, 122);
+            doc.text(`Status: Active Member`, 75, 131);
+
+            // Watermark / Footer
+            doc.setFontSize(9);
+            doc.setTextColor(180, 180, 180);
+            const dateStr = new Date().toLocaleString();
+            doc.text(`Verified Member Profile · Generated on ${dateStr}`, 105, 285, { align: 'center' });
+
+            doc.save(`Profile_${member.name.replace(/\s+/g, '_')}.pdf`);
+        } catch (err) {
+            console.error('Failed to download profile:', err);
+            alert('Failed to generate profile PDF');
+        }
     };
 
 
@@ -377,20 +434,29 @@ const Members = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-white/5"
+                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-5 md:p-8 max-w-2xl w-full shadow-3xl shadow-black/40 border border-slate-200 dark:border-white/5 overflow-hidden flex flex-col max-h-[90vh]"
                         >
-                            <div className="flex items-center gap-5 pb-6 border-b border-slate-100 dark:border-white/5 mb-8">
-                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-primary-500 flex items-center justify-center shadow-xl shadow-primary-500/20 rotate-3">
-                                    <Pencil className="text-white" size={26} />
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-slate-100 dark:border-white/5 mb-6 md:mb-8 flex-shrink-0">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-primary-500 flex items-center justify-center shadow-xl shadow-primary-500/20 rotate-3 shrink-0">
+                                        <Pencil className="text-white" size={26} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Edit Member</h3>
+                                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1 tracking-tighter">{editingMember.name}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Edit Member</h3>
-                                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Update profile details</p>
-                                </div>
+                                <button
+                                    onClick={() => downloadMemberProfile(editingMember)}
+                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-50 dark:bg-white/5 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-slate-200 dark:border-white/5"
+                                >
+                                    <Download size={14} />
+                                    Download Profile
+                                </button>
                             </div>
 
-                            <form onSubmit={handleEditSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 gap-6">
+                            <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto pr-2 -mr-2 scrollbar-hide space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 pt-2">
                                     <Input
                                         label="Full Name"
                                         icon={User}
@@ -414,7 +480,7 @@ const Members = () => {
                                         required
                                     />
                                     <Input
-                                        label="Mobile"
+                                        label="Mobile Number"
                                         icon={Phone}
                                         value={editForm.mobile}
                                         onChange={e => setEditForm({ ...editForm, mobile: e.target.value })}
@@ -440,30 +506,31 @@ const Members = () => {
                                         <button
                                             type="button"
                                             onClick={() => setShowEditPassword(!showEditPassword)}
-                                            className="absolute right-4 top-[38px] text-slate-400 hover:text-indigo-500 transition-colors"
+                                            className="absolute right-4 top-[24px] translate-y-1 text-slate-400 hover:text-indigo-500 transition-colors z-20"
                                             title={showEditPassword ? "Hide password" : "Show password"}
                                         >
                                             {showEditPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
                                     </div>
                                 </div>
-
-                                <div className="flex gap-3 pt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setEditingMember(null)}
-                                        className="flex-1 py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <Button
-                                        type="submit"
-                                        className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 shadow-xl shadow-indigo-600/20 active:scale-95 transition-all"
-                                    >
-                                        Update Profile
-                                    </Button>
-                                </div>
                             </form>
+
+                            <div className="flex gap-4 pt-6 mt-6 border-t border-slate-100 dark:border-white/5 flex-shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingMember(null)}
+                                    className="flex-1 py-4 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <Button
+                                    onClick={handleEditSubmit}
+                                    className="flex-[2] py-4 bg-indigo-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 shadow-xl shadow-indigo-600/20 active:scale-95 transition-all"
+                                >
+                                    Update Profile
+                                </Button>
+                            </div>
+
                         </motion.div>
                     </div>
                 )}

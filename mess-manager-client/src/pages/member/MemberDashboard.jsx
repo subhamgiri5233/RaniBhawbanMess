@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Clock from '../../components/ui/Clock';
 import AvatarPicker, { getAvatarUrl } from '../../components/ui/AvatarPicker';
-import { Wallet, Utensils, ShoppingCart, Star, TrendingUp, Calendar as CalendarIcon, Lock, Eye, EyeOff, Check } from 'lucide-react';
+import { Wallet, Utensils, ShoppingCart, Star, TrendingUp, Calendar as CalendarIcon, Lock, Eye, EyeOff, Check, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
@@ -226,7 +226,16 @@ const MemberDashboard = () => {
                                 <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
                             </div>
                             <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Guest Liability</p>
-                            <h3 className="text-3xl font-black text-purple-600 dark:text-purple-400 mt-2 tracking-tight">{myGuestMeals.length} <span className="text-sm font-bold opacity-60">Meals</span></h3>
+                            <div className="flex items-end justify-between mt-2">
+                                <h3 className="text-3xl font-black text-purple-600 dark:text-purple-400 tracking-tight">{myGuestMeals.length} <span className="text-sm font-bold opacity-60">Meals</span></h3>
+                                <button
+                                    onClick={() => window.location.href = '/member-meals'}
+                                    className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/30 transition-all active:scale-90 flex items-center justify-center"
+                                    title="Add Guest Meal"
+                                >
+                                    <Plus size={18} strokeWidth={3} />
+                                </button>
+                            </div>
                             <p className="text-[10px] font-black text-purple-500/60 dark:text-purple-400/60 mt-1 uppercase tracking-widest italic">Est. Cost: ₹{totalGuestAmount}</p>
                         </Card>
                     </>
