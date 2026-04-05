@@ -108,6 +108,16 @@ const MemberMeals = () => {
         myGuestMeals.reduce((sum, g) => sum + (guestMealPrices[g?.guestMealType] || 0), 0)
         , [myGuestMeals, guestMealPrices]);
 
+    // Calculate regular meal count for current month
+    const myRegularMealsCount = useMemo(() => {
+        return (meals || []).filter(m => 
+            m.memberId === user.id && 
+            m.date && 
+            m.date.startsWith(currentMonth) &&
+            !m.isGuest
+        ).length;
+    }, [meals, user.id, currentMonth]);
+
     return (
         <>
             <motion.div
@@ -116,9 +126,9 @@ const MemberMeals = () => {
             className="space-y-8 pb-12"
         >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 border-l-8 border-l-indigo-500 shadow-sm p-8 rounded-[2rem] border border-slate-200/50 dark:border-white/5 transition-colors">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">My Meal Registry</h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Manage your daily presence and guest logs</p>
+                <div className="flex-1">
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-tight">My Meal Registry</h1>
+                    <p className="text-[9px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest leading-relaxed">Manage daily presence & guests</p>
                 </div>
 
                 <div className="flex items-center gap-3 bg-[#f4f7ff] dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-100 dark:border-white/5 shadow-inner">
@@ -134,7 +144,7 @@ const MemberMeals = () => {
                 </div>
             </div>            {/* Regular Meals Monthly Sheet */}
             <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-4 px-6 py-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-500/10 rounded-2xl">
+                <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4 px-6 py-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-500/10 rounded-2xl">
                     <div className="flex items-center gap-2">
                         <UtensilsCrossed size={16} className="text-indigo-600 dark:text-indigo-400" />
                         <span className="text-[10px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Billing Policy:</span>
@@ -159,7 +169,7 @@ const MemberMeals = () => {
                         <div className="p-3 bg-primary-100 dark:bg-primary-950/40 rounded-2xl">
                             <Users size={24} className="text-primary-600 dark:text-primary-400" />
                         </div>
-                        <h2 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Guest Records</h2>
+                        <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tighter uppercase">Guest Archive</h2>
                     </div>
 
                     <Button
@@ -195,7 +205,7 @@ const MemberMeals = () => {
                                             className="flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
                                         >
                                             <div className="flex items-center gap-5">
-                                                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-white/5 flex items-center justify-center text-2xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[1rem] sm:rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-white/5 flex items-center justify-center text-xl sm:text-2xl group-hover:scale-110 transition-transform duration-500">
                                                     {guestMealIcons[guest.guestMealType]}
                                                 </div>
                                                 <div>
@@ -232,15 +242,15 @@ const MemberMeals = () => {
                     <Card className="p-0 overflow-hidden shadow-premium border-transparent bg-gradient-to-br from-indigo-600 via-indigo-700 to-primary-800 h-fit relative group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl transition-transform duration-700"></div>
 
-                        <div className="p-8 border-b border-white/10 bg-black/10">
+                        <div className="p-6 sm:p-8 border-b border-white/10 bg-black/10">
                             <div className="flex items-center gap-3 mb-1">
-                                <TrendingUp size={16} className="text-indigo-300" />
-                                <h3 className="font-black text-white/60 uppercase text-[9px] tracking-[0.3em]">Personal Summary</h3>
+                                <TrendingUp size={14} className="text-indigo-300" />
+                                <h3 className="font-black text-white/50 uppercase text-[8px] sm:text-[9px] tracking-[0.3em]">Personal Summary</h3>
                             </div>
-                            <h2 className="text-2xl font-black text-white tracking-tight">Financial Impact</h2>
+                            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tighter uppercase">Impact Card</h2>
                         </div>
 
-                        <div className="p-8 space-y-4">
+                        <div className="p-6 sm:p-8 space-y-3 sm:space-y-4">
                             <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md">
                                 <div>
                                     <p className="font-black text-white text-sm tracking-tight">Guest Liability</p>

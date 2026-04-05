@@ -8,6 +8,7 @@ const ManagerRecord = require('../models/ManagerRecord');
 const MonthlySummary = require('../models/MonthlySummary');
 const MonthlySharedExpense = require('../models/MonthlySharedExpense');
 const MarketRequest = require('../models/MarketRequest');
+const Settings = require('../models/Settings');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 /**
@@ -22,7 +23,6 @@ router.get('/:month', auth, async (req, res) => {
         // Robust Month Filter: handle both "2026-03" and potentially "2026-3" if any data was saved without padding
         const monthAlt = month.includes('-0') ? month.replace('-0', '-') : month;
         const monthRegex = `^(${month}|${monthAlt})`;
-
         const [
             members,
             expenses,
@@ -32,7 +32,8 @@ router.get('/:month', auth, async (req, res) => {
             managerRecords,
             sharedExpense,
             initialPaymentStatuses,
-            marketRequests
+            marketRequests,
+            settings
         ] = await Promise.all([
             User.find({ role: 'member' }).select('_id userId name deposit').lean(),
             Expense.find({
@@ -58,10 +59,23 @@ router.get('/:month', auth, async (req, res) => {
             MarketRequest.find({
                 date: { $regex: monthRegex },
                 status: 'approved'
-            }).lean()
+            }).lean(),
+            Settings.find({}).lean()
         ]);
 
-        // 2. Build market duty map
+        // 2. Map settings for easy access
+        const settingsMap = {};
+        (settings || []).forEach(s => { settingsMap[s.key] = s.value; });
+        
+        const minMealsLimit = Number(settingsMap['min_meals_month']) || 40;
+        const guestPrices = {
+            fish: Number(settingsMap['guest_price_fish']) || 0,
+            meat: Number(settingsMap['guest_price_meat']) || 0,
+            veg: Number(settingsMap['guest_price_veg']) || 0,
+            egg: Number(settingsMap['guest_price_egg']) || 0
+        };
+
+        // 3. Build market duty map
         const dutyCounts = {};
         marketRequests.forEach(r => {
             const id = r.assignedMemberId;
@@ -156,10 +170,11 @@ router.get('/:month', auth, async (req, res) => {
                         .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
                 });
 
-                // Regular meal count
-                const regularMeals = (meals || []).filter(m =>
+                // Regular meal count (Actual vs Charged)
+                const actualRegularMeals = (meals || []).filter(m =>
                     m && (m.memberId === memberIdStr || m.memberId === member.userId)
                 ).length;
+                const chargedRegularMeals = Math.max(minMealsLimit, actualRegularMeals);
 
                 // Guest meal count
                 const guestMealCount = (guestMeals || []).filter(g =>
@@ -180,7 +195,8 @@ router.get('/:month', auth, async (req, res) => {
                     userId: member.userId || null,
                     memberName,
                     expenses: expenseByCategory,
-                    regularMeals,
+                    regularMeals: actualRegularMeals,
+                    chargedMeals: chargedRegularMeals,
                     guestMeals: totalGuestMeals,
                     paymentStatus: payment ? (payment.paymentStatus || 'pending') : 'pending',
                     amountPaid: payment ? (Number(payment.amountPaid) || 0) : 0,
@@ -189,7 +205,10 @@ router.get('/:month', auth, async (req, res) => {
                     depositBalance: payment ? (Number(payment.depositBalance) || 0) : 0,
                     depositDate: payment ? (payment.depositDate || '') : '',
                     depositBalanceLocked: !!payment,
-                    marketDays: dutyCounts[memberIdStr] || dutyCounts[member.userId] || (userToIdMap[memberIdStr] ? dutyCounts[userToIdMap[memberIdStr]] : 0) || (userToIdMap[member.userId] ? dutyCounts[userToIdMap[member.userId]] : 0) || 4,
+                    marketDays: dutyCounts[memberIdStr] || dutyCounts[member.userId] || (userToIdMap[memberIdStr] ? dutyCounts[userToIdMap[memberIdStr]] : 0) || (userToIdMap[member.userId] ? dutyCounts[userToIdMap[member.userId]] : 0),
+                    marketDates: (marketRequests || [])
+                        .filter(r => r.assignedMemberId === memberIdStr || r.assignedMemberId === member.userId)
+                        .map(r => r.date),
                     note: payment ? (payment.note || '') : '',
                     deposit: member.deposit || 0
                 };
@@ -208,7 +227,7 @@ router.get('/:month', auth, async (req, res) => {
                 memberName: g.memberName || (members.find(m => m._id.toString() === g.memberId || m.userId === g.memberId)?.name || 'Unknown'),
                 guestMealType: g.guestMealType || 'veg',
                 mealTime: g.mealTime || 'lunch',
-                amount: g.amount || 0,
+                amount: g.amount || guestPrices[g.guestMealType || 'veg'] || 0,
                 source: 'guest_meal'
             })),
             ...(guestMealsInMealCollection || []).map(m => ({
@@ -225,7 +244,7 @@ router.get('/:month', auth, async (req, res) => {
 
         // 9. Calculate live shared totals (fallback if no snapshot)
         const liveBills = {};
-        ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others'].forEach(cat => {
+        ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'rice', 'others'].forEach(cat => {
             liveBills[cat] = expenses
                 .filter(e => e.category === cat)
                 .reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -236,6 +255,7 @@ router.get('/:month', auth, async (req, res) => {
             managers,
             liveBills,
             totalMembersCount: members.length,
+            minMealsLimit, // Send the limit to the frontend
             guestRecords, // New full history log
             sharedExpense: sharedExpense || null,
             members: req.user.role === 'admin'

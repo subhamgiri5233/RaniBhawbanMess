@@ -1,5 +1,5 @@
 import { useData } from '../../context/DataContext';
-import { Calendar, ChevronLeft, ChevronRight, CalendarCheck } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, CalendarCheck, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const GlobalMonthSelector = () => {
@@ -59,38 +59,37 @@ const GlobalMonthSelector = () => {
         <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/50 dark:border-white/5 rounded-[2rem] p-2 sm:p-2.5 mb-8 flex flex-row items-center justify-between gap-4 shadow-xl shadow-indigo-500/5"
+            className="bg-white/40 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/50 dark:border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-2 sm:p-2.5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-indigo-500/5"
         >
-            {/* Legend / Icon */}
+            {/* Legend / Icon - Hidden on Mobile */}
             <div className="hidden lg:flex items-center gap-3 pl-2">
                 <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">
                     <Calendar size={18} />
                 </div>
                 <div className="flex flex-col">
-                    <h3 className="text-[10px] font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest leading-none">Global Timeline</h3>
-                    <p className="text-[8px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">Application Scope</p>
+                    <h3 className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest leading-none">Global Timeline</h3>
+                    <p className="text-[8px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 font-bold mt-1">Application Scope</p>
                 </div>
             </div>
 
             {/* Navigation & Pill */}
-            <div className="flex items-center gap-1.5 flex-1 justify-center sm:justify-start">
-                {/* Prev */}
+            <div className="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
                 <button
                     onClick={handlePreviousMonth}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 text-slate-400 hover:text-indigo-500 hover:border-indigo-500/30 transition-all active:scale-90 shadow-sm"
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:text-indigo-500 hover:dark:text-indigo-400 transition-all active:scale-90 shadow-sm"
                     title="Previous Month"
                 >
                     <ChevronLeft size={20} />
                 </button>
 
                 {/* The Premium Pill */}
-                <div className="relative group">
-                    <div className="flex items-center gap-4 bg-slate-900 dark:bg-black/60 border border-white/10 px-8 py-2.5 rounded-full shadow-2xl hover:bg-slate-800 dark:hover:bg-white/5 transition-all cursor-pointer ring-1 ring-white/5 backdrop-blur-xl">
-                        <Calendar size={16} className="text-primary-500" />
-                        <span className="text-[11px] font-black text-white dark:text-slate-100 uppercase tracking-[0.2em] whitespace-nowrap">
+                <div className="relative group flex-1 sm:flex-none max-w-[240px]">
+                    <div className="flex items-center justify-center gap-3 bg-slate-900 dark:bg-black/60 border border-white/10 px-4 sm:px-8 py-2.5 rounded-full shadow-2xl hover:bg-slate-800 dark:hover:bg-slate-900 transition-all cursor-pointer ring-1 ring-white/5 backdrop-blur-xl">
+                        <Calendar size={14} className="text-primary-500 hidden xs:block" />
+                        <span className="text-[10px] sm:text-[11px] font-black text-white dark:text-slate-100 uppercase tracking-[0.15em] sm:tracking-[0.2em] whitespace-nowrap">
                             {formattedCurrentMonth}
                         </span>
-                        <Calendar size={12} className="text-slate-600 dark:text-slate-500 opacity-40" />
+                        <ChevronDown size={12} className="text-slate-500 opacity-40 ml-1" />
                     </div>
 
                     <input
@@ -101,10 +100,9 @@ const GlobalMonthSelector = () => {
                     />
                 </div>
 
-                {/* Next */}
                 <button
                     onClick={handleNextMonth}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 text-slate-400 hover:text-indigo-500 hover:border-indigo-500/30 transition-all active:scale-90 shadow-sm"
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:text-indigo-500 hover:dark:text-indigo-400 transition-all active:scale-90 shadow-sm"
                     title="Next Month"
                 >
                     <ChevronRight size={20} />
@@ -112,19 +110,19 @@ const GlobalMonthSelector = () => {
             </div>
 
             {/* Today/Current Jumper */}
-            <div className="flex items-center gap-2 pr-2">
+            <div className="w-full sm:w-auto flex items-center justify-center border-t sm:border-t-0 border-slate-200/50 dark:border-white/10 pt-3 sm:pt-0 pb-1 sm:pb-0">
                 {!isCurrentMonth ? (
                     <button
                         onClick={handleCurrentMonth}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all"
                     >
                         <CalendarCheck size={14} />
                         Go Current
                     </button>
                 ) : (
-                    <div className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+                    <div className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 dark:border-emerald-500/10 rounded-full text-[10px] font-black uppercase tracking-widest font-mono">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Today
+                        LATEST DATA
                     </div>
                 )}
             </div>
