@@ -199,7 +199,31 @@ router.get('/:month', auth, async (req, res) => {
             }
         }).filter(Boolean); // Clear out any members that crashed
 
-        // 8. Calculate live shared totals (fallback if no snapshot)
+        // 8. Build a unified list of ALL individual guest records for the log
+        const guestRecords = [
+            ...(guestMeals || []).map(g => ({
+                _id: g._id,
+                date: g.date,
+                memberId: g.memberId,
+                memberName: g.memberName || (members.find(m => m._id.toString() === g.memberId || m.userId === g.memberId)?.name || 'Unknown'),
+                guestMealType: g.guestMealType || 'veg',
+                mealTime: g.mealTime || 'lunch',
+                amount: g.amount || 0,
+                source: 'guest_meal'
+            })),
+            ...(guestMealsInMealCollection || []).map(m => ({
+                _id: m._id,
+                date: m.date,
+                memberId: m.memberId,
+                memberName: members.find(u => u._id.toString() === m.memberId || u.userId === m.memberId)?.name || 'Unknown',
+                guestMealType: m.guestMealType || 'veg',
+                mealTime: m.type || 'lunch',
+                amount: m.amount || 0,
+                source: 'meal_collection'
+            }))
+        ].sort((a, b) => b.date.localeCompare(a.date)); // Sort by date descending
+
+        // 9. Calculate live shared totals (fallback if no snapshot)
         const liveBills = {};
         ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others'].forEach(cat => {
             liveBills[cat] = expenses
@@ -212,6 +236,7 @@ router.get('/:month', auth, async (req, res) => {
             managers,
             liveBills,
             totalMembersCount: members.length,
+            guestRecords, // New full history log
             sharedExpense: sharedExpense || null,
             members: req.user.role === 'admin'
                 ? memberSummaries

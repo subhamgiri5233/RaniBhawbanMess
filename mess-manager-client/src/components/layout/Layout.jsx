@@ -40,29 +40,33 @@ const Layout = () => {
                 isCollapsed={isDesktopCollapsed}
             />
 
-            {/* Mobile Header */}
-            <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 p-4 sticky top-0 z-30 flex items-center justify-between transition-colors">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Rani Bhawban Mess</h2>
-                <div className="flex items-center gap-2">
+            {/* Mobile Header - Premium Floating Glassmorphism */}
+            <div className="md:hidden sticky top-0 z-[40] px-4 py-3 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 flex items-center justify-between transition-all shadow-sm shadow-indigo-500/5">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
+                        <span className="text-white text-[10px] font-black italic">RB</span>
+                    </div>
+                    <h2 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-tighter">Rani Bhawban</h2>
+                </div>
+                <div className="flex items-center gap-1.5">
                     <button
                         onClick={handleRefresh}
                         disabled={isRefreshing}
-                        className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                        title="Refresh data"
+                        className="p-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-all active:scale-90"
                     >
                         <RefreshCw size={18} className={isRefreshing ? 'animate-spin text-primary-500' : ''} />
                     </button>
                     <button
                         onClick={toggleTheme}
-                        className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        className="p-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-all active:scale-90"
                     >
-                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} className="text-yellow-500" />}
+                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} className="text-amber-500" />}
                     </button>
                     <button
                         onClick={() => setIsSidebarOpen(true)}
-                        className="p-2 -mr-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        className="p-2.5 ml-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl transition-all shadow-inner active:scale-90 border border-indigo-100 dark:border-indigo-500/20"
                     >
-                        <Menu size={24} />
+                        <Menu size={22} />
                     </button>
                 </div>
             </div>
