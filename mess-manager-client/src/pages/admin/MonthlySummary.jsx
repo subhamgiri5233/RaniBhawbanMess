@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ClipboardList, ChevronDown, X, Save, Crown,
+    ClipboardList, X, Save, Crown,
     CheckCircle2, Clock, AlertCircle, Users,
-    ShoppingBag, Wifi, Zap, User, Utensils, Flame,
-    Coffee, FileText, Loader2, RefreshCw, Search, Wallet, Home, Newspaper, UserRound, Calendar, Calculator, TrendingUp
+    ShoppingBag, Wifi, Zap, Utensils, Flame,
+    Coffee, FileText, Loader2, RefreshCw, Search, Home, Newspaper, UserRound, Calculator, TrendingUp
 } from 'lucide-react';
 import api from '../../lib/api';
 import { cn } from '../../lib/utils';
@@ -418,6 +418,7 @@ const MonthlySummary = () => {
 
 
     const mealRate = data?.sharedExpense?.results?.mealRate || data?.mealRate || 0;
+    const sharedExpenses = data?.sharedExpense?.results || {};
     const clearedCount = data?.members?.filter(m => m.paymentStatus === 'clear').length || 0;
     const pendingCount = data?.members?.filter(m => m.paymentStatus === 'pending').length || 0;
     const partialCount = data?.members?.filter(m => m.paymentStatus === 'partial').length || 0;
