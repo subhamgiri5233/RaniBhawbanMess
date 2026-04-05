@@ -109,7 +109,8 @@ const MemberMeals = () => {
         , [myGuestMeals, guestMealPrices]);
 
     return (
-        <motion.div
+        <>
+            <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
@@ -264,8 +265,8 @@ const MemberMeals = () => {
                         </div>
                     </Card>
                 </div>
-            </div>
-         </div>
+                </div>
+            </motion.div>
 
             {/* Floating Action Button (FAB) for Mobile */}
             <motion.button
@@ -412,7 +413,7 @@ const MemberMeals = () => {
                     </div>
                 )}
             </AnimatePresence>
-        </motion.div>
+        </>
     );
 };
 
