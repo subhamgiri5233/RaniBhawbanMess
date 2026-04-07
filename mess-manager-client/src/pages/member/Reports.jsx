@@ -61,7 +61,7 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
     const finalizedContribution = Number(offM.totalContribution ?? totalContribution); 
     const effectiveContribution = Object.keys(offM).length > 0 ? finalizedContribution : 0;
 
-    const dBal = Object.keys(offM).length > 0 ? (signedOffBal || ((dMCost + dGCost + (Number(dHead) || 0)) - effectiveContribution)) : 0;
+    const dBal = Object.keys(offM).length > 0 ? ((dMCost + dGCost + (Number(dHead) || 0)) - effectiveContribution) : 0;
 
     // SMART BALANCE ENGINE: Match Admin Truth
     // If status is 'clear', balance is definitively 0.
@@ -73,93 +73,98 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
 
     return (
         <div className={cn(
-            "p-4 sm:p-6 rounded-[2rem] border transition-all group relative overflow-hidden",
+            "p-6 sm:p-8 rounded-[2.5rem] border transition-all duration-300 group relative overflow-hidden",
             isCurrentUser
-                ? "bg-primary-50/30 dark:bg-primary-500/5 border-primary-500/40 shadow-lg shadow-primary-500/5 ring-1 ring-primary-500/20"
-                : "bg-slate-50 dark:bg-black/30 border-slate-100 dark:border-white/10 hover:border-primary-500/20"
+                ? "bg-white/80 dark:bg-slate-900 shadow-2xl shadow-primary-500/10 border-primary-500/30 ring-1 ring-primary-500/10"
+                : "bg-white/40 dark:bg-slate-900/40 border-slate-200/50 dark:border-white/5 hover:border-primary-500/20 backdrop-blur-md"
         )}>
             {isCurrentUser && (
-                <div className="absolute top-0 right-0 p-4">
-                    <span className="px-2 py-0.5 bg-primary-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-sm">My Account</span>
+                <div className="absolute top-0 right-0 p-6">
+                    <span className="px-3 py-1 bg-primary-500 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg shadow-primary-500/30">Primary Identity</span>
                 </div>
             )}
 
-            <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
+            <div className="absolute -right-10 -bottom-10 opacity-[0.02] dark:opacity-[0.04] group-hover:rotate-12 transition-transform duration-700 pointer-events-none">
+                <UserRound size={180} />
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-8 relative z-10">
+                <div className="flex items-center gap-4">
                     <div className={cn(
-                        "w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-sm shadow-lg",
-                        isCurrentUser ? "bg-primary-600 dark:bg-primary-500 shadow-primary-500/30" : "bg-slate-400 dark:bg-slate-700 shadow-none"
+                        "w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-white font-black text-xl shadow-2xl transition-transform group-hover:scale-105",
+                        isCurrentUser ? "bg-gradient-to-br from-primary-500 to-indigo-600 shadow-primary-500/30" : "bg-slate-800 dark:bg-slate-700 shadow-none"
                     )}>
                         {(m.memberName || '?').charAt(0)}
                     </div>
                     <div>
-                        <div className="text-base font-black text-slate-900 dark:text-slate-100 leading-none mb-1">{m.memberName}</div>
-                        <div className="flex items-center gap-2">
-                            <div className="flex text-[9px] font-black text-slate-400 uppercase tracking-widest items-center gap-1 leading-none">
-                                <Calendar size={10} /> {m.marketDays || 0} Market Days
-                                {m.marketDates?.length > 0 && (
-                                    <span className="text-[8px] opacity-60 normal-case font-mono ml-1">({m.marketDates.map(d => d.split('-')[2]).join(', ')})</span>
-                                )}
+                        <div className="text-xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-1">{m.memberName}</div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest items-center gap-1.5">
+                                <Calendar size={12} className="text-primary-500/50" /> {m.marketDays || 0} Procurement Units
                             </div>
+                            {m.marketDates?.length > 0 && (
+                                <div className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-[8px] font-mono text-slate-500 dark:text-slate-400">
+                                    DATES: {m.marketDates.map(d => d.split('-')[2]).join(', ')}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
+                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3">
                     <StatusBadge status={m.paymentStatus} />
-                    {m.role === 'admin' && <span className="px-1.5 py-0.5 bg-indigo-500 text-white text-[7px] font-black uppercase rounded-lg">Mess Admin</span>}
+                    {m.role === 'admin' && (
+                        <span className="px-2 py-0.5 bg-indigo-500/20 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[8px] font-black uppercase tracking-[0.15em] rounded-lg border border-indigo-500/20">
+                            Governance Administrator
+                        </span>
+                    )}
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div className="p-3 bg-indigo-50 dark:bg-black/40 border border-indigo-100 dark:border-indigo-500/10 rounded-2xl">
-                    <div className="text-[8px] font-black text-indigo-400 mb-0.5 uppercase tracking-widest">Meal Cost</div>
-                    <div className="flex items-baseline gap-1.5 flex-wrap">
-                        <span className="text-[9px] font-black text-indigo-500/60 leading-none">{chargedRegMeals} × {dRate.toFixed(2)}</span>
-                        <div className="text-base font-black text-indigo-600 dark:text-indigo-300 leading-none">₹{Math.round(dMCost)}</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div className="p-4 bg-slate-50/50 dark:bg-black/20 border border-slate-100 dark:border-white/5 rounded-2xl group/sub shadow-sm transition-all hover:shadow-md">
+                    <div className="text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest leading-none">Standard Meal Cost</div>
+                    <div className="flex flex-col gap-1">
+                        <div className="text-lg font-black text-slate-900 dark:text-white leading-none">₹{Math.round(dMCost)}</div>
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter opacity-60">{chargedRegMeals} × {dRate.toFixed(1)}</span>
                     </div>
                 </div>
-                <div className="p-3 bg-amber-50 dark:bg-black/40 border border-amber-100 dark:border-amber-500/10 rounded-2xl"><div className="text-[8px] font-black text-amber-500 mb-0.5 uppercase tracking-widest">Guest</div><div className="text-base font-black text-amber-600 dark:text-amber-400">₹{Math.round(dGCost)}</div></div>
-                <div className="p-3 bg-emerald-50 dark:bg-black/40 border border-emerald-100 dark:border-emerald-500/10 rounded-2xl"><div className="text-[8px] font-black text-emerald-500 mb-0.5 uppercase tracking-widest">Shared Cost</div><div className="text-base font-black text-emerald-600 dark:text-emerald-300">₹{Math.round(dHead)}</div></div>
+                <div className="p-4 bg-slate-50/50 dark:bg-black/20 border border-slate-100 dark:border-white/5 rounded-2xl group/sub shadow-sm"><div className="text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest leading-none">Guest Adjustment</div><div className="text-lg font-black text-slate-900 dark:text-white leading-none">₹{Math.round(dGCost)}</div></div>
+                <div className="p-4 bg-slate-50/50 dark:bg-black/20 border border-slate-100 dark:border-white/5 rounded-2xl group/sub shadow-sm"><div className="text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest leading-none">Shared Liability</div><div className="text-lg font-black text-slate-900 dark:text-white leading-none">₹{Math.round(dHead)}</div></div>
                 <div className={cn(
-                    "p-3 rounded-2xl border transition-all",
-                    rem > 0 ? "bg-rose-50 dark:bg-black/40 border-rose-100 dark:border-rose-500/10" : "bg-emerald-50 dark:bg-black/40 border-emerald-100 dark:border-emerald-500/10"
+                    "p-4 rounded-2xl border transition-all shadow-sm",
+                    rem > 0 ? "bg-rose-50/50 dark:bg-rose-900/10 border-rose-100 dark:border-rose-900/20 shadow-rose-500/5 text-rose-600" : "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20 shadow-emerald-500/5 text-emerald-600"
                 )}>
-                    <div className={cn("text-[8px] font-black uppercase mb-0.5 tracking-widest", rem > 0 ? "text-rose-400" : "text-emerald-400")}>Balance</div>
-                    <div className={cn("text-base font-black", rem > 0 ? "text-rose-600" : "text-emerald-600 dark:text-emerald-400")}>₹{rem === 0 ? '0' : Math.abs(rem)}</div>
+                    <div className={cn("text-[9px] font-black uppercase mb-2 tracking-widest leading-none", rem > 0 ? "text-rose-400" : "text-emerald-400")}>Outstanding</div>
+                    <div className={cn("text-xl font-black tabular-nums tracking-tighter leading-none", rem > 0 ? "text-rose-600" : "text-emerald-600 dark:text-emerald-400")}>
+                        {rem === 0 ? '₹ 0.00' : `₹ ${Math.abs(rem).toLocaleString()}`}
+                    </div>
                 </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-y-3 py-3 border-t border-slate-100 dark:border-white/5">
-                <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-y-4 py-5 border-t border-slate-100 dark:border-white/5">
+                <div className="flex items-center gap-3">
                     <div className="relative group/meal">
                         <div className={cn(
-                            "px-2 py-1 border rounded-lg flex items-center gap-1.5 transition-all text-[10px] font-black uppercase tracking-tight",
+                            "px-3 py-1.5 border rounded-2xl flex items-center gap-2 transition-all text-[11px] font-black uppercase tracking-widest",
                             isMinApplied
-                                ? "bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400"
-                                : "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300"
+                                ? "bg-rose-50/50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 shadow-sm"
+                                : "bg-primary-50/50 dark:bg-primary-500/5 border-primary-100 dark:border-primary-500/20 text-primary-700 dark:text-primary-300 shadow-sm"
                         )}>
-                            <ClipboardList size={10} className={isMinApplied ? "text-rose-500" : "text-indigo-500"} />
-                            <span>{m.regularMeals} REG</span>
+                            <Utensils size={12} className={isMinApplied ? "text-rose-500" : "text-primary-500"} />
+                            <span>{m.regularMeals} Active Meals</span>
                         </div>
                         {isMinApplied && (
-                            <div className="absolute -top-2.5 -right-2.5 bg-rose-500 text-white text-[8px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-lg shadow-rose-500/30 scale-110">
+                            <div className="absolute -top-3 -right-3 bg-rose-500 text-white text-[9px] font-black w-7 h-7 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-xl shadow-rose-500/30 scale-110">
                                 {dMinLimit}+
                             </div>
                         )}
                     </div>
-
-                    <div className="px-2 py-1 bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 rounded-lg flex items-center gap-1.5">
-                        <Users size={10} className="text-amber-500" />
-                        <span className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-tight">{m.guestMeals} GUEST</span>
-                    </div>
-                    <div className="flex items-center gap-1.5"><TrendingUp size={12} className="text-emerald-500" /> <span className="opacity-70 text-[9px] font-black uppercase text-slate-400 dark:text-slate-500">Audit Ready</span></div>
                 </div>
             </div>
 
-            {/* Your Contributions Grid (Synchronized with Pro Audit Logic) */}
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/5">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Auditable Contributions</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+            <div className="mt-4 pt-6 border-t border-slate-100 dark:border-white/5">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Auditable Contributions</p>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {(() => {
                         const isAdmin = m.role === 'admin';
                         const categories = isAdmin 
@@ -180,71 +185,35 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
                             .map(cat => ({ ...cat, val: Number(m.expenses?.[cat.k]) || 0 }))
                             .filter(cat => cat.val > 0)
                             .map(cat => (
-                                <div key={cat.k} className={cn(
-                                    "p-2.5 rounded-[1.2rem] border transition-all bg-white dark:bg-black/40 border-slate-200 dark:border-white/10 shadow-sm"
-                                )}>
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                        <cat.i size={11} className={cn(
-                                            cat.c === 'indigo' && "text-indigo-500",
-                                            cat.c === 'emerald' && "text-emerald-500",
-                                            cat.c === 'amber' && "text-amber-500",
-                                            cat.c === 'blue' && "text-blue-500",
-                                            cat.c === 'rose' && "text-rose-500",
-                                            cat.c === 'slate' && "text-slate-500"
-                                        )} />
+                                <div key={cat.k} className="p-3 rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-black/20 shadow-sm">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <cat.i size={12} className="text-slate-400" />
                                         <span className="text-[8px] font-black uppercase tracking-tight text-slate-400">{cat.l}</span>
                                     </div>
-                                    <div className="text-[12px] font-black text-slate-900 dark:text-slate-100 leading-none">₹{cat.val}</div>
+                                    <div className="text-[13px] font-black text-slate-900 dark:text-slate-100 leading-none">₹{cat.val}</div>
                                 </div>
                             ));
                     })()}
                 </div>
             </div>
 
-            {/* Summary Footer */}
-            <div className="mt-4 pt-4 border-t-2 border-slate-100 dark:border-white/10 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-col gap-3 flex-grow max-w-[240px]">
-                    <div className="flex items-center justify-between group/exp hover:translate-x-1 transition-transform">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]" />
-                            <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-wider whitespace-nowrap">Total Expenses</span>
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-sm font-black text-rose-600 dark:text-rose-400">₹{Math.round(dMCost + dGCost + (Number(dHead) || 0))}</span>
-                            <span className="text-[8px] text-slate-400 font-bold opacity-50">({Math.round(dMCost)}+{Math.round(dGCost)}+{Math.round(dHead || 0)})</span>
-                        </div>
+            <div className="mt-6 pt-6 border-t-2 border-slate-100 dark:border-white/10 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Total Expenses</span>
+                        <span className="text-sm font-black text-slate-900 dark:text-white">₹{Math.round(dMCost + dGCost + (Number(dHead) || 0))}</span>
                     </div>
-                    <div className="flex items-center justify-between group/con hover:translate-x-1 transition-transform">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider whitespace-nowrap">Total Contribution</span>
-                        </div>
+                    <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Total Contribution</span>
                         <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">₹{Math.round(effectiveContribution)}</span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3 bg-white dark:bg-black/40 p-2 rounded-2xl border border-slate-200/50 dark:border-white/5 shadow-sm transition-all hover:scale-105">
-                    <div className="text-right flex flex-col items-end">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
-                            {rem > 0 ? 'Payable Balance' : rem < 0 ? 'Receivable Balance' : 'Clear Status'}
-                        </span>
-                        <span className={cn(
-                            "text-lg font-black leading-none",
-                            rem > 0 ? "text-rose-600" : rem < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
-                        )}>₹{Math.abs(rem)}</span>
-                    </div>
-                    <div className={cn(
-                        "w-8 h-8 rounded-xl flex items-center justify-center shadow-lg transition-transform",
-                        rem > 0 ? "bg-rose-500 shadow-rose-500/20" : rem < 0 ? "bg-emerald-500 shadow-emerald-500/20" : "bg-slate-200 dark:bg-slate-700 shadow-none"
-                    )}>
-                        {rem > 0 ? <TrendingDown size={16} className="text-white" /> : rem < 0 ? <TrendingUp size={16} className="text-white" /> : <CheckCircle2 size={16} className="text-slate-500" />}
                     </div>
                 </div>
             </div>
         </div>
     );
 }, (prev, next) => {
-    // Optimized comparison to avoid redundant re-renders
     return (
         prev.m === next.m && 
         prev.offM === next.offM &&
@@ -263,7 +232,6 @@ const Reports = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-
 
     const monthStr = useMemo(() => globalMonth || new Date().toISOString().slice(0, 7), [globalMonth]);
 
@@ -287,7 +255,6 @@ const Reports = () => {
 
     const stats = useMemo(() => {
         if (!data) return { rate: 0, head: 0, shared: 0, mkt: 0, rice: 0, gstM: 0, totalM: 0, minLimit: 40 };
-        const members = (data.members || []);
         const minLimit = Number(data.minMealsLimit) || 40;
         const offR = data?.sharedExpense?.results || {};
         const offI = data?.sharedExpense?.mealInputs || {};
@@ -304,14 +271,8 @@ const Reports = () => {
                 minLimit
             };
         }
-
-        // RESTRICTED MODE: If no finalized sharedExpense is found, show zero stats
-        return { 
-            rate: 0, head: 0, shared: 0, mkt: 0, rice: 0, gstM: 0, totalM: 0, 
-            minLimit 
-        };
+        return { rate: 0, head: 0, shared: 0, mkt: 0, rice: 0, gstM: 0, totalM: 0, minLimit };
     }, [data]);
-
 
     const filteredMembers = useMemo(() => {
         if (!data || !data.members) return [];
@@ -323,16 +284,29 @@ const Reports = () => {
 
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
-            <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-lg shadow-primary-500/20"><ClipboardList className="text-white" size={24} /></div>
-                    <div>
-                        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Summary Dashboard</h1>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1 leading-none">Trace for {monthStr}</p>
-                    </div>
+            
+            {/* Power Banner */}
+            <div className="relative overflow-hidden bg-white/90 dark:bg-slate-900 shadow-sm p-8 rounded-[2.5rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
+                <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={fetchSummary} className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-500 shadow-sm active:scale-95 transition-all hover:rotate-180"><RefreshCw size={18} className={loading ? 'animate-spin' : ''} /></button>
+
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Activity size={14} className="text-primary-500 animate-pulse" />
+                            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.3em]">Institutional Grade Reporting</span>
+                        </div>
+                        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
+                            Member Reports
+                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/50 text-[10px] font-black text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-900/50 uppercase tracking-widest">
+                                {monthStr}
+                            </span>
+                        </h1>
+                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
+                            Comprehensive financial ledger and dietary consumption trace
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -349,26 +323,6 @@ const Reports = () => {
                 </div>
             ) : data && (
                 <>
-                    <AnimatePresence>
-                        {!data.sharedExpense && (
-                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-2">
-                                <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-1.5 bg-rose-500 rounded-lg"><AlertCircle size={14} className="text-white" /></div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Summary Not Finalized</p>
-                                            <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 tracking-tighter uppercase">Trace restricted to finalized records only.</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 rounded-xl border border-rose-500/20 text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">
-                                        No Record
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                         <Card className="p-0 overflow-hidden border-emerald-200/50 dark:border-white/10 bg-white dark:bg-slate-900 shadow-xl">
                             <div className="p-4 sm:p-5 border-b border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-black/30 flex items-center justify-between">

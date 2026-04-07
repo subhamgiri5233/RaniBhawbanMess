@@ -670,235 +670,277 @@ const Calculator = () => {
 
     return (
         <div className="space-y-6 pb-12">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 border-l-8 border-l-primary-500 shadow-sm p-8 rounded-[2rem] border border-slate-200 dark:border-white/5 backdrop-blur-xl transition-colors">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Monthly Calculator</h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Finalize monthly accounts and revenue</p>
+            {/* Power Banner */}
+            <div className="relative overflow-hidden bg-white/90 dark:bg-slate-900 shadow-sm p-8 rounded-[2.5rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
+                <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
                 </div>
-                <div className="flex gap-3">
-                    <Button onClick={generatePDF} disabled={!perHeadResult || !mealChargeResult} className="rounded-2xl shadow-lg active:scale-95 transition-all">
-                        <Download size={18} />
-                        Download
-                    </Button>
 
-                    <Button
-                        onClick={handleSubmitToMonthlyReport}
-                        disabled={submittingReport || !perHeadResult || !mealChargeResult}
-                        className="rounded-2xl shadow-lg active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-700 border-none text-white font-black"
-                    >
-                        <Save size={18} />
-                        {submittingReport ? 'Submitting...' : 'Submit to Report'}
-                    </Button>
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Sparkles size={14} className="text-primary-500 animate-pulse" />
+                            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.3em]">Institutional Revenue Audit</span>
+                        </div>
+                        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
+                            Monthly Calculator
+                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/50 text-[10px] font-black text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-900/50 uppercase tracking-widest">
+                                {globalMonth}
+                            </span>
+                        </h1>
+                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
+                            Finalize shared expenses and generate individual member accounting
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-4">
+                        <Button 
+                            onClick={generatePDF} 
+                            disabled={!perHeadResult || !mealChargeResult} 
+                            className="h-12 px-6 rounded-2xl shadow-lg shadow-indigo-500/10 active:scale-95 transition-all flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 font-black text-xs uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-700"
+                        >
+                            <Download size={16} />
+                            Download PDF
+                        </Button>
+
+                        <Button
+                            onClick={handleSubmitToMonthlyReport}
+                            disabled={submittingReport || !perHeadResult || !mealChargeResult}
+                            className="h-12 px-8 rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-500 border-none text-white font-black text-xs uppercase tracking-[0.1em] flex items-center gap-2"
+                        >
+                            <Save size={16} />
+                            {submittingReport ? 'Finalizing...' : 'Submit to Report'}
+                        </Button>
+                    </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Per Head Section */}
-                <Card className="p-6 border-slate-200/60 dark:border-white/5 bg-white dark:bg-slate-900/40">
-                    <h2 className="text-lg font-black text-slate-800 dark:text-slate-50 tracking-tight mb-6 flex items-center gap-2">
-                        <CalculatorIcon className="text-primary-600 dark:text-primary-400" size={20} />
-                        Per Head Metrics
+                {/* Per Head Metrics */}
+                <Card className="relative overflow-hidden p-8 border-slate-200/60 dark:border-white/5 bg-white/90 dark:bg-slate-900/40 backdrop-blur-md group/card">
+                    <div className="absolute -right-10 -top-10 opacity-[0.03] dark:opacity-[0.05] group-hover/card:rotate-12 transition-transform duration-700 pointer-events-none">
+                        <CalculatorIcon size={200} />
+                    </div>
+
+                    <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight mb-8 flex items-center gap-3">
+                        <div className="p-2.5 bg-primary-100 dark:bg-primary-950/50 rounded-2xl text-primary-600 dark:text-primary-400"><CalculatorIcon size={20} /></div>
+                        Shared Subscriptions
                     </h2>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-8 mb-8">
                         {Object.keys(bills).map(key => {
                             const isAutoFetched = ['gas', 'wifi', 'electric', 'spices', 'others'].includes(key);
                             return (
-                                <Input
-                                    key={key}
-                                    label={key.replace(/([A-Z])/g, ' $1').trim().toUpperCase() + " (₹)"}
-                                    type="number"
-                                    name={key}
-                                    value={bills[key] === 0 ? '' : bills[key]}
-                                    onChange={handleBillChange}
-                                    onFocus={(e) => e.target.select()}
-                                    onWheel={(e) => e.target.blur()}
-                                    readOnly={isAutoFetched}
-                                    className={isAutoFetched ? "opacity-90" : ""}
-                                    inputClassName={isAutoFetched ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 font-black" : ""}
-                                />
+                                <div key={key} className="space-y-1.5">
+                                    <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">{key.replace(/([A-Z])/g, ' $1').trim()}</label>
+                                    <div className="relative group">
+                                        <input
+                                            type="number"
+                                            name={key}
+                                            value={bills[key] === 0 ? '' : bills[key]}
+                                            onChange={handleBillChange}
+                                            onFocus={(e) => e.target.select()}
+                                            readOnly={isAutoFetched}
+                                            className={cn(
+                                                "w-full bg-slate-50/50 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black transition-all ring-1 focus:ring-2",
+                                                isAutoFetched 
+                                                    ? "ring-emerald-100/50 dark:ring-emerald-900/20 text-emerald-600 dark:text-emerald-400" 
+                                                    : "ring-slate-100 dark:ring-white/5 focus:ring-primary-500/50 text-slate-900 dark:text-white"
+                                            )}
+                                        />
+                                        {isAutoFetched && <div className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" title="Auto-fetched from vault" />}
+                                    </div>
+                                </div>
                             );
                         })}
                     </div>
-                    <div className="bg-primary-50 dark:bg-primary-950/30 p-4 rounded-2xl flex justify-between items-center border border-primary-100 dark:border-primary-900/50">
-                        <div className="text-sm font-black text-primary-800 dark:text-primary-300 uppercase tracking-wider">Total Members: {members.length}</div>
-                        <Button size="sm" onClick={calculatePerHead}>Calculate</Button>
-                    </div>
-                    {perHeadResult && (
-                        <div className="mt-4 p-5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl text-center border border-slate-100 dark:border-white/5 shadow-inner">
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Total Amount: ₹{perHeadResult.totalAmount.toFixed(2)}</p>
-                            <p className="text-2xl font-black text-primary-600 dark:text-primary-400 mt-1">Per Head: ₹{perHeadResult.perHeadAmount.toFixed(2)}</p>
+
+                    <div className="flex items-center justify-between p-6 bg-slate-50/50 dark:bg-slate-900/50 rounded-[1.5rem] border border-slate-100 dark:border-white/5 shadow-inner">
+                        <div>
+                            <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Active Population</p>
+                            <p className="text-xl font-black text-slate-900 dark:text-slate-50">{members.length} Members</p>
                         </div>
+                        <Button 
+                            onClick={calculatePerHead}
+                            className="bg-primary-600 hover:bg-primary-500 text-white rounded-2xl h-12 px-8 font-black uppercase text-xs tracking-widest shadow-xl shadow-primary-500/10"
+                        >
+                            Process All
+                        </Button>
+                    </div>
+
+                    {perHeadResult && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-6 p-6 rounded-[1.5rem] bg-gradient-to-br from-primary-600 to-indigo-700 text-white shadow-2xl shadow-primary-500/20 relative overflow-hidden"
+                        >
+                            <div className="relative z-10 text-center">
+                                <p className="text-[9px] font-black text-primary-100/60 uppercase tracking-widest mb-2">Aggregate Per Head Liability</p>
+                                <p className="text-4xl font-black tracking-tighter">₹{perHeadResult.perHeadAmount.toFixed(2)}</p>
+                                <p className="text-[10px] font-bold text-white/50 mt-1">Total Vault Withdrawal: ₹{perHeadResult.totalAmount.toFixed(0)}</p>
+                            </div>
+                        </motion.div>
                     )}
                 </Card>
 
                 {/* Meal Charge Section */}
-                <Card className="p-6 border-slate-200/60 dark:border-white/5 bg-white dark:bg-slate-900/40">
-                    <h2 className="text-lg font-black text-slate-800 dark:text-slate-50 tracking-tight mb-6 flex items-center gap-2">
-                        <CalculatorIcon className="text-amber-600 dark:text-amber-400" size={20} />
+                <Card className="relative overflow-hidden p-8 border-slate-200/60 dark:border-white/5 bg-white/90 dark:bg-slate-900/40 backdrop-blur-md group/meal">
+                    <div className="absolute -right-10 -top-10 opacity-[0.03] dark:opacity-[0.05] group-hover/meal:rotate-12 transition-transform duration-700 pointer-events-none text-amber-500">
+                        <TrendingUp size={200} />
+                    </div>
+
+                    <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight mb-8 flex items-center gap-3">
+                        <div className="p-2.5 bg-amber-100 dark:bg-amber-950/50 rounded-2xl text-amber-600 dark:text-amber-400"><TrendingUp size={20} /></div>
                         Meal Unit Value
                     </h2>
-                    <div className="space-y-4 mb-4">
-                        <Input
-                            label="TOTAL MARKET (₹)"
-                            type="number"
-                            name="totalMarket"
-                            value={mealInputs.totalMarket === 0 ? '' : mealInputs.totalMarket}
-                            onChange={handleMealInputChange}
-                            readOnly
-                            onFocus={(e) => e.target.select()}
-                            onWheel={(e) => e.target.blur()}
-                            inputClassName="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input
-                                label="RICE (₹)"
-                                type="number"
-                                name="rice"
-                                value={mealInputs.rice === 0 ? '' : mealInputs.rice}
-                                onChange={handleMealInputChange}
-                                readOnly
-                                onFocus={(e) => e.target.select()}
-                                onWheel={(e) => e.target.blur()}
-                                inputClassName="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
-                            />
-                            <Input
-                                label="GUEST ADJ. (₹)"
-                                type="number"
-                                name="guest"
-                                value={mealInputs.guest === 0 ? '' : mealInputs.guest}
-                                onChange={handleMealInputChange}
-                                readOnly
-                                onFocus={(e) => e.target.select()}
-                                onWheel={(e) => e.target.blur()}
-                                inputClassName="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
-                            />
+
+                    <div className="space-y-6 mb-8">
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-1.5 col-span-2">
+                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Aggregate Market (₹)</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        value={mealInputs.totalMarket}
+                                        readOnly
+                                        className="w-full bg-emerald-50/50 dark:bg-emerald-950/20 border-none rounded-2xl px-5 py-4 text-sm font-black text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-100/50 dark:ring-emerald-900/30"
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Rice (₹)</label>
+                                <input
+                                    type="number"
+                                    value={mealInputs.rice}
+                                    readOnly
+                                    className="w-full bg-slate-50/50 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black text-slate-900 dark:text-white ring-1 ring-slate-100 dark:ring-white/5"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Guest Adj. (₹)</label>
+                                <input
+                                    type="number"
+                                    value={mealInputs.guest}
+                                    readOnly
+                                    className="w-full bg-slate-50/50 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black text-slate-900 dark:text-white ring-1 ring-slate-100 dark:ring-white/5"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5 col-span-2">
+                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Standardized Meal Units</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        value={mealInputs.totalMeal}
+                                        readOnly
+                                        className="w-full bg-amber-50/50 dark:bg-amber-950/20 border-none rounded-2xl px-5 py-4 text-sm font-black text-amber-700 dark:text-amber-400 ring-1 ring-amber-100/50 dark:ring-amber-900/30"
+                                    />
+                                    <p className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest">
+                                        Includes {MIN_MEALS}+ Min
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <Input
-                            label="TOTAL MEALS (ADJUSTED)"
-                            type="number"
-                            name="totalMeal"
-                            value={mealInputs.totalMeal === 0 ? '' : mealInputs.totalMeal}
-                            onChange={handleMealInputChange}
-                            readOnly
-                            onFocus={(e) => e.target.select()}
-                            onWheel={(e) => e.target.blur()}
-                            inputClassName="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
-                        />
-                        <p className="text-[10px] font-black text-rose-500 dark:text-rose-400 uppercase tracking-widest text-right mt-1">
-                            * Includes adjustments for {MIN_MEALS}-meal minimum
-                        </p>
                     </div>
-                    <div className="flex justify-end mb-4">
-                        <Button size="sm" onClick={calculateMealCharge}>Calculate</Button>
+
+                    <div className="flex justify-end mb-6">
+                        <Button 
+                            onClick={calculateMealCharge}
+                            className="bg-amber-600 hover:bg-amber-500 text-white rounded-2xl h-12 px-10 font-black uppercase text-xs tracking-widest shadow-xl shadow-amber-500/10"
+                        >
+                            Sync Units
+                        </Button>
                     </div>
+
                     {mealChargeResult && (
-                        <div className="p-5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl text-center border border-slate-100 dark:border-white/5 shadow-inner mt-4">
-                            <p className="text-2xl font-black text-amber-600 dark:text-amber-400">
-                                Charge: ₹{mealChargeResult.mealCharge.toFixed(2)} / meal
-                            </p>
-                        </div>
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="p-6 rounded-[1.5rem] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-2xl shadow-amber-500/20 text-center relative overflow-hidden"
+                        >
+                            <p className="text-[9px] font-black text-white/60 uppercase tracking-widest mb-1">Standard Meal Charge</p>
+                            <p className="text-4xl font-black">₹{mealChargeResult.mealCharge.toFixed(2)}</p>
+                        </motion.div>
                     )}
                 </Card>
-            </div >
+        </div>
 
-            {/* Individual Calculation Section */}
-            {
-                perHeadResult && mealChargeResult && (
-                    <Card className="p-0 overflow-hidden border-slate-100 dark:border-white/5">
-                        <div className="p-6 border-b border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50">
-                            <h2 className="text-lg font-black text-slate-900 dark:text-slate-50 tracking-tight">Individual Breakdown</h2>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-100/50 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 font-black uppercase tracking-widest text-[11px] border-b border-slate-200 dark:border-white/5">
-                                    <tr>
-                                        <th className="p-4">Member</th>
-                                        <th className="p-4 w-24">Meals</th>
-                                        <th className="p-4 w-20">M.Days</th>
-                                        <th className="p-4 w-32">Market (₹)</th>
-                                        <th className="p-4 w-28">Guest (₹)</th>
-                                        <th className="p-4 w-32">Per Head (₹)</th>
-                                        <th className="p-4 w-32">Deposit (Tot/Gen)</th>
-                                        <th className="p-4 text-right">Balance</th>
+            {(perHeadResult && mealChargeResult) && (
+                <div className="mt-12 space-y-6">
+                    <div className="flex items-center gap-3 px-2">
+                        <div className="p-2 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl"><Users size={18} /></div>
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Institutional Audit Ledger</h3>
+                    </div>
+
+                    <Card className="relative overflow-hidden p-0 border-slate-200/60 dark:border-white/5 bg-white/90 dark:bg-slate-900/40 backdrop-blur-md shadow-2xl">
+                        <div className="overflow-x-auto custom-scrollbar">
+                            <table className="w-full border-collapse min-w-[1000px]">
+                                <thead>
+                                    <tr className="bg-slate-900 dark:bg-black text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                        <th className="p-5 text-left sticky left-0 bg-slate-900 dark:bg-black z-20 shadow-xl">Identity</th>
+                                        <th className="p-5 text-center">Market Allocation</th>
+                                        <th className="p-5 text-center">Guest Units</th>
+                                        <th className="p-5 text-center">Shared Liability</th>
+                                        <th className="p-5 text-center">Capital Deposit</th>
+                                        <th className="p-5 text-right pr-8">Month End Status</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-bold">
-                                    {calculatedData.data.map(data => {
-                                        const memberId = data._id || data.id;
+                                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                    {members.map(member => {
+                                        const memberId = member._id || member.memberId;
+                                        const data = individualResults[memberId] || { balance: 0 };
+                                        
                                         return (
-                                            <tr key={memberId} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                                <td className="p-4 font-black text-slate-900 dark:text-slate-100">{data.name}</td>
-                                                <td className="p-4 relative">
-                                                    <input
-                                                        type="number"
-                                                        value={individualInputs[memberId]?.meals || 0}
-                                                        readOnly
-                                                        className={cn(
-                                                            "w-full p-1.5 border rounded-lg text-xs font-black text-center transition-all",
-                                                            data.isBelowMinimum
-                                                                ? "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-400"
-                                                                : "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
-                                                        )}
-                                                        title={data.isBelowMinimum ? `Below ${MIN_MEALS} meal minimum (Effective: ${MIN_MEALS})` : "Auto-fetched from meals database"}
-                                                    />
-                                                    {data.isBelowMinimum && (
-                                                        <div className="absolute -top-1 -right-1">
-                                                            <div className="flex items-center justify-center w-5 h-5 bg-rose-500 text-white rounded-full text-[8px] font-black border-2 border-white dark:border-slate-900 shadow-sm" title="Minimum applied">
-                                                                {MIN_MEALS}+
-                                                            </div>
+                                            <tr key={memberId} className="group hover:bg-slate-50 dark:hover:bg-white/5 transition-colors duration-200">
+                                                <td className="p-5 sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-black transition-colors z-10 shadow-lg">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-800 flex items-center justify-center text-white text-xs font-black shadow-lg">
+                                                            {(member.memberName || '?').charAt(0)}
                                                         </div>
-                                                    )}
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="w-full p-1.5 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50 rounded-lg text-xs font-black text-indigo-700 dark:text-indigo-400 text-center" title="Assigned market duty days">
-                                                        {individualInputs[memberId]?.marketDays || data.marketDays || 0}
+                                                        <div>
+                                                            <div className="text-xs font-black text-slate-900 dark:text-white leading-none mb-1">{member.memberName}</div>
+                                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{member.role}</div>
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                <td className="p-4">
-                                                    <input
-                                                        type="number"
-                                                        value={individualInputs[memberId]?.marketExpense || 0}
-                                                        readOnly
-                                                        className="w-full p-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-lg text-xs font-black text-emerald-700 dark:text-emerald-400 text-center"
-                                                        title="Auto-fetched from approved market expenses"
-                                                    />
+                                                <td className="p-5">
+                                                    <div className="px-4 py-2 bg-slate-50 dark:bg-black/30 rounded-xl border border-slate-100 dark:border-white/5 text-center">
+                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">₹{individualInputs[memberId]?.marketExpense || 0}</span>
+                                                    </div>
                                                 </td>
-                                                <td className="p-4">
-                                                    <input
-                                                        type="number"
-                                                        value={individualInputs[memberId]?.guest || 0}
-                                                        readOnly
-                                                        className="w-full p-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-lg text-xs font-black text-emerald-700 dark:text-emerald-400 text-center"
-                                                        title="Auto-fetched from guest meals"
-                                                    />
+                                                <td className="p-5 text-center">
+                                                    <div className="px-4 py-2 bg-slate-50 dark:bg-black/30 rounded-xl border border-slate-100 dark:border-white/5 inline-block min-w-[60px]">
+                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">{individualInputs[memberId]?.guest || 0}</span>
+                                                    </div>
                                                 </td>
-                                                <td className="p-4">
-                                                    <input
-                                                        type="number"
-                                                        value={perHeadResult?.perHeadAmount.toFixed(2) || 0}
-                                                        readOnly
-                                                        className="w-full p-1.5 bg-primary-50 dark:bg-primary-950/30 border border-primary-200 dark:border-primary-800/50 rounded-lg text-xs font-black text-primary-700 dark:text-primary-400 text-center"
-                                                        title="Per head cost (same for all members)"
-                                                    />
+                                                <td className="p-5 text-center text-xs font-black text-slate-600 dark:text-slate-400">
+                                                    ₹{perHeadResult?.perHeadAmount.toFixed(0)}
                                                 </td>
-                                                <td className="p-4">
-                                                    <div className="flex flex-col gap-1">
+                                                <td className="p-5">
+                                                    <div className="flex flex-col gap-1.5 items-center">
                                                         <input
                                                             type="number"
                                                             value={individualInputs[memberId]?.deposit === 0 ? '' : (individualInputs[memberId]?.deposit || '')}
                                                             onChange={(e) => handleIndividualChange(memberId, 'deposit', e.target.value)}
-                                                            onFocus={(e) => e.target.select()}
-                                                            onWheel={(e) => e.target.blur()}
-                                                            className="w-full p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-black text-slate-900 dark:text-slate-100 text-center focus:ring-2 focus:ring-primary-500/20 outline-none transition-all"
-                                                            title="Total monthly deposit (editable)"
+                                                            className="w-[100px] bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-black text-center focus:border-primary-500 outline-none transition-all shadow-sm"
+                                                            placeholder="0"
                                                         />
-                                                        <div className="text-[9px] font-black text-violet-500 dark:text-violet-400 text-center uppercase tracking-tighter">
-                                                            Gen: ₹{individualInputs[memberId]?.genDeposit || 0}
-                                                        </div>
+                                                        <span className="text-[8px] font-black text-primary-500 uppercase tracking-tighter opacity-60">GEN: ₹{individualInputs[memberId]?.genDeposit || 0}</span>
                                                     </div>
                                                 </td>
-                                                <td className={`p-4 text-right font-black ${data.balance >= 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                                                    ₹{Math.abs(Math.round(data.balance))} {data.balance >= 0 ? '(Pay)' : '(Get)'}
+                                                <td className="p-5 text-right pr-8">
+                                                    <div className={cn(
+                                                        "inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-xs shadow-lg",
+                                                        data.balance > 0 
+                                                            ? "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 shadow-rose-500/10 border border-rose-100 dark:border-rose-900/20" 
+                                                            : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-100 dark:border-emerald-900/20"
+                                                    )}>
+                                                        ₹{Math.abs(Math.round(data.balance))}
+                                                        <span className="text-[8px] font-bold uppercase opacity-60">{data.balance > 0 ? 'PAY' : 'GET'}</span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
@@ -906,11 +948,10 @@ const Calculator = () => {
                                 </tbody>
                             </table>
                         </div>
-
                     </Card>
-                )
-            }
-        </div >
+                </div>
+            )}
+        </div>
     );
 };
 
