@@ -9,7 +9,6 @@ import {
     Users,
     Utensils,
     Receipt,
-    Bell,
     LogOut,
     ShoppingBag,
     CreditCard,
@@ -27,7 +26,7 @@ import api from '../../lib/api';
 
 const Sidebar = ({ isOpen, onClose, isCollapsed = false }) => {
     const { user, logout } = useAuth();
-    const { notifications, members } = useData();
+    const { members } = useData();
     const { theme, toggleTheme } = useTheme();
     const [currentManager, setCurrentManager] = useState(null);
 
@@ -54,11 +53,6 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false }) => {
         }
     }, [user]);
 
-    // Calculate unread notifications
-    const currentUserId = user?.id || user?._id || user?.userId;
-    const unreadCount = notifications ? notifications.filter(n =>
-        (n.userId === currentUserId || n.userId === 'all') && !n.isRead && n.type !== 'market_request'
-    ).length : 0;
 
     if (!user) return null;
 
@@ -73,18 +67,16 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false }) => {
         { to: '/monthly-summary', icon: ClipboardList, label: 'Monthly Summary' },
         { to: '/settings', icon: SettingsIcon, label: 'Settings' },
         { to: '/management', icon: UserCheck, label: 'Management' },
-        { to: '/notifications', icon: Bell, label: 'Notifications' },
     ];
 
     const memberLinks = [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { to: '/member-meals', icon: Utensils, label: 'Meals' },
         { to: '/market', icon: ShoppingBag, label: 'Market Duty' },
-        { to: '/add-expense', icon: Receipt, label: 'Add Expense' },
+        { to: '/add-expense', icon: CreditCard, label: 'Add Expense' },
+        { to: '/member-expenses', icon: Receipt, label: 'Expenses' },
         { to: '/payments', icon: CreditCard, label: 'Payments' },
-        { to: '/spices-others', icon: ShoppingBag, label: 'Spices & Others' },
         { to: '/reports', icon: FileText, label: 'Reports' },
-        { to: '/member-notifications', icon: Bell, label: 'Notifications' },
     ];
 
     const links = user.role === 'admin' ? adminLinks : memberLinks;
@@ -158,15 +150,6 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false }) => {
                             <link.icon size={18} className="shrink-0" />
                             {!isCollapsed && (
                                 <span className="flex-1 truncate">{link.label}</span>
-                            )}
-                            {/* Unread badge */}
-                            {link.label === 'Notifications' && unreadCount > 0 && (
-                                <span className={cn(
-                                    "bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] text-center",
-                                    isCollapsed ? "absolute top-1 right-1 px-1 py-0" : "px-1.5 py-0.5"
-                                )}>
-                                    {unreadCount > 99 ? '99+' : unreadCount}
-                                </span>
                             )}
                             {/* Tooltip when collapsed */}
                             {isCollapsed && (

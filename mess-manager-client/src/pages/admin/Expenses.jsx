@@ -3,7 +3,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, AlertTriangle, UserX, Bell } from 'lucide-react';
+import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, AlertTriangle, UserX, Bell, Wallet, Zap, Wifi, ShoppingBag } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
@@ -20,6 +20,13 @@ const Expenses = () => {
         return member?.name || 'Unknown';
     };
 
+    // Robust month matching (handles YYYY-MM-DD and DD-MM-YYYY)
+    const matchesMonth = (dateStr) => {
+        if (!dateStr || !globalMonth) return false;
+        return dateStr.includes(globalMonth) || 
+               (dateStr.includes('-') && dateStr.split('-').reverse().join('-').includes(globalMonth));
+    };
+
     // Filter expenses based on category and member
     // Exclude admin market expenses (admin only adds spices/other)
     const filteredExpenses = expenses
@@ -29,7 +36,8 @@ const Expenses = () => {
             if (expense.status === 'rejected') return false;
             const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
             const memberMatch = selectedMember === 'all' || expense.paidBy === selectedMember;
-            return categoryMatch && memberMatch;
+            const monthMatch = matchesMonth(expense.date);
+            return categoryMatch && memberMatch && monthMatch;
         })
         .sort((a, b) => {
             // Pending first, then rejected, then approved
@@ -37,11 +45,11 @@ const Expenses = () => {
             return (order[a.status] ?? 3) - (order[b.status] ?? 3);
         });
 
-    // Category-wise breakdown - Only count APPROVED expenses
-    const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && e.status === 'approved');
-    const spicesExpenses = expenses.filter(e => e.category === 'spices' && e.status === 'approved');
-    const riceExpenses = expenses.filter(e => e.category === 'rice' && e.status === 'approved');
-    const othersExpenses = expenses.filter(e => e.category === 'others' && e.status === 'approved');
+    // Category-wise breakdown - Only count APPROVED expenses for the SELECTED MONTH
+    const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && e.status === 'approved' && matchesMonth(e.date));
+    const spicesExpenses = expenses.filter(e => e.category === 'spices' && e.status === 'approved' && matchesMonth(e.date));
+    const riceExpenses = expenses.filter(e => e.category === 'rice' && e.status === 'approved' && matchesMonth(e.date));
+    const othersExpenses = expenses.filter(e => e.category === 'others' && e.status === 'approved' && matchesMonth(e.date));
 
     const categoryStats = [
         {
@@ -86,14 +94,14 @@ const Expenses = () => {
         },
     ];
 
-    const totalApproved = expenses.filter(e => e.status === 'approved').reduce((acc, e) => acc + e.amount, 0);
-    const pendingCount = expenses.filter(e => e.status === 'pending').length;
+    const totalApproved = expenses.filter(e => e.status === 'approved' && matchesMonth(e.date)).reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
+    const pendingCount = expenses.filter(e => e.status === 'pending' && matchesMonth(e.date)).length;
 
     // Members who haven't submitted ANY market expense this month
     const memberOnlyList = members.filter(m => m.role === 'member');
     const membersWithMarket = new Set(
         expenses
-            .filter(e => e.category === 'market' && e.paidBy !== 'admin')
+            .filter(e => e.category === 'market' && e.paidBy !== 'admin' && matchesMonth(e.date))
             .map(e => e.paidBy)
     );
     const membersWithoutMarket = memberOnlyList.filter(m => !membersWithMarket.has(m._id || m.id));
@@ -122,241 +130,8 @@ const Expenses = () => {
             </div>
 
 
-            {/* Main Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Pending Approvals Card */}
-                <Card className="p-6 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-slate-900 dark:to-slate-800/80 border-amber-200/50 dark:border-amber-900/30 overflow-hidden relative group">
-                    <div className="absolute -right-6 -top-6 text-amber-500/10 dark:text-amber-500/5 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
-                        <Clock size={120} />
-                    </div>
-                    <div className="flex flex-col h-full justify-between relative z-10">
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <Clock className="text-amber-500 dark:text-amber-400" size={20} />
-                                <p className="text-amber-700/70 dark:text-amber-400/70 font-black text-xs uppercase tracking-widest">Pending Approvals</p>
-                            </div>
-                            <h2 className="text-5xl font-black mt-2 text-amber-600 dark:text-amber-500 tracking-tighter">{pendingCount}</h2>
-                        </div>
-                        {pendingCount > 0 && (
-                            <div className="mt-6 flex flex-wrap gap-3">
-                                <button
-                                    onClick={async () => {
-                                        if (window.confirm(`Approve all ${pendingCount} pending expenses?`)) {
-                                            const result = await approveAllExpenses();
-                                            if (result.success) {
-                                                alert(`✅ Successfully approved ${result.modifiedCount} expenses!`);
-                                            } else {
-                                                alert(`❌ Error: ${result.error}`);
-                                            }
-                                        }
-                                    }}
-                                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl transition-all flex items-center gap-2 text-xs uppercase tracking-widest shadow-sm shadow-emerald-500/20 w-fit"
-                                >
-                                    <Check size={16} />
-                                    Approve All
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        if (window.confirm(`Are you sure you want to REJECT (delete) all ${pendingCount} pending expenses? This action cannot be undone.`)) {
-                                            const result = await rejectAllExpenses();
-                                            if (result.success) {
-                                                alert(`❌ Successfully rejected ${result.deletedCount} expenses!`);
-                                            } else {
-                                                alert(`❌ Error: ${result.error}`);
-                                            }
-                                        }
-                                    }}
-                                    className="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-black rounded-xl transition-all flex items-center gap-2 text-xs uppercase tracking-widest shadow-sm shadow-rose-500/20 w-fit"
-                                >
-                                    <X size={16} />
-                                    Reject All
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </Card>
-
-                {/* Member Summary Card */}
-                <Card className="p-6 bg-gradient-to-br from-primary-50 to-white dark:from-slate-900 dark:to-slate-900/50 border-primary-200/50 dark:border-primary-900/30">
-                    <div className="flex items-center gap-2 mb-4">
-                        <TrendingUp className="text-primary-500 dark:text-primary-400" size={20} />
-                        <p className="text-primary-600/70 dark:text-primary-400/70 font-black text-xs uppercase tracking-widest">Individual Summary</p>
-                    </div>
-
-                    {selectedMember !== 'all' ? (
-                        <>
-                            <h3 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
-                                {getMemberName(selectedMember)}
-                            </h3>
-                            <div className="mt-5 grid grid-cols-2 gap-3">
-                                {(() => {
-                                    const isAdmin = selectedMember === 'admin';
-                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status !== 'rejected');
-                                    const approvedTotal = memberExpenses.filter(e => e.status === 'approved').reduce((acc, e) => acc + e.amount, 0);
-                                    const pendingTotal = memberExpenses.filter(e => e.status === 'pending').reduce((acc, e) => acc + e.amount, 0);
-                                    const marketTotal = memberExpenses.filter(e => e.category === 'market').reduce((acc, e) => acc + e.amount, 0);
-
-                                    // Shared helper: sum by category from ALL expenses (not just non-rejected)
-                                    const catTotal = (cat) => expenses.filter(e => e.paidBy === selectedMember && e.category === cat && e.status !== 'rejected').reduce((acc, e) => acc + e.amount, 0);
-
-                                    if (isAdmin) {
-                                        // Admin view: Market, Rice, Spices+Others
-                                        const riceTotal = memberExpenses.filter(e => e.category === 'rice').reduce((acc, e) => acc + e.amount, 0);
-                                        const spicesOthersTotal = memberExpenses.filter(e => e.category === 'spices' || e.category === 'others').reduce((acc, e) => acc + e.amount, 0);
-                                        return (
-                                            <>
-                                                <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                                                    <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-xl p-2.5 sm:p-3 border border-indigo-100 dark:border-indigo-900/30">
-                                                        <p className="text-[10px] font-black text-indigo-600/70 dark:text-indigo-400/70 uppercase tracking-wider mb-0.5">Market</p>
-                                                        <p className="font-black text-base sm:text-lg text-indigo-700 dark:text-indigo-400">₹{marketTotal}</p>
-                                                    </div>
-                                                    <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-xl p-2.5 sm:p-3 border border-emerald-100 dark:border-emerald-900/30">
-                                                        <p className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-wider mb-0.5">Rice</p>
-                                                        <p className="font-black text-base sm:text-lg text-emerald-700 dark:text-emerald-400">₹{riceTotal}</p>
-                                                    </div>
-                                                    <div className="bg-orange-50 dark:bg-orange-950/20 rounded-xl p-2.5 sm:p-3 border border-orange-100 dark:border-orange-900/30">
-                                                        <p className="text-[10px] font-black text-orange-600/70 dark:text-orange-400/70 uppercase tracking-wider mb-0.5">Spices + Others</p>
-                                                        <p className="font-black text-base sm:text-lg text-orange-700 dark:text-orange-400">₹{spicesOthersTotal}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-4 grid grid-cols-2 gap-3 pb-4 border-b border-primary-100/50 dark:border-primary-900/30">
-                                                    <div className="flex flex-col">
-                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Approved</p>
-                                                        <p className="font-black text-sm text-emerald-500">₹{approvedTotal}</p>
-                                                    </div>
-                                                    <div className="flex flex-col items-end">
-                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Pending</p>
-                                                        <p className="font-black text-sm text-amber-500">₹{pendingTotal}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-4 flex justify-between items-center">
-                                                    <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Total Expenses:</span>
-                                                    <span className="font-black text-2xl text-primary-600 dark:text-primary-400">₹{approvedTotal + pendingTotal}</span>
-                                                </div>
-                                            </>
-                                        );
-                                    } else {
-                                        // Member view: Market, Deposit, Gas, WiFi, Electric
-                                        const depositTotal = catTotal('deposit');
-                                        const gasTotal = catTotal('gas');
-                                        const wifiTotal = catTotal('wifi');
-                                        const electricTotal = catTotal('electric');
-                                        return (
-                                            <>
-                                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-                                                    <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-xl p-2.5 sm:p-3 border border-indigo-100 dark:border-indigo-900/30">
-                                                        <p className="text-[10px] font-black text-indigo-600/70 dark:text-indigo-400/70 uppercase tracking-wider mb-0.5">Market</p>
-                                                        <p className="font-black text-base sm:text-lg text-indigo-700 dark:text-indigo-400">₹{marketTotal}</p>
-                                                    </div>
-                                                    <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl p-2.5 sm:p-3 border border-blue-100 dark:border-blue-900/30">
-                                                        <p className="text-[10px] font-black text-blue-600/70 dark:text-blue-400/70 uppercase tracking-wider mb-0.5">Deposit</p>
-                                                        <p className="font-black text-base sm:text-lg text-blue-700 dark:text-blue-400">₹{depositTotal}</p>
-                                                    </div>
-                                                    <div className="bg-yellow-50 dark:bg-yellow-950/20 rounded-xl p-2.5 sm:p-3 border border-yellow-100 dark:border-yellow-900/30">
-                                                        <p className="text-[10px] font-black text-yellow-600/70 dark:text-yellow-400/70 uppercase tracking-wider mb-0.5">Gas</p>
-                                                        <p className="font-black text-base sm:text-lg text-yellow-700 dark:text-yellow-400">₹{gasTotal}</p>
-                                                    </div>
-                                                    <div className="bg-cyan-50 dark:bg-cyan-950/20 rounded-xl p-2.5 sm:p-3 border border-cyan-100 dark:border-cyan-900/30">
-                                                        <p className="text-[10px] font-black text-cyan-600/70 dark:text-cyan-400/70 uppercase tracking-wider mb-0.5">WiFi</p>
-                                                        <p className="font-black text-base sm:text-lg text-cyan-700 dark:text-cyan-400">₹{wifiTotal}</p>
-                                                    </div>
-                                                    <div className="bg-rose-50 dark:bg-rose-950/20 rounded-xl p-2.5 sm:p-3 border border-rose-100 dark:border-rose-900/30 col-span-2 lg:col-span-1">
-                                                        <p className="text-[10px] font-black text-rose-600/70 dark:text-rose-400/70 uppercase tracking-wider mb-0.5">Electric</p>
-                                                        <p className="font-black text-base sm:text-lg text-rose-700 dark:text-rose-400">₹{electricTotal}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-4 grid grid-cols-2 gap-3 pb-4 border-b border-primary-100/50 dark:border-primary-900/30">
-                                                    <div className="flex flex-col">
-                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Approved</p>
-                                                        <p className="font-black text-sm text-emerald-500">₹{approvedTotal}</p>
-                                                    </div>
-                                                    <div className="flex flex-col items-end">
-                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Pending</p>
-                                                        <p className="font-black text-sm text-amber-500">₹{pendingTotal}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-4 flex justify-between items-center">
-                                                    <span className="text-slate-700 dark:text-slate-300 font-bold text-sm">Total Expenses:</span>
-                                                    <span className="font-black text-2xl text-primary-600 dark:text-primary-400">₹{approvedTotal + pendingTotal}</span>
-                                                </div>
-                                            </>
-                                        );
-                                    }
-                                })()}
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-[140px] text-center">
-                            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mb-3">
-                                <Filter className="text-primary-500" size={24} />
-                            </div>
-                            <p className="text-primary-700 dark:text-primary-400 text-sm font-bold">Select a member below</p>
-                            <p className="text-slate-500 dark:text-slate-500 text-xs mt-1">to view their specific contributions</p>
-                        </div>
-                    )}
-                </Card>
-            </div>
-
-            {/* Missing Market Submissions Alert */}
-            {membersWithoutMarket.length > 0 && (
-                <Card className="p-4 bg-gradient-to-br from-rose-50 to-rose-100/40 dark:from-slate-900 dark:to-slate-800/80 border-rose-200/60 dark:border-rose-900/30">
-                    <div className="flex items-start gap-3">
-                        <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-xl shrink-0">
-                            <UserX className="text-rose-500 dark:text-rose-400" size={18} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                                <p className="text-rose-700 dark:text-rose-400 font-black text-xs uppercase tracking-widest">
-                                    No Market Expense Submitted — {monthLabel}
-                                </p>
-                                <span className="text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-black">
-                                    {membersWithoutMarket.length}
-                                </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {membersWithoutMarket.map(m => (
-                                    <span
-                                        key={m._id || m.id}
-                                        className="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-800/60 border border-rose-200 dark:border-rose-900/40 rounded-lg text-sm font-bold text-rose-700 dark:text-rose-400"
-                                    >
-                                        <AlertTriangle size={12} />
-                                        {m.name}
-                                    </span>
-                                ))}
-                            </div>
-                            <button
-                                onClick={async () => {
-                                    setIsSendingAlerts(true);
-                                    try {
-                                        for (const m of membersWithoutMarket) {
-                                            await api.post('/notifications', {
-                                                userId: m._id || m.id,
-                                                message: `⚠️ Reminder: Please submit your market expense for ${monthLabel}. The deadline is approaching!`,
-                                                type: 'market_reminder'
-                                            });
-                                        }
-                                        alert(`✅ Notifications sent to ${membersWithoutMarket.length} member(s)!`);
-                                    } catch (err) {
-                                        alert('Failed to send some notifications.');
-                                    } finally {
-                                        setIsSendingAlerts(false);
-                                    }
-                                }}
-                                disabled={isSendingAlerts}
-                                className="mt-3 flex items-center gap-2 px-4 py-2 bg-rose-500 hover:bg-rose-600 disabled:opacity-60 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all"
-                            >
-                                <Bell size={13} className={isSendingAlerts ? 'animate-bounce' : ''} />
-                                {isSendingAlerts ? 'Sending...' : `Notify ${membersWithoutMarket.length} Member${membersWithoutMarket.length > 1 ? 's' : ''}`}
-                            </button>
-                        </div>
-                    </div>
-                </Card>
-            )}
-
-            {/* Category Breakdown */}
-
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
-                {categoryStats.map((stat) => {
+                {categoryStats.filter(s => s.total > 0).map((stat) => {
                     const Icon = stat.icon;
                     return (
                         <Card
@@ -397,6 +172,115 @@ const Expenses = () => {
                     );
                 })}
             </div>
+
+            {/* Member Summary Card */}
+            <Card className="p-6 bg-gradient-to-br from-primary-50 to-white dark:from-slate-900 dark:to-slate-900/50 border-primary-200/50 dark:border-primary-900/30 overflow-hidden relative">
+                {/* Background Decor */}
+                <div className="absolute top-0 right-0 p-8 opacity-5 dark:opacity-10 pointer-events-none">
+                    <TrendingUp size={120} />
+                </div>
+
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-6">
+                        <TrendingUp className="text-primary-500 dark:text-primary-400" size={18} />
+                        <p className="text-primary-600/70 dark:text-primary-400/70 font-black text-[10px] uppercase tracking-[0.2em]">Live Analysis</p>
+                    </div>
+
+                    {selectedMember !== 'all' ? (
+                        <div className="space-y-6">
+                            <div className="flex flex-wrap items-end justify-between gap-4">
+                                <div>
+                                    <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest mb-1">Active Contributor</p>
+                                    <h3 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tighter">
+                                        {getMemberName(selectedMember)}
+                                    </h3>
+                                </div>
+                                <div className="px-4 py-2 bg-primary-500/10 dark:bg-primary-500/20 rounded-2xl border border-primary-500/20 backdrop-blur-md">
+                                    <p className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center mb-0.5">Total Monthly</p>
+                                    <p className="text-2xl font-black text-primary-600 dark:text-primary-400 tracking-tight">₹{(() => {
+                                        const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status !== 'rejected');
+                                        return memberExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+                                    })()}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                                {(() => {
+                                    const isAdmin = selectedMember === 'admin';
+                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status !== 'rejected');
+                                    
+                                    const getCatTotal = (cat) => memberExpenses.filter(e => e.category === cat).reduce((acc, e) => acc + (e.amount || 0), 0);
+
+                                    if (isAdmin) {
+                                        const stats = [
+                                            { label: 'Rice', val: getCatTotal('rice'), icon: Wheat, color: 'emerald' },
+                                            { label: 'Spices', val: getCatTotal('spices'), icon: Package, color: 'orange' },
+                                            { label: 'Others', val: getCatTotal('others'), icon: Package, color: 'slate' }
+                                        ];
+                                        return stats.filter(s => s.val > 0).map(s => (
+                                            <div key={s.label} className={cn("p-4 rounded-3xl border transition-all hover:scale-[1.02]", 
+                                                s.color === 'emerald' ? "bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20" :
+                                                s.color === 'orange' ? "bg-orange-50/50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20" :
+                                                "bg-slate-50/50 dark:bg-slate-500/10 border-slate-100 dark:border-slate-500/20"
+                                            )}>
+                                                <s.icon size={18} className={cn("mb-3", 
+                                                    s.color === 'emerald' ? "text-emerald-500" :
+                                                    s.color === 'orange' ? "text-orange-500" : "text-slate-500"
+                                                )} />
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{s.label}</p>
+                                                <p className={cn("text-xl font-black tracking-tight",
+                                                    s.color === 'emerald' ? "text-emerald-600 dark:text-emerald-400" :
+                                                    s.color === 'orange' ? "text-orange-600 dark:text-orange-400" : "text-slate-600 dark:text-slate-400"
+                                                )}>₹{s.val}</p>
+                                            </div>
+                                        ));
+                                    } else {
+                                        const stats = [
+                                            { label: 'Market', val: getCatTotal('market'), icon: ShoppingCart, color: 'indigo' },
+                                            { label: 'Deposit', val: getCatTotal('deposit'), icon: Wallet, color: 'emerald' },
+                                            { label: 'Gas', val: getCatTotal('gas'), icon: Flame, color: 'amber' },
+                                            { label: 'WiFi', val: getCatTotal('wifi'), icon: Wifi, color: 'cyan' },
+                                            { label: 'Electric', val: getCatTotal('electric'), icon: Zap, color: 'rose' }
+                                        ];
+                                        return stats.filter(s => s.val > 0).map(s => (
+                                            <div key={s.label} className={cn("p-4 rounded-3xl border transition-all hover:scale-[1.02]", 
+                                                s.color === 'indigo' ? "bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20" :
+                                                s.color === 'emerald' ? "bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20" :
+                                                s.color === 'amber' ? "bg-amber-50/50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20" :
+                                                s.color === 'cyan' ? "bg-cyan-50/50 dark:bg-cyan-500/10 border-cyan-100 dark:border-cyan-500/20" :
+                                                "bg-rose-50/50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20"
+                                            )}>
+                                                <s.icon size={18} className={cn("mb-3", 
+                                                    s.color === 'indigo' ? "text-indigo-500" :
+                                                    s.color === 'emerald' ? "text-emerald-500" :
+                                                    s.color === 'amber' ? "text-amber-500" :
+                                                    s.color === 'cyan' ? "text-cyan-500" : "text-rose-500"
+                                                )} />
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{s.label}</p>
+                                                <p className={cn("text-xl font-black tracking-tight",
+                                                    s.color === 'indigo' ? "text-indigo-600 dark:text-indigo-400" :
+                                                    s.color === 'emerald' ? "text-emerald-600 dark:text-emerald-400" :
+                                                    s.color === 'amber' ? "text-amber-600 dark:text-amber-400" :
+                                                    s.color === 'cyan' ? "text-cyan-600 dark:text-cyan-400" : "text-rose-600 dark:text-rose-400"
+                                                )}>₹{s.val}</p>
+                                            </div>
+                                        ));
+                                    }
+                                })()}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                            <div className="w-20 h-20 bg-primary-500/10 dark:bg-primary-500/20 rounded-[2.5rem] flex items-center justify-center mb-6 rotate-12 transition-transform hover:rotate-0">
+                                <Filter className="text-primary-500" size={32} />
+                            </div>
+                            <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Mission Control</h4>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs mt-2 font-bold max-w-[240px] leading-relaxed">Select a member below to analyze their individual mess contributions and category audit.</p>
+                        </div>
+                    )}
+                </div>
+            </Card>
+
 
             {/* Filters */}
             <Card className="p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-slate-100 dark:border-white/5">
@@ -465,7 +349,6 @@ const Expenses = () => {
                                 <th className="p-4">Category</th>
                                 <th className="p-4">Amount</th>
                                 <th className="p-4">Paid By</th>
-                                <th className="p-4">Status</th>
                                 <th className="p-4 text-right">Action</th>
                             </tr>
                         </thead>
@@ -490,55 +373,18 @@ const Expenses = () => {
                                     </td>
                                     <td className="p-4 font-black text-slate-900 dark:text-slate-50">₹{expense.amount}</td>
                                     <td className="p-4 text-slate-600 dark:text-slate-400 text-sm font-bold">{getMemberName(expense.paidBy)}</td>
-                                    <td className="p-4">
-                                        <span className={cn(
-                                            "px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center w-fit gap-1.5",
-                                            expense.status === 'approved' && "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400",
-                                            expense.status === 'rejected' && "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400",
-                                            expense.status === 'pending' && "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
-                                        )}>
-                                            {expense.status === 'approved' && <Check size={12} />}
-                                            {expense.status === 'rejected' && <X size={12} />}
-                                            {expense.status === 'pending' && <Clock size={12} />}
-                                            {expense.status}
-                                        </span>
-                                    </td>
                                     <td className="p-4 text-right">
-                                        {expense.status === 'pending' && (
-                                            <div className="flex justify-end gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => approveExpense(expense._id || expense.id)}
-                                                    className="bg-green-600 hover:bg-green-700 text-white shadow-none"
-                                                >
-                                                    Approve
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    onClick={async () => {
-                                                        if (window.confirm('Are you sure you want to reject this expense? This will delete the record.')) {
-                                                            await deleteExpense(expense._id || expense.id);
-                                                        }
-                                                    }}
-                                                    className="bg-red-500 hover:bg-red-600 text-white shadow-none"
-                                                >
-                                                    Reject
-                                                </Button>
-                                            </div>
-                                        )}
-                                        {expense.status === 'approved' && (
-                                            <button
-                                                onClick={async () => {
-                                                    if (window.confirm('Do you want to delete?')) {
-                                                        await deleteExpense(expense._id || expense.id);
-                                                    }
-                                                }}
-                                                className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
-                                                title="Delete Expense"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        )}
+                                        <button
+                                            onClick={async () => {
+                                                if (window.confirm('Do you want to delete?')) {
+                                                    await deleteExpense(expense._id || expense.id);
+                                                }
+                                            }}
+                                            className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10"
+                                            title="Delete Expense"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

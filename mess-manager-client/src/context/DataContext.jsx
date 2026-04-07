@@ -35,7 +35,6 @@ export const DataProvider = ({ children }) => {
     const [expenses, setExpenses] = useState(() => hydrateFromStorage('mess_expenses', []));
     const [meals, setMeals] = useState(() => hydrateFromStorage('mess_meals', []));
     const [guestMeals, setGuestMeals] = useState(() => hydrateFromStorage('mess_guest_meals', []));
-    const [notifications, setNotifications] = useState(() => hydrateFromStorage('mess_notifications', []));
     
     const [marketSchedule, setMarketSchedule] = useState({});
     const [marketDutyLimits, setMarketDutyLimits] = useState({});
@@ -90,7 +89,6 @@ export const DataProvider = ({ children }) => {
         fetchEndpoint(api.get(`/expenses?month=${globalMonth}`), setExpenses, isCurrentMonth ? 'mess_expenses' : null);
         fetchEndpoint(api.get(`/meals?month=${globalMonth}`), setMeals, isCurrentMonth ? 'mess_meals' : null);
         fetchEndpoint(api.get(`/guest-meals?month=${globalMonth}`), setGuestMeals, isCurrentMonth ? 'mess_guest_meals' : null);
-        fetchEndpoint(api.get(`/notifications?limit=50`), setNotifications, 'mess_notifications');
         
         // Market logic needs special handling for mapping
         (async () => {
@@ -161,9 +159,6 @@ export const DataProvider = ({ children }) => {
     const refreshGuestMeals = useCallback(async () => {
         try { const r = await api.get(`/guest-meals?month=${globalMonth}`); setGuestMeals(r.data); } catch (e) { console.error('refreshGuestMeals failed', e); }
     }, [globalMonth]);
-    const refreshNotifications = useCallback(async () => {
-        try { const r = await api.get('/notifications?limit=50'); setNotifications(r.data); } catch (e) { console.error('refreshNotifications failed', e); }
-    }, []);
 
     // Admin Actions
     const addMember = useCallback(async (member) => {
@@ -199,79 +194,6 @@ export const DataProvider = ({ children }) => {
             });
         } catch (error) {
             console.error('Update Member failed:', error);
-        }
-    }, []);
-
-    // Notification Logic
-    const sendNotification = useCallback(async (userId, message) => {
-        try {
-            await api.post('/notifications', { userId, message, type: 'general' });
-        } catch (error) {
-            console.error('Send Notification failed', error);
-        }
-    }, []);
-
-    // Send Payment Notifications to All Members
-    const sendPaymentNotifications = useCallback(async (membersToNotify) => {
-        try {
-            const response = await api.post('/notifications/payment/bulk', { members: membersToNotify });
-            await refreshNotifications();
-            return { success: true, count: response.data.count };
-        } catch (error) {
-            console.error('Send Payment Notifications failed', error);
-            return { success: false, error: error.response?.data?.message || 'Failed to send notifications' };
-        }
-    }, [refreshNotifications]);
-
-    // Send Official WhatsApp Notifications to Multiple Members
-    const sendBulkWhatsAppOfficial = useCallback(async (membersToNotify) => {
-        try {
-            const response = await api.post('/notifications/whatsapp/official/bulk', { members: membersToNotify });
-            return { success: true, results: response.data.results };
-        } catch (error) {
-            console.error('Official WhatsApp Notifications failed', error);
-            return { success: false, error: error.response?.data?.message || 'Failed to send bulk WhatsApp messages' };
-        }
-    }, []);
-
-    // Mark Payment as Paid
-    const markPaymentAsPaid = useCallback(async (notificationId) => {
-        try {
-            await api.put(`/notifications/payment/${notificationId}/mark-paid`);
-            await refreshNotifications();
-            return { success: true };
-        } catch (error) {
-            console.error('Mark payment as paid failed', error);
-            return { success: false, error: error.response?.data?.message || 'Failed to mark payment' };
-        }
-    }, [refreshNotifications]);
-
-    const updateNotification = useCallback(async (id, updates) => {
-        try {
-            await api.put(`/notifications/${id}`, updates);
-            setNotifications(prev => prev.map(n => n.id === id || n._id === id ? { ...n, ...updates } : n));
-        } catch (error) {
-            console.error('Update Notification failed', error);
-        }
-    }, []);
-
-    const deleteNotification = useCallback(async (id) => {
-        try {
-            await api.delete(`/notifications/${id}`);
-            setNotifications(prev => prev.filter(n => n.id !== id && n._id !== id));
-        } catch (error) {
-            console.error('Delete Notification failed', error);
-        }
-    }, []);
-
-    const markAllAsRead = useCallback(async (userId) => {
-        try {
-            await api.put(`/notifications/mark-read/${userId}`);
-            setNotifications(prev => prev.map(n =>
-                (n.userId === userId || n.userId === 'all') ? { ...n, isRead: true } : n
-            ));
-        } catch (error) {
-            console.error('Mark read failed', error);
         }
     }, []);
 
@@ -517,7 +439,6 @@ export const DataProvider = ({ children }) => {
         allGuestMeals: guestMeals,
         globalMonth,
         setGlobalMonth,
-        notifications,
         marketSchedule,
         marketDutyLimits,
         managerAllocation,
@@ -531,12 +452,6 @@ export const DataProvider = ({ children }) => {
         removeMeal,
         addGuestMeal,
         removeGuestMeal,
-        sendNotification,
-        sendPaymentNotifications,
-        markPaymentAsPaid,
-        updateNotification,
-        deleteNotification,
-        markAllAsRead,
         addExpense,
         approveExpense,
         approveAllExpenses,
@@ -550,25 +465,26 @@ export const DataProvider = ({ children }) => {
         setManagerForMonth,
         markCookingFinished,
         getCookingDuty,
+        refreshExpenses,
+        refreshMembers,
+        refreshMeals,
+        refreshGuestMeals,
+        refreshMarket,
         refreshData,
         dailyInfo,
         settings,
         updateSystemSetting,
         loadingDaily,
-        sendBulkWhatsAppOfficial
     }), [
         members, expenses, filteredExpenses, meals, filteredMeals, guestMeals, filteredGuestMeals,
-        globalMonth, setGlobalMonth, notifications, marketSchedule, marketDutyLimits,
+        globalMonth, setGlobalMonth, marketSchedule, marketDutyLimits,
         managerAllocation, cookingDuties, clearMonthlyData, getMonthlyDataPreview, dailyInfo, settings, 
-        updateSystemSetting, loadingDaily, refreshData, refreshMarketDutyLimits,
+        refreshExpenses, refreshMembers, refreshMeals, refreshGuestMeals, refreshMarket, refreshData,
         addMember, removeMember, updateMember, addMeal, removeMeal, addGuestMeal,
-        removeGuestMeal, sendNotification,
-        sendPaymentNotifications, markPaymentAsPaid, updateNotification,
-        deleteNotification, markAllAsRead, addExpense, approveExpense,
+        removeGuestMeal, addExpense, approveExpense,
         approveAllExpenses, rejectExpense, rejectAllExpenses, updateExpense, deleteExpense,
         allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, setManagerForMonth, markCookingFinished, getCookingDuty,
-        sendBulkWhatsAppOfficial
     ]);
 
     return (

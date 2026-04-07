@@ -15,7 +15,6 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Members = lazy(() => import('./pages/admin/Members'));
 const Meals = lazy(() => import('./pages/admin/Meals'));
 const Expenses = lazy(() => import('./pages/admin/Expenses'));
-const Notifications = lazy(() => import('./pages/admin/Notifications'));
 const Calculator = lazy(() => import('./pages/admin/Calculator'));
 const Settings = lazy(() => import('./pages/admin/Settings'));
 const Management = lazy(() => import('./pages/admin/Management'));
@@ -24,10 +23,9 @@ const MonthlySummary = lazy(() => import('./pages/admin/MonthlySummary'));
 // Member Pages
 const Market = lazy(() => import('./pages/member/MarketDuty'));
 const AddExpense = lazy(() => import('./pages/member/AddExpense'));
+const MemberExpenses = lazy(() => import('./pages/member/MemberExpenses'));
 const Payments = lazy(() => import('./pages/member/Payments'));
-const MemberNotifications = lazy(() => import('./pages/member/MemberNotifications'));
 const Reports = lazy(() => import('./pages/member/Reports'));
-const SpicesAndOthers = lazy(() => import('./pages/member/SpicesAndOthers'));
 const MemberMeals = lazy(() => import('./pages/member/MemberMeals'));
 
 const LoadingScreen = () => (
@@ -117,7 +115,6 @@ function App() {
                   <Route path="/members" element={<AdminRoute><Members /></AdminRoute>} />
                   <Route path="/meals" element={<AdminRoute><Meals /></AdminRoute>} />
                   <Route path="/expenses" element={<AdminRoute><Expenses /></AdminRoute>} />
-                  <Route path="/notifications" element={<AdminRoute><Notifications /></AdminRoute>} />
                   <Route path="/calculator" element={<AdminRoute><Calculator /></AdminRoute>} />
                   <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
                   <Route path="/management" element={<AdminRoute><Management /></AdminRoute>} />
@@ -129,9 +126,8 @@ function App() {
                   {/* Member Routes - accessible to all */}
                   <Route path="/market" element={<Market />} />
                   <Route path="/payments" element={<Payments />} />
-                  <Route path="/member-notifications" element={<MemberNotifications />} />
+                  <Route path="/member-expenses" element={<MemberExpenses />} />
                   <Route path="/reports" element={<Reports />} />
-                  <Route path="/spices-others" element={<SpicesAndOthers />} />
                   <Route path="/member-meals" element={<MemberMeals />} />
                 </Route>
 

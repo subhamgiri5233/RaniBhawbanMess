@@ -47,22 +47,22 @@ const AdminDashboard = () => {
     // Calculate expenses by category - Only count APPROVED expenses
     const marketExpenses = useMemo(() => {
         if (!Array.isArray(expenses)) return 0;
-        return expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && e.status === 'approved').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+        return expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && e.status !== 'rejected').reduce((acc, curr) => acc + (curr.amount || 0), 0);
     }, [expenses]);
 
     const spicesExpenses = useMemo(() => {
         if (!Array.isArray(expenses)) return 0;
-        return expenses.filter(e => e.category === 'spices' && e.status === 'approved').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+        return expenses.filter(e => e.category === 'spices' && e.status !== 'rejected').reduce((acc, curr) => acc + (curr.amount || 0), 0);
     }, [expenses]);
 
     const riceExpenses = useMemo(() => {
         if (!Array.isArray(expenses)) return 0;
-        return expenses.filter(e => e.category === 'rice' && e.status === 'approved').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+        return expenses.filter(e => e.category === 'rice' && e.status !== 'rejected').reduce((acc, curr) => acc + (curr.amount || 0), 0);
     }, [expenses]);
 
     const othersExpenses = useMemo(() => {
         if (!Array.isArray(expenses)) return 0;
-        return expenses.filter(e => e.category === 'others' && e.status === 'approved').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+        return expenses.filter(e => e.category === 'others' && e.status !== 'rejected').reduce((acc, curr) => acc + (curr.amount || 0), 0);
     }, [expenses]);
 
     const stats = useMemo(() => [

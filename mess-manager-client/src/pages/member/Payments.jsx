@@ -9,20 +9,11 @@ import { cn } from '../../lib/utils';
 
 const Payments = () => {
     const { user } = useAuth();
-    const { notifications, markPaymentAsPaid, members, expenses, globalMonth } = useData();
-    const [processingPayment, setProcessingPayment] = useState(null);
+    const { members, expenses, globalMonth } = useData();
 
-    // 1. Get payment notifications for this user, filtered by globalMonth
-    const paymentNotifications = notifications.filter(n => {
-        const notifUserId = String(n.userId || n.user?._id || n.user);
-        const currentUserId = String(user.id || user._id);
-        const isCorrectMonth = n.date && n.date.startsWith(globalMonth);
-        return notifUserId === currentUserId && n.type === 'payment' && isCorrectMonth;
-    }).map(n => ({ ...n, itemType: 'notification' }));
-
-    // 2. Get payment expenses (deposits/bills) for this user, excluding market logs
+    // 1. Get payment expenses (deposits/bills) for this user, excluding market logs
     const myId = String(user.id || user.userId || user._id);
-    const paymentExpenses = expenses.filter(e =>
+    const ledgerItems = expenses.filter(e =>
         String(e.paidBy) === myId && e.category !== 'market'
     ).map(e => ({
         ...e,
@@ -31,35 +22,12 @@ const Payments = () => {
         date: e.date,
         paymentAmount: e.amount,
         isPaid: true // Expenses are always recorded as "paid/settled"
-    }));
-
-    // 3. Combine and sort by date descending
-    const ledgerItems = [...paymentNotifications, ...paymentExpenses].sort((a, b) => {
-        return new Date(b.date || 0) - new Date(a.date || 0);
-    });
-
-    const handleMarkAsPaid = async (notificationId) => {
-        try {
-            setProcessingPayment(notificationId);
-            const result = await markPaymentAsPaid(notificationId);
-            if (result.success) {
-                // Success - the notification will be updated via refreshData
-            } else {
-                alert(`Failed to mark payment: ${result.error}`);
-            }
-        } catch (error) {
-            console.error('Error marking payment:', error);
-            alert('Failed to mark payment as complete');
-        } finally {
-            setProcessingPayment(null);
-        }
-    };
+    })).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
     // Get current member's data
     const currentMember = members.find(m => (m._id === user.id || m.id === user.id));
 
-    // Compute General Deposit for the selected month only (expenses is already filtered by globalMonth)
-    // Mirrors Finance page & Dashboard logic: match paidBy by _id, userId, or name
+    // Compute General Deposit for the selected month only
     const currentGeneralDeposit = (() => {
         if (!Array.isArray(expenses) || !currentMember) return 0;
         const memberId = currentMember._id || currentMember.id;
@@ -124,7 +92,7 @@ const Payments = () => {
                             <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tight">₹{currentGeneralDeposit.toLocaleString()}</p>
                         </div>
                         <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
-                            Payment requests are historical records of mess contributions. Clear them to maintain a healthy account balance.
+                            This ledger displays your verified mess contributions and bill settlements for the selected month.
                         </p>
                     </div>
                 </Card>
@@ -138,7 +106,7 @@ const Payments = () => {
                         </div>
                         <div>
                             <h3 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Dues Ledger</h3>
-                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Summary of pending and historical transactions</p>
+                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Summary of historical transactions</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -154,9 +122,6 @@ const Payments = () => {
                             {(ledgerItems || []).map((item, idx) => {
                                 const itemId = item._id || item.id;
                                 const amount = item.paymentAmount || 0;
-                                const isPaid = item.isPaid;
-                                const isPositive = amount >= 0;
-                                const isExpense = item.itemType === 'expense';
 
                                 return (
                                     <motion.div
@@ -165,58 +130,29 @@ const Payments = () => {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: idx * 0.05 }}
-                                        className={cn(
-                                            "p-8 hover:bg-indigo-50/20 dark:hover:bg-white/5 transition-all group",
-                                            isPaid && "opacity-60"
-                                        )}
+                                        className="p-8 hover:bg-indigo-50/20 dark:hover:bg-white/5 transition-all group opacity-80"
                                     >
                                         <div className="flex items-start gap-6">
-                                            <div className={cn(
-                                                "w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border group-hover:scale-110 transition-transform duration-500",
-                                                isPaid
-                                                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/10"
-                                                    : "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-500/10"
-                                            )}>
-                                                {isPaid ? <CheckCircle size={20} /> : <History size={20} />}
+                                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/10 group-hover:scale-110 transition-transform duration-500">
+                                                <CheckCircle size={20} />
                                             </div>
                                             <div className="flex-1">
                                                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                                                     <div>
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            <span className={cn(
-                                                                "text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md",
-                                                                isPaid ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"
-                                                            )}>
-                                                                {isPaid ? (isExpense ? 'Wallet Deposit' : 'Settled') : 'Pending Verification'}
+                                                            <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600">
+                                                                Verified Settlement
                                                             </span>
                                                         </div>
                                                         <h4 className="text-lg font-black text-slate-900 dark:text-slate-50 tracking-tight">
                                                             ₹{Math.abs(amount).toLocaleString()}
-                                                            <span className={cn(
-                                                                "ml-2 text-[10px] font-bold uppercase tracking-widest",
-                                                                isExpense ? "text-emerald-500" : (isPositive ? "text-rose-500" : "text-emerald-500")
-                                                            )}>
-                                                                {isExpense ? 'Added to balance' : (isPositive ? 'to contribute' : 'to receive')}
+                                                            <span className="ml-2 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
+                                                                Added to balance
                                                             </span>
                                                         </h4>
                                                         <p className="text-slate-600 dark:text-slate-400 text-sm font-bold mt-1 leading-relaxed">{item.message}</p>
                                                         <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2">{item.date}</p>
                                                     </div>
-                                                    {!isPaid && !isExpense && isPositive && (
-                                                        <Button
-                                                            size="sm"
-                                                            className="rounded-2xl px-6 py-4 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 hover:scale-105 transition-all text-[10px] font-black uppercase tracking-widest h-auto border-none shadow-premium"
-                                                            onClick={() => handleMarkAsPaid(itemId)}
-                                                            disabled={processingPayment === itemId}
-                                                        >
-                                                            {processingPayment === itemId ? (
-                                                                <span className="flex items-center gap-2">
-                                                                    <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                                                                    Processing...
-                                                                </span>
-                                                            ) : 'Confirm Settlement'}
-                                                        </Button>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -234,7 +170,7 @@ const Payments = () => {
                                 <CheckCircle size={32} className="text-slate-300 dark:text-slate-700" />
                             </motion.div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-relaxed">
-                                No historical dues or payment records found.<br />Your account is currently balanced.
+                                No verified payments or deposit records found for this period.
                             </p>
                         </div>
                     )}

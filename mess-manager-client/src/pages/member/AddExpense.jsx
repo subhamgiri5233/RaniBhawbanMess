@@ -4,18 +4,18 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { Receipt, PlusCircle, History, Trash2, TrendingUp, ArrowRight, User, Wallet, Sparkles, Info, X } from 'lucide-react';
+import { Receipt, PlusCircle, History, Trash2, TrendingUp, ArrowRight, User, Wallet, Sparkles, Info, X, ShoppingBag, Flame, Wifi, Zap, Package, Calendar, ShoppingCart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 const AddExpense = () => {
-    const { addExpense, expenses, members, updateMember, deleteExpense, globalMonth, setGlobalMonth } = useData();
+    const { addExpense, expenses, members, updateMember, deleteExpense, globalMonth, setGlobalMonth, refreshExpenses } = useData();
     const { user } = useAuth();
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const isAdmin = user?.role === 'admin';
 
-    // Compute each member's general deposit balance for the selected month (expenses is already filtered by globalMonth)
-    // Mirrors AdminDashboard logic: match paidBy against _id, userId, OR name
+    // Compute each member's general deposit balance for the selected month
     const getMemberGeneralDeposit = (member) => {
         if (!Array.isArray(expenses)) return 0;
         const memberId = member._id || member.id;
@@ -29,25 +29,25 @@ const AddExpense = () => {
 
     const [title, setTitle] = useState('');
     const [amount, setAmount] = useState('');
-    const [category, setCategory] = useState(isAdmin ? 'spices' : 'market'); // Admin defaults to spices, members to market
+    const [category, setCategory] = useState(isAdmin ? 'spices' : 'market');
     const [transactionDate, setTransactionDate] = useState(() => {
         const today = new Date();
         const dateStr = today.toISOString().split('T')[0];
-        // If today is in the global month, use today. Otherwise use 1st of global month.
         return dateStr.startsWith(globalMonth) ? dateStr : `${globalMonth}-01`;
     });
 
-    // Admin Deposit State
-    const [activeTab, setActiveTab] = useState('expense'); // 'expense' or 'deposit'
+    const [activeTab, setActiveTab] = useState('expense'); 
     const [selectedMemberId, setSelectedMemberId] = useState('');
     const [depositAmount, setDepositAmount] = useState('');
-    const [paymentPurpose, setPaymentPurpose] = useState('deposit'); // 'deposit', 'gas', 'wifi', etc.
+    const [paymentPurpose, setPaymentPurpose] = useState('deposit'); 
+    const [filterCategory, setFilterCategory] = useState('all'); 
 
     const purposeOptions = [
         { id: 'deposit', name: 'General Deposit', icon: Wallet },
-        { id: 'gas', name: 'Gas Bill', icon: Info },
-        { id: 'wifi', name: 'WiFi Bill', icon: Info },
-        { id: 'electric', name: 'Electric Bill', icon: Info }
+        { id: 'market', name: 'Market Payment', icon: ShoppingCart },
+        { id: 'gas', name: 'Gas Bill', icon: Flame },
+        { id: 'wifi', name: 'WiFi Bill', icon: Wifi },
+        { id: 'electric', name: 'Electric Bill', icon: Zap }
     ];
 
     const handleExpenseSubmit = async (e) => {
@@ -60,7 +60,7 @@ const AddExpense = () => {
             category,
             paidBy: isAdmin ? 'admin' : (user.id || user.userId),
             date: transactionDate,
-            status: isAdmin ? 'approved' : 'pending'
+            status: 'approved'
         });
 
         if (result.success) {
@@ -86,48 +86,55 @@ const AddExpense = () => {
             return;
         }
 
-        // 1. Update Member Deposit Balance
         const newTotal = (member.deposit || 0) + amountNum;
         await updateMember(selectedMemberId, { deposit: newTotal });
 
-        // 2. Create an approved expense record for tracking and history
         const isGeneral = paymentPurpose === 'deposit';
-        const purposeLabel = isGeneral
-            ? 'General Deposit'
-            : (purposeOptions.find(p => p.id === paymentPurpose)?.name || 'Shared Expense');
+        const purposeLabel = purposeOptions.find(p => p.id === paymentPurpose)?.name || 'Credit Account';
 
-        await addExpense({
+        const res = await addExpense({
             description: `${purposeLabel} (By ${member.name})`,
             amount: Number(depositAmount),
-            category: paymentPurpose, // 'deposit', 'gas', 'wifi', etc.
+            category: paymentPurpose,
             paidBy: selectedMemberId,
             date: transactionDate,
             status: 'approved'
         });
 
-        setDepositAmount('');
-        setSelectedMemberId('');
-        setPaymentPurpose('deposit');
-        alert(`Transaction successful! ₹${depositAmount} ${isGeneral ? 'added to balance' : 'recorded as ' + paymentPurpose} for ${member.name}.`);
+        if (res.success) {
+            setIsRefreshing(true);
+            await refreshExpenses();
+            setIsRefreshing(false);
+
+            setDepositAmount('');
+            
+            // Check if month mismatch
+            const selectedMonth = transactionDate.substring(0, 7);
+            if (selectedMonth !== globalMonth) {
+                const monthName = new Date(transactionDate).toLocaleString('default', { month: 'long', year: 'numeric' });
+                alert(`✅ Success! ₹${depositAmount} recorded for ${member.name} in ${monthName}.\n\n📌 Note: To see this in the audit log, please switch the Global Timeline at the top to ${monthName}.`);
+            } else {
+                alert(`✅ Transaction successful! ₹${depositAmount} recorded as ${purposeLabel} for ${member.name}.`);
+            }
+        } else {
+            alert(`❌ Error: ${res.error || 'Failed to record transaction'}`);
+        }
     };
 
-
-
-    // Filter history based on active tab
     const historyItems = expenses.filter(e => {
         if (isAdmin) {
             if (activeTab === 'deposit') {
-                // Deposit tab: Show member payments (anything not 'admin' AND NOT 'market')
-                return e.paidBy !== 'admin' && e.category !== 'market';
+                const isMemberExpense = e.paidBy !== 'admin';
+                const matchesFilter = filterCategory === 'all' || e.category === filterCategory;
+                return isMemberExpense && matchesFilter;
             } else {
-                // Expense tab: Show admin fund expenses
                 return e.paidBy === 'admin';
             }
         }
-
-        // Members see their own logs
         return e.paidBy === (user.id || user.userId || user._id);
     }).reverse();
+
+    const categoryTotal = historyItems.reduce((sum, e) => sum + (e.amount || 0), 0);
 
     return (
         <motion.div
@@ -135,296 +142,317 @@ const AddExpense = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/90 dark:bg-slate-900 shadow-sm p-8 rounded-[2rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
-                        {isAdmin ? 'Financial Terminal' : 'Market Expense'}
-                    </h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
-                        {isAdmin ? 'Manage mess funds and member deposits' : 'Submit your daily market spend logs'}
-                    </p>
+            <div className="relative overflow-hidden bg-white/90 dark:bg-slate-900 shadow-sm p-6 sm:p-10 rounded-[2.5rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl group">
+                <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
                 </div>
-                {isAdmin && (
-                    <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
-                        <button
-                            className={cn(
-                                "px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all",
-                                activeTab === 'expense'
-                                    ? "bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm"
-                                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                            )}
-                            onClick={() => setActiveTab('expense')}
-                        >
-                            Record Expense
-                        </button>
-                        <button
-                            className={cn(
-                                "px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all",
-                                activeTab === 'deposit'
-                                    ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm"
-                                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                            )}
-                            onClick={() => setActiveTab('deposit')}
-                        >
-                            Manage Deposits
-                        </button>
-                    </div>
-                )}
-            </div>
 
-            {/* Forms Section */}
-            <div className="lg:col-span-1">
-                <AnimatePresence mode="wait">
-                    {(!isAdmin || activeTab === 'expense') ? (
-                        <motion.div
-                            key="expense-form"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                        >
-                            <Card className="p-8 shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl overflow-hidden relative group">
-                                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                                    <Wallet size={120} />
-                                </div>
-                                <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight mb-8 flex items-center gap-3">
-                                    <div className="p-2 bg-primary-100 dark:bg-primary-950/40 rounded-xl">
-                                        <PlusCircle size={20} className="text-primary-600 dark:text-primary-400" />
-                                    </div>
-                                    {isAdmin ? 'Expense Entry' : 'Market Purchase Log'}
-                                </h2>
-                                <form onSubmit={handleExpenseSubmit} className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <Input
-                                            label="Transaction Date"
-                                            type="date"
-                                            value={transactionDate}
-                                            onChange={e => {
-                                                const newDate = e.target.value;
-                                                setTransactionDate(newDate);
-                                                const newMonth = newDate.substring(0, 7);
-                                                if (newMonth !== globalMonth) setGlobalMonth(newMonth);
-                                            }}
-                                            required
-                                        />
-                                        <Input
-                                            label="Item Description"
-                                            value={title}
-                                            onChange={e => setTitle(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <Input
-                                        label="Total Amount (₹)"
-                                        type="number"
-                                        value={amount}
-                                        onChange={e => setAmount(e.target.value)}
-                                        required
-                                    />
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 mb-2 block">Fund Category</label>
-                                        {isAdmin ? (
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {['spices', 'rice', 'others'].map(cat => (
-                                                    <button
-                                                        key={cat}
-                                                        type="button"
-                                                        onClick={() => setCategory(cat)}
-                                                        className={cn(
-                                                            "p-3 rounded-xl border-2 transition-all font-black uppercase tracking-widest text-[9px]",
-                                                            category === cat
-                                                                ? "border-primary-500 bg-primary-50 dark:bg-primary-950/20 text-primary-600"
-                                                                : "border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200"
-                                                        )}
-                                                    >
-                                                        {cat === 'spices' ? '🌶️ Spices' : cat === 'rice' ? '🍚 Rice' : '📦 Other'}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 flex items-center gap-3">
-                                                <Sparkles size={16} className="text-indigo-500" />
-                                                <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">🛒 Market Collection Fund</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <Button
-                                        type="submit"
-                                        className="w-full py-6 rounded-2xl bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white shadow-xl shadow-primary-500/20 active:scale-95 transition-all font-black uppercase tracking-widest text-xs"
-                                    >
-                                        Log Transaction <ArrowRight size={16} className="ml-2" />
-                                    </Button>
-                                </form>
-                            </Card>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="deposit-form"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                        >
-                            <Card className="p-8 shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl overflow-hidden relative group">
-                                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                                    <History size={120} />
-                                </div>
-                                <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight mb-8 flex items-center gap-3">
-                                    <div className="p-2 bg-emerald-100 dark:bg-emerald-950/40 rounded-xl">
-                                        <Receipt size={20} className="text-emerald-600 dark:text-emerald-400" />
-                                    </div>
-                                    Record Member Payment
-                                </h2>
-                                <form onSubmit={handleDepositSubmit} className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 flex items-center gap-2"><User size={10} /> Select Member Account</label>
-                                        <select
-                                            className="w-full p-4 bg-indigo-50/30 dark:bg-slate-950 border border-indigo-100/50 dark:border-white/5 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none text-slate-900 dark:text-slate-100 font-bold transition-all appearance-none"
-                                            value={selectedMemberId}
-                                            onChange={e => setSelectedMemberId(e.target.value)}
-                                            required
-                                        >
-                                            <option value="">Choose a member...</option>
-                                            {members.filter(m => m.role === 'member').map(m => (
-                                                <option key={m.id || m._id} value={m.id || m._id} className="dark:bg-slate-900">
-                                                    {m.name} (Balance: ₹{getMemberGeneralDeposit(m)})
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <Input
-                                            label="Payment Date"
-                                            type="date"
-                                            value={transactionDate}
-                                            onChange={e => {
-                                                const newDate = e.target.value;
-                                                setTransactionDate(newDate);
-                                                const newMonth = newDate.substring(0, 7);
-                                                if (newMonth !== globalMonth) setGlobalMonth(newMonth);
-                                            }}
-                                            required
-                                        />
-                                        <Input
-                                            label="Amount Received (₹)"
-                                            type="number"
-                                            value={depositAmount}
-                                            onChange={e => setDepositAmount(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 flex items-center gap-2">
-                                            <Info size={10} /> For Which Purpose?
-                                        </label>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                            {purposeOptions.map(opt => (
-                                                <button
-                                                    key={opt.id}
-                                                    type="button"
-                                                    onClick={() => setPaymentPurpose(opt.id)}
-                                                    className={cn(
-                                                        "p-3 rounded-xl border-2 transition-all font-black uppercase tracking-widest text-[8px] text-center flex flex-col items-center gap-2 justify-center",
-                                                        paymentPurpose === opt.id
-                                                            ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600"
-                                                            : "border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200"
-                                                    )}
-                                                >
-                                                    <opt.icon size={14} />
-                                                    {opt.name.replace(' Bill', '')}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <Button
-                                        type="submit"
-                                        className="w-full py-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all font-black uppercase tracking-widest text-xs"
-                                    >
-                                        Update Balance <ArrowRight size={16} className="ml-2" />
-                                    </Button>
-                                </form>
-                            </Card>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-
-            {/* History Section */}
-            <div className="lg:col-span-1">
-                <Card className="p-0 overflow-hidden shadow-sm border-indigo-100/50 bg-white/40 backdrop-blur-lg dark:bg-slate-900/40">
-                    <div className="p-6 border-b border-indigo-100/50 dark:border-white/5 bg-indigo-50/20 dark:bg-slate-900/50 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                                <History size={18} className="text-slate-500" />
-                            </div>
-                            <h3 className="font-black text-slate-800 dark:text-slate-100 tracking-tight uppercase text-xs tracking-widest">
-                                {activeTab === 'deposit' ? 'Ref: Managed Deposits' : 'Ref: Admin Fund Log'}
-                            </h3>
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Sparkles size={14} className="text-primary-500 animate-pulse" />
+                            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.3em]">Institutional Grade Audit</span>
                         </div>
-                        {isAdmin && (
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Live Audit</span>
-                            </div>
-                        )}
+                        <h1 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-slate-50 tracking-tighter leading-none">
+                            {isAdmin ? 'Financial Terminal' : 'Market Terminal'}
+                        </h1>
+                        <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <div className="w-4 h-[1px] bg-slate-300 dark:bg-slate-700"></div>
+                            {isAdmin ? 'Manage Mess Vault & Member Records' : 'Log Daily Procurement Logs'}
+                        </p>
                     </div>
 
-                    <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 scrollbar-hide">
-                        {historyItems.map((expense, idx) => (
-                            <motion.div
-                                key={expense._id || expense.id}
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                                className="p-6 flex justify-between items-center hover:bg-white dark:hover:bg-white/5 transition-all group"
+                    {isAdmin && (
+                        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-white/5 rounded-[1.5rem] backdrop-blur-sm self-start lg:self-center">
+                            <button
+                                className={cn(
+                                    "px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                                    activeTab === 'expense'
+                                        ? "bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-[0_8px_20px_rgba(99,102,241,0.15)] scale-[1.02]"
+                                        : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                )}
+                                onClick={() => setActiveTab('expense')}
                             >
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <p className="font-black text-slate-900 dark:text-slate-100 tracking-tight uppercase text-sm">{expense.description || expense.title}</p>
-                                        {expense.category && (
-                                            <span className={cn(
-                                                "text-[8px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest",
-                                                expense.category === 'market' ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" :
-                                                    expense.category === 'spices' ? "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400" :
-                                                        expense.category === 'rice' ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400" :
-                                                            expense.category === 'deposit' ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" :
-                                                                "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400"
-                                            )}>
-                                                {expense.category}
-                                            </span>
+                                <PlusCircle size={14} className={activeTab === 'expense' ? "text-primary-500" : "opacity-40"} />
+                                Expense Entry
+                            </button>
+                            <button
+                                className={cn(
+                                    "px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                                    activeTab === 'deposit'
+                                        ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-[0_8px_20px_rgba(16,185,129,0.15)] scale-[1.02]"
+                                        : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                )}
+                                onClick={() => setActiveTab('deposit')}
+                            >
+                                <Receipt size={14} className={activeTab === 'deposit' ? "text-emerald-500" : "opacity-40"} />
+                                Manage Deposits
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <div className="space-y-8">
+                    <AnimatePresence mode="wait">
+                        {(!isAdmin || activeTab === 'expense') ? (
+                            <motion.div
+                                key="expense-form"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                            >
+                                <Card className="p-6 sm:p-10 shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl overflow-hidden relative group rounded-[2.5rem]">
+                                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-primary-500/20 transition-all"></div>
+                                    <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <ShoppingBag size={140} strokeWidth={1} />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-4 mb-10">
+                                            <div className="p-3 bg-primary-100 dark:bg-primary-950/40 rounded-2xl shadow-inner">
+                                                <PlusCircle size={24} className="text-primary-600 dark:text-primary-400" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tighter uppercase leading-none mb-1">
+                                                    {isAdmin ? 'Expense Entry' : 'Market Purchase Log'}
+                                                </h2>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Authorized Transaction Interface</p>
+                                            </div>
+                                        </div>
+                                        <form onSubmit={handleExpenseSubmit} className="space-y-8">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <Input label="Transaction Date" type="date" value={transactionDate} onChange={e => { const newDate = e.target.value; setTransactionDate(newDate); const newMonth = newDate.substring(0, 7); if (newMonth !== globalMonth) setGlobalMonth(newMonth); }} className="bg-slate-50/50 dark:bg-slate-950/50 border-slate-200/50" required />
+                                                <Input label="Item Description" placeholder="e.g. 5kg Rice or Gas Refill" value={title} onChange={e => setTitle(e.target.value)} className="bg-slate-50/50 dark:bg-slate-950/50 border-slate-200/50" required />
+                                            </div>
+                                            <div className="relative pt-2">
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 mb-3 block">Total Amount (₹)</label>
+                                                <div className="relative group/amt">
+                                                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-400 group-focus-within/amt:text-primary-500 transition-colors">₹</div>
+                                                    <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full pl-16 pr-8 py-8 bg-slate-50/50 dark:bg-slate-950/80 border-2 border-slate-100 dark:border-white/5 rounded-3xl text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tighter focus:ring-8 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800" required />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 block">Fund Category Allocation</label>
+                                                {isAdmin ? (
+                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                        {[
+                                                            { id: 'spices', n: 'Spices', i: Flame, c: 'orange' },
+                                                            { id: 'rice', n: 'Rice', i: ShoppingBag, c: 'emerald' },
+                                                            { id: 'others', n: 'Other', i: Package, c: 'indigo' }
+                                                        ].map(cat => (
+                                                            <button key={cat.id} type="button" onClick={() => setCategory(cat.id)} className={cn("p-5 rounded-3xl border-2 transition-all flex flex-col items-center gap-3 group/cat relative overflow-hidden", category === cat.id ? cn("border-primary-500 dark:border-primary-400 bg-white dark:bg-primary-950/20 scale-[1.02] shadow-xl shadow-primary-500/10", cat.c === 'orange' && "ring-orange-500/20", cat.c === 'emerald' && "ring-emerald-500/20", cat.c === 'indigo' && "ring-indigo-500/20") : "border-slate-50 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200")}>
+                                                                <cat.i size={24} className={cn("transition-all", category === cat.id ? (cat.c === 'orange' ? "text-orange-500" : cat.c === 'emerald' ? "text-emerald-500" : "text-indigo-500") : "text-slate-300 opacity-50 group-hover/cat:scale-110")} />
+                                                                <span className={cn("text-[10px] font-black uppercase tracking-widest text-center", category === cat.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400")}>{cat.n}</span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-6 rounded-[2rem] bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 border border-indigo-100/50 dark:border-indigo-900/30 flex items-center justify-between group/market">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="p-3 bg-indigo-500/10 rounded-2xl group-hover/market:rotate-12 transition-transform"><Sparkles size={20} className="text-indigo-500" /></div>
+                                                            <div>
+                                                                <p className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Authenticated Category</p>
+                                                                <p className="text-sm font-black text-indigo-900 dark:text-slate-100 uppercase tracking-tighter leading-none">🛒 Mess Market Collection Fund</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="p-2 bg-indigo-500/10 rounded-lg"><Info size={16} className="text-indigo-500 animate-pulse" /></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <Button type="submit" className="w-full py-8 rounded-3xl bg-gradient-to-r from-slate-900 via-primary-600 to-indigo-700 hover:from-black hover:to-indigo-800 text-white shadow-2xl shadow-primary-500/30 active:scale-[0.98] transition-all font-black uppercase tracking-[0.2em] text-[10px] sm:text-xs overflow-hidden relative group">
+                                                <div className="relative z-10 flex items-center justify-center gap-3">Finalize Transaction <ArrowRight size={18} /></div>
+                                                <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
+                                            </Button>
+                                        </form>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="deposit-form"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                            >
+                                <Card className="p-6 sm:p-10 shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl overflow-hidden relative group rounded-[2.5rem]">
+                                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+                                    <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <Receipt size={140} strokeWidth={1} />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-4 mb-10">
+                                            <div className="p-3 bg-emerald-100 dark:bg-emerald-950/40 rounded-2xl shadow-inner">
+                                                <TrendingUp size={24} className="text-emerald-600 dark:text-emerald-400" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tighter uppercase leading-none mb-1">Deposit Registry</h2>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Internal Member Credit Interface</p>
+                                            </div>
+                                        </div>
+                                        <form onSubmit={handleDepositSubmit} className="space-y-8">
+                                            <div className="space-y-3">
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 flex items-center gap-1.5"><User size={10} /> Select Member Account</label>
+                                                <div className="relative group/sel">
+                                                    <select className="w-full p-6 bg-slate-50/50 dark:bg-slate-950/80 border-2 border-slate-100 dark:border-white/5 rounded-3xl focus:ring-8 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none text-slate-900 dark:text-slate-100 font-black tracking-tight transition-all appearance-none cursor-pointer" value={selectedMemberId} onChange={e => setSelectedMemberId(e.target.value)} required >
+                                                        <option value="">AWAITING SELECTION...</option>
+                                                        {members.filter(m => m.role === 'member').map(m => (
+                                                            <option key={m.id || m._id} value={m.id || m._id} className="dark:bg-slate-900">{m.name.toUpperCase()} (AVL: ₹{getMemberGeneralDeposit(m)})</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within/sel:rotate-180 transition-transform"><ArrowRight size={20} className="rotate-90" /></div>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <Input label="Execution Date" type="date" value={transactionDate} onChange={e => { const newDate = e.target.value; setTransactionDate(newDate); const newMonth = newDate.substring(0, 7); if (newMonth !== globalMonth) setGlobalMonth(newMonth); }} className="bg-slate-50/50 dark:bg-slate-950/50 border-slate-200/50" required />
+                                                <div className="relative group/amt">
+                                                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 mb-2.5 block">Credit Amount (₹)</label>
+                                                    <div className="relative">
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-black text-slate-400 group-focus-within/amt:text-emerald-500 transition-colors">₹</div>
+                                                        <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder="0.00" className="w-full pl-10 pr-4 py-4 bg-slate-50/50 dark:bg-slate-950/50 border-2 border-slate-100 dark:border-white/5 rounded-2xl text-xl font-black text-slate-900 dark:text-slate-100 tracking-tighter focus:ring-8 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 flex items-center gap-1.5"><Info size={10} /> Allocation Purpose</label>
+                                                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                                                    {[
+                                                        { id: 'deposit', n: 'Deposit', i: Wallet, c: 'emerald' },
+                                                        { id: 'market', n: 'Market', i: ShoppingCart, c: 'sky' },
+                                                        { id: 'gas', n: 'Gas', i: Flame, c: 'rose' },
+                                                        { id: 'wifi', n: 'WiFi', i: Wifi, c: 'blue' },
+                                                        { id: 'electric', n: 'Electric', i: Zap, c: 'amber' }
+                                                    ].map(opt => (
+                                                        <button key={opt.id} type="button" onClick={() => setPaymentPurpose(opt.id)} className={cn("p-4 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 group/opt relative overflow-hidden", paymentPurpose === opt.id ? cn("border-emerald-500 dark:border-emerald-400 bg-white dark:bg-emerald-950/20 scale-[1.02] shadow-xl shadow-emerald-500/10", opt.c === 'sky' && "ring-sky-500/20", opt.c === 'rose' && "ring-rose-500/20", opt.c === 'blue' && "ring-blue-500/20", opt.c === 'amber' && "ring-amber-500/20") : "border-slate-50 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200")}>
+                                                            <opt.i size={18} className={cn("transition-all", paymentPurpose === opt.id ? (opt.c === 'emerald' ? "text-emerald-500" : opt.c === 'sky' ? "text-sky-500" : opt.c === 'rose' ? "text-rose-500" : opt.c === 'blue' ? "text-blue-500" : "text-amber-500") : "text-slate-300 opacity-50 group-hover/opt:scale-110")} />
+                                                            <span className={cn("text-[9px] font-black uppercase tracking-tight", paymentPurpose === opt.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400")}>{opt.n}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <Button type="submit" className="w-full py-8 rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-600 to-teal-700 hover:from-black hover:to-teal-800 text-white shadow-2xl shadow-emerald-500/30 active:scale-[0.98] transition-all font-black uppercase tracking-[0.2em] text-[10px] sm:text-xs overflow-hidden relative group">
+                                                <div className="relative z-10 flex items-center justify-center gap-3">Update Balance <ArrowRight size={18} /></div>
+                                                <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
+                                            </Button>
+                                        </form>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                <div className="space-y-8 lg:mt-0 mt-8">
+                    <Card className="p-0 overflow-hidden shadow-sm border-indigo-100/50 bg-white/40 backdrop-blur-lg dark:bg-slate-900/40 rounded-[2.5rem]">
+                        <div className="p-6 sm:p-8 border-b border-indigo-100/50 dark:border-white/5 bg-white/50 dark:bg-slate-900/50 flex flex-wrap items-center justify-between gap-y-6 gap-x-8">
+                            <div className="flex items-center gap-4 min-w-[200px]">
+                                <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-2xl shadow-inner"><History size={20} className="text-slate-500" /></div>
+                                <div>
+                                    <h3 className="font-black text-slate-800 dark:text-slate-100 tracking-tighter uppercase text-sm leading-tight">{activeTab === 'deposit' ? 'Managed Deposits' : 'Terminal Audit Log'}</h3>
+                                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                        {isRefreshing ? (
+                                            <span className="text-primary-500 animate-pulse flex items-center gap-1"><TrendingUp size={8} /> Syncing Vault...</span>
+                                        ) : (
+                                            "Authorized Transaction Stream"
                                         )}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                                        <TrendingUp size={10} />
-                                        {expense.date || 'Today'}
-                                    </div>
+                                    </p>
                                 </div>
-                                <div className="flex items-center gap-6">
-                                    <div className="text-right">
-                                        <p className="font-black text-slate-900 dark:text-slate-50 text-lg">₹{expense.amount}</p>
-                                        <div className="flex items-center justify-end gap-1.5 mt-1">
-                                            <span className={cn(
-                                                "w-1.5 h-1.5 rounded-full",
-                                                expense.status === 'approved' ? "bg-emerald-500" : "bg-amber-500"
-                                            )}></span>
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                                {expense.status}
-                                            </span>
+                            </div>
+                            
+                            {activeTab === 'deposit' && (
+                                <div className="relative group/filters overflow-hidden flex-1 sm:max-w-md">
+                                    <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar whitespace-nowrap mask-fade-edges">
+                                        {['all', 'deposit', 'market', 'gas', 'wifi', 'electric'].map(cat => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => setFilterCategory(cat)}
+                                                className={cn(
+                                                    "px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 border",
+                                                    filterCategory === cat
+                                                        ? "bg-slate-900 dark:bg-primary-500 text-white border-transparent shadow-[0_4px_12px_rgba(99,102,241,0.3)] scale-105"
+                                                        : "bg-white/50 dark:bg-white/5 text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-600 dark:hover:text-slate-200"
+                                                )}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {/* Glassy Shadow for scroll indicator */}
+                                    <style dangerouslySetInnerHTML={{ __html: `
+                                        .mask-fade-edges {
+                                            mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+                                            -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+                                        }
+                                        .custom-scrollbar::-webkit-scrollbar {
+                                            width: 5px;
+                                            height: 5px;
+                                        }
+                                        .custom-scrollbar::-webkit-scrollbar-track {
+                                            background: transparent;
+                                        }
+                                        .custom-scrollbar::-webkit-scrollbar-thumb {
+                                            background: rgba(99, 102, 241, 0.15);
+                                            border-radius: 10px;
+                                            border: 1px solid rgba(255, 255, 255, 0.05);
+                                        }
+                                        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                                            background: rgba(99, 102, 241, 0.4);
+                                        }
+                                        .custom-scrollbar {
+                                            scrollbar-width: thin;
+                                            scrollbar-color: rgba(99, 102, 241, 0.15) transparent;
+                                        }
+                                    `}} />
+                                </div>
+                            )}
+
+                            {activeTab === 'deposit' && (
+                                <div className="flex items-center gap-2.5 py-2 px-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl shadow-[0_0_15px_rgba(16,185,129,0.05)] ml-auto sm:ml-0">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] whitespace-nowrap">Live Total: ₹{historyItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0).toLocaleString()}</span>
+                                </div>
+                            )}
+
+                            {isAdmin && activeTab !== 'deposit' && (
+                                <div className="flex items-center gap-2.5 py-1.5 px-3 bg-emerald-500/5 border border-emerald-500/20 rounded-full">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Live Audit</span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="max-h-[700px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 custom-scrollbar">
+                            {historyItems.map((expense, idx) => (
+                                <motion.div key={expense._id || expense.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} className="p-6 sm:p-8 flex justify-between items-center hover:bg-white dark:hover:bg-white/5 transition-all group relative overflow-hidden" >
+                                    <div className="relative z-10 flex-1">
+                                        <div className="flex flex-wrap items-center gap-3 mb-2.5">
+                                            <p className="font-black text-slate-900 dark:text-slate-100 tracking-tight uppercase text-[13px]">{expense.description || expense.title}</p>
+                                            {expense.category && (
+                                                <span className={cn("text-[9px] px-2.5 py-1 rounded-lg font-black uppercase tracking-widest", expense.category === 'market' ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400" : expense.category === 'spices' ? "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400" : expense.category === 'rice' ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : expense.category === 'deposit' ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" : "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400")}>{expense.category}</span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-widest"><Calendar size={10} className="opacity-50" />{expense.date || 'Today'}</div>
+                                            {expense.paidBy === 'admin' && <div className="text-[10px] text-primary-500 font-black uppercase tracking-widest flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-primary-500"></div>Admin Fund</div>}
                                         </div>
                                     </div>
-
-                                </div>
-                            </motion.div>
-                        ))}
-
-                        {historyItems.length === 0 && (
-                            <div className="p-16 text-center text-slate-400 font-black uppercase tracking-widest text-[10px]">
-                                Empty Vault Record
-                            </div>
-                        )}
-                    </div>
-
-                </Card>
-            </div >
-        </motion.div >
+                                    <div className="relative z-10 flex items-center gap-8">
+                                        <div className="text-right">
+                                            <p className="font-black text-slate-900 dark:text-slate-50 text-2xl tracking-tighter">₹{expense.amount.toLocaleString()}</p>
+                                            <div className="flex items-center justify-end gap-2 mt-1.5 opacity-60"><div className={cn("w-1.5 h-1.5 rounded-full", expense.status === 'approved' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-amber-500")}></div><span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">{expense.status}</span></div>
+                                        </div>
+                                        <button onClick={async () => { if (window.confirm('PERMANENT ACTION: Purge this audit trail?')) { await deleteExpense(expense._id || expense.id); } }} className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl transition-all opacity-0 group-hover:opacity-100 shadow-xl shadow-rose-500/20 active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
+                                    </div>
+                                    <div className="absolute top-1/2 right-[-2.5%] -translate-y-1/2 opacity-0 group-hover:opacity-[0.05] transition-opacity pointer-events-none -rotate-12 scale-150">
+                                        <History size={120} strokeWidth={1} />
+                                    </div>
+                                </motion.div>
+                            ))}
+                            {historyItems.length === 0 && (<div className="p-24 text-center"><div className="w-16 h-16 bg-slate-50 dark:bg-slate-950/50 rounded-full flex items-center justify-center mx-auto mb-6 opacity-30 shadow-inner"><Sparkles size={24} className="text-slate-400" /></div><p className="text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em]">Vault Records Clear</p></div>)}
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        </motion.div>
     );
 };
 

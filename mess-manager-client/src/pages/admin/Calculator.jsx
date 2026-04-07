@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { Calculator as CalculatorIcon, Download, Send, Save, MessageCircle, MessageSquare } from 'lucide-react';
+import { Calculator as CalculatorIcon, Download, Save } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { cn } from '../../lib/utils';
@@ -16,8 +16,7 @@ import { MESS_CONFIG } from '../../config';
 const Calculator = () => {
     const { user } = useAuth();
     const {
-        members, expenses, meals, guestMeals, sendNotification,
-        sendPaymentNotifications, sendBulkWhatsAppOfficial, globalMonth, settings
+        members, expenses, meals, guestMeals, globalMonth, settings
     } = useData();
 
     // Dynamic Settings with Fallbacks
@@ -59,14 +58,13 @@ const Calculator = () => {
     // Calculated Results
     const [perHeadResult, setPerHeadResult] = useState(null); // { totalAmount, perHeadAmount }
     const [mealChargeResult, setMealChargeResult] = useState(null); // { mealCharge }
-    const [sendingNotifications, setSendingNotifications] = useState(false);
-    const [savingPDF, setSavingPDF] = useState(false);
     const [submittingReport, setSubmittingReport] = useState(false);
 
     // Individual Member Inputs (Map of memberId -> { meals, deposit, genDeposit, genDepositDate, guest, marketExpense })
     const [individualInputs, setIndividualInputs] = useState({});
     const [monthlySummaries, setMonthlySummaries] = useState([]);
     const [loadingSummaries, setLoadingSummaries] = useState(false);
+    const [savingPDF, setSavingPDF] = useState(false);
 
     // Fetch values and monthly snapshots from database
     useEffect(() => {
@@ -374,178 +372,6 @@ const Calculator = () => {
     }, [members, individualInputs, perHeadResult, mealChargeResult, MIN_MEALS]);
 
     const calculatedData = useMemo(() => getCalculatedData(), [getCalculatedData]);
-
-    // -- Send Payment Notifications --
-    const handleBulkWhatsAppOfficial = async () => {
-        if (!perHeadResult || !mealChargeResult) {
-            alert('Please perform calculations first!');
-            return;
-        }
-
-        if (!confirm('This will send the official mess bill (mess_bill_notification template) to ALL members. Continue?')) {
-            return;
-        }
-
-        setSendingNotifications(true);
-        try {
-            const { data } = getCalculatedData();
-            const [y, m] = globalMonth.split('-').map(Number);
-            const monthText = format(new Date(y, m - 1), 'MMMM yyyy');
-
-            const membersToNotify = data.map(m => ({
-                userId: m._id || m.id,
-                name: m.name,
-                mobile: m.mobile || members.find(member => member._id === (m._id || m.id) || member.id === (m._id || m.id))?.mobile,
-                month: monthText,
-                meals: m.effectiveMeals,
-                mealCharge: mealChargeResult.mealCharge,
-                mealCost: m.mealCost,
-                fixedCost: m.fixedCost,
-                marketContribution: m.marketExpense,
-                deposit: m.deposit,
-                balance: m.balance
-            })).filter(m => m.mobile);
-
-            if (membersToNotify.length === 0) {
-                alert('No members with mobile numbers found!');
-                return;
-            }
-
-            const result = await sendBulkWhatsAppOfficial(membersToNotify);
-
-            if (result.success) {
-                const failed = result.results.filter(r => !r.success);
-                const successCount = result.results.length - failed.length;
-
-                let message = `Official WhatsApp bulk send completed!\nSuccess: ${successCount}\nFailed: ${failed.length}`;
-
-                if (failed.length > 0) {
-                    message += `\n\nFailed member details:\n` +
-                        failed.map(f => `- ${f.name}: ${f.error}`).join('\n');
-                }
-
-                alert(message);
-            } else {
-                alert('Failed to send bulk notifications: ' + result.error);
-            }
-        } catch (error) {
-            console.error('Bulk WhatsApp error:', error);
-            alert('An unexpected error occurred.');
-        } finally {
-            setSendingNotifications(false);
-        }
-    };
-
-    const handleSendNotifications = async () => {
-        if (!perHeadResult || !mealChargeResult) {
-            alert('Please perform calculations first!');
-            return;
-        }
-
-        try {
-            setSendingNotifications(true);
-
-            // Prepare member payment data
-            const memberPayments = calculatedData.data.map(member => ({
-                userId: member._id || member.id,
-                memberName: member.name,
-                amount: member.balance
-            }));
-
-            const result = await sendPaymentNotifications(memberPayments);
-
-            if (result.success) {
-                alert(`Payment notifications sent to ${result.count} members successfully!`);
-            } else {
-                alert(`Failed to send notifications: ${result.error}`);
-            }
-        } catch (error) {
-            console.error('Error sending notifications:', error);
-            alert('Failed to send payment notifications');
-        } finally {
-            setSendingNotifications(false);
-        }
-    };
-
-    const handleWhatsAppClick = (data) => {
-        try {
-            const memberMobile = data.mobile || members.find(m => m._id === data._id || m.id === data.id)?.mobile;
-
-            if (!memberMobile) {
-                alert(`Mobile number not found for ${data.name}. Please add it in Admin > Members first.`);
-                return;
-            }
-
-            // Clean mobile number (remove spaces, dashes, +, etc.)
-            const cleanedMobile = memberMobile.replace(/\D/g, '');
-            // Add 91 if not present (assuming Indian numbers)
-            const finalMobile = cleanedMobile.length === 10 ? `91${cleanedMobile}` : cleanedMobile;
-
-            const balanceText = `${Math.abs(Math.round(data.balance))} ${data.balance >= 0 ? 'To Pay' : 'To Receive'}`;
-
-            const [y, m] = globalMonth.split('-').map(Number);
-            const monthText = format(new Date(y, m - 1), 'MMMM yyyy');
-
-            const message = `*Mess Bill Notification - ${monthText}*\n\n` +
-                `Hello *${data.name}*, here is your mess bill for this month:\n\n` +
-                `• *Meals:* ${data.meals}${data.isBelowMinimum ? ` (40 Min applied)` : ''}\n` +
-                `• *Meal Charge:* ₹${(mealChargeResult?.mealCharge || 0).toFixed(2)} / meal\n` +
-                `• *Meal Cost:* ₹${data.mealCost.toFixed(2)}\n` +
-                `• *Fixed Cost:* ₹${data.fixedCost.toFixed(2)}\n` +
-                `• *Market Contribution:* ₹${data.marketExpense.toFixed(2)}\n` +
-                `• *Deposit:* ₹${data.deposit.toFixed(2)}\n` +
-                `---\n` +
-                `*Balance:* ₹*${balanceText}*\n\n` +
-                `_Please [Pay/Receive] soon. Thank you!_`;
-
-            const encodedMessage = encodeURIComponent(message);
-            const waLink = `https://wa.me/${finalMobile}?text=${encodedMessage}`;
-
-            // Using a temporary anchor tag for maximum compatibility
-            const link = document.createElement('a');
-            link.href = waLink;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (error) {
-            console.error('WhatsApp trigger failed:', error);
-            alert('Could not open WhatsApp. Please check your browser settings.');
-        }
-    };
-
-    const handleSMSClick = (data) => {
-        try {
-            const memberMobile = data.mobile || members.find(m => m._id === data._id || m.id === data.id)?.mobile;
-
-            if (!memberMobile) {
-                alert(`Mobile number not found for ${data.name}.`);
-                return;
-            }
-
-            const cleanedMobile = memberMobile.replace(/\D/g, '');
-            const balanceText = `${Math.abs(Math.round(data.balance))} ${data.balance >= 0 ? 'To Pay' : 'To Receive'}`;
-
-            const [y, m] = globalMonth.split('-').map(Number);
-            const monthShortText = format(new Date(y, m - 1), 'MMM yyyy');
-
-            const message = `Mess Bill - ${monthShortText}\n\n` +
-                `Hello ${data.name}, your mess bill:\n` +
-                `• Meals: ${data.meals}\n` +
-                `• Meal Cost: Rs.${data.mealCost.toFixed(2)}\n` +
-                `• Fixed Cost: Rs.${data.fixedCost.toFixed(2)}\n` +
-                `• Balance: Rs.${balanceText}\n\n` +
-                `Please clear soon. Thanks!`;
-
-            const encodedMessage = encodeURIComponent(message);
-            // location.href is often more reliable for protocol handlers like sms:
-            window.location.href = `sms:${cleanedMobile}?body=${encodedMessage}`;
-        } catch (error) {
-            console.error('SMS trigger failed:', error);
-            alert('Could not open Messaging app. Error: ' + error.message);
-        }
-    };
 
     // -- PDF Generation --
 
@@ -994,7 +820,6 @@ const Calculator = () => {
                                         <th className="p-4 w-32">Per Head (₹)</th>
                                         <th className="p-4 w-32">Deposit (Tot/Gen)</th>
                                         <th className="p-4 text-right">Balance</th>
-                                        <th className="p-4 text-center w-28">Notify</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-bold">
@@ -1075,24 +900,6 @@ const Calculator = () => {
                                                 <td className={`p-4 text-right font-black ${data.balance >= 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                                     ₹{Math.abs(Math.round(data.balance))} {data.balance >= 0 ? '(Pay)' : '(Get)'}
                                                 </td>
-                                                <td className="p-4 text-center">
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <button
-                                                            onClick={() => handleWhatsAppClick(data)}
-                                                            className="p-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg shadow-emerald-500/20 active:scale-90 transition-all"
-                                                            title="WhatsApp"
-                                                        >
-                                                            <MessageCircle size={14} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleSMSClick(data)}
-                                                            className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/20 active:scale-90 transition-all"
-                                                            title="Normal SMS"
-                                                        >
-                                                            <MessageSquare size={14} />
-                                                        </button>
-                                                    </div>
-                                                </td>
                                             </tr>
                                         );
                                     })}
@@ -1100,27 +907,6 @@ const Calculator = () => {
                             </table>
                         </div>
 
-                        {/* Send Notification Buttons */}
-                        <div className="p-4 border-t border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex flex-wrap justify-end gap-3">
-                            <Button
-                                onClick={handleBulkWhatsAppOfficial}
-                                disabled={sendingNotifications}
-                                variant="outline"
-                                className="border-emerald-500/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-2xl"
-                            >
-                                <MessageCircle size={18} />
-                                {sendingNotifications ? 'Sending...' : 'Bulk WhatsApp (Official)'}
-                            </Button>
-                            <Button
-                                onClick={handleSendNotifications}
-                                disabled={sendingNotifications}
-                                variant="secondary"
-                                className="rounded-2xl"
-                            >
-                                <Send size={18} />
-                                {sendingNotifications ? 'Sending...' : 'Send App Notifications'}
-                            </Button>
-                        </div>
                     </Card>
                 )
             }

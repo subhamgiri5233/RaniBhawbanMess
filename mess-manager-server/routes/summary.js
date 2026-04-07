@@ -497,15 +497,29 @@ router.get('/:month/invoice/:memberId', auth, async (req, res) => {
         managerRecords.forEach(r => { managersMap[r.memberId] = r.memberName; });
         const managers = Object.values(managersMap);
 
+        // 7. Get finalized shared expense record for the month
+        const sharedExpense = await MonthlySharedExpense.findOne({ month }).lean();
+        const offR = sharedExpense?.results || {};
+        const offI = sharedExpense?.mealInputs || {};
+        const offM = (sharedExpense?.members || []).find(m => String(m.memberId) === memberIdStr) || {};
+
+        // RESTRICTED MODE: Only use finalized data for invoice costs
+        const finalizedRate = offR.mealCharge || 0;
+        const finalizedHead = offR.perHeadAmount || 0;
+
         res.json({
             month,
             member: { id: memberIdStr, name: memberName, userId: member.userId },
             totalMembers,
             managers,
-            memberExpenses,
+            memberExpenses, // Keep live expenses for receipt breakdown
             regularMeals,
             guestMeals: [...guestMeals, ...guestMealsInMeal],
-            payment: payment || null
+            payment: payment || null,
+            sharedExpense: sharedExpense || null,
+            finalizedRate,
+            finalizedHead,
+            offM
         });
     } catch (err) {
         console.error('Invoice route error:', err);

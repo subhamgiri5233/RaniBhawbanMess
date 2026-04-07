@@ -40,12 +40,12 @@ router.get('/', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
     const { description, amount, category, paidBy, date, splits, status } = req.body;
 
-    // Security: Members cannot pre-approve their own expenses or set themselves as 'admin'
-    let finalStatus = status || 'pending';
+    // Security: Admin fund expenses must be labeled as 'admin'
+    let finalStatus = status || 'approved'; // Default to approved
     let finalPaidBy = paidBy;
 
     if (req.user.role === 'member') {
-        finalStatus = 'pending';
+        // Members can now have their expenses auto-approved
         if (paidBy === 'admin') finalPaidBy = req.user.name;
     }
 
@@ -156,18 +156,25 @@ router.put('/:id', auth, requireAdmin, async (req, res) => {
     }
 });
 
-// Delete Expense - Admin only
-router.delete('/:id', auth, requireAdmin, async (req, res) => {
+// Delete Expense - Admin or the member who paid
+router.delete('/:id', auth, async (req, res) => {
     const { id } = req.params;
     // Guard: ensure this is a valid ObjectId
     if (!/^[0-9a-fA-F]{24}$/.test(id)) {
         return res.status(400).json({ message: 'Invalid expense ID' });
     }
     try {
-        const deletedExpense = await Expense.findByIdAndDelete(id);
-        if (!deletedExpense) {
+        const expense = await Expense.findById(id);
+        if (!expense) {
             return res.status(404).json({ message: 'Expense not found' });
         }
+
+        // Permission check: Admin can delete anything, members can only delete their own
+        if (req.user.role !== 'admin' && expense.paidBy !== (req.user.id || req.user.userId)) {
+            return res.status(403).json({ message: 'Not authorized to delete this expense' });
+        }
+
+        const deletedExpense = await Expense.findByIdAndDelete(id);
         res.json({ message: 'Expense deleted successfully', deletedExpense });
     } catch (err) {
         res.status(500).json({ message: err.message });
