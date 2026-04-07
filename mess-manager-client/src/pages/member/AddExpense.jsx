@@ -235,17 +235,42 @@ const AddExpense = () => {
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 block">Fund Category Allocation</label>
                                                 {isAdmin ? (
-                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                                        {[
-                                                            { id: 'spices', n: 'Spices', i: Flame, c: 'orange' },
-                                                            { id: 'rice', n: 'Rice', i: ShoppingBag, c: 'emerald' },
-                                                            { id: 'others', n: 'Other', i: Package, c: 'indigo' }
-                                                        ].map(cat => (
-                                                            <button key={cat.id} type="button" onClick={() => setCategory(cat.id)} className={cn("p-5 rounded-3xl border-2 transition-all flex flex-col items-center gap-3 group/cat relative overflow-hidden", category === cat.id ? cn("border-primary-500 dark:border-primary-400 bg-white dark:bg-primary-950/20 scale-[1.02] shadow-xl shadow-primary-500/10", cat.c === 'orange' && "ring-orange-500/20", cat.c === 'emerald' && "ring-emerald-500/20", cat.c === 'indigo' && "ring-indigo-500/20") : "border-slate-50 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200")}>
-                                                                <cat.i size={24} className={cn("transition-all", category === cat.id ? (cat.c === 'orange' ? "text-orange-500" : cat.c === 'emerald' ? "text-emerald-500" : "text-indigo-500") : "text-slate-300 opacity-50 group-hover/cat:scale-110")} />
-                                                                <span className={cn("text-[10px] font-black uppercase tracking-widest text-center", category === cat.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400")}>{cat.n}</span>
-                                                            </button>
-                                                        ))}
+                                                    <div className="relative group/carousel-admin">
+                                                        {/* Fade Masks */}
+                                                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-admin:opacity-100 transition-opacity"></div>
+                                                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-admin:opacity-100 transition-opacity"></div>
+
+                                                        <div className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 scrollbar-hide scroll-smooth w-full">
+                                                            {[
+                                                                { id: 'spices', n: 'Spices', i: Flame, c: 'orange' },
+                                                                { id: 'rice', n: 'Rice', i: ShoppingBag, c: 'emerald' },
+                                                                { id: 'others', n: 'Other', i: Package, c: 'indigo' }
+                                                            ].map(cat => (
+                                                                <button 
+                                                                    key={cat.id} 
+                                                                    type="button" 
+                                                                    onClick={() => setCategory(cat.id)} 
+                                                                    className={cn(
+                                                                        "flex-shrink-0 min-w-[120px] p-6 rounded-[2.5rem] border-2 transition-all flex flex-col items-center gap-4 group/cat relative overflow-hidden snap-center", 
+                                                                        category === cat.id 
+                                                                            ? cn(
+                                                                                "border-primary-500 dark:border-primary-400 bg-white dark:bg-primary-950/40 scale-[1.05] shadow-2xl shadow-primary-500/20", 
+                                                                                cat.c === 'orange' && "ring-orange-500/10", 
+                                                                                cat.c === 'emerald' && "ring-emerald-500/10", 
+                                                                                cat.c === 'indigo' && "ring-indigo-500/10"
+                                                                            ) 
+                                                                            : "border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200 hover:bg-white dark:hover:bg-slate-900 shadow-sm"
+                                                                    )}
+                                                                >
+                                                                    <cat.i size={24} className={cn("transition-all duration-500", category === cat.id ? (cat.c === 'orange' ? "text-orange-500" : cat.c === 'emerald' ? "text-emerald-500" : "text-indigo-500") : "text-slate-300 opacity-40 group-hover/cat:scale-125 group-hover/cat:opacity-100")} />
+                                                                    <span className={cn("text-[11px] font-black uppercase tracking-[0.2em]", category === cat.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400 group-hover:text-slate-600")}>{cat.n}</span>
+                                                                    
+                                                                    {category === cat.id && (
+                                                                        <motion.div layoutId="category-glow" className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-white/10 dark:via-white/2 dark:to-white/5 pointer-events-none" />
+                                                                    )}
+                                                                </button>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <div className="p-6 rounded-[2rem] bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 border border-indigo-100/50 dark:border-indigo-900/30 flex items-center justify-between group/market">
@@ -315,19 +340,44 @@ const AddExpense = () => {
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 flex items-center gap-1.5"><Info size={10} /> Allocation Purpose</label>
-                                                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-                                                    {[
-                                                        { id: 'deposit', n: 'Deposit', i: Wallet, c: 'emerald' },
-                                                        { id: 'market', n: 'Market', i: ShoppingCart, c: 'sky' },
-                                                        { id: 'gas', n: 'Gas', i: Flame, c: 'rose' },
-                                                        { id: 'wifi', n: 'WiFi', i: Wifi, c: 'blue' },
-                                                        { id: 'electric', n: 'Electric', i: Zap, c: 'amber' }
-                                                    ].map(opt => (
-                                                        <button key={opt.id} type="button" onClick={() => setPaymentPurpose(opt.id)} className={cn("p-4 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 group/opt relative overflow-hidden", paymentPurpose === opt.id ? cn("border-emerald-500 dark:border-emerald-400 bg-white dark:bg-emerald-950/20 scale-[1.02] shadow-xl shadow-emerald-500/10", opt.c === 'sky' && "ring-sky-500/20", opt.c === 'rose' && "ring-rose-500/20", opt.c === 'blue' && "ring-blue-500/20", opt.c === 'amber' && "ring-amber-500/20") : "border-slate-50 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200")}>
-                                                            <opt.i size={18} className={cn("transition-all", paymentPurpose === opt.id ? (opt.c === 'emerald' ? "text-emerald-500" : opt.c === 'sky' ? "text-sky-500" : opt.c === 'rose' ? "text-rose-500" : opt.c === 'blue' ? "text-blue-500" : "text-amber-500") : "text-slate-300 opacity-50 group-hover/opt:scale-110")} />
-                                                            <span className={cn("text-[9px] font-black uppercase tracking-tight", paymentPurpose === opt.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400")}>{opt.n}</span>
-                                                        </button>
-                                                    ))}
+                                                <div className="relative group/carousel">
+                                                    {/* Fade Masks */}
+                                                    <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity"></div>
+                                                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity"></div>
+
+                                                    <div className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 scrollbar-hide scroll-smooth w-full">
+                                                        {[
+                                                            { id: 'deposit', n: 'Deposit', i: Wallet, c: 'emerald' },
+                                                            { id: 'market', n: 'Market', i: ShoppingCart, c: 'sky' },
+                                                            { id: 'gas', n: 'Gas', i: Flame, c: 'rose' },
+                                                            { id: 'wifi', n: 'WiFi', i: Wifi, c: 'blue' },
+                                                            { id: 'electric', n: 'Electric', i: Zap, c: 'amber' }
+                                                        ].map(opt => (
+                                                            <button 
+                                                                key={opt.id} 
+                                                                type="button" 
+                                                                onClick={() => setPaymentPurpose(opt.id)} 
+                                                                className={cn(
+                                                                    "flex-shrink-0 min-w-[100px] p-5 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 group/opt relative overflow-hidden snap-center", 
+                                                                    paymentPurpose === opt.id 
+                                                                        ? cn(
+                                                                            "border-emerald-500 dark:border-emerald-400 bg-white dark:bg-emerald-950/40 scale-[1.05] shadow-2xl shadow-emerald-500/20", 
+                                                                            opt.c === 'sky' && "ring-sky-500/10", 
+                                                                            opt.c === 'rose' && "ring-rose-500/10", 
+                                                                            opt.c === 'blue' && "ring-blue-500/10"
+                                                                        ) 
+                                                                        : "border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200 hover:bg-white dark:hover:bg-slate-900 shadow-sm"
+                                                                )}
+                                                            >
+                                                                <opt.i size={20} className={cn("transition-all duration-500", paymentPurpose === opt.id ? (opt.c === 'emerald' ? "text-emerald-500" : opt.c === 'sky' ? "text-sky-500" : opt.c === 'rose' ? "text-rose-500" : opt.c === 'blue' ? "text-blue-500" : "text-amber-500") : "text-slate-300 opacity-40 group-hover/opt:scale-125 group-hover/opt:opacity-100")} />
+                                                                <span className={cn("text-[10px] font-black uppercase tracking-[0.1em]", paymentPurpose === opt.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400 group-hover:text-slate-600")}>{opt.n}</span>
+                                                                
+                                                                {paymentPurpose === opt.id && (
+                                                                    <motion.div layoutId="purpose-glow" className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-white/10 dark:via-white/2 dark:to-white/5 pointer-events-none" />
+                                                                )}
+                                                            </button>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <Button type="submit" className="w-full py-8 rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-600 to-teal-700 hover:from-black hover:to-teal-800 text-white shadow-2xl shadow-emerald-500/30 active:scale-[0.98] transition-all font-black uppercase tracking-[0.2em] text-[10px] sm:text-xs overflow-hidden relative group">
@@ -360,56 +410,37 @@ const AddExpense = () => {
                             </div>
                             
                             {activeTab === 'deposit' && (
-                                <div className="relative group/filters overflow-hidden flex-1 sm:max-w-md">
-                                    <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar whitespace-nowrap mask-fade-edges">
-                                        {['all', 'deposit', 'market', 'gas', 'wifi', 'electric'].map(cat => (
-                                            <button
-                                                key={cat}
-                                                onClick={() => setFilterCategory(cat)}
-                                                className={cn(
-                                                    "px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 border",
-                                                    filterCategory === cat
-                                                        ? "bg-slate-900 dark:bg-primary-500 text-white border-transparent shadow-[0_4px_12px_rgba(99,102,241,0.3)] scale-105"
-                                                        : "bg-white/50 dark:bg-white/5 text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-600 dark:hover:text-slate-200"
-                                                )}
-                                            >
-                                                {cat}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    {/* Glassy Shadow for scroll indicator */}
-                                    <style dangerouslySetInnerHTML={{ __html: `
-                                        .mask-fade-edges {
-                                            mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
-                                            -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
-                                        }
-                                        .custom-scrollbar::-webkit-scrollbar {
-                                            width: 5px;
-                                            height: 5px;
-                                        }
-                                        .custom-scrollbar::-webkit-scrollbar-track {
-                                            background: transparent;
-                                        }
-                                        .custom-scrollbar::-webkit-scrollbar-thumb {
-                                            background: rgba(99, 102, 241, 0.15);
-                                            border-radius: 10px;
-                                            border: 1px solid rgba(255, 255, 255, 0.05);
-                                        }
-                                        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                                            background: rgba(99, 102, 241, 0.4);
-                                        }
-                                        .custom-scrollbar {
-                                            scrollbar-width: thin;
-                                            scrollbar-color: rgba(99, 102, 241, 0.15) transparent;
-                                        }
-                                    `}} />
-                                </div>
-                            )}
+                                <div className="flex flex-col gap-6 flex-1 sm:max-w-md">
+                                    <div className="relative group/carousel-filters">
+                                        {/* Fade Masks */}
+                                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-filters:opacity-100 transition-opacity"></div>
+                                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-filters:opacity-100 transition-opacity"></div>
 
-                            {activeTab === 'deposit' && (
-                                <div className="flex items-center gap-2.5 py-2 px-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl shadow-[0_0_15px_rgba(16,185,129,0.05)] ml-auto sm:ml-0">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] whitespace-nowrap">Live Total: ₹{historyItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0).toLocaleString()}</span>
+                                        <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-1 w-full">
+                                            {['all', 'deposit', 'market', 'gas', 'wifi', 'electric'].map(cat => (
+                                                <button
+                                                    key={cat}
+                                                    onClick={() => setFilterCategory(cat)}
+                                                    className={cn(
+                                                        "flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 border snap-center relative overflow-hidden",
+                                                        filterCategory === cat
+                                                            ? "bg-gradient-to-r from-primary-600 to-indigo-600 text-white border-transparent shadow-[0_8px_25px_rgba(79,70,229,0.5)] scale-110"
+                                                            : "bg-white/50 dark:bg-slate-800/40 text-slate-400 border-slate-100 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-600 dark:hover:text-slate-200"
+                                                    )}
+                                                >
+                                                    <span className="relative z-10">{cat}</span>
+                                                    {filterCategory === cat && (
+                                                        <motion.div layoutId="filter-glow-active" className="absolute inset-0 bg-white/10" />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-[1.2rem] bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 self-start transition-all hover:bg-emerald-500/15 group/total">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)] group-hover/total:scale-125 transition-transform"></div>
+                                        <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] whitespace-nowrap">Live Total: ₹{historyItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0).toLocaleString()}</span>
+                                    </div>
                                 </div>
                             )}
 

@@ -1,11 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { Calculator as CalculatorIcon, Download, Save } from 'lucide-react';
+import { 
+    Calculator as CalculatorIcon, Download, Save, TrendingUp, Sparkles, 
+    Users, Activity, TrendingDown, CheckCircle2, AlertCircle, RefreshCw,
+    UserRound, Home, Wifi, Zap, Flame, Newspaper, Coffee, FileText, Coins
+} from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { cn } from '../../lib/utils';
@@ -21,7 +26,7 @@ const Calculator = () => {
 
     // Dynamic Settings with Fallbacks
     const getSettingValue = (key, fallback) => {
-        const s = settings.find(item => item.key === key);
+        const s = (settings || []).find(item => item.key === key);
         return s ? Number(s.value) : fallback;
     };
 
@@ -95,10 +100,10 @@ const Calculator = () => {
         };
 
         // Fetch approved or pending expenses by category
-        const relevantExpenses = expenses.filter(e => e.status === 'approved' || e.status === 'pending');
+        const relevantExpenses = (expenses || []).filter(e => e?.status === 'approved' || e?.status === 'pending');
 
         // Helper to sum by category
-        const sumCat = (cat) => relevantExpenses.filter(e => e.category === cat).reduce((sum, e) => sum + e.amount, 0);
+        const sumCat = (cat) => relevantExpenses.filter(e => e?.category === cat).reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
 
         const spicesTotal = sumCat('spices');
         const othersTotal = sumCat('others');
@@ -115,9 +120,9 @@ const Calculator = () => {
 
         // Calculate total meals
         // Calculate total meals (Adjusted with minimum)
-        const totalAdjustedMeals = members.reduce((sum, m) => {
+        const totalAdjustedMeals = (members || []).reduce((sum, m) => {
             const memberId = m._id || m.id;
-            const mealCount = meals.filter(meal =>
+            const mealCount = (meals || []).filter(meal =>
                 meal.memberId === memberId ||
                 meal.memberId === m._id ||
                 meal.memberId === m.id
@@ -129,8 +134,8 @@ const Calculator = () => {
         // const guestMealPrices = { ... };
 
         // Calculate guest adjustment (total guest meal cost)
-        const guestAdjustment = guestMeals.reduce((sum, g) => {
-            const price = guestMealPrices[g.guestMealType] || 0;
+        const guestAdjustment = (guestMeals || []).reduce((sum, g) => {
+            const price = guestMealPrices[g?.guestMealType] || 0;
             return sum + price;
         }, 0);
 
@@ -172,63 +177,63 @@ const Calculator = () => {
         setIndividualInputs(() => {
             const newInputs = {}; // Start fresh for each month
 
-            members.forEach(m => {
+            (members || []).forEach(m => {
+                if (!m) return;
                 const memberId = m._id || m.id;
-                console.log(`Processing member: ${m.name} (ID: ${memberId})`);
+                if (!memberId) return;
 
                 // Calculate meal count for this member - check both _id and id
-                const memberMeals = meals.filter(meal =>
-                    meal.memberId === memberId ||
-                    meal.memberId === m._id ||
-                    meal.memberId === m.id
+                const memberMeals = (meals || []).filter(meal =>
+                    meal?.memberId === memberId ||
+                    meal?.memberId === m._id ||
+                    meal?.memberId === m.id
                 );
                 const mealCount = memberMeals.length;
-                console.log(`  - Meals count: ${mealCount}`, memberMeals);
 
                 // Calculate guest meal count and cost for this member
-                const memberGuestMeals = guestMeals.filter(g =>
-                    g.memberId === memberId ||
-                    g.memberId === m._id ||
-                    g.memberId === m.id
+                const memberGuestMeals = (guestMeals || []).filter(g =>
+                    g?.memberId === memberId ||
+                    g?.memberId === m._id ||
+                    g?.memberId === m.id
                 );
                 const guestCost = memberGuestMeals.reduce((sum, g) => {
-                    return sum + (guestMealPrices[g.guestMealType] || 0);
+                    return sum + (guestMealPrices[g?.guestMealType] || 0);
                 }, 0);
-                console.log(`  - Guest cost: ₹${guestCost}`, memberGuestMeals);
 
                 // Calculate market expenses for this member (approved or pending)
-                const memberMarketExpenses = expenses.filter(e =>
-                    e.category === 'market' &&
-                    (e.status === 'approved' || e.status === 'pending') &&
-                    (e.paidBy === memberId || e.paidBy === m._id || e.paidBy === m.id)
+                const memberMarketExpenses = (expenses || []).filter(e =>
+                    e?.category === 'market' &&
+                    (e?.status === 'approved' || e?.status === 'pending') &&
+                    (e?.paidBy === memberId || e?.paidBy === m._id || e?.paidBy === m.id)
                 );
-                const marketTotal = memberMarketExpenses.reduce((sum, e) => sum + e.amount, 0);
-                console.log(`  - Market expenses: ₹${marketTotal}`, memberMarketExpenses);
+                const marketTotal = memberMarketExpenses.reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
 
                 // Calculate bill payments for this member (Gas, Wifi, Electric) - approved or pending
-                const memberBillExpenses = expenses.filter(e =>
-                    ['gas', 'wifi', 'electric'].includes(e.category) &&
-                    (e.status === 'approved' || e.status === 'pending') &&
-                    (e.paidBy === memberId || e.paidBy === m._id || e.paidBy === m.id)
+                const memberBillExpenses = (expenses || []).filter(e =>
+                    ['gas', 'wifi', 'electric'].includes(e?.category) &&
+                    (e?.status === 'approved' || e?.status === 'pending') &&
+                    (e?.paidBy === memberId || e?.paidBy === m._id || e?.paidBy === m.id)
                 );
-                const gasPaid = memberBillExpenses.filter(e => e.category === 'gas').reduce((sum, e) => sum + e.amount, 0);
-                const wifiPaid = memberBillExpenses.filter(e => e.category === 'wifi').reduce((sum, e) => sum + e.amount, 0);
-                const electricPaid = memberBillExpenses.filter(e => e.category === 'electric').reduce((sum, e) => sum + e.amount, 0);
+                const gasPaid = memberBillExpenses.filter(e => e?.category === 'gas').reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
+                const wifiPaid = memberBillExpenses.filter(e => e?.category === 'wifi').reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
+                const electricPaid = memberBillExpenses.filter(e => e?.category === 'electric').reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
                 const totalBillsPaid = gasPaid + wifiPaid + electricPaid;
 
                 // Get the snapshot deposit if it exists for this month, else default to 0
-                const summary = monthlySummaries.find(ps => ps.memberId?.toString() === memberId?.toString() || ps.userId === m.userId);
-                // Fix: Never fall back to profile deposit (m.deposit) to prevent leakage
-                const snapshotDeposit = summary ? (summary.depositBalance || 0) : 0;
-                const snapshotDepositDate = summary ? summary.depositDate : (m.depositDate || '');
+                const summary = (monthlySummaries || []).find(ps => 
+                    ps?.memberId?.toString() === memberId?.toString() || ps?.userId === m?.userId
+                );
+                
+                const snapshotDeposit = summary ? (Number(summary?.depositBalance) || 0) : 0;
+                const snapshotDepositDate = summary ? summary?.depositDate : (m?.depositDate || '');
 
                 // Calculate general deposit for this member from expenses (approved or pending)
-                const memberDepositExpenses = expenses.filter(e =>
-                    e.category === 'deposit' &&
-                    (e.status === 'approved' || e.status === 'pending') &&
-                    (e.paidBy === memberId || e.paidBy === m._id || e.paidBy === m.id || e.paidBy === m.name)
+                const memberDepositExpenses = (expenses || []).filter(e =>
+                    e?.category === 'deposit' &&
+                    (e?.status === 'approved' || e?.status === 'pending') &&
+                    (e?.paidBy === memberId || e?.paidBy === m._id || e?.paidBy === m.id || e?.paidBy === m.name)
                 );
-                const generalDeposit = memberDepositExpenses.reduce((sum, e) => sum + e.amount, 0);
+                const generalDeposit = memberDepositExpenses.reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
 
                 // Initialize or update member data
                 newInputs[memberId] = {
@@ -238,11 +243,10 @@ const Calculator = () => {
                     genDepositDate: snapshotDepositDate,
                     guest: guestCost,
                     marketExpense: marketTotal,
-                    marketDays: summary ? (summary.marketDays || 4) : 4 // Snapshot or default 4
+                    marketDays: summary ? (Number(summary?.marketDays) || 4) : 4 // Snapshot or default 4
                 };
             });
 
-            console.log('Final individualInputs:', newInputs);
             return newInputs;
         });
     }, [members, meals, guestMeals, expenses, globalMonth]);
@@ -866,10 +870,10 @@ const Calculator = () => {
                         </motion.div>
                     )}
                 </Card>
-        </div>
+            </div>
 
-            {(perHeadResult && mealChargeResult) && (
-                <div className="mt-12 space-y-6">
+                {(perHeadResult && mealChargeResult) && (
+                    <div className="mt-12 space-y-6">
                     <div className="flex items-center gap-3 px-2">
                         <div className="p-2 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl"><Users size={18} /></div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Institutional Audit Ledger</h3>
@@ -881,6 +885,7 @@ const Calculator = () => {
                                 <thead>
                                     <tr className="bg-slate-900 dark:bg-black text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                                         <th className="p-5 text-left sticky left-0 bg-slate-900 dark:bg-black z-20 shadow-xl">Identity</th>
+                                        <th className="p-5 text-center">Meal Units</th>
                                         <th className="p-5 text-center">Market Allocation</th>
                                         <th className="p-5 text-center">Guest Units</th>
                                         <th className="p-5 text-center">Shared Liability</th>
@@ -889,57 +894,70 @@ const Calculator = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                    {members.map(member => {
-                                        const memberId = member._id || member.memberId;
-                                        const data = individualResults[memberId] || { balance: 0 };
+                                    {(calculatedData?.data || []).map(item => {
+                                        const memberId = item?._id || item?.id;
+                                        if (!memberId) return null;
                                         
                                         return (
                                             <tr key={memberId} className="group hover:bg-slate-50 dark:hover:bg-white/5 transition-colors duration-200">
                                                 <td className="p-5 sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-black transition-colors z-10 shadow-lg">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-800 flex items-center justify-center text-white text-xs font-black shadow-lg">
-                                                            {(member.memberName || '?').charAt(0)}
+                                                            {(item?.name || item?.memberName || '?').charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div className="text-xs font-black text-slate-900 dark:text-white leading-none mb-1">{member.memberName}</div>
-                                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{member.role}</div>
+                                                            <div className="text-xs font-black text-slate-900 dark:text-white leading-none mb-1">{item?.name || item?.memberName}</div>
+                                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item?.role || 'Member'}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="p-5 text-center">
+                                                    <div className={cn(
+                                                        "px-4 py-2 rounded-xl border inline-block min-w-[80px]",
+                                                        item?.isBelowMinimum 
+                                                            ? "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 shadow-rose-500/10 border border-rose-100 dark:border-rose-900/20" 
+                                                            : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-100 dark:border-emerald-900/20"
+                                                    )}>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-xs font-black">{(Number(item?.meals) || 0)} Units</span>
+                                                            <span className="text-[8px] font-bold opacity-60 uppercase tracking-tighter">Min: {MIN_MEALS}</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="p-5">
                                                     <div className="px-4 py-2 bg-slate-50 dark:bg-black/30 rounded-xl border border-slate-100 dark:border-white/5 text-center">
-                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">₹{individualInputs[memberId]?.marketExpense || 0}</span>
+                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">₹{(Number(item?.marketExpense) || 0).toLocaleString()}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-5 text-center">
                                                     <div className="px-4 py-2 bg-slate-50 dark:bg-black/30 rounded-xl border border-slate-100 dark:border-white/5 inline-block min-w-[60px]">
-                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">{individualInputs[memberId]?.guest || 0}</span>
+                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">{Number(item?.guest) || 0}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-5 text-center text-xs font-black text-slate-600 dark:text-slate-400">
-                                                    ₹{perHeadResult?.perHeadAmount.toFixed(0)}
+                                                    ₹{(Number(perHeadResult?.perHeadAmount) || 0).toFixed(0)}
                                                 </td>
                                                 <td className="p-5">
                                                     <div className="flex flex-col gap-1.5 items-center">
                                                         <input
                                                             type="number"
-                                                            value={individualInputs[memberId]?.deposit === 0 ? '' : (individualInputs[memberId]?.deposit || '')}
+                                                            value={item?.deposit === 0 ? '' : (item?.deposit || '')}
                                                             onChange={(e) => handleIndividualChange(memberId, 'deposit', e.target.value)}
                                                             className="w-[100px] bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-black text-center focus:border-primary-500 outline-none transition-all shadow-sm"
                                                             placeholder="0"
                                                         />
-                                                        <span className="text-[8px] font-black text-primary-500 uppercase tracking-tighter opacity-60">GEN: ₹{individualInputs[memberId]?.genDeposit || 0}</span>
+                                                        <span className="text-[8px] font-black text-primary-500 uppercase tracking-tighter opacity-60">GEN: ₹{Number(item?.genDeposit) || 0}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-5 text-right pr-8">
                                                     <div className={cn(
                                                         "inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-xs shadow-lg",
-                                                        data.balance > 0 
+                                                        (Number(item?.balance) || 0) > 0 
                                                             ? "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 shadow-rose-500/10 border border-rose-100 dark:border-rose-900/20" 
                                                             : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-100 dark:border-emerald-900/20"
                                                     )}>
-                                                        ₹{Math.abs(Math.round(data.balance))}
-                                                        <span className="text-[8px] font-bold uppercase opacity-60">{data.balance > 0 ? 'PAY' : 'GET'}</span>
+                                                        ₹{Math.abs(Math.round(Number(item?.balance) || 0))}
+                                                        <span className="text-[8px] font-bold uppercase opacity-60">{(Number(item?.balance) || 0) > 0 ? 'PAY' : 'GET'}</span>
                                                     </div>
                                                 </td>
                                             </tr>

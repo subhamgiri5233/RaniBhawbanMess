@@ -291,11 +291,11 @@ const Expenses = () => {
                     </div>
 
                     {/* Category Tabs */}
-                    <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl">
+                    <div className="flex overflow-x-auto scrollbar-hide gap-2 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl max-w-full">
                         <button
                             onClick={() => setActiveCategory('all')}
                             className={cn(
-                                "px-4 py-1.5 rounded-lg text-sm font-black transition-all duration-200 uppercase tracking-wider",
+                                "flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-black transition-all duration-200 uppercase tracking-wider",
                                 activeCategory === 'all'
                                     ? "bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm"
                                     : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
@@ -308,7 +308,7 @@ const Expenses = () => {
                                 key={cat.key}
                                 onClick={() => setActiveCategory(cat.key)}
                                 className={cn(
-                                    "px-4 py-1.5 rounded-lg text-sm font-black transition-all duration-200 uppercase tracking-wider",
+                                    "flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-black transition-all duration-200 uppercase tracking-wider",
                                     activeCategory === cat.key
                                         ? "bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm"
                                         : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
