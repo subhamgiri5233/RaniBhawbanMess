@@ -454,38 +454,28 @@ const AddExpense = () => {
                             
                             {activeTab === 'deposit' && (
                                 <div className="flex flex-col gap-6 flex-1 sm:max-w-md">
-                                    <div className="relative group/carousel-filters">
-                                        {/* Fade Masks */}
-                                        {/* Permanent Fade Masks for Mobile Visibility */}
-                                        <div className="absolute left-0 top-0 bottom-10 w-12 bg-gradient-to-r from-white dark:from-slate-950 to-transparent z-10 pointer-events-none transition-opacity"></div>
-                                        <div className="absolute right-0 top-0 bottom-10 w-12 bg-gradient-to-l from-white dark:from-slate-950 to-transparent z-10 pointer-events-none transition-opacity"></div>
-
-                                        <div className="flex items-center gap-4 overflow-x-auto pb-4 custom-scrollbar scroll-smooth px-1 w-full">
-                                            {[
-                                                { id: 'all',      label: 'All',      active: 'bg-gradient-to-r from-slate-700 to-slate-900 text-white border-transparent shadow-[0_8px_20px_rgba(15,23,42,0.4)] scale-110' },
-                                                { id: 'deposit',  label: 'Deposit',  active: 'bg-gradient-to-r from-blue-500 to-blue-700 text-white border-transparent shadow-[0_8px_20px_rgba(59,130,246,0.5)] scale-110' },
-                                                { id: 'market',   label: 'Market',   active: 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-[0_8px_20px_rgba(99,102,241,0.5)] scale-110' },
-                                                { id: 'gas',      label: 'Gas',      active: 'bg-gradient-to-r from-amber-400 to-orange-500 text-white border-transparent shadow-[0_8px_20px_rgba(245,158,11,0.5)] scale-110' },
-                                                { id: 'wifi',     label: 'WiFi',     active: 'bg-gradient-to-r from-cyan-400 to-sky-500 text-white border-transparent shadow-[0_8px_20px_rgba(6,182,212,0.5)] scale-110' },
-                                                { id: 'electric', label: 'Electric', active: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white border-transparent shadow-[0_8px_20px_rgba(244,63,94,0.5)] scale-110' },
-                                            ].map(cat => (
-                                                <button
-                                                    key={cat.id}
-                                                    onClick={() => setFilterCategory(cat.id)}
-                                                    className={cn(
-                                                        "flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 border snap-center relative overflow-hidden",
-                                                        filterCategory === cat.id
-                                                            ? cat.active
-                                                            : "bg-white/50 dark:bg-slate-800/40 text-slate-400 border-slate-100 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-600 dark:hover:text-slate-200"
-                                                    )}
-                                                >
-                                                    <span className="relative z-10">{cat.label}</span>
-                                                    {filterCategory === cat.id && (
-                                                        <motion.div layoutId="filter-glow-active" className="absolute inset-0 bg-white/10" />
-                                                    )}
-                                                </button>
-                                            ))}
-                                        </div>
+                                    <div className="grid grid-cols-3 gap-2 w-full">
+                                        {[
+                                            { id: 'all',      label: 'All',      active: 'bg-gradient-to-r from-slate-700 to-slate-900 text-white border-transparent' },
+                                            { id: 'deposit',  label: 'Deposit',  active: 'bg-gradient-to-r from-blue-500 to-blue-700 text-white border-transparent' },
+                                            { id: 'market',   label: 'Market',   active: 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent' },
+                                            { id: 'gas',      label: 'Gas',      active: 'bg-gradient-to-r from-amber-400 to-orange-500 text-white border-transparent' },
+                                            { id: 'wifi',     label: 'WiFi',     active: 'bg-gradient-to-r from-cyan-400 to-sky-500 text-white border-transparent' },
+                                            { id: 'electric', label: 'Electric', active: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white border-transparent' },
+                                        ].map(cat => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => setFilterCategory(cat.id)}
+                                                className={cn(
+                                                    "px-1 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-tight transition-all duration-300 border relative overflow-hidden",
+                                                    filterCategory === cat.id 
+                                                        ? cat.active + " shadow-md scale-[1.02] z-10"
+                                                        : "bg-white/50 dark:bg-slate-800/40 text-slate-400 border-slate-100 dark:border-white/5 hover:border-slate-300"
+                                                )}
+                                            >
+                                                <span className="relative z-10">{cat.label}</span>
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                             )}
