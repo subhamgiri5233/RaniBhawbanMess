@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
@@ -135,6 +135,27 @@ const AddExpense = () => {
     }).reverse();
 
     const categoryTotal = historyItems.reduce((sum, e) => sum + (e.amount || 0), 0);
+
+    const contributorTotals = useMemo(() => {
+        const totalsByPayer = {};
+        historyItems.forEach(e => {
+            const payer = e.paidBy;
+            if (!totalsByPayer[payer]) totalsByPayer[payer] = 0;
+            totalsByPayer[payer] += (e.amount || 0);
+        });
+
+        return Object.entries(totalsByPayer)
+            .map(([payerId, total]) => {
+                const member = members.find(m => m.id === payerId || m._id === payerId || m.userId === payerId || m.name === payerId);
+                return {
+                    name: member?.name || (payerId === 'admin' ? 'Admin Fund' : payerId),
+                    amount: total,
+                    id: payerId
+                };
+            })
+            .filter(item => item.amount > 0)
+            .sort((a, b) => b.amount - a.amount);
+    }, [historyItems, members]);
 
     return (
         <motion.div
@@ -448,6 +469,28 @@ const AddExpense = () => {
                                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)] group-hover/total:scale-125 transition-transform"></div>
                                         <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] whitespace-nowrap">Live Total: ₹{historyItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0).toLocaleString()}</span>
                                     </div>
+
+                                    {contributorTotals.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 pt-2">
+                                            {contributorTotals.map((item, idx) => (
+                                                <motion.div
+                                                    key={item.id}
+                                                    initial={{ opacity: 0, scale: 0.8 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    transition={{ delay: idx * 0.05 }}
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-white/50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5 rounded-full shadow-sm hover:scale-105 transition-transform"
+                                                >
+                                                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-[8px] font-black text-white uppercase">
+                                                        {item.name.charAt(0)}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[9px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tighter leading-none">{item.name}</span>
+                                                        <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 tracking-tighter">₹{item.amount.toLocaleString()}</span>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
