@@ -88,15 +88,20 @@
 
   /* High-Visibility Mobile Scrollbars */
   @media (pointer: coarse) {
+    .custom-scrollbar {
+      -webkit-overflow-scrolling: touch;
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
-      width: 12px !important;
-      height: 12px !important;
+      width: 10px !important;
+      height: 10px !important;
       display: block !important;
     }
     
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05) !important;
+      background: rgba(0, 0, 0, 0.15) !important;
       border-radius: 9999px !important;
+      margin: 4px !important;
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -104,15 +109,16 @@
       border: 2px solid white !important;
       border-radius: 9999px !important;
       background-clip: padding-box !important;
+      box-shadow: 0 0 14px rgba(79, 70, 229, 0.4) !important;
+    }
+
+    .dark .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.12) !important;
     }
 
     .dark .custom-scrollbar::-webkit-scrollbar-thumb {
       background-color: #818cf8 !important;
-      border: 3px solid #1e293b !important;
-    }
-
-    .dark .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1) !important;
+      border: 3px solid #0f172a !important;
     }
   }
 

@@ -456,8 +456,9 @@ const AddExpense = () => {
                                 <div className="flex flex-col gap-6 flex-1 sm:max-w-md">
                                     <div className="relative group/carousel-filters">
                                         {/* Fade Masks */}
-                                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-filters:opacity-100 transition-opacity"></div>
-                                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-filters:opacity-100 transition-opacity"></div>
+                                        {/* Permanent Fade Masks for Mobile Visibility */}
+                                        <div className="absolute left-0 top-0 bottom-10 w-12 bg-gradient-to-r from-white dark:from-slate-950 to-transparent z-10 pointer-events-none transition-opacity"></div>
+                                        <div className="absolute right-0 top-0 bottom-10 w-12 bg-gradient-to-l from-white dark:from-slate-950 to-transparent z-10 pointer-events-none transition-opacity"></div>
 
                                         <div className="flex items-center gap-4 overflow-x-auto pb-4 custom-scrollbar scroll-smooth px-1 w-full">
                                             {[
