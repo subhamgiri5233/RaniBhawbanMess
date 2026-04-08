@@ -22,13 +22,14 @@ const MemberExpenses = () => {
         return (members || []).find(m => (m._id || m.id || m.userId) === paidBy)?.name || 'Admin';
     };
 
-    // Filter expenses - Show all approved expenses for transparency OR the user's/admin's expenses
-    const filteredExpenses = expenses
+    // Filter and sort expenses
+    const filteredExpenses = [...expenses]
         .filter(expense => {
             const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
             const memberMatch = selectedMember === 'all' || expense.paidBy === selectedMember;
             return categoryMatch && memberMatch;
-        });
+        })
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     // Operational Category Stats (Synchronized with Admin Expenses Logic)
     const getCatTotal = (cat) => expenses.filter(e => {
@@ -318,7 +319,12 @@ const MemberExpenses = () => {
                                         <td className="px-6 py-4 text-right">
                                             {isMine && (
                                                 <button 
-                                                    onClick={() => window.confirm('Permanently delete this entry?') && deleteExpense(e._id || e.id)}
+                                                    onClick={async () => {
+                                                        if (window.confirm('Permanently delete this entry?')) {
+                                                            const res = await deleteExpense(e._id || e.id);
+                                                            if (res && !res.success) alert(res.error || 'Failed to delete');
+                                                        }
+                                                    }}
                                                     className="p-2.5 bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-lg shadow-rose-500/10"
                                                 >
                                                     <Trash2 size={16} />

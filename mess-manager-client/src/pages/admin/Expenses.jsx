@@ -37,7 +37,8 @@ const Expenses = () => {
             const memberMatch = selectedMember === 'all' || expense.paidBy === selectedMember;
             const monthMatch = matchesMonth(expense.date);
             return categoryMatch && memberMatch && monthMatch;
-        });
+        })
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     // Category-wise breakdown for the SELECTED MONTH
     const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && matchesMonth(e.date));
