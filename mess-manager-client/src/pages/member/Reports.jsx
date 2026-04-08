@@ -59,9 +59,9 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
 
     // Finalized contribution (from stored record) vs live contribution
     const finalizedContribution = Number(offM.totalContribution ?? totalContribution); 
-    const effectiveContribution = Object.keys(offM).length > 0 ? finalizedContribution : 0;
+    const effectiveContribution = finalizedContribution;
 
-    const dBal = Object.keys(offM).length > 0 ? ((dMCost + dGCost + (Number(dHead) || 0)) - effectiveContribution) : 0;
+    const dBal = ((dMCost + dGCost + (Number(dHead) || 0)) - effectiveContribution);
 
     // SMART BALANCE ENGINE: Match Admin Truth
     // If status is 'clear', balance is definitively 0.
@@ -402,7 +402,7 @@ const Reports = () => {
                         <div className="grid grid-cols-1 gap-6">
                             {filteredMembers.map(m => {
                                 const isCurrentUser = String(m._id || m.memberId) === String(user.id || user._id);
-                                const offM = (data?.sharedExpense?.members || []).find(om => String(om.memberId) === String(m._id || m.memberId)) || {};
+                                const offM = (data?.sharedExpense?.memberBalances || []).find(mb => String(mb.memberId) === String(m._id || m.memberId)) || {};
                                 return (
                                     <MemberCard
                                         key={m._id || m.memberId}

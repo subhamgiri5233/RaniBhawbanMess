@@ -74,9 +74,9 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
     
     // Finalized contribution (from stored record) vs live contribution
     const finalizedContribution = Number(offM.totalContribution ?? totalContribution); 
-    const effectiveContribution = hasFinalizedData ? finalizedContribution : 0;
+    const effectiveContribution = finalizedContribution;
 
-    const dBal = hasFinalizedData ? (signedOffBal || ((dMCost + dGCost + Number(dHead)) - effectiveContribution)) : 0;
+    const dBal = signedOffBal || ((dMCost + dGCost + Number(dHead)) - effectiveContribution);
 
     const rem = Math.round(dBal) - (Number(m.submittedAmount) || 0);
 

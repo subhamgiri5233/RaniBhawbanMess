@@ -46,9 +46,6 @@ const AddExpense = () => {
     const [selectedMemberId, setSelectedMemberId] = useState('');
     const [depositAmount, setDepositAmount] = useState('');
     const [paymentPurpose, setPaymentPurpose] = useState('deposit');
-    const [filterCategory, setFilterCategory] = useState('all');
-    const [historyMemberFilter, setHistoryMemberFilter] = useState('all');
-
     const purposeOptions = [
         { id: 'deposit', name: 'General Deposit', icon: Wallet },
         { id: 'market', name: 'Market Payment', icon: ShoppingCart },
@@ -127,63 +124,32 @@ const AddExpense = () => {
             alert(`❌ Error: ${res.error || 'Failed to record transaction'}`);
         }
     };
-
-    const historyItems = expenses.filter(e => {
-        // Apply Global Month Filter
-        if (e.date && globalMonth && !e.date.startsWith(globalMonth)) return false;
-
-        // Apply Category Filter
-        if (filterCategory !== 'all' && e.category !== filterCategory) return false;
-
-        // Apply Member Filter (Admin only)
-        if (isAdmin && historyMemberFilter !== 'all' && e.paidBy !== historyMemberFilter) return false;
-
-        if (isAdmin) {
-            // Unify logic: Admin wants to see what they entered in each tab
-            if (activeTab === 'expense') {
-                return e.paidBy === 'admin';
-            } else if (activeTab === 'deposit') {
-                return e.paidBy !== 'admin';
-            }
-            return true;
-        } else {
-            // For members, show their own records AND collective market procurement
-            const isMine = e.paidBy === (user.id || user.userId || user._id) || e.paidBy === user.name;
-            const isCollectiveMarket = e.paidBy === 'admin' && (e.category === 'market' || e.category === 'rice' || e.category === 'spices');
-            return isMine || isCollectiveMarket;
-        }
-    }).reverse();
-
-    const categoryTotal = historyItems.reduce((sum, e) => sum + (e.amount || 0), 0);
-
-    const contributorTotals = useMemo(() => {
+  
+    const historyItems = useMemo(() => {
         if (!expenses) return [];
-        // Find all member-paid records for the current category
-        const memberPayments = expenses.filter(e => {
-            const isPayment = e.paidBy !== 'admin';
-            const matchesCategory = filterCategory === 'all' || e.category === filterCategory;
-            return isPayment && matchesCategory;
-        });
+        return expenses.filter(e => {
+            // Apply Global Month Filter
+            if (e.date && globalMonth && !e.date.startsWith(globalMonth)) return false;
 
-        const totalsByPayer = {};
-        memberPayments.forEach(e => {
-            const payer = e.paidBy;
-            if (!totalsByPayer[payer]) totalsByPayer[payer] = 0;
-            totalsByPayer[payer] += (e.amount || 0);
+            const myId = user.id || user.userId || user._id;
+            
+            if (isAdmin) {
+                // Admin sees what they entered in the current tab context
+                if (activeTab === 'expense') return e.paidBy === 'admin';
+                return e.paidBy !== 'admin'; // Deposits
+            }
+            
+            return e.paidBy === myId || e.paidBy === String(myId) || e.paidBy === user.name;
+        }).sort((a, b) => {
+            // Sort by date descending
+            const dateCompare = new Date(b.date) - new Date(a.date);
+            if (dateCompare !== 0) return dateCompare;
+            // If dates are equal, use ID or array index (implicit in expenses order)
+            // But since we want "recently added", and expenses are usually pushed, 
+            // the one with higher index in the original array is more recent.
+            return expenses.indexOf(b) - expenses.indexOf(a);
         });
-
-        return Object.entries(totalsByPayer)
-            .map(([payerId, total]) => {
-                const memberName = getMemberName(payerId);
-                return {
-                    name: memberName,
-                    amount: total,
-                    id: payerId
-                };
-            })
-            .filter(item => item.amount > 0)
-            .sort((a, b) => b.amount - a.amount);
-    }, [expenses, members, filterCategory]);
+    }, [expenses, globalMonth, user, isAdmin, activeTab]);
 
     return (
         <motion.div
@@ -240,6 +206,7 @@ const AddExpense = () => {
                         </div>
                     )}
                 </div>
+
             </div>
 
             <div className="grid grid-cols-1 gap-12 items-start">
@@ -282,11 +249,6 @@ const AddExpense = () => {
                                                     <div className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-400 group-focus-within/amt:text-primary-500 transition-colors">₹</div>
                                                     <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full pl-16 pr-8 py-8 bg-indigo-300/40 dark:bg-slate-950/80 border-2 border-indigo-300/30 dark:border-white/5 rounded-3xl text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tighter focus:ring-8 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-800" required />
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-[10px] font-black text-indigo-700 dark:text-slate-400 uppercase tracking-widest bg-indigo-300/40 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-indigo-300/30 dark:border-white/5 shadow-sm">
-                                                    {historyItems.length} Entries
-                                                </span>
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 block">Fund Category Allocation</label>
@@ -446,87 +408,95 @@ const AddExpense = () => {
                     </AnimatePresence>
                 </div>
 
-                <div className="space-y-8">
+            </div>
 
+            {historyItems.length > 0 && (
+                <div className="space-y-8 mt-12">
+                    <div className="flex items-center gap-3 px-2">
+                        <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                            <History size={16} />
+                        </div>
+                        <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-widest">
+                            {isAdmin && activeTab === 'deposit' ? 'Recent Deposits' : 'Your Recent Entries'}
+                        </h3>
+                        <span className="text-[10px] font-black bg-indigo-500/10 text-indigo-600 px-2 py-1 rounded-lg">
+                            {historyItems.length} Records
+                        </span>
+                    </div>
 
-                    <Card className="rb-card p-0 overflow-hidden border-indigo-300/30 dark:border-white/5">
-                        <div className="flex flex-col">
-
-                            {/* Full Tabular History Section */}
-                            <div className="overflow-auto max-h-[700px] scrollbar-thin scrollbar-thumb-indigo-200 dark:scrollbar-thumb-slate-700 bg-indigo-300/20 dark:bg-slate-950/20">
-                                <table className="w-full text-left relative border-collapse">
-                                    <thead className="sticky top-0 z-10 bg-indigo-300/40 dark:bg-slate-900 shadow-sm text-indigo-800 dark:text-slate-400 font-black uppercase tracking-widest text-[11px] border-b border-indigo-300/30 dark:border-white/5">
-                                        <tr>
-                                            <th className="p-4">Date</th>
-                                            <th className="p-4">Description</th>
-                                            <th className="p-4">Category</th>
-                                            <th className="p-4">Amount</th>
-                                            <th className="p-4">Paid By</th>
-                                            <th className="p-4 text-right">Action</th>
+                    <Card className="rb-card p-0 overflow-hidden border-indigo-300/30 dark:border-white/5 bg-indigo-300/10 dark:bg-slate-900/40 backdrop-blur-md">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="bg-indigo-300/40 dark:bg-slate-900/80 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-800 dark:text-slate-500 border-b border-indigo-300/20 dark:border-white/5">
+                                    <tr>
+                                        <th className="p-4">Date</th>
+                                        <th className="p-4">Description</th>
+                                        <th className="p-4">Category</th>
+                                        <th className="p-4 text-right">Amount</th>
+                                        <th className="p-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-indigo-300/10 dark:divide-white/5">
+                                    {historyItems.map(expense => (
+                                        <tr key={expense._id || expense.id} className="group transition-colors hover:bg-white/40 dark:hover:bg-white/5">
+                                            <td className="p-4 text-xs font-bold text-slate-500 tabular-nums">
+                                                {expense.date}
+                                            </td>
+                                            <td className="p-4">
+                                                <p className="text-sm font-black text-slate-800 dark:text-slate-200">
+                                                    {expense.description || expense.title}
+                                                </p>
+                                                {isAdmin && activeTab === 'deposit' && (
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                                                        For: {getMemberName(expense.paidBy)}
+                                                    </p>
+                                                )}
+                                            </td>
+                                            <td className="p-4">
+                                                <span className={cn(
+                                                    "text-[9px] px-2 py-0.5 rounded-lg font-black uppercase tracking-widest border flex items-center gap-1 w-fit",
+                                                    expense.category === 'market' && "bg-blue-300/20 text-blue-600 border-blue-400/20",
+                                                    expense.category === 'spices' && "bg-orange-300/20 text-orange-600 border-orange-400/20",
+                                                    expense.category === 'rice' && "bg-emerald-300/20 text-emerald-600 border-emerald-400/20",
+                                                    expense.category === 'deposit' && "bg-emerald-300/20 text-emerald-600 border-emerald-400/20",
+                                                    expense.category === 'wifi' && "bg-blue-300/20 text-blue-600 border-blue-400/20",
+                                                    expense.category === 'gas' && "bg-rose-300/20 text-rose-600 border-rose-400/20",
+                                                    expense.category === 'electric' && "bg-amber-300/20 text-amber-600 border-amber-400/20",
+                                                    "bg-slate-300/20 text-slate-600 border-slate-400/20"
+                                                )}>
+                                                    {expense.category === 'market' && '🛒 Market'}
+                                                    {expense.category === 'spices' && '🌶️ Spices'}
+                                                    {expense.category === 'rice' && '🍚 Rice'}
+                                                    {expense.category === 'deposit' && '💰 Deposit'}
+                                                    {expense.category === 'wifi' && '📶 WiFi'}
+                                                    {expense.category === 'gas' && '🔥 Gas'}
+                                                    {expense.category === 'electric' && '⚡ Electric'}
+                                                    {!['market', 'spices', 'rice', 'deposit', 'wifi', 'gas', 'electric'].includes(expense.category) && expense.category}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-right text-sm font-black text-slate-900 dark:text-slate-100 tabular-nums">
+                                                ₹{expense.amount}
+                                            </td>
+                                            <td className="p-4 text-right">
+                                                <button
+                                                    onClick={() => {
+                                                        if (window.confirm('Delete this entry permanently?')) {
+                                                            deleteExpense(expense._id || expense.id);
+                                                        }
+                                                    }}
+                                                    className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-indigo-300/30 dark:divide-white/5">
-                                        {historyItems.map(expense => (
-                                            <tr key={expense._id || expense.id} className="hover:bg-indigo-300/60 dark:hover:bg-slate-800/50 transition-colors group">
-                                                <td className="p-4 text-slate-600 dark:text-slate-400 text-sm font-bold flex items-center gap-2">
-                                                    <Calendar size={12} className="opacity-50" />
-                                                    {expense.date}
-                                                </td>
-                                                <td className="p-4 font-black text-slate-900 dark:text-slate-100">{expense.description || expense.title}</td>
-                                                <td className="p-4">
-                                                    <span className={cn(
-                                                        "text-[10px] px-2.5 py-1 rounded-xl font-black uppercase tracking-widest border",
-                                                        expense.category === 'market' && "bg-blue-300/40 text-blue-800 border-blue-400/30 dark:bg-blue-500/20 dark:text-blue-400",
-                                                        expense.category === 'spices' && "bg-orange-300/40 text-orange-800 border-orange-400/30 dark:bg-orange-500/20 dark:text-orange-400",
-                                                        expense.category === 'rice' && "bg-emerald-300/40 text-emerald-800 border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-400",
-                                                        expense.category === 'deposit' && "bg-cyan-300/40 text-cyan-800 border-cyan-400/30 dark:bg-cyan-500/20 dark:text-cyan-400",
-                                                        expense.category === 'others' && "bg-indigo-300/40 text-indigo-800 border-indigo-400/30 dark:bg-slate-500/20 dark:text-slate-400",
-                                                        expense.category === 'gas' && "bg-rose-300/40 text-rose-800 border-rose-400/30 dark:bg-rose-500/20 dark:text-rose-400",
-                                                        expense.category === 'electric' && "bg-amber-300/40 text-amber-800 border-amber-400/30 dark:bg-amber-500/20 dark:text-amber-400",
-                                                        expense.category === 'wifi' && "bg-sky-300/40 text-sky-800 border-sky-400/30 dark:bg-blue-500/20 dark:text-blue-400",
-                                                    )}>
-                                                        {expense.category}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 font-black text-slate-900 dark:text-slate-50 tabular-nums text-lg">₹{expense.amount}</td>
-                                                <td className="p-4 text-slate-700 dark:text-slate-400 text-sm font-bold flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-md bg-indigo-300/40 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-indigo-800 dark:text-slate-300 shrink-0">
-                                                        {getMemberName(expense.paidBy).charAt(0).toUpperCase()}
-                                                    </div>
-                                                    {getMemberName(expense.paidBy)}
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    <button
-                                                        onClick={async () => {
-                                                            if (window.confirm('Do you want to delete this specific log permanently?')) {
-                                                                await deleteExpense(expense._id || expense.id);
-                                                            }
-                                                        }}
-                                                        className="p-2 opacity-0 group-hover:opacity-100 bg-rose-300/40 dark:bg-rose-950/30 text-rose-600 dark:text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-lg shadow-rose-500/10 border border-rose-400/20 inline-flex"
-                                                        title="Delete Entry"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {historyItems.length === 0 && (
-                                            <tr>
-                                                <td colSpan={6} className="p-12 text-center">
-                                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-300/40 dark:bg-slate-900/50 mb-4 opacity-50">
-                                                        <Search className="text-slate-500" size={24} />
-                                                    </div>
-                                                    <p className="text-slate-500 dark:text-slate-400 font-bold">No logs found matching current filters.</p>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </Card>
                 </div>
-            </div>
+            )}
         </motion.div>
     );
 };

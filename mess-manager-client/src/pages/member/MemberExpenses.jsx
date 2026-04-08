@@ -393,16 +393,25 @@ const Expenses = () => {
                                     <td className="p-4 font-black text-slate-900 dark:text-slate-100">{expense.description || expense.title}</td>
                                     <td className="p-4">
                                         <span className={cn(
-                                            "text-[10px] px-2.5 py-1 rounded-xl font-black uppercase tracking-widest border",
+                                            "text-[10px] px-2.5 py-1 rounded-xl font-black uppercase tracking-widest border flex items-center gap-1.5 w-fit",
                                             expense.category === 'market' && "bg-blue-300/40 text-blue-800 border-blue-400/30 dark:bg-blue-500/20 dark:text-blue-400",
                                             expense.category === 'spices' && "bg-amber-300/40 text-amber-800 border-amber-400/30 dark:bg-amber-500/20 dark:text-amber-400",
                                             expense.category === 'rice' && "bg-emerald-300/40 text-emerald-800 border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-400",
+                                            expense.category === 'deposit' && "bg-emerald-300/40 text-emerald-800 border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-400",
+                                            expense.category === 'wifi' && "bg-blue-300/40 text-blue-800 border-blue-400/30 dark:bg-blue-500/20 dark:text-blue-400",
+                                            expense.category === 'gas' && "bg-rose-300/40 text-rose-800 border-rose-400/30 dark:bg-rose-500/20 dark:text-rose-400",
+                                            expense.category === 'electric' && "bg-amber-300/40 text-amber-800 border-amber-400/30 dark:bg-amber-500/20 dark:text-amber-400",
                                             expense.category === 'others' && "bg-indigo-300/40 text-indigo-800 border-indigo-400/30 dark:bg-slate-500/20 dark:text-slate-400"
                                         )}>
-                                            {expense.category === 'market' && '🛒 Market'}
-                                            {expense.category === 'spices' && '🌶️ Spices'}
-                                            {expense.category === 'rice' && '🍚 Rice'}
-                                            {expense.category === 'others' && '📦 Other'}
+                                            {expense.category === 'market' && <>🛒 Market</>}
+                                            {expense.category === 'spices' && <>🌶️ Spices</>}
+                                            {expense.category === 'rice' && <>🍚 Rice</>}
+                                            {expense.category === 'deposit' && <>💰 Deposit</>}
+                                            {expense.category === 'wifi' && <>📶 WiFi</>}
+                                            {expense.category === 'gas' && <>🔥 Gas</>}
+                                            {expense.category === 'electric' && <>⚡ Electric</>}
+                                            {expense.category === 'others' && <>📦 Other</>}
+                                            {!['market', 'spices', 'rice', 'deposit', 'wifi', 'gas', 'electric', 'others'].includes(expense.category) && <span>{expense.category}</span>}
                                         </span>
                                     </td>
                                     <td className="p-4 font-black text-slate-900 dark:text-slate-50">₹{expense.amount}</td>

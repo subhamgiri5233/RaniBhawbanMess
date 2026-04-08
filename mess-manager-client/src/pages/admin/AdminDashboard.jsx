@@ -4,7 +4,7 @@ import { useData } from '../../context/DataContext';
 import api from '../../lib/api';
 import Card from '../../components/ui/Card';
 import Clock from '../../components/ui/Clock';
-import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, TrendingUp, ArrowUpRight, Crown, Wallet, ShoppingCart, Flame, Wheat, Package } from 'lucide-react';
+import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, TrendingUp, ArrowUpRight, Crown, Wallet, ShoppingCart, Flame, Wheat, Package, Wifi, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import Skeleton from '../../components/ui/Skeleton';
@@ -21,15 +21,16 @@ const AdminDashboard = () => {
                 m.memberId === memberId || m.memberId === member?.userId
             ).length;
 
-            const memberDeposits = expenses.filter(e =>
-                e.category === 'deposit' && (e.paidBy === member.name || e.paidBy === memberId || e.paidBy === member?.userId)
+            const memberContribs = expenses.filter(e =>
+                (e.paidBy === member.name || e.paidBy === memberId || e.paidBy === member?.userId) &&
+                ['deposit', 'market', 'wifi', 'gas', 'electric', 'spices', 'rice'].includes(e.category)
             );
-            const totalMonthlyDeposit = memberDeposits.reduce((sum, e) => sum + e.amount, 0);
+            const totalMonthlyContrib = memberContribs.reduce((sum, e) => sum + (e.amount || 0), 0);
 
             return {
                 ...member,
                 totalMeals: memberMealCount,
-                monthlyDeposit: totalMonthlyDeposit
+                monthlyDeposit: totalMonthlyContrib
             };
         });
     }, [members, meals, expenses]);
@@ -226,7 +227,7 @@ const AdminDashboard = () => {
                                 <tr className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-indigo-300/30 dark:border-white/5">
                                     <th className="p-4 md:p-6">Member Name</th>
                                     <th className="p-4 md:p-6 text-center">Meals</th>
-                                    <th className="p-4 md:p-6 text-center">Monthly Deposit</th>
+                                    <th className="p-4 md:p-6 text-center">Total Contribution</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-indigo-300/30 dark:divide-white/5">
@@ -391,16 +392,30 @@ const AdminExpenseRow = ({ expense }) => {
             <td className="py-3">
                 <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">{expense.description || expense.title}</div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
-                    <span className={`px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${(expense.category || 'others') === 'market' ? 'bg-blue-300/40 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' :
-                        (expense.category || 'others') === 'spices' ? 'bg-orange-300/40 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400' :
-                            (expense.category || 'others') === 'rice' ? 'bg-emerald-300/40 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' :
-                                'bg-indigo-300/40 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400'
-                        }`}>
-                        {(expense.category || 'others') === 'market' ? '🛒 Market' :
-                            (expense.category || 'others') === 'spices' ? '🌶️ Spices' :
-                                (expense.category || 'others') === 'rice' ? '🍚 Rice' :
-                                    '📦 Other'}
-                    </span>
+                    {(() => {
+                        const cat = (expense.category || 'others').toLowerCase();
+                        const config = {
+                            market: { icon: ShoppingCart, label: 'Market', cls: 'bg-indigo-300/40 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 border-indigo-300/30' },
+                            spices: { icon: Flame, label: 'Spices', cls: 'bg-orange-300/40 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 border-orange-300/30' },
+                            rice: { icon: Wheat, label: 'Rice', cls: 'bg-emerald-300/40 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-300/30' },
+                            deposit: { icon: Wallet, label: 'Deposit', cls: 'bg-blue-300/40 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-300/30' },
+                            wifi: { icon: Wifi, label: 'WiFi', cls: 'bg-blue-300/40 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-300/30' },
+                            gas: { icon: Flame, label: 'Gas', cls: 'bg-rose-300/40 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border-rose-300/30' },
+                            electric: { icon: Zap, label: 'Electric', cls: 'bg-amber-300/40 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-amber-300/30' },
+                            others: { icon: Package, label: 'Other', cls: 'bg-slate-300/40 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400 border-slate-300/30' }
+                        };
+                        const cfg = config[cat] || config.others;
+                        const Icon = cfg.icon;
+                        return (
+                            <span className={cn(
+                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border font-black uppercase tracking-widest text-[9px]",
+                                cfg.cls
+                            )}>
+                                <Icon size={10} />
+                                {cfg.label}
+                            </span>
+                        );
+                    })()}
                     <span className="font-medium">{expense.date}</span>
                 </div>
             </td>
