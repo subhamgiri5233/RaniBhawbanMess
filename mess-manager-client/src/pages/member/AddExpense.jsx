@@ -240,7 +240,7 @@ const AddExpense = () => {
                                                         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-admin:opacity-100 transition-opacity"></div>
                                                         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-admin:opacity-100 transition-opacity"></div>
 
-                                                        <div className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 scrollbar-hide scroll-smooth w-full">
+                                                        <div className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 custom-scrollbar scroll-smooth w-full">
                                                             {[
                                                                 { id: 'spices', n: 'Spices', i: Flame, c: 'orange' },
                                                                 { id: 'rice', n: 'Rice', i: ShoppingBag, c: 'emerald' },
@@ -345,7 +345,7 @@ const AddExpense = () => {
                                                     <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity"></div>
                                                     <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity"></div>
 
-                                                    <div className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 scrollbar-hide scroll-smooth w-full">
+                                                    <div className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 custom-scrollbar scroll-smooth w-full">
                                                         {[
                                                             { id: 'deposit', n: 'Deposit', i: Wallet, c: 'emerald' },
                                                             { id: 'market', n: 'Market', i: ShoppingCart, c: 'sky' },
@@ -416,7 +416,7 @@ const AddExpense = () => {
                                         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-filters:opacity-100 transition-opacity"></div>
                                         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-filters:opacity-100 transition-opacity"></div>
 
-                                        <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-1 w-full">
+                                        <div className="flex items-center gap-4 overflow-x-auto pb-4 custom-scrollbar scroll-smooth px-1 w-full">
                                             {[
                                                 { id: 'all',      label: 'All',      active: 'bg-gradient-to-r from-slate-700 to-slate-900 text-white border-transparent shadow-[0_8px_20px_rgba(15,23,42,0.4)] scale-110' },
                                                 { id: 'deposit',  label: 'Deposit',  active: 'bg-gradient-to-r from-blue-500 to-blue-700 text-white border-transparent shadow-[0_8px_20px_rgba(59,130,246,0.5)] scale-110' },
