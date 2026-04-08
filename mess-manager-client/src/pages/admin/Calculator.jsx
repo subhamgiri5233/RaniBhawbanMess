@@ -99,8 +99,8 @@ const Calculator = () => {
             totalMarket: 0, rice: 0, guest: 0, totalMeal: 1
         };
 
-        // Fetch approved or pending expenses by category
-        const relevantExpenses = (expenses || []).filter(e => e?.status === 'approved' || e?.status === 'pending');
+        // Fetch approved expenses by category
+        const relevantExpenses = (expenses || []).filter(e => e?.status === 'approved');
 
         // Helper to sum by category
         const sumCat = (cat) => relevantExpenses.filter(e => e?.category === cat).reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
@@ -200,18 +200,18 @@ const Calculator = () => {
                     return sum + (guestMealPrices[g?.guestMealType] || 0);
                 }, 0);
 
-                // Calculate market expenses for this member (approved or pending)
+                // Calculate market expenses for this member (approved)
                 const memberMarketExpenses = (expenses || []).filter(e =>
                     e?.category === 'market' &&
-                    (e?.status === 'approved' || e?.status === 'pending') &&
+                    e?.status === 'approved' &&
                     (e?.paidBy === memberId || e?.paidBy === m._id || e?.paidBy === m.id)
                 );
                 const marketTotal = memberMarketExpenses.reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
 
-                // Calculate bill payments for this member (Gas, Wifi, Electric) - approved or pending
+                // Calculate bill payments for this member (Gas, Wifi, Electric) - approved
                 const memberBillExpenses = (expenses || []).filter(e =>
                     ['gas', 'wifi', 'electric'].includes(e?.category) &&
-                    (e?.status === 'approved' || e?.status === 'pending') &&
+                    e?.status === 'approved' &&
                     (e?.paidBy === memberId || e?.paidBy === m._id || e?.paidBy === m.id)
                 );
                 const gasPaid = memberBillExpenses.filter(e => e?.category === 'gas').reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
@@ -227,10 +227,10 @@ const Calculator = () => {
                 const snapshotDeposit = summary ? (Number(summary?.depositBalance) || 0) : 0;
                 const snapshotDepositDate = summary ? summary?.depositDate : (m?.depositDate || '');
 
-                // Calculate general deposit for this member from expenses (approved or pending)
+                // Calculate general deposit for this member from expenses (approved)
                 const memberDepositExpenses = (expenses || []).filter(e =>
                     e?.category === 'deposit' &&
-                    (e?.status === 'approved' || e?.status === 'pending') &&
+                    e?.status === 'approved' &&
                     (e?.paidBy === memberId || e?.paidBy === m._id || e?.paidBy === m.id || e?.paidBy === m.name)
                 );
                 const generalDeposit = memberDepositExpenses.reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);

@@ -31,25 +31,19 @@ const Expenses = () => {
     // Exclude admin market expenses (admin only adds spices/other)
     const filteredExpenses = expenses
         .filter(expense => {
-            // Hide admin market expenses and rejected expenses
+            // Hide admin market expenses
             if (expense.category === 'market' && expense.paidBy === 'admin') return false;
-            if (expense.status === 'rejected') return false;
             const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
             const memberMatch = selectedMember === 'all' || expense.paidBy === selectedMember;
             const monthMatch = matchesMonth(expense.date);
             return categoryMatch && memberMatch && monthMatch;
-        })
-        .sort((a, b) => {
-            // Pending first, then rejected, then approved
-            const order = { pending: 0, rejected: 1, approved: 2 };
-            return (order[a.status] ?? 3) - (order[b.status] ?? 3);
         });
 
-    // Category-wise breakdown - Only count APPROVED expenses for the SELECTED MONTH
-    const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && e.status === 'approved' && matchesMonth(e.date));
-    const spicesExpenses = expenses.filter(e => e.category === 'spices' && e.status === 'approved' && matchesMonth(e.date));
-    const riceExpenses = expenses.filter(e => e.category === 'rice' && e.status === 'approved' && matchesMonth(e.date));
-    const othersExpenses = expenses.filter(e => e.category === 'others' && e.status === 'approved' && matchesMonth(e.date));
+    // Category-wise breakdown for the SELECTED MONTH
+    const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && matchesMonth(e.date));
+    const spicesExpenses = expenses.filter(e => e.category === 'spices' && matchesMonth(e.date));
+    const riceExpenses = expenses.filter(e => e.category === 'rice' && matchesMonth(e.date));
+    const othersExpenses = expenses.filter(e => e.category === 'others' && matchesMonth(e.date));
 
     const categoryStats = [
         {
@@ -94,8 +88,6 @@ const Expenses = () => {
         },
     ];
 
-    const totalApproved = expenses.filter(e => e.status === 'approved' && matchesMonth(e.date)).reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
-    const pendingCount = expenses.filter(e => e.status === 'pending' && matchesMonth(e.date)).length;
 
     // Members who haven't submitted ANY market expense this month
     const memberOnlyList = members.filter(m => m.role === 'member');
@@ -198,7 +190,7 @@ const Expenses = () => {
                                 <div className="px-4 py-2 bg-primary-500/10 dark:bg-primary-500/20 rounded-2xl border border-primary-500/20 backdrop-blur-md">
                                     <p className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center mb-0.5">Total Monthly</p>
                                     <p className="text-2xl font-black text-primary-600 dark:text-primary-400 tracking-tight">₹{(() => {
-                                        const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status !== 'rejected');
+                                        const memberExpenses = expenses.filter(e => e.paidBy === selectedMember);
                                         return memberExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
                                     })()}</p>
                                 </div>
@@ -207,7 +199,7 @@ const Expenses = () => {
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                                 {(() => {
                                     const isAdmin = selectedMember === 'admin';
-                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status !== 'rejected');
+                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember);
                                     
                                     const getCatTotal = (cat) => memberExpenses.filter(e => e.category === cat).reduce((acc, e) => acc + (e.amount || 0), 0);
 

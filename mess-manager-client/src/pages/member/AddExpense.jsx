@@ -469,7 +469,6 @@ const AddExpense = () => {
                                     <div className="relative z-10 flex items-center gap-8">
                                         <div className="text-right">
                                             <p className="font-black text-slate-900 dark:text-slate-50 text-2xl tracking-tighter">₹{expense.amount.toLocaleString()}</p>
-                                            <div className="flex items-center justify-end gap-2 mt-1.5 opacity-60"><div className={cn("w-1.5 h-1.5 rounded-full", expense.status === 'approved' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-amber-500")}></div><span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">{expense.status}</span></div>
                                         </div>
                                         <button onClick={async () => { if (window.confirm('PERMANENT ACTION: Purge this audit trail?')) { await deleteExpense(expense._id || expense.id); } }} className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl transition-all opacity-0 group-hover:opacity-100 shadow-xl shadow-rose-500/20 active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
                                     </div>

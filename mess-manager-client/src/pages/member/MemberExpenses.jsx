@@ -25,16 +25,9 @@ const MemberExpenses = () => {
     // Filter expenses - Show all approved expenses for transparency OR the user's/admin's expenses
     const filteredExpenses = expenses
         .filter(expense => {
-            const isMine = expense.paidBy === myId || expense.paidBy === String(myId);
-            if (!isMine && expense.status !== 'approved') return false;
-            
             const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
             const memberMatch = selectedMember === 'all' || expense.paidBy === selectedMember;
             return categoryMatch && memberMatch;
-        })
-        .sort((a, b) => {
-            const order = { pending: 0, rejected: 1, approved: 2 };
-            return (order[a.status] ?? 3) - (order[b.status] ?? 3);
         });
 
     // Operational Category Stats (Synchronized with Admin Expenses Logic)
@@ -283,7 +276,6 @@ const MemberExpenses = () => {
                                 <th className="px-6 py-4">Item Detail</th>
                                 <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Amount</th>
-                                <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
@@ -323,14 +315,8 @@ const MemberExpenses = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 font-black text-slate-900 dark:text-slate-100 tracking-tight">₹{e.amount}</td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-1.5">
-                                                <div className={cn("w-1.5 h-1.5 rounded-full", e.status === 'approved' ? "bg-emerald-500" : "bg-amber-500")} />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{e.status}</span>
-                                            </div>
-                                        </td>
                                         <td className="px-6 py-4 text-right">
-                                            {e.status === 'pending' && isMine && (
+                                            {isMine && (
                                                 <button 
                                                     onClick={() => window.confirm('Permanently delete this entry?') && deleteExpense(e._id || e.id)}
                                                     className="p-2.5 bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-lg shadow-rose-500/10"
