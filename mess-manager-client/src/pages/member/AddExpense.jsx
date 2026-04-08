@@ -142,8 +142,10 @@ const AddExpense = () => {
                 return isPurchase;
             }
         }
-        // For members, only show their own records
-        return e.paidBy === (user.id || user.userId || user._id) || e.paidBy === user.name;
+        // For members, show their own records AND collective market procurement
+        const isMine = e.paidBy === (user.id || user.userId || user._id) || e.paidBy === user.name;
+        const isCollectiveMarket = e.paidBy === 'admin' && (e.category === 'market' || e.category === 'rice' || e.category === 'spices');
+        return isMine || isCollectiveMarket;
     }).reverse();
 
     const categoryTotal = historyItems.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -484,42 +486,36 @@ const AddExpense = () => {
                                             ))}
                                         </div>
                                     </div>
-
-                                    <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-[1.2rem] bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 self-start transition-all hover:bg-emerald-500/15 group/total">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)] group-hover/total:scale-125 transition-transform"></div>
-                                        <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] whitespace-nowrap">Live Total: ₹{historyItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0).toLocaleString()}</span>
-                                    </div>
-
-                                    {contributorTotals.length > 0 && (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
-                                            {contributorTotals.map((item, idx) => (
-                                                <motion.div
-                                                    key={item.id}
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: idx * 0.05 }}
-                                                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800/40 border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:border-indigo-200 dark:hover:border-white/10 transition-all group/pill hover:scale-[1.02]"
-                                                >
-                                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-xs font-black text-white shadow-lg shadow-indigo-500/20 group-hover/pill:rotate-6 transition-transform">
-                                                        {item.name.charAt(0).toUpperCase()}
-                                                    </div>
-                                                    <div className="flex flex-col min-w-0">
-                                                        <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate">{item.name}</span>
-                                                        <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 tracking-tighter">₹{item.amount.toLocaleString()}</span>
-                                                    </div>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    )}
                                 </div>
                             )}
 
-                            {isAdmin && activeTab !== 'deposit' && (
-                                <div className="flex items-center gap-2.5 py-1.5 px-3 bg-emerald-500/5 border border-emerald-500/20 rounded-full">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Live Audit</span>
+                        {/* Shared Contributor Breakdown - Visible to Admin & Members */}
+                        {contributorTotals.length > 0 && (
+                            <div className="px-6 sm:px-8 py-6 bg-slate-50/30 dark:bg-slate-900/40 border-b border-slate-100 dark:border-white/5">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-500"><User size={12} /></div>
+                                    <h4 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">{filterCategory === 'all' ? 'Contribution Stream' : `${filterCategory} Breakdown`}</h4>
                                 </div>
-                            )}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                    {contributorTotals.map((item, idx) => (
+                                        <motion.div
+                                            key={item.id}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: idx * 0.03 }}
+                                            className="flex items-center gap-3 p-3 bg-white/60 dark:bg-slate-800/60 border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-all group/pill hover:scale-[1.02]"
+                                        >
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-xs font-black text-white shadow-lg shadow-indigo-500/20">
+                                                {item.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate">{item.name}</span>
+                                                <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 tracking-tighter">₹{item.amount.toLocaleString()}</span>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                         <div className="max-h-[700px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 custom-scrollbar">
                             {historyItems.map((expense, idx) => (
