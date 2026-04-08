@@ -149,7 +149,7 @@ const MemberExpenses = () => {
                                 <div className="px-4 py-2 bg-primary-500/10 dark:bg-primary-500/20 rounded-2xl border border-primary-500/20 backdrop-blur-md">
                                     <p className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center mb-0.5">Total Monthly</p>
                                     <p className="text-2xl font-black text-primary-600 dark:text-primary-400 tracking-tight leading-none">₹{(() => {
-                                        const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status === 'approved');
+                                        const memberExpenses = expenses.filter(e => e.paidBy === selectedMember);
                                         return memberExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
                                     })()}</p>
                                 </div>
@@ -158,7 +158,7 @@ const MemberExpenses = () => {
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                                 {(() => {
                                     const isAdmin = selectedMember === 'admin';
-                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember && e.status === 'approved');
+                                    const memberExpenses = expenses.filter(e => e.paidBy === selectedMember);
                                     const getCatVal = (cat) => memberExpenses.filter(e => e.category === cat).reduce((acc, e) => acc + (e.amount || 0), 0);
 
                                     if (isAdmin) {

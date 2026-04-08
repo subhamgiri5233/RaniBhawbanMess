@@ -210,46 +210,6 @@ export const DataProvider = ({ children }) => {
         }
     }, []);
 
-    const approveExpense = useCallback(async (id) => {
-        try {
-            await api.put(`/expenses/${id}`, { status: 'approved' });
-            setExpenses(prev => prev.map(e => (e._id === id || e.id === id) ? { ...e, status: 'approved' } : e));
-        } catch (error) {
-            console.error('Approve Expense failed', error);
-        }
-    }, []);
-
-    const approveAllExpenses = useCallback(async () => {
-        try {
-            const response = await api.put('/expenses/approve-all');
-            setExpenses(prev => prev.map(e => e.status === 'pending' ? { ...e, status: 'approved' } : e));
-            return { success: true, modifiedCount: response.data.modifiedCount };
-        } catch (error) {
-            console.error('Approve all expenses failed', error);
-            return { success: false, error: error.response?.data?.message || 'Failed to approve all expenses' };
-        }
-    }, []);
-
-    const rejectExpense = useCallback(async (id) => {
-        try {
-            await api.put(`/expenses/${id}`, { status: 'rejected' });
-            setExpenses(prev => prev.map(e => (e._id === id || e.id === id) ? { ...e, status: 'rejected' } : e));
-        } catch (error) {
-            console.error('Reject Expense failed', error);
-        }
-    }, []);
-
-    const rejectAllExpenses = useCallback(async () => {
-        try {
-            await api.put('/expenses/reject-all');
-            setExpenses(prev => prev.map(e => e.status === 'pending' ? { ...e, status: 'rejected' } : e));
-            return { success: true };
-        } catch (error) {
-            console.error('Reject all expenses failed', error);
-            return { success: false, error: error.response?.data?.message || 'Failed to reject all expenses' };
-        }
-    }, []);
-
     const updateExpense = useCallback(async (id, updates) => {
         try {
             const response = await api.put(`/expenses/${id}`, updates);
@@ -453,10 +413,6 @@ export const DataProvider = ({ children }) => {
         addGuestMeal,
         removeGuestMeal,
         addExpense,
-        approveExpense,
-        approveAllExpenses,
-        rejectExpense,
-        rejectAllExpenses,
         updateExpense,
         deleteExpense,
         allocateMarketDay,
@@ -481,8 +437,7 @@ export const DataProvider = ({ children }) => {
         managerAllocation, cookingDuties, clearMonthlyData, getMonthlyDataPreview, dailyInfo, settings, 
         refreshExpenses, refreshMembers, refreshMeals, refreshGuestMeals, refreshMarket, refreshData,
         addMember, removeMember, updateMember, addMeal, removeMeal, addGuestMeal,
-        removeGuestMeal, addExpense, approveExpense,
-        approveAllExpenses, rejectExpense, rejectAllExpenses, updateExpense, deleteExpense,
+        removeGuestMeal, addExpense, updateExpense, deleteExpense,
         allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, setManagerForMonth, markCookingFinished, getCookingDuty,
     ]);

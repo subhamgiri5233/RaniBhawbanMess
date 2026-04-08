@@ -6,18 +6,7 @@ const MonthlySharedExpense = require('../models/MonthlySharedExpense');
 const MonthlySummary = require('../models/MonthlySummary');
 const { auth, requireAdmin } = require('../middleware/auth');
 
-// Reject (Delete) all pending expenses - Admin only
-router.delete('/bulk/reject-pending', auth, requireAdmin, async (req, res) => {
-    try {
-        const result = await Expense.deleteMany({ status: 'pending' });
-        res.json({
-            message: 'All pending expenses rejected (deleted) successfully',
-            deletedCount: result.deletedCount
-        });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+
 
 // Get all expenses - Requires authentication (optional: filter by month)
 router.get('/', auth, async (req, res) => {
@@ -92,23 +81,7 @@ router.delete('/admin/clear-all', auth, requireAdmin, async (req, res) => {
     }
 });
 
-// Approve all pending expenses - Admin only
-router.put('/approve-all', auth, requireAdmin, async (req, res) => {
-    try {
-        // Update all pending expenses to approved
-        const result = await Expense.updateMany(
-            { status: 'pending' },
-            { status: 'approved' }
-        );
 
-        res.json({
-            message: 'All pending expenses approved successfully',
-            modifiedCount: result.modifiedCount
-        });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
 
 
 // Clear all expense history - Admin only
@@ -170,7 +143,8 @@ router.delete('/:id', auth, async (req, res) => {
         }
 
         // Permission check: Admin can delete anything, members can only delete their own
-        if (req.user.role !== 'admin' && expense.paidBy !== (req.user.id || req.user.userId)) {
+        const userId = req.user.id || req.user.userId || req.user._id?.toString();
+        if (req.user.role !== 'admin' && expense.paidBy !== userId) {
             return res.status(403).json({ message: 'Not authorized to delete this expense' });
         }
 
@@ -218,19 +192,6 @@ router.post('/bulk-shared', auth, requireAdmin, async (req, res) => {
                     { upsert: true }
                 );
             }
-        }
-
-        // Auto-approve existing manual entries for these categories
-        const categories = Object.keys(bills);
-        for (const category of categories) {
-            await Expense.updateMany(
-                {
-                    date: { $regex: `^${month}` },
-                    category,
-                    status: 'pending'
-                },
-                { $set: { status: 'approved' } }
-            );
         }
 
         res.json({ message: 'Monthly shared expenses saved successfully', data: updatedShared });

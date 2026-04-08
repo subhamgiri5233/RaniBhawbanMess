@@ -417,19 +417,26 @@ const AddExpense = () => {
                                         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-filters:opacity-100 transition-opacity"></div>
 
                                         <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth px-1 w-full">
-                                            {['all', 'deposit', 'market', 'gas', 'wifi', 'electric'].map(cat => (
+                                            {[
+                                                { id: 'all',      label: 'All',      active: 'bg-gradient-to-r from-slate-700 to-slate-900 text-white border-transparent shadow-[0_8px_20px_rgba(15,23,42,0.4)] scale-110' },
+                                                { id: 'deposit',  label: 'Deposit',  active: 'bg-gradient-to-r from-blue-500 to-blue-700 text-white border-transparent shadow-[0_8px_20px_rgba(59,130,246,0.5)] scale-110' },
+                                                { id: 'market',   label: 'Market',   active: 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-[0_8px_20px_rgba(99,102,241,0.5)] scale-110' },
+                                                { id: 'gas',      label: 'Gas',      active: 'bg-gradient-to-r from-amber-400 to-orange-500 text-white border-transparent shadow-[0_8px_20px_rgba(245,158,11,0.5)] scale-110' },
+                                                { id: 'wifi',     label: 'WiFi',     active: 'bg-gradient-to-r from-cyan-400 to-sky-500 text-white border-transparent shadow-[0_8px_20px_rgba(6,182,212,0.5)] scale-110' },
+                                                { id: 'electric', label: 'Electric', active: 'bg-gradient-to-r from-rose-500 to-pink-600 text-white border-transparent shadow-[0_8px_20px_rgba(244,63,94,0.5)] scale-110' },
+                                            ].map(cat => (
                                                 <button
-                                                    key={cat}
-                                                    onClick={() => setFilterCategory(cat)}
+                                                    key={cat.id}
+                                                    onClick={() => setFilterCategory(cat.id)}
                                                     className={cn(
                                                         "flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 border snap-center relative overflow-hidden",
-                                                        filterCategory === cat
-                                                            ? "bg-gradient-to-r from-primary-600 to-indigo-600 text-white border-transparent shadow-[0_8px_25px_rgba(79,70,229,0.5)] scale-110"
+                                                        filterCategory === cat.id
+                                                            ? cat.active
                                                             : "bg-white/50 dark:bg-slate-800/40 text-slate-400 border-slate-100 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-600 dark:hover:text-slate-200"
                                                     )}
                                                 >
-                                                    <span className="relative z-10">{cat}</span>
-                                                    {filterCategory === cat && (
+                                                    <span className="relative z-10">{cat.label}</span>
+                                                    {filterCategory === cat.id && (
                                                         <motion.div layoutId="filter-glow-active" className="absolute inset-0 bg-white/10" />
                                                     )}
                                                 </button>
@@ -458,7 +465,24 @@ const AddExpense = () => {
                                         <div className="flex flex-wrap items-center gap-3 mb-2.5">
                                             <p className="font-black text-slate-900 dark:text-slate-100 tracking-tight uppercase text-[13px]">{expense.description || expense.title}</p>
                                             {expense.category && (
-                                                <span className={cn("text-[9px] px-2.5 py-1 rounded-lg font-black uppercase tracking-widest", expense.category === 'market' ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400" : expense.category === 'spices' ? "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400" : expense.category === 'rice' ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : expense.category === 'deposit' ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" : "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400")}>{expense.category}</span>
+                                                <span className={cn(
+                                                    "text-[9px] px-2.5 py-1 rounded-lg font-black uppercase tracking-widest",
+                                                    expense.category === 'market'   ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400" :
+                                                    expense.category === 'spices'   ? "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400" :
+                                                    expense.category === 'rice'     ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" :
+                                                    expense.category === 'deposit'  ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" :
+                                                    expense.category === 'gas'      ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" :
+                                                    expense.category === 'wifi'     ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400" :
+                                                    expense.category === 'electric' ? "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400" :
+                                                    "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400"
+                                                )}>
+                                                    {expense.category === 'gas'      && '🔥 '}
+                                                    {expense.category === 'wifi'     && '📶 '}
+                                                    {expense.category === 'electric' && '⚡ '}
+                                                    {expense.category === 'deposit'  && '💰 '}
+                                                    {expense.category === 'market'   && '🛒 '}
+                                                    {expense.category}
+                                                </span>
                                             )}
                                         </div>
                                         <div className="flex items-center gap-3">
@@ -470,7 +494,7 @@ const AddExpense = () => {
                                         <div className="text-right">
                                             <p className="font-black text-slate-900 dark:text-slate-50 text-2xl tracking-tighter">₹{expense.amount.toLocaleString()}</p>
                                         </div>
-                                        <button onClick={async () => { if (window.confirm('PERMANENT ACTION: Purge this audit trail?')) { const res = await deleteExpense(expense._id || expense.id); if (res && !res.success) alert(res.error || 'Failed to delete'); } }} className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl transition-all opacity-0 group-hover:opacity-100 shadow-xl shadow-rose-500/20 active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
+                                        <button onClick={async () => { if (window.confirm('Delete this expense permanently?')) { const res = await deleteExpense(expense._id || expense.id); if (res && !res.success) alert(res.error || 'Failed to delete'); } }} className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-400 hover:bg-rose-500 hover:text-white rounded-2xl transition-all shadow-sm shadow-rose-500/10 active:scale-90 flex-shrink-0" title="Delete Expense"><Trash2 size={16} /></button>
                                     </div>
                                     <div className="absolute top-1/2 right-[-2.5%] -translate-y-1/2 opacity-0 group-hover:opacity-[0.05] transition-opacity pointer-events-none -rotate-12 scale-150">
                                         <History size={120} strokeWidth={1} />

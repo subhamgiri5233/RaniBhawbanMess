@@ -1,18 +1,14 @@
 import { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import { Check, Clock, X, TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, AlertTriangle, UserX, Bell, Wallet, Zap, Wifi, ShoppingBag } from 'lucide-react';
+import { TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, Wallet, Zap, Wifi } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import api from '../../lib/api';
 
 const Expenses = () => {
-    const { expenses, members, approveExpense, approveAllExpenses, rejectAllExpenses, deleteExpense, refreshData, globalMonth } = useData();
+    const { expenses, members, deleteExpense, refreshData, globalMonth } = useData();
     const [activeCategory, setActiveCategory] = useState('all');
     const [selectedMember, setSelectedMember] = useState('all');
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [isSendingAlerts, setIsSendingAlerts] = useState(false);
 
     const getMemberName = (paidBy) => {
         if (paidBy === 'admin') return 'Admin';
