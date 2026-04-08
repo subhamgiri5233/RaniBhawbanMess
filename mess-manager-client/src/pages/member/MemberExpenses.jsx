@@ -34,12 +34,12 @@ const MemberExpenses = () => {
     // Operational Category Stats (Synchronized with Admin Expenses Logic)
     const getCatTotal = (cat) => expenses.filter(e => {
         if (cat === 'market' && e.paidBy === 'admin') return false;
-        return e.category === cat && e.status === 'approved';
+        return e.category === cat;
     }).reduce((acc, e) => acc + (e.amount || 0), 0);
     
     const getCatCount = (cat) => expenses.filter(e => {
         if (cat === 'market' && e.paidBy === 'admin') return false;
-        return e.category === cat && e.status === 'approved';
+        return e.category === cat;
     }).length;
 
     const categoryStats = [
@@ -49,7 +49,7 @@ const MemberExpenses = () => {
         { name: 'Others', key: 'others', count: getCatCount('others'), total: getCatTotal('others'), icon: Package, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-900/40' },
     ];
 
-    const myApprovedTotal = expenses.filter(e => e.status === 'approved' && (e.paidBy === myId || e.paidBy === String(myId))).reduce((acc, e) => acc + (e.amount || 0), 0);
+    const myApprovedTotal = expenses.filter(e => (e.paidBy === myId || e.paidBy === String(myId))).reduce((acc, e) => acc + (e.amount || 0), 0);
 
     const monthLabel = globalMonth
         ? new Date(`${globalMonth}-01`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
@@ -277,7 +277,6 @@ const MemberExpenses = () => {
                                 <th className="px-6 py-4">Item Detail</th>
                                 <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Amount</th>
-                                <th className="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -316,21 +315,6 @@ const MemberExpenses = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 font-black text-slate-900 dark:text-slate-100 tracking-tight">₹{e.amount}</td>
-                                        <td className="px-6 py-4 text-right">
-                                            {isMine && (
-                                                <button 
-                                                    onClick={async () => {
-                                                        if (window.confirm('Permanently delete this entry?')) {
-                                                            const res = await deleteExpense(e._id || e.id);
-                                                            if (res && !res.success) alert(res.error || 'Failed to delete');
-                                                        }
-                                                    }}
-                                                    className="p-2.5 bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-lg shadow-rose-500/10"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            )}
-                                        </td>
                                     </tr>
                                 );
                             })}

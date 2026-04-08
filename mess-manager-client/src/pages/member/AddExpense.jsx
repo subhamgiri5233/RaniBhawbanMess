@@ -470,7 +470,6 @@ const AddExpense = () => {
                                         <div className="text-right">
                                             <p className="font-black text-slate-900 dark:text-slate-50 text-2xl tracking-tighter">₹{expense.amount.toLocaleString()}</p>
                                         </div>
-                                        <button onClick={async () => { if (window.confirm('PERMANENT ACTION: Purge this audit trail?')) { await deleteExpense(expense._id || expense.id); } }} className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-2xl transition-all opacity-0 group-hover:opacity-100 shadow-xl shadow-rose-500/20 active:scale-90" title="Purge Record"><Trash2 size={16} /></button>
                                     </div>
                                     <div className="absolute top-1/2 right-[-2.5%] -translate-y-1/2 opacity-0 group-hover:opacity-[0.05] transition-opacity pointer-events-none -rotate-12 scale-150">
                                         <History size={120} strokeWidth={1} />
