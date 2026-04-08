@@ -517,7 +517,8 @@ const AddExpense = () => {
                                     ))}
                                 </div>
                             </div>
-                        </div>
+                        )}
+                    </div>
                         <div className="max-h-[700px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 custom-scrollbar">
                             {historyItems.map((expense, idx) => (
                                 <motion.div key={expense._id || expense.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} className="p-6 sm:p-8 flex justify-between items-center hover:bg-white dark:hover:bg-white/5 transition-all group relative overflow-hidden" >
