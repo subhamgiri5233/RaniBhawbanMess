@@ -125,32 +125,32 @@ const MemberMeals = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 border-l-8 border-l-indigo-500 shadow-sm p-8 rounded-[2rem] border border-slate-200/50 dark:border-white/5 transition-colors">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-8 border-l-indigo-600 shadow-sm p-8 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 transition-colors">
                 <div className="flex-1">
                     <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-tight">My Meal Registry</h1>
-                    <p className="text-[9px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest leading-relaxed">Manage daily presence & guests</p>
+                    <p className="text-[9px] sm:text-xs font-bold text-indigo-500/80 dark:text-slate-400 mt-1 uppercase tracking-widest leading-relaxed">Manage daily presence & guests</p>
                 </div>
 
-                <div className="flex items-center gap-3 bg-[#f4f7ff] dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-100 dark:border-white/5 shadow-inner">
-                    <div className="p-2 bg-white dark:bg-slate-700 rounded-xl shadow-sm">
-                        <Calendar size={18} className="text-indigo-500" />
+                <div className="flex items-center gap-3 bg-indigo-300/40 dark:bg-slate-800/50 p-2 rounded-2xl border border-indigo-400/30 dark:border-white/5 shadow-inner">
+                    <div className="p-2 bg-indigo-300/40 dark:bg-slate-700 rounded-xl shadow-inner border border-indigo-400/20">
+                        <Calendar size={18} className="text-indigo-600" />
                     </div>
                     <input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => handleDateChange(e.target.value)}
-                        className="bg-transparent outline-none text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight"
+                        className="bg-transparent outline-none text-sm font-black text-indigo-900 dark:text-slate-200 uppercase tracking-tight"
                     />
                 </div>
             </div>            {/* Regular Meals Monthly Sheet */}
             <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4 px-6 py-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-500/10 rounded-2xl">
+                <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4 px-6 py-4 bg-indigo-300/40 dark:bg-indigo-950/20 border border-indigo-300/30 dark:border-indigo-500/10 rounded-2xl">
                     <div className="flex items-center gap-2">
                         <UtensilsCrossed size={16} className="text-indigo-600 dark:text-indigo-400" />
                         <span className="text-[10px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Billing Policy:</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-tight">
-                        <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-md font-black">{MIN_MEALS} MEALS MINIMUM</span>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-indigo-600 dark:text-slate-400 uppercase tracking-tight">
+                        <span className="bg-indigo-600 text-white px-2 py-0.5 rounded-md font-black shadow-md">{MIN_MEALS} MEALS MINIMUM</span>
                         PER MONTH
                     </div>
                 </div>
@@ -163,13 +163,13 @@ const MemberMeals = () => {
             </div>
 
             {/* Guest Records Section - MOVED TO BOTTOM */}
-            <div className="space-y-6 pt-12 border-t border-slate-100 dark:border-white/5">
+            <div className="space-y-6 pt-12 border-t border-indigo-300/30 dark:border-white/5">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-primary-100 dark:bg-primary-950/40 rounded-2xl">
-                            <Users size={24} className="text-primary-600 dark:text-primary-400" />
+                         <div className="p-3 bg-indigo-300/40 dark:bg-primary-950/40 rounded-2xl shadow-inner border border-indigo-400/20">
+                            <Users size={24} className="text-indigo-700 dark:text-primary-400" />
                         </div>
-                        <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tighter uppercase">Guest Archive</h2>
+                        <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tighter uppercase leading-none">Guest Archive</h2>
                     </div>
 
                     <Button
@@ -182,14 +182,14 @@ const MemberMeals = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Guest Meals List */}
-                    <Card className="lg:col-span-2 p-0 overflow-hidden shadow-sm border-slate-200/60 dark:border-white/5 relative bg-white dark:bg-slate-900/40">
-                        <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
+                    <Card className="lg:col-span-2 p-0 overflow-hidden shadow-sm border-indigo-300/30 dark:border-white/5 relative bg-indigo-300/40 dark:bg-slate-900/40">
+                        <div className="p-6 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-slate-900/50 flex justify-between items-center">
                             <h3 className="font-black text-slate-800 dark:text-slate-100 uppercase text-[10px] tracking-[0.2em]">Personal Guest Ledger</h3>
                         </div>
-                        <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 scrollbar-hide">
+                        <div className="max-h-[500px] overflow-y-auto divide-y divide-indigo-300/30 dark:divide-white/5 scrollbar-hide">
                             {myGuestMeals.length === 0 ? (
                                 <div className="p-16 text-center">
-                                    <div className="w-16 h-16 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-dashed border-slate-200 dark:border-white/10">
+                                    <div className="w-16 h-16 bg-indigo-300/40 dark:bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-dashed border-indigo-400/30 dark:border-white/10">
                                         <Info size={24} className="text-slate-300" />
                                     </div>
                                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No guest records found for this month</p>
@@ -198,14 +198,14 @@ const MemberMeals = () => {
                                 <AnimatePresence mode="popLayout">
                                     {myGuestMeals.map((guest, idx) => (
                                         <motion.div
-                                            key={guest._id || guest.id}
+                                            key={`guest-${guest._id || idx}`}
                                             initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: idx * 0.03 }}
-                                            className="flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
+                                            className="flex items-center justify-between p-6 bg-indigo-300/40 backdrop-blur-lg dark:bg-slate-900/60 rounded-[1.5rem] hover:bg-indigo-300/60 dark:hover:bg-white/5 transition-all border border-indigo-300/30 dark:border-white/5 group"
                                         >
                                             <div className="flex items-center gap-5">
-                                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[1rem] sm:rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-white/5 flex items-center justify-center text-xl sm:text-2xl group-hover:scale-110 transition-transform duration-500">
+                                                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[1rem] sm:rounded-2xl bg-indigo-300/40 dark:bg-slate-800 shadow-inner border border-indigo-300/30 dark:border-white/5 flex items-center justify-center text-xl sm:text-2xl group-hover:scale-110 transition-transform duration-500">
                                                     {guestMealIcons[guest.guestMealType]}
                                                 </div>
                                                 <div>
@@ -214,7 +214,7 @@ const MemberMeals = () => {
                                                     </p>
                                                     <div className="flex flex-wrap items-center gap-3 mt-1 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                                         <span className="flex items-center gap-1"><Calendar size={10} /> {format(new Date(guest.date), 'MMM dd')}</span>
-                                                        <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-800"></span>
+                                                        <span className="w-1 h-1 rounded-full bg-indigo-300/40 dark:bg-slate-800"></span>
                                                         <span className="flex items-center gap-1">{guest.mealTime === 'lunch' ? '☀️ Lunch' : '🌙 Dinner'}</span>
                                                     </div>
                                                 </div>
@@ -226,7 +226,7 @@ const MemberMeals = () => {
                                                 </div>
                                                 <button
                                                     onClick={() => removeGuestMeal(guest._id || guest.id)}
-                                                    className="opacity-0 group-hover:opacity-100 transition-all text-slate-300 hover:text-red-500 p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-90"
+                                                    className="opacity-0 group-hover:opacity-100 transition-all text-slate-400 hover:text-rose-600 p-2.5 rounded-xl hover:bg-rose-300/40 dark:hover:bg-rose-950/20 active:scale-90"
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>
@@ -240,7 +240,7 @@ const MemberMeals = () => {
 
                     {/* Summary Card */}
                     <Card className="p-0 overflow-hidden shadow-premium border-transparent bg-gradient-to-br from-indigo-600 via-indigo-700 to-primary-800 h-fit relative group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl transition-transform duration-700"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-black/10 rounded-full -mr-16 -mt-16 blur-2xl transition-transform duration-700"></div>
 
                         <div className="p-6 sm:p-8 border-b border-white/10 bg-black/10">
                             <div className="flex items-center gap-3 mb-1">
@@ -251,7 +251,7 @@ const MemberMeals = () => {
                         </div>
 
                         <div className="p-6 sm:p-8 space-y-3 sm:space-y-4">
-                            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md">
+                            <div className="flex items-center justify-between p-4 bg-black/10 rounded-2xl border border-white/10 backdrop-blur-md">
                                 <div>
                                     <p className="font-black text-white text-sm tracking-tight">Guest Liability</p>
                                     <p className="text-[9px] font-black text-indigo-200/50 uppercase tracking-widest mt-0.5">{myGuestMeals.length} External Session{myGuestMeals.length !== 1 ? 's' : ''}</p>
@@ -309,7 +309,7 @@ const MemberMeals = () => {
                             {/* Animated Background Glow */}
                             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-primary-500 to-emerald-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                             
-                            <Card className="p-5 md:p-10 shadow-3xl shadow-black/60 border-white/10 dark:bg-slate-900/90 overflow-hidden relative backdrop-blur-2xl rounded-[2.5rem] flex flex-col max-h-[90vh]">
+                            <Card className="p-5 md:p-10 shadow-3xl shadow-black/60 border-indigo-300/30 bg-indigo-300/40 dark:bg-slate-900/40 overflow-hidden relative backdrop-blur-2xl rounded-[2.5rem] flex flex-col max-h-[90vh]">
                                 <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:scale-125 transition-transform duration-700">
                                     <Sparkles size={160} />
                                 </div>
@@ -323,9 +323,9 @@ const MemberMeals = () => {
                                         <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tighter">Add Guest Record</h3>
                                         <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-tight">Real-time dynamic pricing applied</p>
                                     </div>
-                                    <button
+                                     <button
                                         onClick={() => setShowGuestDialog(false)}
-                                        className="p-2 md:p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-2xl transition-all active:scale-90 hover:rotate-90 duration-300"
+                                        className="p-2 md:p-3 bg-indigo-300/40 dark:bg-slate-800 text-indigo-600 hover:text-rose-600 dark:hover:text-rose-400 rounded-2xl transition-all active:scale-90 hover:rotate-90 duration-300 shadow-inner border border-indigo-400/20"
                                     >
                                         <X size={20} />
                                     </button>
@@ -341,7 +341,7 @@ const MemberMeals = () => {
                                                     type="date"
                                                     value={guestDate}
                                                     onChange={(e) => setGuestDate(e.target.value)}
-                                                    className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-white/5 rounded-2xl focus:ring-4 focus:ring-primary-500/10 outline-none text-slate-900 dark:text-slate-100 font-black uppercase tracking-tight transition-all"
+                                                    className="w-full pl-12 pr-4 py-4 bg-indigo-300/40 dark:bg-slate-950 border border-indigo-300/30 dark:border-white/5 rounded-2xl focus:ring-4 focus:ring-primary-500/10 outline-none text-slate-900 dark:text-slate-100 font-black uppercase tracking-tight transition-all"
                                                 />
                                             </div>
                                         </div>
@@ -358,7 +358,7 @@ const MemberMeals = () => {
                                                             "p-5 rounded-[2rem] border-2 transition-all font-black uppercase tracking-widest text-[10px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
                                                             guestMealTime === time
                                                                 ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
-                                                                : "border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-slate-900/60 text-slate-400 hover:border-slate-200 hover:text-slate-600 dark:hover:text-slate-300"
+                                                                : "border-indigo-400/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-900/60 text-indigo-400 hover:border-indigo-300 hover:text-indigo-600 dark:hover:text-slate-300"
                                                         )}
                                                     >
                                                         <span className="text-lg group-hover:scale-125 transition-transform">{time === 'lunch' ? '☀️' : '🌙'}</span>
@@ -382,7 +382,7 @@ const MemberMeals = () => {
                                                             "p-5 rounded-[2rem] border-2 transition-all group flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
                                                             selectedMealType === key
                                                                 ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
-                                                                : "border-slate-50 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 text-slate-400 hover:border-slate-200 hover:bg-white dark:hover:bg-slate-800"
+                                                                : "border-indigo-200/50 dark:border-white/5 bg-indigo-200/30 dark:bg-slate-950/50 text-indigo-400 hover:border-indigo-300 hover:bg-indigo-300/40 dark:hover:bg-slate-800"
                                                         )}
                                                     >
                                                         {selectedMealType === key && (
@@ -406,7 +406,7 @@ const MemberMeals = () => {
                                 <div className="flex gap-4 mt-8 md:mt-12 pt-6 md:pt-8 border-t border-slate-100 dark:border-white/5 flex-shrink-0">
                                     <button
                                         onClick={() => setShowGuestDialog(false)}
-                                        className="flex-1 py-5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-black uppercase tracking-widest text-[10px] rounded-[1.5rem] hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-500 transition-all active:scale-95"
+                                        className="flex-1 py-5 bg-indigo-300/40 dark:bg-slate-800 text-indigo-500 font-black uppercase tracking-widest text-[10px] rounded-[1.5rem] hover:bg-rose-300/40 dark:hover:bg-rose-950/30 hover:text-rose-600 transition-all active:scale-95"
                                     >
                                         Discard
                                     </button>
@@ -414,7 +414,7 @@ const MemberMeals = () => {
                                         onClick={handleAddGuest}
                                         className="flex-[2] py-5 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] rounded-[1.5rem] shadow-2xl shadow-primary-500/40 hover:shadow-primary-500/60 transition-all active:scale-95 flex items-center justify-center gap-3 relative overflow-hidden group/btn"
                                     >
-                                        <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000"></div>
+                                        <div className="absolute inset-0 bg-indigo-300/40 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000"></div>
                                         Confirm Registration <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
                                     </button>
                                 </div>

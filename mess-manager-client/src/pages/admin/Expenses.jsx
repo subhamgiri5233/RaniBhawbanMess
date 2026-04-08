@@ -16,11 +16,14 @@ const Expenses = () => {
         return member?.name || 'Unknown';
     };
 
-    // Robust month matching (handles YYYY-MM-DD and DD-MM-YYYY)
+    // Robust month matching (handles YYYY-MM-DD and DD-MM-YYYY smoothly)
     const matchesMonth = (dateStr) => {
         if (!dateStr || !globalMonth) return false;
-        return dateStr.includes(globalMonth) || 
-               (dateStr.includes('-') && dateStr.split('-').reverse().join('-').includes(globalMonth));
+        // Normalize separators to handle inconsistent data (Mirroring DataContext fix)
+        const d = String(dateStr).replace(/[ /]/g, '-');
+        const gm = globalMonth.replace(/[ /]/g, '-');
+        return d.includes(gm) ||
+            (d.includes('-') && d.split('-').reverse().join('-').includes(gm));
     };
 
     // Filter expenses based on category and member
@@ -28,13 +31,31 @@ const Expenses = () => {
     const filteredExpenses = expenses
         .filter(expense => {
             // Hide admin market expenses
-            if (expense.category === 'market' && expense.paidBy === 'admin') return false;
+            if (expense.category === 'market' && String(expense.paidBy).toLowerCase() === 'admin') return false;
+            
             const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
-            const memberMatch = selectedMember === 'all' || expense.paidBy === selectedMember;
+            const selMember = (members || []).find(m => (m._id || m.id) === selectedMember);
+            
+            const memberMatch = selectedMember === 'all' || 
+                              String(expense.paidBy).toLowerCase() === String(selectedMember).toLowerCase() || 
+                              (selMember && String(expense.paidBy).toLowerCase() === String(selMember.name).toLowerCase());
+            
             const monthMatch = matchesMonth(expense.date);
             return categoryMatch && memberMatch && monthMatch;
         })
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
+        .sort((a, b) => {
+            const parseDate = (d) => {
+                if (!d) return 0;
+                const s = String(d).replace(/[ /]/g, '-');
+                const parts = s.split('-');
+                if (parts.length === 3 && parts[0].length < 4) {
+                    // Reorder DD-MM-YYYY to YYYY-MM-DD for browser safety
+                    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+                }
+                return new Date(s).getTime();
+            };
+            return parseDate(b.date) - parseDate(a.date);
+        });
 
     // Category-wise breakdown for the SELECTED MONTH
     const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && matchesMonth(e.date));
@@ -50,8 +71,8 @@ const Expenses = () => {
             total: marketExpenses.reduce((acc, e) => acc + e.amount, 0),
             icon: ShoppingCart,
             color: 'text-indigo-600 dark:text-indigo-400',
-            bg: 'bg-indigo-50 dark:bg-indigo-950/20',
-            border: 'border-indigo-200/50 dark:border-indigo-800/30'
+            bg: 'bg-indigo-300/40 dark:bg-indigo-950/20',
+            border: 'border-indigo-300/30 dark:border-indigo-800/30'
         },
         {
             name: 'Spices',
@@ -60,8 +81,8 @@ const Expenses = () => {
             total: spicesExpenses.reduce((acc, e) => acc + e.amount, 0),
             icon: Flame,
             color: 'text-orange-600 dark:text-orange-400',
-            bg: 'bg-orange-50 dark:bg-orange-950/20',
-            border: 'border-orange-200/50 dark:border-orange-800/30'
+            bg: 'bg-orange-300/40 dark:bg-orange-950/20',
+            border: 'border-orange-300/30 dark:border-orange-800/30'
         },
         {
             name: 'Rice',
@@ -70,8 +91,8 @@ const Expenses = () => {
             total: riceExpenses.reduce((acc, e) => acc + e.amount, 0),
             icon: Wheat,
             color: 'text-emerald-600 dark:text-emerald-400',
-            bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-            border: 'border-emerald-200/50 dark:border-emerald-800/30'
+            bg: 'bg-emerald-300/40 dark:bg-emerald-950/20',
+            border: 'border-emerald-300/30 dark:border-emerald-800/30'
         },
         {
             name: 'Other',
@@ -80,8 +101,8 @@ const Expenses = () => {
             total: othersExpenses.reduce((acc, e) => acc + e.amount, 0),
             icon: Package,
             color: 'text-slate-600 dark:text-slate-400',
-            bg: 'bg-slate-50 dark:bg-slate-900/40',
-            border: 'border-slate-200/50 dark:border-white/5'
+            bg: 'bg-indigo-300/40 dark:bg-slate-900/40',
+            border: 'border-indigo-400/30 dark:border-white/5'
         },
     ];
 
@@ -128,8 +149,8 @@ const Expenses = () => {
                             className={cn(
                                 "p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group cursor-pointer relative overflow-hidden",
                                 activeCategory === stat.key
-                                    ? `ring-4 ring-offset-2 dark:ring-offset-slate-900 ${stat.color.replace('text-', 'ring-').split(' ')[0]} bg-white dark:bg-slate-900`
-                                    : cn("bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5", stat.bg)
+                                    ? `ring-4 ring-offset-2 dark:ring-offset-slate-900 ${stat.color.replace('text-', 'ring-').split(' ')[0]} bg-indigo-300/40 dark:bg-slate-900`
+                                    : cn("bg-indigo-300/40 dark:bg-slate-900/60 border-indigo-300/30 dark:border-white/5", stat.bg)
                             )}
                             onClick={() => setActiveCategory(activeCategory === stat.key ? 'all' : stat.key)}
                         >
@@ -144,12 +165,12 @@ const Expenses = () => {
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-2">
-                                        <div className={cn("p-2 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
+                                        <div className={cn("p-2 rounded-xl bg-white/20 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
                                             <Icon size={16} />
                                         </div>
                                         <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{stat.name}</p>
                                     </div>
-                                    <span className="text-[9px] bg-white/60 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full font-black tracking-wider uppercase border border-slate-200/50 dark:border-white/5 shadow-sm">
+                                    <span className="text-[9px] bg-white/30 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full font-black tracking-wider uppercase border border-white/20 dark:border-white/5 shadow-sm">
                                         {stat.count} items
                                     </span>
                                 </div>
@@ -163,7 +184,7 @@ const Expenses = () => {
             </div>
 
             {/* Member Summary Card */}
-            <Card className="p-6 bg-gradient-to-br from-primary-50 to-white dark:from-slate-900 dark:to-slate-900/50 border-primary-200/50 dark:border-primary-900/30 overflow-hidden relative">
+            <Card className="p-6 bg-gradient-to-br from-indigo-300/40 to-indigo-300/30 dark:from-slate-900 dark:to-slate-900/50 border-primary-300/30 dark:border-primary-900/30 overflow-hidden relative shadow-xl">
                 {/* Background Decor */}
                 <div className="absolute top-0 right-0 p-8 opacity-5 dark:opacity-10 pointer-events-none">
                     <TrendingUp size={120} />
@@ -184,7 +205,7 @@ const Expenses = () => {
                                         {getMemberName(selectedMember)}
                                     </h3>
                                 </div>
-                                <div className="px-4 py-2 bg-primary-500/10 dark:bg-primary-500/20 rounded-2xl border border-primary-500/20 backdrop-blur-md">
+                                <div className="px-4 py-2 bg-primary-300/40 dark:bg-primary-500/20 rounded-2xl border border-primary-500/20 backdrop-blur-md">
                                     <p className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center mb-0.5">Total Monthly</p>
                                     <p className="text-2xl font-black text-primary-600 dark:text-primary-400 tracking-tight">₹{(() => {
                                         const memberExpenses = expenses.filter(e => e.paidBy === selectedMember);
@@ -197,7 +218,7 @@ const Expenses = () => {
                                 {(() => {
                                     const isAdmin = selectedMember === 'admin';
                                     const memberExpenses = expenses.filter(e => e.paidBy === selectedMember);
-                                    
+
                                     const getCatTotal = (cat) => memberExpenses.filter(e => e.category === cat).reduce((acc, e) => acc + (e.amount || 0), 0);
 
                                     if (isAdmin) {
@@ -207,19 +228,19 @@ const Expenses = () => {
                                             { label: 'Others', val: getCatTotal('others'), icon: Package, color: 'slate' }
                                         ];
                                         return stats.filter(s => s.val > 0).map(s => (
-                                            <div key={s.label} className={cn("p-4 rounded-3xl border transition-all hover:scale-[1.02]", 
-                                                s.color === 'emerald' ? "bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20" :
-                                                s.color === 'orange' ? "bg-orange-50/50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20" :
-                                                "bg-slate-50/50 dark:bg-slate-500/10 border-slate-100 dark:border-slate-500/20"
+                                            <div key={s.label} className={cn("p-4 rounded-3xl border transition-all hover:scale-[1.02]",
+                                                s.color === 'emerald' ? "bg-emerald-300/40 dark:bg-emerald-500/10 border-emerald-300/30 dark:border-emerald-500/20" :
+                                                    s.color === 'orange' ? "bg-orange-300/40 dark:bg-orange-500/10 border-orange-300/30 dark:border-orange-500/20" :
+                                                        "bg-indigo-300/40 dark:bg-slate-500/10 border-indigo-300/30 dark:border-slate-500/20"
                                             )}>
-                                                <s.icon size={18} className={cn("mb-3", 
+                                                <s.icon size={18} className={cn("mb-3",
                                                     s.color === 'emerald' ? "text-emerald-500" :
-                                                    s.color === 'orange' ? "text-orange-500" : "text-slate-500"
+                                                        s.color === 'orange' ? "text-orange-500" : "text-slate-500"
                                                 )} />
                                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{s.label}</p>
                                                 <p className={cn("text-xl font-black tracking-tight",
                                                     s.color === 'emerald' ? "text-emerald-600 dark:text-emerald-400" :
-                                                    s.color === 'orange' ? "text-orange-600 dark:text-orange-400" : "text-slate-600 dark:text-slate-400"
+                                                        s.color === 'orange' ? "text-orange-600 dark:text-orange-400" : "text-slate-600 dark:text-slate-400"
                                                 )}>₹{s.val}</p>
                                             </div>
                                         ));
@@ -232,25 +253,25 @@ const Expenses = () => {
                                             { label: 'Electric', val: getCatTotal('electric'), icon: Zap, color: 'rose' }
                                         ];
                                         return stats.filter(s => s.val > 0).map(s => (
-                                            <div key={s.label} className={cn("p-4 rounded-3xl border transition-all hover:scale-[1.02]", 
-                                                s.color === 'indigo' ? "bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20" :
-                                                s.color === 'emerald' ? "bg-emerald-50/50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20" :
-                                                s.color === 'amber' ? "bg-amber-50/50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20" :
-                                                s.color === 'cyan' ? "bg-cyan-50/50 dark:bg-cyan-500/10 border-cyan-100 dark:border-cyan-500/20" :
-                                                "bg-rose-50/50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20"
+                                            <div key={s.label} className={cn("p-4 rounded-3xl border transition-all hover:scale-[1.02]",
+                                                s.color === 'indigo' ? "bg-indigo-300/40 dark:bg-indigo-500/10 border-indigo-300/30 dark:border-indigo-500/20" :
+                                                    s.color === 'emerald' ? "bg-emerald-300/40 dark:bg-emerald-500/10 border-emerald-300/30 dark:border-emerald-500/20" :
+                                                        s.color === 'amber' ? "bg-amber-300/40 dark:bg-amber-500/10 border-amber-300/30 dark:border-amber-500/20" :
+                                                            s.color === 'cyan' ? "bg-cyan-300/40 dark:bg-cyan-500/10 border-cyan-300/30 dark:border-cyan-500/20" :
+                                                                "bg-rose-300/40 dark:bg-rose-500/10 border-rose-300/30 dark:border-rose-500/20"
                                             )}>
-                                                <s.icon size={18} className={cn("mb-3", 
+                                                <s.icon size={18} className={cn("mb-3",
                                                     s.color === 'indigo' ? "text-indigo-500" :
-                                                    s.color === 'emerald' ? "text-emerald-500" :
-                                                    s.color === 'amber' ? "text-amber-500" :
-                                                    s.color === 'cyan' ? "text-cyan-500" : "text-rose-500"
+                                                        s.color === 'emerald' ? "text-emerald-500" :
+                                                            s.color === 'amber' ? "text-amber-500" :
+                                                                s.color === 'cyan' ? "text-cyan-500" : "text-rose-500"
                                                 )} />
                                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{s.label}</p>
                                                 <p className={cn("text-xl font-black tracking-tight",
                                                     s.color === 'indigo' ? "text-indigo-600 dark:text-indigo-400" :
-                                                    s.color === 'emerald' ? "text-emerald-600 dark:text-emerald-400" :
-                                                    s.color === 'amber' ? "text-amber-600 dark:text-amber-400" :
-                                                    s.color === 'cyan' ? "text-cyan-600 dark:text-cyan-400" : "text-rose-600 dark:text-rose-400"
+                                                        s.color === 'emerald' ? "text-emerald-600 dark:text-emerald-400" :
+                                                            s.color === 'amber' ? "text-amber-600 dark:text-amber-400" :
+                                                                s.color === 'cyan' ? "text-cyan-600 dark:text-cyan-400" : "text-rose-600 dark:text-rose-400"
                                                 )}>₹{s.val}</p>
                                             </div>
                                         ));
@@ -260,7 +281,7 @@ const Expenses = () => {
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center py-10 text-center">
-                            <div className="w-20 h-20 bg-primary-500/10 dark:bg-primary-500/20 rounded-[2.5rem] flex items-center justify-center mb-6 rotate-12 transition-transform hover:rotate-0">
+                            <div className="w-20 h-20 bg-primary-300/40 dark:bg-primary-500/20 rounded-[2.5rem] flex items-center justify-center mb-6 rotate-12 transition-transform hover:rotate-0 border border-primary-400/20 shadow-lg shadow-primary-500/10">
                                 <Filter className="text-primary-500" size={32} />
                             </div>
                             <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Mission Control</h4>
@@ -272,66 +293,64 @@ const Expenses = () => {
 
 
             {/* Filters */}
-            <Card className="p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-slate-100 dark:border-white/5">
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <Filter size={16} className="text-primary-600 dark:text-primary-400" />
-                        <span className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">Filters:</span>
-                    </div>
+            <Card className="px-5 py-4 bg-slate-100 dark:bg-slate-950/80 backdrop-blur-md border border-slate-200 dark:border-white/5 mb-6 shadow-sm rounded-2xl flex flex-wrap items-center gap-5">
+                <div className="flex items-center gap-2.5">
+                    <Filter size={16} className="text-primary-600 dark:text-primary-500/80" />
+                    <span className="text-[13px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.15em]">Filters:</span>
+                </div>
 
-                    {/* Category Tabs */}
-                    <div className="flex overflow-x-auto scrollbar-hide gap-2 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl max-w-full">
+                {/* Category Tabs */}
+                <div className="flex items-center overflow-x-auto scrollbar-hide gap-1 p-1 bg-slate-200/60 dark:bg-slate-800/40 rounded-xl">
+                    <button
+                        onClick={() => setActiveCategory('all')}
+                        className={cn(
+                            "flex-shrink-0 px-4 py-1.5 rounded-lg text-[11px] font-black transition-all duration-300 uppercase tracking-widest",
+                            activeCategory === 'all'
+                                ? "bg-white dark:bg-slate-700/80 text-primary-600 dark:text-primary-400 shadow-sm"
+                                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-white/5"
+                        )}
+                    >
+                        All
+                    </button>
+                    {categoryStats.map(cat => (
                         <button
-                            onClick={() => setActiveCategory('all')}
+                            key={cat.key}
+                            onClick={() => setActiveCategory(cat.key)}
                             className={cn(
-                                "flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-black transition-all duration-200 uppercase tracking-wider",
-                                activeCategory === 'all'
-                                    ? "bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm"
-                                    : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                                "flex-shrink-0 px-4 py-1.5 rounded-lg text-[11px] font-black transition-all duration-300 uppercase tracking-widest",
+                                activeCategory === cat.key
+                                    ? "bg-white dark:bg-slate-700/80 text-primary-600 dark:text-primary-400 shadow-sm"
+                                    : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-white/5"
                             )}
                         >
-                            All
+                            {cat.name}
                         </button>
-                        {categoryStats.map(cat => (
-                            <button
-                                key={cat.key}
-                                onClick={() => setActiveCategory(cat.key)}
-                                className={cn(
-                                    "flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-black transition-all duration-200 uppercase tracking-wider",
-                                    activeCategory === cat.key
-                                        ? "bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm"
-                                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
-                                )}
-                            >
-                                {cat.name}
-                            </button>
-                        ))}
-                    </div>
+                    ))}
+                </div>
 
-                    {/* Member Filter */}
-                    <div className="flex-1 min-w-[200px]">
-                        <select
-                            value={selectedMember}
-                            onChange={(e) => setSelectedMember(e.target.value)}
-                            className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-                        >
-                            <option value="all">All Members</option>
-                            <option value="admin">Admin</option>
-                            {members.filter(m => m.role === 'member').map(member => (
-                                <option key={member._id || member.id} value={member._id || member.id}>
-                                    {member.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                {/* Member Filter */}
+                <div className="flex-1 min-w-[200px] ml-auto">
+                    <select
+                        value={selectedMember}
+                        onChange={(e) => setSelectedMember(e.target.value)}
+                        className="w-full px-4 py-2 bg-slate-200/50 dark:bg-slate-800/40 border-none rounded-xl text-[11px] font-black tracking-widest uppercase text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800"
+                    >
+                        <option value="all">All Members</option>
+                        <option value="admin">Admin</option>
+                        {members.filter(m => m.role === 'member').map(member => (
+                            <option key={member._id || member.id} value={member._id || member.id}>
+                                {member.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </Card>
 
             {/* Expense Table */}
-            <Card className="overflow-hidden p-0 border-slate-100 dark:border-white/5">
+            <Card className="overflow-hidden p-0 border-indigo-300/30 dark:border-white/5">
                 <div className="overflow-auto max-h-[600px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                     <table className="w-full text-left relative border-collapse">
-                        <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900 shadow-sm text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[11px] border-b border-slate-100 dark:border-white/5">
+                        <thead className="sticky top-0 z-10 bg-indigo-300/40 dark:bg-slate-900 shadow-sm text-indigo-700 dark:text-slate-400 font-black uppercase tracking-widest text-[11px] border-b border-indigo-300/30 dark:border-white/5">
                             <tr>
                                 <th className="p-4">Date</th>
                                 <th className="p-4">Description</th>
@@ -341,18 +360,18 @@ const Expenses = () => {
                                 <th className="p-4 text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                        <tbody className="divide-y divide-indigo-300/30 dark:divide-white/5">
                             {filteredExpenses.map(expense => (
-                                <tr key={expense._id || expense.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                                <tr key={expense._id || expense.id} className="hover:bg-indigo-300/40 dark:hover:bg-slate-800/50 transition-colors group">
                                     <td className="p-4 text-slate-500 dark:text-slate-400 text-sm font-bold">{expense.date}</td>
                                     <td className="p-4 font-black text-slate-900 dark:text-slate-100">{expense.description || expense.title}</td>
                                     <td className="p-4">
                                         <span className={cn(
-                                            "text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest",
-                                            expense.category === 'market' && "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400",
-                                            expense.category === 'spices' && "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400",
-                                            expense.category === 'rice' && "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400",
-                                            expense.category === 'others' && "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400"
+                                            "text-[10px] px-2.5 py-1 rounded-xl font-black uppercase tracking-widest border",
+                                            expense.category === 'market' && "bg-blue-300/40 text-blue-800 border-blue-400/30 dark:bg-blue-500/20 dark:text-blue-400",
+                                            expense.category === 'spices' && "bg-amber-300/40 text-amber-800 border-amber-400/30 dark:bg-amber-500/20 dark:text-amber-400",
+                                            expense.category === 'rice' && "bg-emerald-300/40 text-emerald-800 border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-400",
+                                            expense.category === 'others' && "bg-indigo-300/40 text-indigo-800 border-indigo-400/30 dark:bg-slate-500/20 dark:text-slate-400"
                                         )}>
                                             {expense.category === 'market' && '🛒 Market'}
                                             {expense.category === 'spices' && '🌶️ Spices'}
@@ -369,7 +388,7 @@ const Expenses = () => {
                                                     await deleteExpense(expense._id || expense.id);
                                                 }
                                             }}
-                                            className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10"
+                                            className="p-2 bg-rose-300/40 dark:bg-rose-950/30 text-rose-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10 border border-rose-400/20"
                                             title="Delete Expense"
                                         >
                                             <Trash2 size={16} />

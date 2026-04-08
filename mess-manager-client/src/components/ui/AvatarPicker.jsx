@@ -108,7 +108,7 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
                     <img
                         src={currentSrc}
                         alt="Profile"
-                        className="w-16 h-16 sm:w-20 sm:h-20 aspect-square rounded-full border-4 border-indigo-100 dark:border-indigo-900/40 shadow-lg group-hover:border-indigo-400 transition-all object-cover shrink-0"
+                        className="w-16 h-16 sm:w-20 sm:h-20 aspect-square rounded-full border-4 border-indigo-400/30 dark:border-indigo-900/40 shadow-lg group-hover:border-indigo-400 transition-all object-cover shrink-0"
                     />
                     <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Camera size={20} className="text-white" />
@@ -140,10 +140,10 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
                                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                                 animate={{ scale: 1, opacity: 1, y: 0 }}
                                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                                className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 w-full max-w-md overflow-hidden"
+                                className="bg-indigo-300/90 dark:bg-slate-900 rounded-3xl shadow-2xl border border-indigo-400/30 dark:border-white/10 w-full max-w-md overflow-hidden"
                             >
                                 {/* Header */}
-                                <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-indigo-50/50 dark:bg-slate-800/50">
+                                <div className="p-6 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-800/50">
                                     <div>
                                         <h3 className="text-lg font-black text-slate-900 dark:text-slate-50 tracking-tight">Choose Your Avatar</h3>
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Pick a style or upload from gallery</p>
@@ -154,14 +154,14 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
                                 </div>
 
                                 {/* Tabs */}
-                                <div className="flex gap-1 p-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-white/5">
+                                <div className="flex gap-1 p-3 bg-indigo-200/30 dark:bg-slate-800/50 border-b border-indigo-300/30 dark:border-white/5">
                                     <button
                                         onClick={() => setTab('preset')}
                                         className={cn(
                                             "flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
                                             tab === 'preset'
-                                                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
-                                                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                                ? "bg-indigo-300/60 dark:bg-slate-700 text-indigo-700 dark:text-indigo-400 shadow-sm"
+                                                : "text-indigo-500/60 hover:text-indigo-700 dark:hover:text-slate-300"
                                         )}
                                     >
                                         <Smile size={14} /> Avatars

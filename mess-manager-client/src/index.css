@@ -9,7 +9,8 @@
 
   body {
     @apply text-slate-900 dark:bg-[#010411] dark:text-slate-50 antialiased transition-colors duration-300;
-    background: #eceaff;
+    background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+    background-attachment: fixed;
   }
 
   /* Hide number input arrows */
@@ -36,6 +37,31 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Rani Bhawban Design (RBD) Tokens */
+  .rb-card {
+    @apply bg-indigo-100/90 dark:bg-slate-900 border-indigo-200/50 dark:border-white/5 shadow-premium rounded-[3rem] transition-all duration-300 backdrop-blur-xl;
+  }
+
+  .rb-header {
+    @apply font-[900] text-slate-900 dark:text-slate-50 tracking-[-0.05em] uppercase leading-none;
+  }
+
+  .rb-shadow-blue {
+    box-shadow: 0 30px 60px -15px rgba(59, 130, 246, 0.25);
+  }
+
+  .rb-shadow-orange {
+    box-shadow: 0 30px 60px -15px rgba(249, 115, 22, 0.25);
+  }
+
+  .rb-shadow-emerald {
+    box-shadow: 0 30px 60px -15px rgba(16, 185, 129, 0.25);
+  }
+
+  .rb-shadow-indigo {
+    box-shadow: 0 30px 60px -15px rgba(99, 102, 241, 0.25);
   }
 
   .scrollbar-hide {
@@ -106,7 +132,7 @@
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background-color: #4f46e5 !important; 
-      border: 2px solid white !important;
+      border: 2px solid #e0e7ff !important;
       border-radius: 9999px !important;
       background-clip: padding-box !important;
       box-shadow: 0 0 14px rgba(79, 70, 229, 0.4) !important;

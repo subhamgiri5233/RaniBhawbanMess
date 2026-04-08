@@ -46,9 +46,9 @@ const LoginForm = ({ onSuccess }) => {
                     className="space-y-6"
                 >
                     {/* Role Switcher */}
-                    <div className="flex bg-slate-100 dark:bg-white/5 p-1.5 rounded-2xl mb-8 relative border border-slate-200 dark:border-white/5 backdrop-blur-md">
+                    <div className="flex bg-indigo-300/40 dark:bg-indigo-950/30 p-1.5 rounded-2xl mb-8 relative border border-indigo-400/30 dark:border-indigo-500/30 backdrop-blur-md shadow-inner">
                         <motion.div
-                            className="absolute top-1.5 bottom-1.5 bg-white dark:bg-indigo-500/20 shadow-sm dark:shadow-[0_0_20px_rgba(99,102,241,0.2)] rounded-xl border border-slate-200 dark:border-white/10"
+                            className="absolute top-1.5 bottom-1.5 bg-indigo-100 dark:bg-indigo-500/20 shadow-md dark:shadow-[0_0_20px_rgba(99,102,241,0.2)] rounded-xl border border-indigo-300 dark:border-indigo-400/30"
                             initial={false}
                             animate={{
                                 left: role === 'admin' ? '6px' : '50%',
@@ -58,8 +58,8 @@ const LoginForm = ({ onSuccess }) => {
                         />
                         <button
                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 relative z-10 ${role === 'admin'
-                                ? 'text-indigo-600 dark:text-white font-bold'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                ? 'text-indigo-700 dark:text-indigo-100 font-bold'
+                                : 'text-indigo-500/80 dark:text-indigo-300/60 hover:text-indigo-800 dark:hover:text-indigo-200'
                                 }`}
                             onClick={() => { setRole('admin'); setError(''); setUserId(''); setPassword(''); }}
                         >
@@ -73,8 +73,8 @@ const LoginForm = ({ onSuccess }) => {
                         </button>
                         <button
                             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 relative z-10 ${role === 'member'
-                                ? 'text-indigo-600 dark:text-white font-bold'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                ? 'text-indigo-700 dark:text-indigo-100 font-bold'
+                                : 'text-indigo-500/80 dark:text-indigo-300/60 hover:text-indigo-800 dark:hover:text-indigo-200'
                                 }`}
                             onClick={() => { setRole('member'); setError(''); setUserId(''); setPassword(''); }}
                         >
@@ -133,7 +133,7 @@ const LoginForm = ({ onSuccess }) => {
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
-                                    className="flex items-center gap-2 text-red-400 text-sm font-medium bg-red-500/10 p-4 rounded-2xl border border-red-500/20 backdrop-blur-md"
+                                    className="flex items-center gap-2 text-indigo-900 dark:text-indigo-100 text-sm font-medium bg-indigo-200/50 dark:bg-indigo-900/40 p-4 rounded-2xl border border-indigo-400/30 backdrop-blur-md"
                                 >
                                     <AlertCircle size={16} />
                                     {error}
@@ -147,14 +147,14 @@ const LoginForm = ({ onSuccess }) => {
                             transition={{ delay: 0.2 }}
                         >
                             <Button
-                                className="w-full py-5 text-lg font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 shadow-[0_10px_40px_rgba(99,102,241,0.3)] border border-white/20 rounded-[1.5rem] transform active:scale-[0.98] transition-all duration-300"
+                                className="w-full py-5 text-lg font-black bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 shadow-[0_10px_40px_rgba(99,102,241,0.3)] border border-indigo-500/20 rounded-[1.5rem] transform active:scale-[0.98] transition-all duration-300 uppercase tracking-widest text-xs"
                                 size="lg"
                                 type="submit"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
                                     <div className="flex items-center justify-center gap-2">
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <div className="w-5 h-5 border-2 border-indigo-200/30 border-t-indigo-100 rounded-full animate-spin" />
                                         Logging in...
                                     </div>
                                 ) : (

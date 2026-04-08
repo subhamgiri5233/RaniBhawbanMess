@@ -199,7 +199,7 @@ const Settings = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <RefreshCw className="animate-spin text-indigo-600" size={32} />
+                <RefreshCw className="animate-spin text-primary-500" size={32} />
             </div>
         );
     }
@@ -207,15 +207,15 @@ const Settings = () => {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-2">
-                    <SettingsIcon size={28} className="text-primary-600 dark:text-primary-400" />
+                <h1 className="text-3xl sm:text-5xl rb-header flex items-center gap-3">
+                    <SettingsIcon size={32} className="text-primary-600 dark:text-primary-400" />
                     Admin Settings
                 </h1>
             </div>
 
             {/* Account Information */}
-            <Card className="p-6 border-l-4 border-l-primary-500 bg-white/90 dark:bg-slate-900/40 border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
-                <h2 className="text-lg font-black text-slate-900 dark:text-primary-100 tracking-tight mb-4 flex items-center gap-2">
+            <Card className="rb-card rb-shadow-blue p-8 border-l-8 border-l-primary-500">
+                <h2 className="text-xl rb-header mb-6 flex items-center gap-2">
                     <Shield size={20} className="text-primary-600 dark:text-primary-400" />
                     Account Information
                 </h2>
@@ -229,8 +229,8 @@ const Settings = () => {
             </Card>
 
             {/* Change Admin Login Credentials */}
-            <Card className="p-6 border-l-4 border-l-emerald-500 bg-white/90 dark:bg-slate-900/40 border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
-                <h2 className="text-lg font-black text-slate-900 dark:text-emerald-50 tracking-tight mb-4 flex items-center gap-2">
+            <Card className="rb-card rb-shadow-emerald p-8 border-l-8 border-l-emerald-500">
+                <h2 className="text-xl rb-header mb-6 flex items-center gap-2">
                     <Key size={20} className="text-emerald-600 dark:text-emerald-400" />
                     Change Admin Login Credentials
                 </h2>
@@ -293,8 +293,8 @@ const Settings = () => {
                         </Button>
                     </div>
 
-                    <div className="mt-6 p-4 bg-emerald-100/50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl">
-                        <p className="text-[10px] text-emerald-800 dark:text-emerald-300 font-black uppercase tracking-widest flex items-center gap-2">
+                     <div className="mt-6 p-4 bg-emerald-200/50 dark:bg-emerald-950/30 border border-emerald-300/30 dark:border-emerald-800/50 rounded-xl shadow-sm">
+                        <p className="text-[10px] text-emerald-900 dark:text-emerald-300 font-black uppercase tracking-widest flex items-center gap-2">
                             ⚠️ <strong>Warning:</strong> After changing credentials, you will need to use the new username and password to log in next time.
                         </p>
                     </div>
@@ -302,8 +302,8 @@ const Settings = () => {
             </Card>
 
             {/* Monthly Data Management */}
-            <Card className="p-6 border-l-4 border-l-rose-500 bg-white/90 dark:bg-slate-900/40 border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
-                <h2 className="text-lg font-black text-slate-900 dark:text-rose-50 tracking-tight mb-4 flex items-center gap-2">
+            <Card className="rb-card rb-shadow-orange p-8 border-l-8 border-l-rose-500">
+                <h2 className="text-xl rb-header mb-6 flex items-center gap-2">
                     <Database size={20} className="text-rose-600 dark:text-rose-400" />
                     Monthly Data Management
                 </h2>
@@ -317,11 +317,11 @@ const Settings = () => {
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Select Target Month</label>
                             <div className="relative group">
                                 <Calendar size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                <input
+                                 <input
                                     type="month"
                                     value={deleteMonth}
                                     onChange={(e) => setDeleteMonth(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-rose-500/10 transition-all shadow-sm"
+                                    className="w-full pl-10 pr-4 py-3 bg-indigo-200/40 dark:bg-slate-950 border border-indigo-300/30 dark:border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-rose-500/10 transition-all shadow-sm"
                                 />
                             </div>
                         </div>
@@ -336,10 +336,10 @@ const Settings = () => {
                     </div>
 
                     {/* Preview Stats */}
-                    {deleteMonth && (
-                        <div className="mt-6 p-6 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100 dark:border-white/5 overflow-hidden relative">
+                     {deleteMonth && (
+                        <div className="mt-6 p-6 bg-indigo-200/30 dark:bg-slate-950/50 rounded-2xl border border-indigo-300/30 dark:border-white/5 overflow-hidden relative">
                             {loadingPreview && (
-                                <div className="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                <div className="absolute inset-0 bg-indigo-300/20 dark:bg-black/50 backdrop-blur-[1px] flex items-center justify-center z-10">
                                     <RefreshCw className="animate-spin text-primary-500" size={20} />
                                 </div>
                             )}
@@ -351,7 +351,7 @@ const Settings = () => {
                                         <div className="text-[10px] font-black text-rose-500 uppercase tracking-widest leading-none mb-1">Items Found</div>
                                         <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{previewStats?.totalItems || 0}</div>
                                     </div>
-                                    <div className="h-8 w-[1px] bg-slate-200 dark:bg-white/10" />
+                                    <div className="h-8 w-[1px] bg-indigo-300/30 dark:bg-white/10" />
                                     <div className="text-right">
                                         <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Space to Free</div>
                                         <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{previewStats?.totalSizeFormatted || '0 KB'}</div>
@@ -359,9 +359,9 @@ const Settings = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {previewStats?.stats.map((stat) => (
-                                    <div key={stat.name} className="group p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all">
+                                    <div key={stat.name} className="group p-4 bg-indigo-100/50 dark:bg-slate-900 rounded-2xl border border-indigo-200/30 dark:border-white/5 shadow-sm hover:shadow-md transition-all">
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest truncate">
                                                 {stat.name.replace(/([A-Z])/g, ' $1').trim()}
@@ -456,9 +456,9 @@ const Settings = () => {
                         )}
                     </div>
 
-                    <div className="mt-6 p-4 bg-rose-100/50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 rounded-xl">
-                        <p className="text-[11px] text-rose-800 dark:text-rose-300 font-bold leading-relaxed flex gap-3 italic">
-                            <AlertTriangle size={24} className="shrink-0 text-rose-500" />
+                     <div className="mt-6 p-4 bg-rose-200/50 dark:bg-rose-950/30 border border-rose-300/30 dark:border-rose-800/50 rounded-xl">
+                        <p className="text-[11px] text-rose-900 dark:text-rose-300 font-bold leading-relaxed flex gap-3 italic">
+                            <AlertTriangle size={24} className="shrink-0 text-rose-600" />
                             <span>
                                 <strong>Safety Warning:</strong> This operation will clear all meals, guest records, market assignments, cooking duties, and expenses for the selected month. The members themselves and their profiles will NOT be deleted.
                             </span>
@@ -469,10 +469,10 @@ const Settings = () => {
 
             {/* Sensitive Information Vault - REMOVED for safety */}
 
-            {/* Info Card */}
-            <Card className="p-6 bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/30">
-                <h3 className="font-black text-amber-900 dark:text-amber-100 mb-4 flex items-center gap-2 tracking-tight">
-                    <Lock size={18} className="text-amber-600 dark:text-amber-400" />
+             {/* Info Card */}
+            <Card className="rb-card rb-shadow-indigo p-8 !bg-indigo-200/40 dark:!bg-indigo-950/20 mb-8 border-indigo-300/30">
+                <h3 className="rb-header !text-indigo-950 dark:!text-indigo-100 mb-6 flex items-center gap-3 tracking-tight">
+                    <Lock size={18} className="text-primary-600 dark:text-amber-400" />
                     Security Best Practices
                 </h3>
                 <ul className="text-sm font-bold text-amber-800 dark:text-amber-300/80 space-y-2">

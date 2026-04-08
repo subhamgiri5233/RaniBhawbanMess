@@ -15,7 +15,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="relative z-10 max-w-[1600px] mx-auto px-6 md:px-12 py-12 border-t border-white/10 transition-all text-slate-300">
+        <footer className="relative z-10 max-w-[1600px] mx-auto px-6 md:px-12 py-12 border-t border-indigo-500/20 transition-all text-slate-300">
             {/* Top row: brand + quick links */}
             <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-10">
                 {/* Brand */}
@@ -50,7 +50,7 @@ const Footer = () => {
                     <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Built With</p>
                     <div className="flex flex-wrap gap-2">
                         {['React', 'Node.js', 'MongoDB', 'Express'].map(tech => (
-                            <span key={tech} className="px-3 py-1 bg-white/5 border border-white/10 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-lg">
+                            <span key={tech} className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-slate-400 text-[10px] font-bold uppercase tracking-widest rounded-lg">
                                 {tech}
                             </span>
                         ))}
@@ -59,7 +59,7 @@ const Footer = () => {
             </div>
 
             {/* Bottom row: copyright + credit */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-white/5 text-slate-400 font-medium">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-indigo-500/10 text-slate-400 font-medium">
                 <p className="text-sm text-slate-500 font-medium">
                     © 2026 Rani Bhawban Mess Management System.
                 </p>

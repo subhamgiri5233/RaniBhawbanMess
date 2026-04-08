@@ -39,9 +39,9 @@ const MarketDutyItem = ({ member, month, initialValue, onSave }) => {
     };
 
     return (
-        <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-950/40 border border-slate-100 dark:border-white/5 rounded-2xl group transition-all hover:shadow-lg hover:shadow-indigo-500/5">
+        <div className="flex items-center justify-between p-4 bg-indigo-300/40 dark:bg-slate-950/40 border border-indigo-300/30 dark:border-white/5 rounded-2xl group transition-all hover:shadow-lg hover:shadow-indigo-500/5">
             <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className="w-10 h-10 rounded-xl bg-indigo-300/40 dark:bg-indigo-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <UserRound size={18} className="text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
@@ -55,7 +55,7 @@ const MarketDutyItem = ({ member, month, initialValue, onSave }) => {
                     type="number"
                     value={localValue}
                     onChange={(e) => setLocalValue(e.target.value)}
-                    className="w-16 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                    className="w-16 px-3 py-1.5 bg-indigo-300/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-indigo-500/20 outline-none"
                 />
                 
                 <AnimatePresence mode="wait">
@@ -69,7 +69,7 @@ const MarketDutyItem = ({ member, month, initialValue, onSave }) => {
                             disabled={status === 'loading'}
                             className={cn(
                                 "p-2 rounded-xl transition-all shadow-sm active:scale-90",
-                                status === 'loading' && "bg-slate-100 dark:bg-slate-800 text-slate-400 animate-pulse",
+                                status === 'loading' && "bg-indigo-300/40 dark:bg-slate-800 text-indigo-500 animate-pulse",
                                 status === 'success' && "bg-emerald-500 text-white",
                                 status === 'error' && "bg-rose-500 text-white",
                                 status === 'idle' && isDirty && "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20"
@@ -292,13 +292,13 @@ const Management = () => {
                                 disabled={status === 'loading'}
                                 className={cn(
                                     "p-2.5 rounded-xl transition-all shadow-lg active:scale-90",
-                                    status === 'loading' && "bg-slate-100 dark:bg-slate-800 text-slate-400 rotate-180 duration-1000",
+                                    status === 'loading' && "bg-indigo-300/40 dark:bg-slate-800 text-indigo-500 rotate-180 duration-1000",
                                     status === 'success' && "bg-emerald-500 text-white",
                                     status === 'error' && "bg-rose-500 text-white",
                                     status === 'idle' && isDirty && "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/30"
                                 )}
                             >
-                                {status === 'loading' && <div className="w-4 h-4 border-2 border-slate-300 border-t-white rounded-full animate-spin" />}
+                                {status === 'loading' && <div className="w-4 h-4 border-2 border-indigo-400 border-t-white rounded-full animate-spin" />}
                                 {status === 'success' && <CheckCircle2 size={16} />}
                                 {status === 'error' && <X size={16} />}
                                 {status === 'idle' && isDirty && <Rocket size={16} />}
@@ -327,8 +327,8 @@ const Management = () => {
             className="space-y-6"
         >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Management</h1>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-white/5">
+                <h1 className="text-3xl sm:text-5xl rb-header">Management</h1>
+                <div className="flex items-center gap-2 px-4 py-2 bg-indigo-300/40 dark:bg-slate-900/50 rounded-2xl border border-indigo-300/30 dark:border-white/5">
                     <Calendar size={16} className="text-primary-500" />
                     <span className="text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">
                         {format(new Date(), 'MMMM yyyy')}
@@ -338,19 +338,19 @@ const Management = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Cooking Section */}
-                <Card className="p-0 overflow-hidden border-amber-100/50 dark:border-amber-900/20 shadow-amber-500/5">
-                    <div className="p-6 border-b border-amber-100 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/20">
+                <Card className="p-0 overflow-hidden rb-card rb-shadow-orange">
+                    <div className="p-6 border-b border-amber-300/50 dark:border-amber-900/30 bg-amber-300/40 dark:bg-amber-950/20">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/40 rounded-xl">
+                            <div className="p-2.5 bg-amber-300/40 dark:bg-amber-900/40 rounded-xl">
                                 <ChefHat className="text-amber-600 dark:text-amber-400" size={20} />
                             </div>
-                            <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Cooking Records</h2>
+                            <h2 className="text-xl rb-header">Cooking Records</h2>
                         </div>
                     </div>
 
                     <div className="p-6">
                         {/* Add Cooking Form */}
-                        <div className="space-y-5 mb-8 p-6 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-slate-900/20 border border-amber-100/60 dark:border-amber-900/30 rounded-3xl shadow-premium">
+                        <div className="space-y-5 mb-8 p-6 bg-gradient-to-br from-amber-300/40 to-indigo-300/40 dark:from-amber-950/20 dark:to-slate-900/20 border border-amber-300/30 dark:border-amber-900/30 rounded-3xl shadow-premium">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input
                                     label="Date"
@@ -367,7 +367,7 @@ const Management = () => {
                                         <select
                                             value={selectedCook}
                                             onChange={(e) => setSelectedCook(e.target.value)}
-                                            className="w-full p-3 pr-10 appearance-none bg-white dark:bg-slate-950/80 border border-amber-200 dark:border-amber-800/40 rounded-2xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all shadow-sm"
+                                            className="w-full p-3 pr-10 appearance-none bg-indigo-300/40 dark:bg-slate-950/80 border border-amber-300 dark:border-amber-800/40 rounded-2xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all shadow-sm"
                                         >
                                             <option value="" className="dark:bg-slate-900">-- Select Member --</option>
                                             {members.map(m => (
@@ -382,7 +382,7 @@ const Management = () => {
                             {/* Lunch / Dinner Toggle */}
                             <div className="flex items-center gap-2">
                                 <span className="text-[10px] font-black text-amber-800/60 dark:text-amber-300/60 uppercase tracking-widest">Meal Type</span>
-                                <div className="flex gap-1 p-1 bg-amber-100/60 dark:bg-amber-900/20 rounded-2xl border border-amber-200/60 dark:border-amber-800/30">
+                                <div className="flex gap-1 p-1 bg-amber-300/40 dark:bg-amber-900/20 rounded-2xl border border-amber-400/30 dark:border-amber-800/30">
                                     {['lunch', 'dinner'].map(type => (
                                         <button
                                             key={type}
@@ -390,7 +390,7 @@ const Management = () => {
                                             onClick={() => setSelectedMealType(type)}
                                             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${selectedMealType === type
                                                 ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
-                                                : 'text-amber-700 dark:text-amber-400 hover:bg-amber-200/60 dark:hover:bg-amber-800/30'
+                                                : 'text-amber-700 dark:text-amber-400 hover:bg-amber-300/40 dark:hover:bg-amber-800/30'
                                                 }`}
                                         >
                                             {type === 'lunch' ? '☀️' : '🌙'} {type}
@@ -422,10 +422,10 @@ const Management = () => {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             transition={{ delay: index * 0.05 }}
-                                            className="flex items-center justify-between p-4 bg-white dark:bg-slate-950/40 border border-slate-100 dark:border-white/5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:shadow-lg hover:shadow-amber-500/5 transition-all group"
+                                            className="flex items-center justify-between p-4 bg-indigo-300/40 dark:bg-slate-950/40 border border-indigo-300/30 dark:border-white/5 rounded-2xl hover:bg-indigo-300/50 dark:hover:bg-slate-900/60 hover:shadow-lg hover:shadow-amber-500/5 transition-all group"
                                         >
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                                                <div className="w-12 h-12 rounded-2xl bg-amber-300/40 dark:bg-amber-900/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                                                     <ChefHat size={22} className="text-amber-600 dark:text-amber-400" />
                                                 </div>
                                                 <div>
@@ -434,9 +434,9 @@ const Management = () => {
                                                         <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1">
                                                             <Calendar size={10} /> {format(new Date(record.date), 'dd MMM yyyy')}
                                                         </p>
-                                                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${record.mealType === 'dinner'
-                                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-                                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-xl border ${record.mealType === 'dinner'
+                                                            ? 'bg-indigo-300/40 text-indigo-800 border-indigo-400/50 dark:bg-indigo-900/30 dark:text-indigo-400'
+                                                            : 'bg-amber-300/40 text-amber-800 border-amber-400/50 dark:bg-amber-900/30 dark:text-amber-400'
                                                             }`}>
                                                             {record.mealType === 'dinner' ? '🌙 Dinner' : '☀️ Lunch'}
                                                         </span>
@@ -445,7 +445,7 @@ const Management = () => {
                                             </div>
                                             <button
                                                 onClick={() => handleDeleteCooking(record._id || record.id)}
-                                                className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
+                                                className="p-2 bg-rose-300/40 dark:bg-rose-950/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-rose-500/10"
                                                 title="Delete Record"
                                             >
                                                 <Trash2 size={14} />
@@ -456,7 +456,7 @@ const Management = () => {
                                     <motion.p
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="text-center text-slate-400 font-bold py-12 italic bg-slate-50/50 dark:bg-slate-900/20 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800"
+                                        className="text-center text-slate-400 font-bold py-12 italic bg-indigo-300/40 dark:bg-slate-900/20 rounded-3xl border border-dashed border-indigo-300/30 dark:border-slate-800"
                                     >
                                         No cooking records found
                                     </motion.p>
@@ -465,14 +465,14 @@ const Management = () => {
                         </div>
 
                         {/* Cooking Duty Rotation Tracker */}
-                        <div className="mt-6 pt-5 border-t border-amber-100 dark:border-amber-900/20">
+                        <div className="mt-6 pt-5 border-t border-amber-900/30">
                             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <Clock size={10} /> Cooking Duty Rotation
                             </h3>
                             {pendingCooks.length === 0 ? (
-                                <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200/60 dark:border-emerald-900/30">
-                                    <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
-                                    <p className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have cooked.</p>
+                                <div className="flex items-center gap-2 p-3 bg-emerald-300/40 dark:bg-emerald-950/20 rounded-2xl border border-emerald-400/30 dark:border-emerald-900/30">
+                                    <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0" />
+                                    <p className="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have cooked.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2.5">
@@ -480,7 +480,7 @@ const Management = () => {
                                         <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-1.5">Pending ({pendingCooks.length})</p>
                                         <div className="flex flex-wrap gap-1.5">
                                             {pendingCooks.map(m => (
-                                                <span key={m._id || m.id} className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                                <span key={m._id || m.id} className="px-2.5 py-1 bg-rose-300/40 dark:bg-rose-950/20 border border-rose-400/30 dark:border-rose-900/30 text-rose-800 dark:text-rose-400 text-[10px] font-black rounded-lg">{m.name}</span>
                                             ))}
                                         </div>
                                     </div>
@@ -489,7 +489,7 @@ const Management = () => {
                                             <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1.5">Done ✓ ({doneCooks.length})</p>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {doneCooks.map(m => (
-                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-300/40 dark:bg-emerald-950/20 border border-emerald-400/30 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-400 text-[10px] font-black rounded-lg">{m.name}</span>
                                                 ))}
                                             </div>
                                         </div>
@@ -501,19 +501,19 @@ const Management = () => {
                 </Card>
 
                 {/* Manager Section */}
-                <Card className="p-0 overflow-hidden border-primary-100/50 dark:border-primary-900/20 shadow-primary-500/5">
-                    <div className="p-6 border-b border-primary-100 dark:border-primary-900/30 bg-primary-50/50 dark:bg-primary-950/20">
+                <Card className="p-0 overflow-hidden rb-card rb-shadow-blue">
+                    <div className="p-6 border-b border-primary-300/50 dark:border-primary-900/30 bg-primary-300/40 dark:bg-primary-950/20">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-primary-100 dark:bg-primary-900/40 rounded-xl">
+                            <div className="p-2.5 bg-primary-300/40 dark:bg-primary-900/40 rounded-xl">
                                 <UserCheck className="text-primary-600 dark:text-primary-400" size={20} />
                             </div>
-                            <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Manager Records</h2>
+                            <h2 className="text-xl rb-header">Manager Records</h2>
                         </div>
                     </div>
 
                     <div className="p-6">
                         {/* Add Manager Form */}
-                        <div className="space-y-5 mb-8 p-6 bg-gradient-to-br from-primary-50 to-white dark:from-primary-950/20 dark:to-slate-900/20 border border-primary-100/60 dark:border-primary-900/30 rounded-3xl shadow-premium">
+                        <div className="space-y-5 mb-8 p-6 bg-gradient-to-br from-indigo-300/40 to-indigo-300/30 dark:from-primary-950/20 dark:to-slate-900/20 border border-primary-300/30 dark:border-primary-900/30 rounded-3xl shadow-premium">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input
                                     label="Date"
@@ -530,7 +530,7 @@ const Management = () => {
                                         <select
                                             value={selectedManager}
                                             onChange={(e) => setSelectedManager(e.target.value)}
-                                            className="w-full p-3 pr-10 appearance-none bg-white dark:bg-slate-950/80 border border-primary-200 dark:border-primary-800/40 rounded-2xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all shadow-sm"
+                                            className="w-full p-3 pr-10 appearance-none bg-indigo-300/40 dark:bg-slate-950/80 border border-primary-300 dark:border-primary-800/40 rounded-2xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all shadow-sm"
                                         >
                                             <option value="" className="dark:bg-slate-900">-- Select Member --</option>
                                             {members.map(m => (
@@ -564,11 +564,11 @@ const Management = () => {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             transition={{ delay: index * 0.05 }}
-                                            className="flex items-center justify-between p-4 bg-white dark:bg-slate-950/40 border border-slate-100 dark:border-white/5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:shadow-lg hover:shadow-primary-500/5 transition-all group"
+                                            className="flex items-center justify-between p-4 bg-indigo-300/40 dark:bg-slate-950/40 border border-indigo-300/30 dark:border-white/5 rounded-2xl hover:bg-indigo-300/50 dark:hover:bg-slate-900/60 hover:shadow-lg hover:shadow-primary-500/5 transition-all group"
                                         >
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                                                    <UserCheck size={22} className="text-primary-600 dark:text-primary-400" />
+                                                <div className="w-12 h-12 rounded-2xl bg-indigo-300/40 dark:bg-primary-900/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                                                    <UserCheck size={22} className="text-primary-700 dark:text-primary-400" />
                                                 </div>
                                                 <div>
                                                     <p className="font-black text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors uppercase">{record.memberName}</p>
@@ -579,7 +579,7 @@ const Management = () => {
                                             </div>
                                             <button
                                                 onClick={() => handleDeleteManager(record._id || record.id)}
-                                                className="p-2 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
+                                                className="p-2 bg-red-300/40 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-lg shadow-red-500/10"
                                                 title="Delete Record"
                                             >
                                                 <Trash2 size={14} />
@@ -590,7 +590,7 @@ const Management = () => {
                                     <motion.p
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="text-center text-slate-400 font-bold py-12 italic bg-slate-50/50 dark:bg-slate-900/20 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800"
+                                        className="text-center text-slate-400 font-bold py-12 italic bg-indigo-300/40 dark:bg-slate-900/20 rounded-3xl border border-dashed border-indigo-300/30 dark:border-slate-800"
                                     >
                                         No manager records found
                                     </motion.p>
@@ -599,14 +599,14 @@ const Management = () => {
                         </div>
 
                         {/* Manager Duty Rotation Tracker */}
-                        <div className="mt-6 pt-5 border-t border-primary-100 dark:border-primary-900/20">
+                        <div className="mt-6 pt-5 border-t border-primary-900/30">
                             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <Clock size={10} /> Manager Duty Rotation
                             </h3>
                             {pendingManagers.length === 0 ? (
-                                <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200/60 dark:border-emerald-900/30">
-                                    <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
-                                    <p className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have managed.</p>
+                                <div className="flex items-center gap-2 p-3 bg-emerald-300/40 dark:bg-emerald-950/20 rounded-2xl border border-emerald-400/30 dark:border-emerald-900/30">
+                                    <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0" />
+                                    <p className="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have managed.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2.5">
@@ -614,7 +614,7 @@ const Management = () => {
                                         <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-1.5">Pending ({pendingManagers.length})</p>
                                         <div className="flex flex-wrap gap-1.5">
                                             {pendingManagers.map(m => (
-                                                <span key={m._id || m.id} className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                                <span key={m._id || m.id} className="px-2.5 py-1 bg-rose-300/40 dark:bg-rose-950/20 border border-rose-400/30 dark:border-rose-900/30 text-rose-800 dark:text-rose-400 text-[10px] font-black rounded-lg">{m.name}</span>
                                             ))}
                                         </div>
                                     </div>
@@ -623,7 +623,7 @@ const Management = () => {
                                             <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1.5">Done ✓ ({doneManagers.length})</p>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {doneManagers.map(m => (
-                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-300/40 dark:bg-emerald-950/20 border border-emerald-400/30 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-400 text-[10px] font-black rounded-lg">{m.name}</span>
                                                 ))}
                                             </div>
                                         </div>
@@ -641,19 +641,19 @@ const Management = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
             >
-                <Card className="p-0 overflow-hidden border-indigo-100/50 dark:border-indigo-900/20 shadow-indigo-500/5">
-                    <div className="p-6 border-b border-indigo-100 dark:border-indigo-900/30 bg-indigo-50/50 dark:bg-indigo-950/20">
+                <Card className="p-0 overflow-hidden rb-card rb-shadow-indigo">
+                    <div className="p-6 border-b border-indigo-900/30 bg-indigo-300/40 dark:bg-indigo-950/20">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl">
+                                <div className="p-2.5 bg-indigo-300/40 dark:bg-indigo-900/40 rounded-xl">
                                     <ShoppingCart className="text-indigo-600 dark:text-indigo-400" size={20} />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Market Duty Assignment</h2>
+                                    <h2 className="text-xl rb-header">Market Duty Assignment</h2>
                                     <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Assign market days per member for {format(new Date(activeMonth), 'MMMM yyyy')}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 px-3 py-1 bg-white/50 dark:bg-white/5 rounded-full border border-indigo-100 dark:border-white/5">
+                            <div className="flex items-center gap-2 px-3 py-1 bg-indigo-300/40 dark:bg-white/5 rounded-full border border-indigo-300/30 dark:border-white/5">
                                 <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
                                 <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Default: 4 Days</span>
                             </div>
@@ -689,14 +689,14 @@ const Management = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
             >
-                <Card className="p-0 overflow-hidden border-slate-200 dark:border-white/5 shadow-xl shadow-slate-200/40 dark:shadow-none">
-                    <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5">
+                <Card className="p-0 overflow-hidden rb-card rb-shadow-indigo !shadow-slate-200/40 dark:!shadow-none mb-12">
+                    <div className="p-6 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-white/5">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-slate-200 dark:bg-white/10 rounded-xl">
-                                <Rocket className="text-slate-600 dark:text-slate-300" size={20} />
+                            <div className="p-2.5 bg-indigo-300/40 dark:bg-white/10 rounded-xl">
+                                <Rocket className="text-indigo-600 dark:text-slate-300" size={20} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">System Configuration</h2>
+                                <h2 className="text-xl rb-header">System Configuration</h2>
                                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Manage global meal prices and rules</p>
                             </div>
                         </div>
@@ -705,7 +705,7 @@ const Management = () => {
                     <div className="p-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {/* Min Meals */}
-                            <div className="space-y-4 p-7 bg-slate-50 dark:bg-slate-900/40 rounded-[2rem] border border-slate-100 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
+                            <div className="space-y-4 p-7 bg-indigo-300/40 dark:bg-slate-900/40 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
                                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover/card:scale-125 transition-transform duration-700">
                                     <Calendar size={80} />
                                 </div>
@@ -723,7 +723,7 @@ const Management = () => {
                             </div>
 
                             {/* Guest Prices */}
-                            <div className="md:col-span-1 lg:col-span-2 space-y-4 p-7 bg-slate-50 dark:bg-slate-900/40 rounded-[2rem] border border-slate-100 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
+                            <div className="md:col-span-1 lg:col-span-2 space-y-4 p-7 bg-indigo-300/40 dark:bg-slate-900/40 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
                                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover/card:scale-125 transition-transform duration-700">
                                     <ShoppingCart size={80} />
                                 </div>

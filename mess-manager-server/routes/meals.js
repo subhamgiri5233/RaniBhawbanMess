@@ -13,9 +13,20 @@ router.get('/', auth, async (req, res) => {
         if (date) {
             query.date = date;
         } else if (month) {
-            // Escape special regex characters to prevent injection
+            // Escape special regex characters
             const escapedMonth = month.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            query.date = { $regex: `^${escapedMonth}` };
+            // Support both YYYY-MM and DD-MM-YYYY formats
+            if (escapedMonth.includes('-')) {
+                const parts = escapedMonth.split('-');
+                if (parts.length === 2) {
+                    const [year, mnt] = parts;
+                    query.date = { $regex: `(${year}-${mnt}|-${mnt}-${year})` };
+                } else {
+                    query.date = { $regex: escapedMonth };
+                }
+            } else {
+                query.date = { $regex: escapedMonth };
+            }
         }
         const meals = await Meal.find(query);
         res.json(meals);

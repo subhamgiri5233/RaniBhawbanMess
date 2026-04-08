@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 const AnalogClock = memo(({ hourAngle, minuteAngle, secondAngle, theme }) => {
     return (
         <div className="flex-shrink-0" role="img" aria-label="Analog clock">
-            <div className={`relative w-28 h-28 rounded-full bg-white dark:bg-slate-900 shadow-xl border-4 ${theme.border} transition-colors`}>
+            <div className={`relative w-28 h-28 rounded-full bg-indigo-300/40 dark:bg-slate-900 shadow-xl shadow-indigo-500/20 border-4 ${theme.border} transition-colors`}>
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className={`absolute w-2 h-2 ${theme.centerDot} rounded-full`} style={{ zIndex: 50 }} />
                 </div>

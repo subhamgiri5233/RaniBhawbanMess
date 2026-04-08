@@ -65,8 +65,8 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false }) => {
         { to: '/expenses', icon: Receipt, label: 'Expenses' },
         { to: '/calculator', icon: Calculator, label: 'Calculator' },
         { to: '/monthly-summary', icon: ClipboardList, label: 'Monthly Summary' },
-        { to: '/settings', icon: SettingsIcon, label: 'Settings' },
         { to: '/management', icon: UserCheck, label: 'Management' },
+        { to: '/settings', icon: SettingsIcon, label: 'Settings' },
     ];
 
     const memberLinks = [

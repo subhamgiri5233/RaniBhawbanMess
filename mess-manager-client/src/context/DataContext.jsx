@@ -376,17 +376,40 @@ export const DataProvider = ({ children }) => {
 
     const filteredExpenses = useMemo(() => {
         if (!Array.isArray(expenses)) return [];
-        return expenses.filter(e => e.date?.startsWith(globalMonth));
+        return expenses.filter(e => {
+            if (!e.date || !globalMonth) return false;
+            // Clean globalMonth (usually YYYY-MM)
+            const gm = globalMonth.replace(/[ /]/g, '-');
+            
+            // Normalize separators in expense date string
+            const d = String(e.date).replace(/[ /]/g, '-');
+            
+            // Match YYYY-MM-DD or DD-MM-YYYY (normalized)
+            return d.includes(gm) || 
+                   (d.includes('-') && d.split('-').reverse().join('-').includes(gm));
+        });
     }, [expenses, globalMonth]);
 
     const filteredMeals = useMemo(() => {
         if (!Array.isArray(meals)) return [];
-        return meals.filter(m => m.date?.startsWith(globalMonth));
+        return meals.filter(m => {
+            if (!m.date || !globalMonth) return false;
+            const gm = globalMonth.replace(/[ /]/g, '-');
+            const d = String(m.date).replace(/[ /]/g, '-');
+            return d.includes(gm) || 
+                   (d.includes('-') && d.split('-').reverse().join('-').includes(gm));
+        });
     }, [meals, globalMonth]);
 
     const filteredGuestMeals = useMemo(() => {
         if (!Array.isArray(guestMeals)) return [];
-        return guestMeals.filter(m => m.date?.startsWith(globalMonth));
+        return guestMeals.filter(m => {
+            if (!m.date || !globalMonth) return false;
+            const gm = globalMonth.replace(/[ /]/g, '-');
+            const d = String(m.date).replace(/[ /]/g, '-');
+            return d.includes(gm) || 
+                   (d.includes('-') && d.split('-').reverse().join('-').includes(gm));
+        });
     }, [guestMeals, globalMonth]);
 
     const contextValue = useMemo(() => ({

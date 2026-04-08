@@ -14,9 +14,22 @@ router.get('/', auth, async (req, res) => {
         const { month } = req.query;
         let query = {};
         if (month) {
-            // Escape special regex characters to prevent injection
+            // Escape special regex characters
             const escapedMonth = month.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            query.date = { $regex: `^${escapedMonth}` };
+            // Support both YYYY-MM and DD-MM-YYYY formats by matching the month string anywhere
+            // or specifically handling the reverse case.
+            if (escapedMonth.includes('-')) {
+                const parts = escapedMonth.split('-');
+                if (parts.length === 2) {
+                    const [year, mnt] = parts;
+                    // Match either "2026-03" or "-03-2026"
+                    query.date = { $regex: `(${year}-${mnt}|-${mnt}-${year})` };
+                } else {
+                    query.date = { $regex: escapedMonth };
+                }
+            } else {
+                query.date = { $regex: escapedMonth };
+            }
         }
         const expenses = await Expense.find(query).lean().sort({ date: -1 });
         res.json(expenses);

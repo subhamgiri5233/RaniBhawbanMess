@@ -36,7 +36,7 @@ const Navbar = ({ onLoginClick }) => {
     };
 
     return (
-        <nav className="fixed top-0 w-full z-40 bg-slate-950/40 backdrop-blur-2xl border-b border-white/5 transition-all">
+        <nav className="fixed top-0 w-full z-40 bg-indigo-200/50 dark:bg-slate-950/40 backdrop-blur-2xl border-b border-indigo-400/30 dark:border-white/5 transition-all">
             <div className="max-w-[1600px] mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
                 {/* Logo */}
                 <div
@@ -53,7 +53,7 @@ const Navbar = ({ onLoginClick }) => {
                         <Home className="text-white fill-current" size={24} />
                     </motion.div>
                     <div className="flex overflow-hidden">
-                        <span className="text-xl font-black bg-gradient-to-r from-white via-indigo-400 to-indigo-600 bg-clip-text text-transparent tracking-tight">
+                        <span className="text-xl font-[900] bg-gradient-to-r from-slate-900 dark:from-white via-indigo-600 dark:via-indigo-400 to-indigo-900 dark:to-indigo-500 bg-clip-text text-transparent tracking-[-0.05em] uppercase">
                             Rani Bhawban
                         </span>
                     </div>
@@ -65,9 +65,9 @@ const Navbar = ({ onLoginClick }) => {
                         <button
                             key={link.label}
                             onClick={() => handleNavClick(link.href)}
-                            className={`relative px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 ${activeSection === link.href.slice(1)
-                                    ? 'text-indigo-300'
-                                    : 'text-slate-400 hover:text-white'
+                            className={`relative px-4 py-2 text-[11px] font-[900] uppercase tracking-widest rounded-xl transition-all duration-300 ${activeSection === link.href.slice(1)
+                                    ? 'text-indigo-600 dark:text-indigo-300'
+                                    : 'text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white'
                                 }`}
                         >
                             {link.label}
@@ -86,12 +86,12 @@ const Navbar = ({ onLoginClick }) => {
                 <div className="flex items-center gap-3">
                     <Button
                         onClick={onLoginClick}
-                        className="rounded-full px-8 py-2.5 font-bold shadow-xl shadow-indigo-100 dark:shadow-none hover:shadow-indigo-200 transition-all"
+                        className="rounded-2xl px-8 py-2.5 font-black uppercase tracking-[0.15em] text-xs shadow-xl shadow-indigo-400/20 dark:shadow-none hover:shadow-indigo-500/30 transition-all bg-indigo-600 text-white border-0"
                     >
-                        Login
+                        Terminal Login
                     </Button>
                     <button
-                        className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+                        className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-300/40 dark:bg-white/5 border border-indigo-400/30 dark:border-white/10 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-all"
                         onClick={() => setMobileOpen(v => !v)}
                         aria-label="Toggle menu"
                     >
@@ -108,13 +108,13 @@ const Navbar = ({ onLoginClick }) => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -16 }}
                         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                        className="md:hidden border-t border-white/5 bg-slate-950/90 backdrop-blur-2xl px-6 py-4 flex flex-col gap-1"
+                        className="md:hidden border-t border-indigo-400/30 dark:border-white/5 bg-indigo-200/80 dark:bg-slate-950/90 backdrop-blur-2xl px-6 py-4 flex flex-col gap-1 shadow-2xl"
                     >
                         {navLinks.map(link => (
                             <button
                                 key={link.label}
                                 onClick={() => handleNavClick(link.href)}
-                                className="text-left px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-semibold text-sm transition-all"
+                                className="text-left px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 font-semibold text-sm transition-all"
                             >
                                 {link.label}
                             </button>

@@ -7,7 +7,7 @@ const Skeleton = ({ className, ...props }) => {
     return (
         <div
             className={cn(
-                "animate-pulse rounded-md bg-slate-200 dark:bg-slate-800/80",
+                "animate-pulse rounded-md bg-indigo-300/40 dark:bg-slate-800/80",
                 className
             )}
             {...props}
@@ -19,7 +19,7 @@ const Skeleton = ({ className, ...props }) => {
  * Pre-defined skeleton variants for common UI patterns.
  */
 Skeleton.Card = ({ className }) => (
-    <div className={cn("p-6 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/5 space-y-4", className)}>
+    <div className={cn("p-6 rounded-2xl bg-indigo-300/40 dark:bg-slate-900/60 border border-indigo-400/30 dark:border-white/5 space-y-4", className)}>
         <div className="flex items-center gap-3">
             <Skeleton className="w-10 h-10 rounded-xl" />
             <Skeleton className="w-24 h-4 rounded-full" />
@@ -29,7 +29,7 @@ Skeleton.Card = ({ className }) => (
 );
 
 Skeleton.Row = () => (
-    <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-white/5">
+    <div className="flex items-center justify-between p-4 border-b border-indigo-100/30 dark:border-white/5">
         <div className="flex items-center gap-3">
             <Skeleton className="w-10 h-10 rounded-full" />
             <Skeleton className="w-32 h-4 rounded-full" />

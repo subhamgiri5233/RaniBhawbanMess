@@ -66,15 +66,15 @@ const AdminDashboard = () => {
     }, [expenses]);
 
     const stats = useMemo(() => [
-        { title: 'Total Members', value: members.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/20' },
-        { title: 'Total Meals', value: totalMeals, icon: UtensilsCrossed, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950/20' },
+        { title: 'Total Members', value: members.length, icon: Users, color: 'text-indigo-700', bg: 'bg-indigo-300/40 dark:bg-blue-950/20' },
+        { title: 'Total Meals', value: totalMeals, icon: UtensilsCrossed, color: 'text-orange-700', bg: 'bg-orange-300/40 dark:bg-orange-950/20' },
     ], [members.length, totalMeals]);
 
     const expenseBreakdown = useMemo(() => [
-        { title: 'Market', value: `₹${marketExpenses}`, icon: ShoppingCart, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-950/20' },
-        { title: 'Spices', value: `₹${spicesExpenses}`, icon: Flame, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/20' },
-        { title: 'Rice', value: `₹${riceExpenses}`, icon: Wheat, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20' },
-        { title: 'Other', value: `₹${othersExpenses}`, icon: Package, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-900/40' },
+        { title: 'Market', value: `₹${marketExpenses}`, icon: ShoppingCart, color: 'text-indigo-700 dark:text-indigo-400', bg: 'bg-indigo-300/40 dark:bg-indigo-950/20' },
+        { title: 'Spices', value: `₹${spicesExpenses}`, icon: Flame, color: 'text-orange-700 dark:text-orange-400', bg: 'bg-orange-300/40 dark:bg-orange-950/20' },
+        { title: 'Rice', value: `₹${riceExpenses}`, icon: Wheat, color: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-300/40 dark:bg-emerald-950/20' },
+        { title: 'Other', value: `₹${othersExpenses}`, icon: Package, color: 'text-slate-700 dark:text-slate-400', bg: 'bg-indigo-300/40 dark:bg-slate-900/40' },
     ], [marketExpenses, spicesExpenses, riceExpenses, othersExpenses]);
 
     return (
@@ -85,13 +85,13 @@ const AdminDashboard = () => {
         >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Dashboard</h1>
-                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">Welcome back, Admin. Here's your mess overview.</p>
+                    <h1 className="text-3xl sm:text-5xl rb-header">Dashboard</h1>
+                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-2 uppercase tracking-widest">Authorized Mess Controller Interface</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-                        <TrendingUp size={16} className="text-emerald-500" />
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">System Active</span>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-emerald-300/40 border border-emerald-500/20 rounded-2xl shadow-sm">
+                        <TrendingUp size={16} className="text-emerald-600" />
+                        <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">System Active</span>
                     </div>
                 </div>
             </div>
@@ -113,11 +113,10 @@ const AdminDashboard = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: index * 0.1 }}
                         >
-                            <Card className={cn(
-                                "p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden",
-                                "bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5",
-                                stat.bg
-                            )}>
+                                <Card className={cn(
+                                    "rb-card p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden",
+                                    stat.bg === 'bg-indigo-300/40 dark:bg-blue-950/20' ? 'rb-shadow-blue' : 'rb-shadow-orange'
+                                )}>
                                 {/* Background decoration */}
                                 <div className={cn(
                                     "absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 pointer-events-none",
@@ -129,17 +128,17 @@ const AdminDashboard = () => {
                                 <div className="relative z-10 flex items-start justify-between">
                                     <div>
                                         <div className="flex items-center gap-2 mb-3">
-                                            <div className={cn("p-2.5 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
+                                            <div className={cn("p-2.5 rounded-xl bg-indigo-300/40 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
                                                 <stat.icon size={20} />
                                             </div>
                                             <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{stat.title}</p>
                                         </div>
-                                        <h3 className={cn("text-4xl sm:text-5xl font-black tracking-tighter mt-1", stat.color)}>
+                                        <h3 className={cn("text-4xl sm:text-6xl rb-header mt-1", stat.color)}>
                                             {stat.value}
                                         </h3>
                                     </div>
-                                    <div className="p-2 bg-white/50 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-slate-100 dark:border-white/5 shadow-sm">
-                                        <ArrowUpRight size={16} className="text-slate-400" />
+                                    <div className="p-2 bg-indigo-300/40 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-indigo-300/30 dark:border-white/5 shadow-sm">
+                                        <ArrowUpRight size={16} className="text-indigo-500" />
                                     </div>
                                 </div>
                             </Card>
@@ -168,9 +167,10 @@ const AdminDashboard = () => {
                                 transition={{ delay: 0.3 + index * 0.05 }}
                             >
                                 <Card className={cn(
-                                    "p-4 sm:p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative overflow-hidden",
-                                    "bg-white dark:bg-slate-900/60 border-slate-200/60 dark:border-white/5",
-                                    item.bg
+                                    "rb-card p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden",
+                                    item.title === 'Market' ? 'rb-shadow-indigo' : 
+                                    item.title === 'Spices' ? 'rb-shadow-orange' : 
+                                    item.title === 'Rice' ? 'rb-shadow-emerald' : 'rb-shadow-indigo'
                                 )}>
                                     {/* Background decoration */}
                                     <div className={cn(
@@ -182,12 +182,12 @@ const AdminDashboard = () => {
 
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-2 mb-4">
-                                            <div className={cn("p-2 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", item.color)}>
+                                            <div className={cn("p-2 rounded-xl bg-indigo-300/40 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", item.color)}>
                                                 <Icon size={16} />
                                             </div>
                                             <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{item.title}</p>
                                         </div>
-                                        <h3 className={cn("text-2xl sm:text-3xl font-black tracking-tighter mt-1", item.color)}>
+                                        <h3 className={cn("text-2xl sm:text-3xl rb-header mt-1", item.color)}>
                                             {item.value}
                                         </h3>
                                     </div>
@@ -205,31 +205,31 @@ const AdminDashboard = () => {
                 transition={{ delay: 0.5 }}
                 className="grid grid-cols-1 lg:grid-cols-2 gap-6"
             >
-                <Card className="p-0 overflow-hidden border-slate-200/60 dark:border-white/5 bg-white dark:bg-slate-900/40">
-                    <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                <Card className="rb-card p-0 overflow-hidden rb-shadow-blue">
+                    <div className="p-6 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-slate-900/50 flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-primary-100 dark:bg-primary-950/40 rounded-xl">
-                                <Crown className="text-primary-600 dark:text-primary-400" size={20} />
+                            <div className="p-2.5 bg-primary-300/40 dark:bg-primary-950/40 rounded-xl">
+                                <Crown className="text-primary-700 dark:text-primary-400" size={20} />
                             </div>
-                            <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight text-base md:text-xl">Active Members</h2>
+                            <h2 className="text-xl rb-header">Active Members</h2>
                         </div>
                         <button
                             onClick={() => navigate('/members')}
-                            className="text-[10px] font-black uppercase tracking-widest text-primary-500 hover:text-primary-600 flex items-center gap-2 px-3 md:px-4 py-2 bg-primary-50 dark:bg-primary-950/20 rounded-xl transition-all"
+                            className="text-[10px] font-black uppercase tracking-widest text-primary-700 hover:text-primary-800 flex items-center gap-2 px-3 md:px-4 py-2 bg-indigo-300/40 dark:bg-primary-950/20 rounded-xl transition-all border border-indigo-400/20 shadow-sm"
                         >
                             View All <ArrowUpRight size={14} />
                         </button>
                     </div>
                     <div className="overflow-auto max-h-[400px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                         <table className="w-full text-left border-collapse">
-                            <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900/90 backdrop-blur-sm">
-                                <tr className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
+                            <thead className="sticky top-0 z-10 bg-indigo-300/40 dark:bg-slate-900/90 backdrop-blur-sm">
+                                <tr className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-indigo-300/30 dark:border-white/5">
                                     <th className="p-4 md:p-6">Member Name</th>
                                     <th className="p-4 md:p-6 text-center">Meals</th>
                                     <th className="p-4 md:p-6 text-center">Monthly Deposit</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                            <tbody className="divide-y divide-indigo-300/30 dark:divide-white/5">
                                 {loadingDaily && members.length === 0 ? (
                                     <tr>
                                         <td colSpan="3" className="p-0">
@@ -245,20 +245,20 @@ const AdminDashboard = () => {
                                                 initial={{ opacity: 0, x: -10 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: 0.1 + index * 0.05 }}
-                                                className="hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
+                                                className="hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-all group border-b border-indigo-300/30 last:border-0"
                                             >
                                                 <td className="p-4 md:p-6">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-slate-500 dark:text-slate-400 group-hover:from-primary-500 group-hover:to-primary-600 group-hover:text-white transition-all duration-500 shadow-sm uppercase shrink-0">
+                                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-indigo-500 dark:text-slate-400 group-hover:from-primary-600 group-hover:to-primary-700 group-hover:text-white transition-all duration-500 shadow-sm uppercase shrink-0">
                                                             {(member.name || '?').charAt(0)}
                                                         </div>
                                                         <span className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-sm md:text-base">{member.name}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4 md:p-6 text-center">
-                                                    <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-black border border-amber-100 dark:border-amber-900/30 text-xs md:text-sm">
-                                                        {member.totalMeals}
-                                                    </span>
+                                                        <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-orange-300/40 dark:bg-amber-950/20 text-orange-700 dark:text-amber-400 font-black border border-orange-300/30 dark:border-amber-900/30 text-xs md:text-sm">
+                                                            {member.totalMeals}
+                                                        </span>
                                                 </td>
                                                 <td className="p-4 md:p-6 text-center">
                                                     <span className="font-black text-violet-600 dark:text-violet-400 text-sm md:text-lg">₹{member.monthlyDeposit}</span>
@@ -273,31 +273,31 @@ const AdminDashboard = () => {
                 </Card>
 
                 {/* Admin Expenses Section */}
-                <Card className="p-0 overflow-hidden border-slate-200/60 dark:border-white/5 bg-white dark:bg-slate-900/40">
-                    <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                <Card className="rb-card p-0 overflow-hidden rb-shadow-emerald">
+                    <div className="p-6 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-slate-900/50 flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950/40 rounded-xl">
-                                <Receipt className="text-emerald-600 dark:text-emerald-400" size={20} />
+                            <div className="p-2.5 bg-emerald-300/40 dark:bg-emerald-950/40 rounded-xl border border-emerald-400/20 shadow-lg shadow-emerald-500/10">
+                                <Receipt className="text-emerald-700 dark:text-emerald-400" size={20} />
                             </div>
-                            <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight text-base md:text-xl">Admin Spends</h2>
+                            <h2 className="text-xl rb-header">Admin Spends</h2>
                         </div>
                         <button
                             onClick={() => navigate('/expenses')}
-                            className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl transition-all"
+                            className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 flex items-center gap-2 px-3 md:px-4 py-2 bg-emerald-300/40 dark:bg-emerald-950/20 rounded-xl transition-all"
                         >
                             View All <ArrowUpRight size={14} />
                         </button>
                     </div>
                     <div className="overflow-auto max-h-[400px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                         <table className="w-full text-left border-collapse">
-                            <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-900/90 backdrop-blur-sm">
-                                <tr className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-slate-100 dark:border-white/5">
+                            <thead className="sticky top-0 z-10 bg-indigo-300/40 dark:bg-slate-900/90 backdrop-blur-sm">
+                                <tr className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-[10px] border-b border-indigo-300/30 dark:border-white/5">
                                     <th className="p-4 md:p-6">Details</th>
                                     <th className="p-4 md:p-6">Amount</th>
                                     <th className="p-4 md:p-6 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                            <tbody className="divide-y divide-indigo-300/30 dark:divide-white/5">
                                 {expenses.filter(e => e.paidBy === 'admin').length > 0 ? (
                                     expenses.filter(e => e.paidBy === 'admin').map((expense) => (
                                         <AdminExpenseRow key={expense._id || expense.id} expense={expense} />
@@ -344,19 +344,19 @@ const AdminExpenseRow = ({ expense }) => {
 
     if (isEditing) {
         return (
-            <tr className="border-b dark:border-slate-800/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+            <tr className="border-b dark:border-slate-800/50 last:border-0 hover:bg-indigo-300/40 dark:hover:bg-slate-800/50 transition-colors">
                 <td className="py-3 pr-2">
                     <input
                         type="text"
                         value={editData.description}
                         onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs mb-2 transition-all focus:ring-2 focus:ring-primary-500 outline-none dark:text-slate-200"
+                        className="w-full px-3 py-2 bg-indigo-300/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-slate-800 rounded-lg text-xs mb-2 transition-all focus:ring-2 focus:ring-primary-500 outline-none dark:text-slate-200"
                         placeholder="Description"
                     />
                     <select
                         value={editData.category}
                         onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                        className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs transition-all focus:ring-2 focus:ring-primary-500 outline-none dark:text-slate-200"
+                        className="w-full px-2 py-1.5 bg-indigo-300/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-slate-800 rounded-lg text-xs transition-all focus:ring-2 focus:ring-primary-500 outline-none dark:text-slate-200"
                     >
                         <option value="market">Market</option>
                         <option value="spices">Spices</option>
@@ -369,7 +369,7 @@ const AdminExpenseRow = ({ expense }) => {
                         type="number"
                         value={editData.amount}
                         onChange={(e) => setEditData({ ...editData, amount: e.target.value })}
-                        className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs transition-all focus:ring-2 focus:ring-primary-500 outline-none dark:text-slate-200"
+                        className="w-24 px-3 py-2 bg-indigo-300/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-slate-800 rounded-lg text-xs transition-all focus:ring-2 focus:ring-primary-500 outline-none dark:text-slate-200"
                     />
                 </td>
                 <td className="py-3 text-right align-top">
@@ -387,14 +387,14 @@ const AdminExpenseRow = ({ expense }) => {
     }
 
     return (
-        <tr className="border-b dark:border-slate-800/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors h-16">
+        <tr className="border-b dark:border-slate-800/50 last:border-0 hover:bg-indigo-300/40 dark:hover:bg-slate-800/50 transition-colors h-16">
             <td className="py-3">
                 <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">{expense.description || expense.title}</div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
-                    <span className={`px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${(expense.category || 'others') === 'market' ? 'bg-blue-100/50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' :
-                        (expense.category || 'others') === 'spices' ? 'bg-orange-100/50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400' :
-                            (expense.category || 'others') === 'rice' ? 'bg-green-100/50 text-green-700 dark:bg-green-500/10 dark:text-green-400' :
-                                'bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400'
+                    <span className={`px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${(expense.category || 'others') === 'market' ? 'bg-blue-300/40 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' :
+                        (expense.category || 'others') === 'spices' ? 'bg-orange-300/40 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400' :
+                            (expense.category || 'others') === 'rice' ? 'bg-emerald-300/40 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' :
+                                'bg-indigo-300/40 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400'
                         }`}>
                         {(expense.category || 'others') === 'market' ? '🛒 Market' :
                             (expense.category || 'others') === 'spices' ? '🌶️ Spices' :

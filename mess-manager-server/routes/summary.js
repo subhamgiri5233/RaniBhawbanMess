@@ -20,9 +20,11 @@ router.get('/:month', auth, async (req, res) => {
         const { month } = req.params;
 
         // 1. Fetch all data in parallel for efficiency
-        // Robust Month Filter: handle both "2026-03" and potentially "2026-3" if any data was saved without padding
+        // Robust Month Filter: handle standard YYYY-MM, reversed DD-MM-YYYY, and non-padded YYYY-M
         const monthAlt = month.includes('-0') ? month.replace('-0', '-') : month;
-        const monthRegex = `^(${month}|${monthAlt})`;
+        const [year, mnt] = month.split('-');
+        const monthRegex = `(${month}|${monthAlt}|-${mnt}-${year})`;
+
         const [
             members,
             expenses,
@@ -386,7 +388,7 @@ router.get('/:month/admin-expenses', auth, requireAdmin, async (req, res) => {
         const { month } = req.params;
         const totalMembers = await User.countDocuments({ role: 'member' });
         const adminExpenses = await Expense.find({
-            date: { $regex: `^${month}` },
+            date: { $regex: `(${month}|-${month.split('-')[1]}-${month.split('-')[0]})` },
             $or: [
                 { paidBy: 'admin' },
                 { category: { $in: ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others'] } }
@@ -396,7 +398,7 @@ router.get('/:month/admin-expenses', auth, requireAdmin, async (req, res) => {
 
         // Manager(s) for this month
         const managerRecords = await ManagerRecord.find({
-            date: { $regex: `^${month}` }
+            date: { $regex: `(${month}|-${month.split('-')[1]}-${month.split('-')[0]})` }
         }).sort({ date: 1 });
         
         const managersMap = {};
@@ -444,7 +446,7 @@ router.get('/:month/invoice/:memberId', auth, async (req, res) => {
 
         // Member's own expenses for this month
         const memberExpenses = await Expense.find({
-            date: { $regex: `^${month}` },
+            date: { $regex: `(${month}|-${month.split('-')[1]}-${month.split('-')[0]})` },
             status: { $ne: 'rejected' },
             $or: [
                 { paidBy: memberName },
@@ -465,20 +467,20 @@ router.get('/:month/invoice/:memberId', auth, async (req, res) => {
 
         // Regular meals for this member this month
         const regularMeals = await Meal.find({
-            date: { $regex: `^${month}` },
+            date: { $regex: `(${month}|-${month.split('-')[1]}-${month.split('-')[0]})` },
             $or: [{ memberId: memberIdStr }, { memberId: member.userId }],
             isGuest: false
         }).sort({ date: 1 });
 
         // Guest meals (GuestMeal collection)
         const guestMeals = await GuestMeal.find({
-            date: { $regex: `^${month}` },
+            date: { $regex: `(${month}|-${month.split('-')[1]}-${month.split('-')[0]})` },
             $or: [{ memberId: memberIdStr }, { memberId: member.userId }]
         }).sort({ date: 1 });
 
         // Guest meals in Meal collection
         const guestMealsInMeal = await Meal.find({
-            date: { $regex: `^${month}` },
+            date: { $regex: `(${month}|-${month.split('-')[1]}-${month.split('-')[0]})` },
             $or: [{ memberId: memberIdStr }, { memberId: member.userId }],
             isGuest: true
         }).sort({ date: 1 });
@@ -491,7 +493,7 @@ router.get('/:month/invoice/:memberId', auth, async (req, res) => {
 
         // Manager(s) for this month
         const managerRecords = await ManagerRecord.find({
-            date: { $regex: `^${month}` }
+            date: { $regex: `(${month}|-${month.split('-')[1]}-${month.split('-')[0]})` }
         }).sort({ date: 1 });
         const managersMap = {};
         managerRecords.forEach(r => { managersMap[r.memberId] = r.memberName; });

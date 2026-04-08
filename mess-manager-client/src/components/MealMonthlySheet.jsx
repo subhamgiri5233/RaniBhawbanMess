@@ -12,9 +12,9 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
     return (
         <td
             className={cn(
-                "p-1.5 border-r border-slate-50 dark:border-white/5 text-center cursor-pointer transition-all relative group/cell",
+                "p-1.5 border-r border-indigo-300/20 dark:border-white/5 text-center cursor-pointer transition-all relative group/cell",
                 isToday && "bg-primary-500/10 dark:bg-primary-500/5",
-                !isToday && isHoveredRowDay && "bg-slate-50 dark:bg-slate-800/20"
+                !isToday && isHoveredRowDay && "bg-indigo-300/30 dark:bg-slate-800/20"
             )}
             onMouseEnter={() => onMouseEnter({ dateStr: day.dateStr, dayNum: day.dayNum, memberId })}
             onMouseLeave={onMouseLeave}
@@ -24,12 +24,12 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
                 <div
                     onClick={(e) => onClick(e, memberId, day.dateStr, 'lunch')}
                     className={cn(
-                        "w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 relative z-10",
+                        "w-5 h-5 rounded-[0.4rem] flex items-center justify-center transition-all duration-300 relative z-10",
                         lunchStatus
-                            ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            ? "bg-emerald-400/30 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"
                             : (!lunchStatus && day.dateStr < todayStr)
-                                ? "bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400"
-                                : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 hover:scale-125"
+                                ? "bg-rose-400/30 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400"
+                                : "bg-indigo-400/20 dark:bg-slate-900/50 text-indigo-500/60 dark:text-slate-600 hover:scale-125 hover:bg-indigo-400/30"
                     )}
                     title="Lunch"
                 >
@@ -39,12 +39,12 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
                 <div
                     onClick={(e) => onClick(e, memberId, day.dateStr, 'dinner')}
                     className={cn(
-                        "w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-300 relative z-10",
+                        "w-5 h-5 rounded-[0.4rem] flex items-center justify-center transition-all duration-300 relative z-10",
                         dinnerStatus
-                            ? "bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                            ? "bg-indigo-400/30 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400"
                             : (!dinnerStatus && day.dateStr < todayStr)
-                                ? "bg-rose-100 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400"
-                                : "bg-slate-50 dark:bg-slate-900/50 text-slate-300 dark:text-slate-600 hover:scale-125"
+                                ? "bg-rose-400/30 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400"
+                                : "bg-indigo-400/20 dark:bg-slate-900/50 text-indigo-500/60 dark:text-slate-600 hover:scale-125 hover:bg-indigo-400/30"
                     )}
                     title="Dinner"
                 >
@@ -59,8 +59,8 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
     const mId = member._id || member.id;
 
     return (
-        <tr className="border-b group hover:bg-slate-100/30 dark:hover:bg-white/5 transition-colors border-slate-50 dark:border-white/5">
-            <td className="p-4 min-w-[170px] border-r border-slate-50 dark:border-white/5 font-black text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-950 z-20 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)]">
+        <tr className="border-b group hover:bg-indigo-300/30 dark:hover:bg-white/5 transition-colors border-indigo-300/20 dark:border-white/5">
+            <td className="p-4 min-w-[170px] border-r border-indigo-400/30 dark:border-white/5 font-black text-slate-900 dark:text-slate-100 sticky left-0 bg-indigo-300/60 dark:bg-slate-950 z-20 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)]">
                 <div className="flex flex-col">
                     <span className="font-black text-slate-900 dark:text-slate-100">{member.name}</span>
                     <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">L & D Registry</span>
@@ -79,7 +79,7 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
                     isHoveredRowDay={hoveredCell?.dayNum === day.dayNum}
                 />
             ))}
-            <td className="p-4 text-center font-black backdrop-blur-sm bg-indigo-50/10 dark:bg-indigo-500/5">
+            <td className="p-4 text-center font-black backdrop-blur-sm bg-indigo-300/30 dark:bg-indigo-500/5">
                 <div className="text-sm text-indigo-600 dark:text-indigo-400">{total}</div>
                 <div className="text-[7px] font-black text-slate-400 uppercase tracking-tight mt-0.5">Total meals</div>
             </td>
@@ -187,20 +187,20 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
         return (
             <table className="w-full text-[10px] md:text-xs border-collapse bg-transparent transition-colors">
                 <thead>
-                    <tr className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-white/5 sticky top-0 z-20">
-                        <th className="p-4 border-r border-slate-100 dark:border-white/5 text-left min-w-[180px] sticky left-0 bg-slate-50 dark:bg-slate-900 z-30 font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Inventory Registry</th>
+                    <tr className="bg-indigo-300/40 dark:bg-slate-900/80 backdrop-blur-md border-b border-indigo-300/30 dark:border-white/5 sticky top-0 z-20">
+                        <th className="p-4 border-r border-indigo-400/30 dark:border-white/5 text-left min-w-[180px] sticky left-0 bg-indigo-300/60 dark:bg-slate-900 z-30 font-black uppercase tracking-widest text-indigo-800/60 dark:text-slate-400">Inventory Registry</th>
                         {days.map(day => {
                             const isToday = day.dateStr === todayStr;
                             return (
                                 <th
                                     key={day.dayNum}
                                     className={cn(
-                                        "p-1 border-r border-slate-100 dark:border-white/5 w-10 font-black transition-all relative",
+                                        "p-1 border-r border-indigo-300/30 dark:border-white/5 w-10 font-black transition-all relative",
                                         isToday
                                             ? 'bg-primary-600 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
                                             : hoveredCell?.dayNum === day.dayNum
                                                 ? 'bg-primary-500 text-white'
-                                                : 'text-slate-400 dark:text-slate-500 bg-white/40 dark:bg-slate-950/40'
+                                                : 'text-indigo-600/60 dark:text-slate-500 bg-indigo-300/30 dark:bg-slate-950/40'
                                     )}
                                 >
                                     <div className="flex flex-col items-center gap-0.5">
@@ -217,7 +217,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                                 </th>
                             );
                         })}
-                        <th className="p-4 min-w-[100px] font-black bg-slate-50 dark:bg-slate-900 text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center">Total</th>
+                        <th className="p-4 min-w-[100px] font-black bg-indigo-300/60 dark:bg-slate-900 text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -252,31 +252,31 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
     }, [activeCell, members]);
 
     return (
-        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-indigo-100 dark:border-white/5 rounded-[2rem] shadow-[0_4px_24px_rgba(79,70,229,0.13)] dark:shadow-premium-dark flex flex-col relative max-h-[700px]">
+        <div className="bg-indigo-300/40 dark:bg-slate-900/50 backdrop-blur-xl border border-indigo-400/30 dark:border-white/5 rounded-[2rem] shadow-[0_4px_24px_rgba(79,70,229,0.13)] dark:shadow-premium-dark flex flex-col relative max-h-[700px]">
             <div className="overflow-auto custom-scrollbar flex-1 rounded-t-[2rem]">
                 {MealGrid}
             </div>
 
-            <div className="p-6 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-100 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 rounded-b-[2rem] z-20 relative">
+            <div className="p-6 bg-indigo-300/30 dark:bg-slate-900/80 backdrop-blur-md border-t border-indigo-300/40 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 rounded-b-[2rem] z-20 relative">
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center">
-                            <Check size={14} className="text-emerald-600 dark:text-emerald-400" />
+                        <div className="w-8 h-8 rounded-xl bg-emerald-400/30 dark:bg-emerald-500/10 flex items-center justify-center">
+                            <Check size={14} className="text-emerald-700 dark:text-emerald-400" />
                         </div>
-                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Active Presence</span>
+                        <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Active Presence</span>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-white/5 flex items-center justify-center">
-                            <X size={14} className="text-slate-400" />
+                        <div className="w-8 h-8 rounded-xl bg-indigo-400/30 dark:bg-white/5 flex items-center justify-center">
+                            <X size={14} className="text-indigo-600/60" />
                         </div>
-                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Absence Registry</span>
+                        <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Absence Registry</span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-8 bg-white dark:bg-slate-950 p-2 pl-6 pr-2 rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm">
+                <div className="flex items-center gap-8 bg-indigo-300/40 dark:bg-slate-950 p-2 pl-6 pr-2 rounded-2xl border border-indigo-300/40 dark:border-white/5 shadow-sm">
                     <div>
-                        <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] text-right">My Meals This Month</p>
-                        <p className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tighter text-right">{monthlyGrandTotal} <span className="text-[10px] font-bold text-slate-400 ml-1 tracking-normal">MEALS</span></p>
+                        <p className="text-[8px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-[0.2em] text-right">My Meals This Month</p>
+                        <p className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tighter text-right">{monthlyGrandTotal} <span className="text-[10px] font-bold text-slate-500 ml-1 tracking-normal">MEALS</span></p>
                     </div>
                     <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30">
                         <TrendingUp size={20} className="text-white" />
@@ -301,7 +301,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                             exit={{ opacity: 0, scale: 0.9 }}
                             className="relative w-full max-w-sm"
                         >
-                            <div className="bg-white dark:bg-slate-900 shadow-2xl rounded-[2.5rem] border border-slate-100 dark:border-white/10 p-8 overflow-hidden relative group">
+                            <div className="bg-indigo-50 dark:bg-slate-900 shadow-2xl rounded-[2.5rem] border border-indigo-200 dark:border-white/10 p-8 overflow-hidden relative group">
                                 <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
                                     <TrendingUp size={120} className="text-primary-500" />
                                 </div>
@@ -309,7 +309,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                                 <div className="text-center mb-8">
                                     <div className="flex items-center justify-center gap-2 mb-2">
                                         <Sparkles size={16} className="text-primary-500" />
-                                        <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Logistics Update</span>
+                                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-[0.3em]">Logistics Update</span>
                                     </div>
                                     <h3 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
                                         {popupLabel.name}'s {popupLabel.type}
@@ -324,7 +324,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                                         onClick={() => handleSelectStatus(true)}
                                         className="flex flex-col items-center justify-center gap-4 p-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all active:scale-95 shadow-xl shadow-emerald-500/20 group/btn"
                                     >
-                                        <div className="p-3 bg-white/20 rounded-2xl group-hover/btn:scale-110 transition-transform">
+                                        <div className="p-3 bg-indigo-900/40 rounded-2xl group-hover/btn:scale-110 transition-transform">
                                             <Check size={28} strokeWidth={3} />
                                         </div>
                                         <span className="text-[10px] font-black uppercase tracking-widest">Record Presence</span>
@@ -342,7 +342,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
 
                                 <button
                                     onClick={() => setActiveCell(null)}
-                                    className="w-full mt-6 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95"
+                                    className="w-full mt-6 py-4 bg-indigo-200/50 dark:bg-slate-800 text-indigo-700 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-indigo-300/50 dark:hover:bg-slate-700 transition-all active:scale-95"
                                 >
                                     Dismiss
                                 </button>

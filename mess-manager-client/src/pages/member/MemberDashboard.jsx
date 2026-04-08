@@ -138,7 +138,7 @@ const MemberDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-white/90 dark:bg-slate-900 shadow-sm p-5 sm:p-8 rounded-[2rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-5 sm:p-8 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl">
                 <div className="flex items-center gap-4 sm:gap-6">
                     {/* Avatar */}
                     <AvatarPicker
@@ -151,18 +151,18 @@ const MemberDashboard = () => {
                             Namaste, <span className="text-indigo-600 dark:text-indigo-400">{user.name}</span>
                         </h1>
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
-                            Activity overview for <span className="text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/30">{monthLabel}</span>
+                            Activity overview for <span className="text-indigo-600 bg-indigo-300/40 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-300/30 dark:border-indigo-800/30 font-black">{monthLabel}</span>
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-                    <Star size={16} className="text-indigo-500" />
-                    <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Active Member</span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-indigo-300/40 dark:bg-indigo-500/10 border border-indigo-500/20 rounded-2xl shadow-sm">
+                    <Star size={16} className="text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Active Member</span>
                 </div>
             </div>
 
             {/* Clock Component */}
-            <div className="rounded-[2rem] overflow-hidden shadow-sm border border-indigo-100/50 dark:border-white/5 bg-white/90 backdrop-blur-xl dark:bg-slate-900/40">
+            <div className="rounded-[2rem] overflow-hidden shadow-sm border border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40">
                 <Clock />
             </div>
 
@@ -178,7 +178,7 @@ const MemberDashboard = () => {
                     <>
                         <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-4 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 dark:bg-indigo-500/20 group-hover:scale-110 transition-transform">
+                                 <div className="p-4 rounded-2xl bg-indigo-300/40 text-indigo-600 dark:text-indigo-400 dark:bg-indigo-500/20 group-hover:scale-110 transition-transform shadow-inner border border-indigo-400/20">
                                     <Utensils size={24} />
                                 </div>
                                 <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
@@ -196,7 +196,7 @@ const MemberDashboard = () => {
 
                         <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 dark:bg-emerald-500/20 group-hover:scale-110 transition-transform">
+                                <div className="p-4 rounded-2xl bg-emerald-300/40 text-emerald-600 dark:text-emerald-400 dark:bg-emerald-500/20 group-hover:scale-110 transition-transform border border-emerald-400/20">
                                     <Wallet size={24} />
                                 </div>
                                 <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
@@ -208,7 +208,7 @@ const MemberDashboard = () => {
 
                         <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20 group-hover:scale-110 transition-transform">
+                                <div className="p-4 rounded-2xl bg-amber-300/40 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20 group-hover:scale-110 transition-transform border border-amber-400/20">
                                     <ShoppingCart size={24} />
                                 </div>
                                 <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
@@ -219,7 +219,7 @@ const MemberDashboard = () => {
 
                         <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-4 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 dark:bg-purple-500/20 group-hover:scale-110 transition-transform">
+                                <div className="p-4 rounded-2xl bg-purple-300/40 text-purple-600 dark:text-purple-400 dark:bg-purple-500/20 group-hover:scale-110 transition-transform border border-purple-400/20">
                                     <Utensils size={24} />
                                 </div>
                                 <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
@@ -248,10 +248,10 @@ const MemberDashboard = () => {
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
                     >
-                        <Card className="p-0 overflow-hidden shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl dark:bg-slate-900/40 mt-8">
-                            <div className="p-8 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                        <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40 mt-8">
+                            <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900/50">
                                 <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-2xl">
+                                     <div className="p-3 bg-purple-300/40 dark:bg-purple-900/30 rounded-2xl shadow-inner border border-purple-400/20">
                                         <Utensils className="text-purple-600 dark:text-purple-400" size={20} />
                                     </div>
                                     <div>
@@ -259,7 +259,7 @@ const MemberDashboard = () => {
                                         <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Detailed breakdown of visiting meals</p>
                                     </div>
                                 </div>
-                                <span className="text-[10px] font-black bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 px-4 py-2 rounded-xl border border-purple-200 dark:border-purple-500/10 tracking-widest uppercase">
+                                <span className="text-[10px] font-black bg-purple-300/40 dark:bg-purple-900/40 text-purple-800 dark:text-purple-400 px-4 py-2 rounded-xl border border-purple-300/30 dark:border-purple-500/10 tracking-widest uppercase">
                                     {myGuestMeals.length} Total • ₹{totalGuestAmount}
                                 </span>
                             </div>
@@ -271,16 +271,16 @@ const MemberDashboard = () => {
                                     return (
                                         <div
                                             key={`guest-${guest._id || idx}`}
-                                            className="flex items-center justify-between p-6 bg-white/70 backdrop-blur-lg dark:bg-slate-900/60 rounded-[1.5rem] hover:bg-indigo-50/50 dark:hover:bg-white/5 transition-all border border-indigo-100/50 dark:border-white/5 group"
+                                            className="flex items-center justify-between p-6 bg-indigo-300/40 backdrop-blur-lg dark:bg-slate-900/60 rounded-[1.5rem] hover:bg-indigo-300/60 dark:hover:bg-white/5 transition-all border border-indigo-300/30 dark:border-white/5 group"
                                         >
                                             <div className="flex items-center gap-5">
-                                                <div className="w-14 h-14 rounded-2xl bg-purple-50 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-500">
+                                                <div className="w-14 h-14 rounded-2xl bg-indigo-300/30 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-500">
                                                     {guestIcons[guest.guestMealType]}
                                                 </div>
                                                 <div>
                                                     <p className="font-black text-slate-900 dark:text-slate-50 capitalize tracking-tight flex items-center gap-3">
                                                         {guest.guestMealType}
-                                                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-bold opacity-60">
+                                                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-300/40 dark:bg-slate-800 font-bold opacity-60">
                                                             {mealTimeIcons[guest.mealTime]} {guest.mealTime}
                                                         </span>
                                                     </p>
@@ -305,15 +305,15 @@ const MemberDashboard = () => {
             {(myMarketExpenses.length > 0 || myMarketDays.length > 0) && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
                     {/* Left Card - Market Expenses History */}
-                    <Card className="p-0 overflow-hidden shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl dark:bg-slate-900/40">
-                        <div className="p-8 border-b border-indigo-100/50 dark:border-white/5 flex items-center justify-between bg-indigo-50/20 dark:bg-slate-900/50">
+                    <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40">
+                        <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900/50">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-2xl">
+                                 <div className="p-3 bg-amber-300/40 dark:bg-amber-900/30 rounded-2xl shadow-inner border border-amber-400/20">
                                     <ShoppingCart className="text-amber-600 dark:text-amber-400" size={20} />
                                 </div>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Market Outlay</h2>
                             </div>
-                            <span className="text-[10px] font-black bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-xl border border-amber-200 dark:border-amber-500/10 tracking-widest">
+                            <span className="text-[10px] font-black bg-amber-300/40 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 px-4 py-2 rounded-xl border border-amber-300/30 dark:border-amber-500/10 tracking-widest">
                                 ₹{totalMarketAmount}
                             </span>
                         </div>
@@ -322,11 +322,11 @@ const MemberDashboard = () => {
                                 myMarketExpenses.map((expense, idx) => (
                                     <div
                                         key={`expense-${expense._id || idx}`}
-                                        className="flex items-center justify-between p-5 bg-white dark:bg-slate-900/60 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all border border-slate-100 dark:border-white/5"
+                                        className="flex items-center justify-between p-5 bg-indigo-300/40 dark:bg-slate-900/60 rounded-2xl hover:bg-indigo-300/60 dark:hover:bg-white/5 transition-all border border-indigo-300/30 dark:border-white/5"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
-                                                <Wallet size={16} className="text-emerald-500" />
+                                            <div className="w-10 h-10 rounded-xl bg-emerald-300/40 dark:bg-emerald-900/20 flex items-center justify-center border border-emerald-400/20">
+                                                <Wallet size={16} className="text-emerald-600" />
                                             </div>
                                             <div>
                                                 <p className="text-sm font-black text-slate-900 dark:text-slate-50 tracking-tight">
@@ -351,15 +351,15 @@ const MemberDashboard = () => {
                     </Card>
 
                     {/* Right Card - Market Duty Days */}
-                    <Card className="p-0 overflow-hidden shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl dark:bg-slate-900/40">
-                        <div className="p-8 border-b border-indigo-100/50 dark:border-white/5 flex items-center justify-between bg-indigo-50/20 dark:bg-slate-900/50">
+                    <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40">
+                        <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900/50">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl">
+                                 <div className="p-3 bg-indigo-300/40 dark:bg-indigo-900/30 rounded-2xl shadow-inner border border-indigo-400/20">
                                     <CalendarIcon className="text-indigo-600 dark:text-indigo-400" size={20} />
                                 </div>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Duty Roster</h2>
                             </div>
-                            <span className="text-[10px] font-black bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 px-4 py-2 rounded-xl border border-indigo-200 dark:border-indigo-500/10 tracking-widest">
+                            <span className="text-[10px] font-black bg-indigo-300/40 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-400 px-4 py-2 rounded-xl border border-indigo-300/30 dark:border-indigo-500/10 tracking-widest">
                                 {myMarketDays.length} SESSIONS
                             </span>
                         </div>
@@ -368,10 +368,10 @@ const MemberDashboard = () => {
                                 myMarketDays.map((day, idx) => (
                                     <div
                                         key={`duty-${day.date}-${idx}`}
-                                        className="flex items-center justify-between p-5 bg-white dark:bg-slate-900/60 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all border border-slate-100 dark:border-white/5"
+                                        className="flex items-center justify-between p-5 bg-indigo-300/40 dark:bg-slate-900/60 rounded-2xl hover:bg-indigo-300/60 dark:hover:bg-white/5 transition-all border border-indigo-300/30 dark:border-white/5"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center">
+                                             <div className="w-10 h-10 rounded-xl bg-indigo-300/30 dark:bg-indigo-900/20 flex items-center justify-center">
                                                 <ShoppingCart size={16} className="text-indigo-500" />
                                             </div>
                                             <div>
@@ -398,10 +398,10 @@ const MemberDashboard = () => {
             )}
 
             {/* Change Password Section */}
-            <Card className="p-0 overflow-hidden shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl dark:bg-slate-900/40 mt-8">
-                <div className="p-8 border-b border-slate-100 dark:border-white/5 flex items-center gap-4 bg-slate-50/50 dark:bg-slate-900/50">
-                    <div className="p-3 bg-rose-100 dark:bg-rose-900/30 rounded-2xl">
-                        <Lock className="text-rose-600 dark:text-rose-400" size={20} />
+            <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40 mt-8">
+                <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center gap-4 bg-indigo-300/40 dark:bg-slate-900/50">
+                     <div className="p-3 bg-rose-300/40 dark:bg-rose-900/30 rounded-2xl shadow-inner border border-rose-400/20">
+                        <Lock className="text-rose-700 dark:text-rose-400" size={20} />
                     </div>
                     <div>
                         <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Change Password</h2>
@@ -418,7 +418,7 @@ const MemberDashboard = () => {
                                 onChange={(e) => setCurrentPassword(e.target.value)}
                                 required
                                 placeholder="Enter current password"
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/50 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all pr-10"
+                                className="w-full px-4 py-3 rounded-xl border border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-800/50 text-sm font-bold text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all pr-10"
                             />
                             <button type="button" onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors">
                                 {showCurrentPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -435,7 +435,7 @@ const MemberDashboard = () => {
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     required
                                     placeholder="Min 4 characters"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/50 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all pr-10"
+                                    className="w-full px-4 py-3 rounded-xl border border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-800/50 text-sm font-bold text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all pr-10"
                                 />
                                 <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors">
                                     {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -450,7 +450,7 @@ const MemberDashboard = () => {
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                                 placeholder="Re-enter new password"
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/50 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
+                                className="w-full px-4 py-3 rounded-xl border border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-800/50 text-sm font-bold text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"
                             />
                         </div>
                     </div>
@@ -458,8 +458,8 @@ const MemberDashboard = () => {
                         <div className={cn(
                             "text-xs font-black px-4 py-3 rounded-xl border",
                             pwStatus.type === 'success'
-                                ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-500/20"
-                                : "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-500/20"
+                                ? "text-emerald-700 dark:text-emerald-400 bg-emerald-300/40 dark:bg-emerald-900/20 border-emerald-300/30 dark:border-emerald-500/20"
+                                : "text-rose-700 dark:text-rose-400 bg-rose-300/40 dark:bg-red-900/20 border-rose-300/30 dark:border-rose-500/20"
                         )}>
                             {pwStatus.type === 'success' && <Check size={14} className="inline mr-1" />}
                             {pwStatus.message}

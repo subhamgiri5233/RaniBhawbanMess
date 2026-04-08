@@ -30,7 +30,7 @@ const ImportanceCard = memo(({ specialOccasion, todayImportance = [], dateInfo, 
     const hasOnlyFallback = todayImportance.length === 1 && !todayImportance[0].ai;
 
     return (
-        <Card className="p-6 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/20 dark:via-teal-950/20 dark:to-cyan-950/20 border-2 border-emerald-200 dark:border-white/5 shadow-premium relative group">
+        <Card className="p-6 bg-indigo-300/40 dark:from-emerald-950/20 dark:via-teal-950/20 dark:to-cyan-950/20 border-2 border-indigo-400/30 dark:border-white/5 shadow-premium relative group">
 
             {/* Header */}
             <div className="flex items-center gap-2 mb-6">
@@ -67,7 +67,7 @@ const ImportanceCard = memo(({ specialOccasion, todayImportance = [], dateInfo, 
             {isLoading && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[1, 2, 3, 4, 5, 6].map(i => (
-                        <div key={`sk-${i}`} className="flex items-start gap-4 p-4 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-emerald-100/50 dark:border-white/5 animate-pulse">
+                        <div key={`sk-${i}`} className="flex items-start gap-4 p-4 bg-indigo-300/40 dark:bg-slate-900/50 rounded-2xl border border-indigo-400/30 dark:border-white/5 animate-pulse">
                             <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-800/30 flex-shrink-0" />
                             <div className="flex-1 space-y-2 pt-1">
                                 <div className="h-2.5 bg-emerald-100 dark:bg-emerald-800/30 rounded-full w-1/3" />
@@ -97,7 +97,7 @@ const ImportanceCard = memo(({ specialOccasion, todayImportance = [], dateInfo, 
                         return (
                             <div
                                 key={`${dateInfo.key}-${index}`}
-                                className="flex flex-col gap-2 p-4 bg-white/70 dark:bg-slate-900/80 rounded-2xl border border-emerald-100 dark:border-white/5 hover:bg-white/90 dark:hover:bg-slate-800 transition-all duration-300 shadow-sm hover:shadow-md group/card"
+                                className="flex flex-col gap-2 p-4 bg-indigo-300/60 dark:bg-slate-900/80 rounded-2xl border border-indigo-400/30 dark:border-white/5 hover:bg-white/90 dark:hover:bg-slate-800 transition-all duration-300 shadow-sm hover:shadow-md group/card"
                             >
                                 {/* Category badge + icon */}
                                 <div className="flex items-center gap-2">

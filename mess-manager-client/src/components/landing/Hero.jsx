@@ -64,27 +64,27 @@ const Hero = ({ onLoginClick }) => {
                 >
                     <motion.div
                         variants={heroBadge}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-bold mb-8 backdrop-blur-md"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 border border-indigo-400/30 dark:border-white/10 text-indigo-700 dark:text-indigo-300 text-xs font-black uppercase tracking-widest mb-8 backdrop-blur-md"
                     >
-                        <Sparkles size={16} />
-                        🚀 Version 3.0 is now live
+                        <Sparkles size={14} className="text-amber-500" />
+                        🚀 Mess Management System Active
                     </motion.div>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.5 }}
-                        className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-tight"
+                        className="text-5xl md:text-8xl font-[900] text-slate-900 dark:text-white mb-8 tracking-[-0.05em] uppercase leading-[0.9]"
                     >
-                        Mess Management
+                        Manage the mess
                         <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-                            Without the Stress
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-800 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400">
+                            Without any stress
                         </span>
                     </motion.h1>
                     <motion.p
                         variants={heroText}
                         transition={{ delay: 0.2 }}
-                        className="mx-auto max-w-2xl text-xl text-slate-300 mb-12 font-medium leading-relaxed"
+                        className="mx-auto max-w-2xl text-xl text-slate-600 dark:text-slate-300 mb-12 font-medium leading-relaxed"
                         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     >
@@ -98,12 +98,11 @@ const Hero = ({ onLoginClick }) => {
                         <Button
                             onClick={onLoginClick}
                             size="lg"
-                            className="w-full sm:w-auto px-10 py-5 text-lg font-bold rounded-2xl shadow-2xl shadow-indigo-200 dark:shadow-indigo-900/20 transition-all relative overflow-hidden group"
+                            className="w-full sm:w-auto px-10 py-5 text-lg font-black uppercase tracking-widest rounded-3xl shadow-2xl shadow-indigo-500/20 bg-indigo-600 hover:bg-indigo-700 text-white transition-all relative overflow-hidden group"
                         >
                             <div className="relative z-10 flex items-center justify-center">
-                                Get Started Now <ArrowRight className="ml-2" size={20} />
+                                Launch Terminal <ArrowRight className="ml-2" size={20} />
                             </div>
-                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         </Button>
                         <motion.a
                             href="#features"
@@ -129,80 +128,17 @@ const Hero = ({ onLoginClick }) => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.6 + i * 0.1, duration: 0.5 }}
-                            className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md"
+                            className="flex items-center gap-3 px-6 py-4 rounded-[2rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-white/10 shadow-premium"
                         >
-                            <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center">
-                                <Icon size={18} className="text-indigo-400" />
+                            <div className={`w-10 h-10 rounded-xl ${i === 0 ? 'bg-blue-500/10' : i === 1 ? 'bg-orange-500/10' : 'bg-emerald-500/10'} flex items-center justify-center`}>
+                                <Icon size={20} className={i === 0 ? 'text-blue-500' : i === 1 ? 'text-orange-500' : 'text-emerald-500'} />
                             </div>
                             <div className="text-left">
-                                <p className="text-white font-black text-lg leading-none">{value}</p>
-                                <p className="text-slate-500 text-xs font-semibold mt-0.5">{label}</p>
+                                <p className="text-slate-900 dark:text-white font-[900] text-xl leading-none tracking-tighter">{value}</p>
+                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">{label}</p>
                             </div>
                         </motion.div>
                     ))}
-                </motion.div>
-
-                {/* Dashboard Preview Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 50, rotateX: 12 }}
-                    whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.2, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ transformStyle: "preserve-3d", perspective: "1200px" }}
-                    className="mt-12 w-full max-w-2xl"
-                >
-                    <div className="relative rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl shadow-indigo-500/10 overflow-hidden backdrop-blur-xl p-6">
-                        {/* Faint glow */}
-                        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-72 h-32 bg-indigo-500/15 blur-3xl rounded-full pointer-events-none" />
-                        {/* Top bar */}
-                        <div className="flex items-center gap-2 mb-5">
-                            <div className="w-3 h-3 rounded-full bg-rose-500/70" />
-                            <div className="w-3 h-3 rounded-full bg-amber-500/70" />
-                            <div className="w-3 h-3 rounded-full bg-emerald-500/70" />
-                            <div className="ml-auto text-xs font-bold text-slate-500 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-                                Dashboard — February 2026
-                            </div>
-                        </div>
-                        {/* Mini stat cards */}
-                        <div className="grid grid-cols-3 gap-3 mb-4">
-                            {[
-                                { label: 'Total Meals', value: '487', color: 'from-indigo-500/20 to-purple-500/10', border: 'border-indigo-500/20', text: 'text-indigo-300' },
-                                { label: 'Members', value: '18', color: 'from-emerald-500/20 to-teal-500/10', border: 'border-emerald-500/20', text: 'text-emerald-300' },
-                                { label: 'Due Amount', value: '₹ 320', color: 'from-rose-500/20 to-pink-500/10', border: 'border-rose-500/20', text: 'text-rose-300' },
-                            ].map(card => (
-                                <div key={card.label} className={`rounded-2xl bg-gradient-to-br ${card.color} border ${card.border} p-4`}>
-                                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">{card.label}</p>
-                                    <p className={`${card.text} font-black text-lg leading-none`}>{card.value}</p>
-                                </div>
-                            ))}
-                        </div>
-                        {/* Fake progress bars */}
-                        <div className="space-y-2.5">
-                            {[
-                                { label: 'Market', pct: '72%', color: 'bg-indigo-500' },
-                                { label: 'Gas & Utilities', pct: '45%', color: 'bg-amber-500' },
-                                { label: 'House Rent', pct: '90%', color: 'bg-emerald-500' },
-                            ].map(bar => (
-                                <div key={bar.label} className="flex items-center gap-3">
-                                    <span className="text-slate-500 text-[10px] font-bold w-20 shrink-0 text-left">{bar.label}</span>
-                                    <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            whileInView={{ width: bar.pct }}
-                                            viewport={{ once: true }}
-                                            transition={{ duration: 1.2, delay: 1, ease: [0.16, 1, 0.3, 1] }}
-                                            className={`h-full ${bar.color} rounded-full`}
-                                        />
-                                    </div>
-                                    <span className="text-slate-500 text-[10px] font-bold w-8 text-right">{bar.pct}</span>
-                                </div>
-                            ))}
-                        </div>
-                        {/* Bottom label */}
-                        <p className="text-center text-slate-600 text-[10px] font-bold mt-5 uppercase tracking-widest">
-                            Live Dashboard Preview · Rani Bhawban Mess
-                        </p>
-                    </div>
                 </motion.div>
             </div>
         </section>

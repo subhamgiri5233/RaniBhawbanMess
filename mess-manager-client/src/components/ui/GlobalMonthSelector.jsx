@@ -59,7 +59,7 @@ const GlobalMonthSelector = () => {
         <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/40 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200/50 dark:border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-2 sm:p-2.5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-indigo-500/5"
+            className="bg-indigo-300/30 dark:bg-slate-900/60 backdrop-blur-md border border-indigo-400/30 dark:border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-2 sm:p-2.5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-indigo-500/5"
         >
             {/* Legend / Icon - Hidden on Mobile */}
             <div className="hidden lg:flex items-center gap-3 pl-2">
@@ -76,7 +76,7 @@ const GlobalMonthSelector = () => {
             <div className="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
                 <button
                     onClick={handlePreviousMonth}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:text-indigo-500 hover:dark:text-indigo-400 transition-all active:scale-90 shadow-sm"
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-300/40 dark:bg-slate-800 border border-indigo-400/30 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:text-indigo-500 hover:dark:text-indigo-400 transition-all active:scale-90 shadow-sm"
                     title="Previous Month"
                 >
                     <ChevronLeft size={20} />
@@ -102,7 +102,7 @@ const GlobalMonthSelector = () => {
 
                 <button
                     onClick={handleNextMonth}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:text-indigo-500 hover:dark:text-indigo-400 transition-all active:scale-90 shadow-sm"
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-300/40 dark:bg-slate-800 border border-indigo-400/30 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:text-indigo-500 hover:dark:text-indigo-400 transition-all active:scale-90 shadow-sm"
                     title="Next Month"
                 >
                     <ChevronRight size={20} />

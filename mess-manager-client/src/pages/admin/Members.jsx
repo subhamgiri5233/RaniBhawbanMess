@@ -22,7 +22,7 @@ const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ delay: index * 0.05 }}
-            className="hover:bg-slate-50 dark:hover:bg-white/5 transition-all group"
+            className="hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-all group border-b border-indigo-300/30 last:border-0"
         >
             <td className="p-4 sm:p-6">
                 <div className="flex items-center gap-4">
@@ -33,7 +33,7 @@ const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
                         <div className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors uppercase">{member.name}</div>
                         <div className="flex items-center gap-1.5 mt-1">
                             <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">UID:</span>
-                            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest bg-primary-50 dark:bg-primary-500/10 px-2 py-0.5 rounded-md">
+                            <span className="text-[10px] font-black text-primary-700 dark:text-primary-400 uppercase tracking-widest bg-primary-300/40 dark:bg-primary-500/10 px-2 py-0.5 rounded-md border border-primary-400/20">
                                 {member.userId}
                             </span>
                         </div>
@@ -61,8 +61,8 @@ const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
                                 <div className={cn(
                                     "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg w-fit",
                                     isToday
-                                        ? "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 animate-pulse shadow-sm shadow-rose-500/20"
-                                        : "text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-500/10"
+                                        ? "text-rose-700 dark:text-rose-400 bg-rose-300/40 dark:bg-rose-500/10 border border-rose-300/30 dark:border-rose-500/20 animate-pulse shadow-sm shadow-rose-500/20"
+                                        : "text-pink-700 dark:text-pink-400 bg-pink-300/40 dark:bg-pink-500/10 border border-pink-400/20"
                                 )}>
                                     <Cake size={10} className={isToday ? "animate-bounce" : ""} />
                                     {isToday ? `Today is ${member.name}'s Birthday!` : format(new Date(member.dateOfBirth), 'dd MMM')}
@@ -82,14 +82,14 @@ const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                     <button
                         onClick={() => onEdit(member)}
-                        className="p-2.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-500 hover:bg-indigo-500 hover:text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10"
+                        className="p-2.5 bg-indigo-300/40 dark:bg-indigo-950/30 text-indigo-600 hover:bg-indigo-500 hover:text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10 border border-indigo-400/20"
                         title="Edit Member"
                     >
                         <Pencil size={16} />
                     </button>
                     <button
                         onClick={() => onDelete(member)}
-                        className="p-2.5 bg-red-50 dark:bg-red-950/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10"
+                        className="p-2.5 bg-red-300/40 dark:bg-red-950/30 text-red-600 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10"
                         title="Remove Member"
                     >
                         <Trash2 size={16} />
@@ -238,19 +238,19 @@ const Members = () => {
             className="space-y-8 pb-12"
         >
             {/* Header with clean light mode / dark mode variants */}
-            <div className="relative overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-10 shadow-sm border border-slate-200/50 dark:border-white/5 group border-l-8 border-l-indigo-600">
+            <div className="relative overflow-hidden rb-card p-6 sm:p-10 group border-l-8 border-l-indigo-600">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/5 rounded-full -ml-24 -mb-24 blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
 
                 <div className="relative flex flex-col md:flex-row justify-between items-center gap-8">
                     <div className="text-center md:text-left">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 dark:bg-white/10 backdrop-blur-md rounded-full border border-indigo-100 dark:border-white/10 mb-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-300/30 dark:bg-white/10 backdrop-blur-md rounded-full border border-indigo-200/50 dark:border-white/10 mb-4">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span className="text-[10px] font-black text-indigo-600 dark:text-white uppercase tracking-widest">Active System</span>
+                            <span className="text-[10px] font-black text-indigo-900 dark:text-white uppercase tracking-widest">Active System</span>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter">
-                            Mess <span className="text-indigo-600 dark:text-indigo-200">Members</span>
+                        <h1 className="text-4xl md:text-6xl rb-header mb-3">
+                            Mess <span className="text-indigo-600 dark:text-indigo-400">Members</span>
                         </h1>
                         <p className="text-slate-500 dark:text-slate-400 text-sm font-bold max-w-md mx-auto md:mx-0">
                             Comprehensive directory of mess members. Manage profiles, track deposits, and oversee memberships.
@@ -258,7 +258,7 @@ const Members = () => {
                     </div>
                     <Button
                         onClick={() => setShowAddForm(!showAddForm)}
-                        className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all px-8 py-7 rounded-3xl font-black uppercase tracking-widest text-xs border-0 group/btn"
+                        className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all px-8 py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs border-0 group/btn"
                     >
                         <UserPlus size={18} className="mr-2 group-hover:rotate-12 transition-transform" />
                         Add Member
@@ -276,14 +276,14 @@ const Members = () => {
                         transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                         className="overflow-hidden"
                     >
-                        <Card className="p-8 shadow-premium border-white/5 dark:bg-slate-900/50 bg-white dark:from-slate-900 dark:to-slate-950 rounded-[2.5rem] mb-4">
+                        <Card className="rb-card rb-shadow-blue p-8 mb-4">
                             <form onSubmit={handleSubmit} className="space-y-10">
-                                <div className="flex items-center gap-5 pb-8 border-b border-slate-100 dark:border-white/5">
+                                <div className="flex items-center gap-5 pb-8 border-b border-indigo-300/30 dark:border-white/5">
                                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-primary-500 flex items-center justify-center shadow-xl shadow-primary-500/20 rotate-3">
                                         <UserPlus className="text-white" size={26} />
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Create Member Profile</h3>
+                                        <h3 className="text-2xl rb-header">Create Member Profile</h3>
                                         <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Official Mess Directory</p>
                                     </div>
                                 </div>
@@ -339,7 +339,7 @@ const Members = () => {
                                     <button
                                         type="button"
                                         onClick={() => setShowAddForm(false)}
-                                        className="px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                                        className="px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-indigo-600 hover:bg-indigo-300/40 dark:hover:bg-slate-800 transition-colors"
                                     >
                                         Cancel
                                     </button>
@@ -357,30 +357,30 @@ const Members = () => {
             </AnimatePresence>
 
             {/* Members Table Card */}
-            <Card className="p-0 overflow-hidden shadow-premium border-white/5 dark:bg-slate-900/50 transition-all">
+            <Card className="rb-card p-0 overflow-hidden mb-8">
                 {/* Search Bar section */}
-                <div className="p-8 bg-[#f4f7ff] dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
+                <div className="p-8 bg-indigo-300/40 dark:bg-slate-950/20 shadow-inner">
                     <Input
                         label="Search members by name or email..."
                         icon={Search}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="mt-0"
+                        className="mt-0 bg-indigo-300/40 dark:bg-slate-900 shadow-sm"
                     />
                 </div>
 
                 {/* Table section */}
                 <div className="overflow-auto max-h-[600px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                     <table className="w-full text-left border-collapse relative">
-                        <thead className="sticky top-0 z-10 bg-[#f4f7ff] dark:bg-slate-900 shadow-sm">
-                            <tr className="border-b border-slate-200 dark:border-white/5">
+                        <thead className="sticky top-0 z-10 bg-indigo-300/40 dark:bg-slate-900 shadow-sm">
+                            <tr className="border-b border-slate-200 dark:border-slate-800">
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Identity</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Contact</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Birthday</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                        <tbody className="divide-y divide-indigo-300/30 dark:divide-slate-800">
                             <AnimatePresence mode="popLayout">
                                 {filteredMembers.map((member, index) => (
                                     <MemberRow 
@@ -396,7 +396,7 @@ const Members = () => {
                                 <tr>
                                     <td colSpan={5} className="p-24 text-center">
                                         <div className="flex flex-col items-center gap-4">
-                                            <div className="w-20 h-20 rounded-[2rem] bg-slate-50 dark:bg-slate-900 flex items-center justify-center border border-dashed border-slate-200 dark:border-white/5">
+                                            <div className="w-20 h-20 rounded-[2rem] bg-indigo-300/40 dark:bg-slate-900 flex items-center justify-center border border-dashed border-indigo-400/30 dark:border-slate-800">
                                                 <Search size={32} className="text-slate-300 dark:text-slate-700" />
                                             </div>
                                             <div>
@@ -413,9 +413,9 @@ const Members = () => {
 
                 {/* Footer with member count */}
                 {filteredMembers.length > 0 && (
-                    <div className="p-6 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-white/5 flex items-center justify-center gap-6">
+                    <div className="p-6 bg-indigo-300/40 dark:bg-slate-900/50 border-t border-indigo-300/30 dark:border-slate-800 flex items-center justify-center gap-6">
                         <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                            <div className="p-1.5 bg-indigo-300/40 dark:bg-indigo-900/30 rounded-lg border border-indigo-400/20">
                                 <Info size={14} className="text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
@@ -429,26 +429,26 @@ const Members = () => {
             {/* Edit Member Modal */}
             <AnimatePresence>
                 {editingMember && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-indigo-950/60 backdrop-blur-sm">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-5 md:p-8 max-w-2xl w-full shadow-3xl shadow-black/40 border border-slate-200 dark:border-white/5 overflow-hidden flex flex-col max-h-[90vh]"
+                            className="bg-indigo-300/40 dark:bg-slate-900 rounded-[2.5rem] p-5 md:p-8 max-w-2xl w-full shadow-3xl shadow-indigo-950/40 border border-indigo-300/30 dark:border-indigo-800/30 overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-xl"
                         >
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-slate-100 dark:border-white/5 mb-6 md:mb-8 flex-shrink-0">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-indigo-300/30 dark:border-indigo-800/30 mb-6 md:mb-8 flex-shrink-0">
                                 <div className="flex items-center gap-5">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-primary-500 flex items-center justify-center shadow-xl shadow-primary-500/20 rotate-3 shrink-0">
+                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-xl shadow-indigo-500/20 rotate-3 shrink-0">
                                         <Pencil className="text-white" size={26} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Edit Member</h3>
-                                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1 tracking-tighter">{editingMember.name}</p>
+                                        <h3 className="text-xl md:text-2xl font-black text-indigo-900 dark:text-indigo-100 tracking-tight">Edit Member</h3>
+                                        <p className="text-indigo-500 text-[10px] font-black uppercase tracking-widest mt-1 tracking-tighter">{editingMember.name}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => downloadMemberProfile(editingMember)}
-                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-50 dark:bg-white/5 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-slate-200 dark:border-white/5"
+                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-300/30 dark:bg-slate-800 hover:bg-indigo-300/40 dark:hover:bg-indigo-500/10 text-indigo-700 dark:text-slate-300 hover:text-indigo-800 dark:hover:text-indigo-400 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-indigo-300/30 dark:border-slate-800"
                                 >
                                     <Download size={14} />
                                     Download Profile
@@ -515,11 +515,11 @@ const Members = () => {
                                 </div>
                             </form>
 
-                            <div className="flex gap-4 pt-6 mt-6 border-t border-slate-100 dark:border-white/5 flex-shrink-0">
+                            <div className="flex gap-4 pt-6 mt-6 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
                                 <button
                                     type="button"
                                     onClick={() => setEditingMember(null)}
-                                    className="flex-1 py-4 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                                    className="flex-1 py-4 bg-indigo-300/40 dark:bg-slate-800 text-indigo-700 dark:text-slate-300 rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-colors"
                                 >
                                     Cancel
                                 </button>
@@ -544,9 +544,9 @@ const Members = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-sm w-full shadow-2xl border border-slate-200 dark:border-white/5"
+                            className="bg-indigo-300/40 dark:bg-slate-900 rounded-[2rem] p-8 max-sm w-full shadow-2xl border border-indigo-300/30 dark:border-slate-800 backdrop-blur-xl"
                         >
-                            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center text-red-600 mb-6 mx-auto">
+                            <div className="w-16 h-16 bg-red-300/40 dark:bg-red-900/30 rounded-2xl flex items-center justify-center text-red-600 mb-6 mx-auto">
                                 <Trash2 size={32} />
                             </div>
                             <h3 className="text-xl font-black text-slate-900 dark:text-white text-center mb-2 uppercase tracking-tight">Remove Member?</h3>
@@ -556,7 +556,7 @@ const Members = () => {
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setConfirmDelete(null)}
-                                    className="flex-1 py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+                                    className="flex-1 py-4 bg-indigo-300/40 dark:bg-slate-800 text-indigo-700 dark:text-slate-300 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-colors"
                                 >
                                     Cancel
                                 </button>

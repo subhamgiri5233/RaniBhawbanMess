@@ -8,7 +8,7 @@ const CultureSection = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.1 }}
-                className="relative p-12 md:p-16 rounded-[4rem] overflow-hidden bg-white/5 border border-white/10 backdrop-blur-lg"
+                className="relative p-12 md:p-16 rounded-[4rem] overflow-hidden bg-indigo-300/30 dark:bg-white/5 border border-indigo-400/30 dark:border-white/10 backdrop-blur-xl shadow-2xl shadow-indigo-500/5 dark:shadow-none"
             >
                 <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent" />
@@ -19,28 +19,28 @@ const CultureSection = () => {
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-sm font-bold mb-6"
+                            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-200/50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-sm font-bold mb-6 border border-amber-300/30"
                         >
                             <Sparkles size={16} />
                             Experience the Culture
                         </motion.div>
-                        <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
-                            More than just a <span className="text-amber-400">Utility</span>.
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 leading-tight">
+                            More than just a <span className="text-amber-600 dark:text-amber-400">Utility</span>.
                             <br />
                             It's a lifestyle.
                         </h2>
-                        <p className="text-lg text-gray-600 dark:text-slate-400 mb-8 font-medium">
+                        <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 font-medium leading-relaxed">
                             We've integrated ancient wisdom and regional traditions into your daily routine. From a clock that speaks your language to daily verses from the Bhagavad Gita, your dashboard is built to inspire.
                         </p>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div className="p-6 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-md">
-                                <h4 className="text-amber-400 font-bold mb-2">Bhagavad Gita</h4>
-                                <p className="text-sm text-slate-400">701 verses with sequential daily updates and Bengali meanings.</p>
+                            <div className="p-6 bg-indigo-200/60 dark:bg-white/5 rounded-2xl border border-indigo-400/30 dark:border-white/5 backdrop-blur-md">
+                                <h4 className="text-amber-600 dark:text-amber-400 font-bold mb-2">Bhagavad Gita</h4>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">701 verses with sequential daily updates and Bengali meanings.</p>
                             </div>
-                            <div className="p-6 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-md">
-                                <h4 className="text-amber-400 font-bold mb-2">Bengali Clock</h4>
-                                <p className="text-sm text-slate-400">Native digit support for a truly localized time-keeping experience.</p>
+                            <div className="p-6 bg-indigo-200/60 dark:bg-white/5 rounded-2xl border border-indigo-400/30 dark:border-white/5 backdrop-blur-md">
+                                <h4 className="text-amber-600 dark:text-amber-400 font-bold mb-2">Bengali Clock</h4>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">Native digit support for a truly localized time-keeping experience.</p>
                             </div>
                         </div>
                     </div>

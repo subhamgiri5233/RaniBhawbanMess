@@ -46,16 +46,16 @@ const Payments = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/90 dark:bg-slate-900 shadow-sm p-8 rounded-[2rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-8 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Financial Hub</h1>
                     <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
-                        Activity for <span className="text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/30 font-black">{globalMonth}</span>
+                        Activity for <span className="text-indigo-600 bg-indigo-200/50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-300/30 dark:border-indigo-800/30 font-black">{globalMonth}</span>
                     </p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-                    <CreditCard size={16} className="text-emerald-500" />
-                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Secure Wallet</span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-2xl">
+                    <CreditCard size={16} className="text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-widest">Secure Wallet</span>
                 </div>
             </div>
 
@@ -68,7 +68,7 @@ const Payments = () => {
                         <p className="text-emerald-100 font-black text-[10px] uppercase tracking-widest">Liquidity Balance</p>
                         <h2 className="text-4xl font-black mt-2 tracking-tight">₹{currentGeneralDeposit.toLocaleString()}</h2>
                         <div className="mt-8 pt-6 border-t border-white/10 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-xl bg-indigo-300/40 flex items-center justify-center">
                                 <CheckCircle size={14} className="text-emerald-200" />
                             </div>
                             <p className="text-[10px] font-bold text-emerald-50 uppercase tracking-widest leading-none">Account Verified & Synced</p>
@@ -76,18 +76,18 @@ const Payments = () => {
                     </div>
                 </Card>
 
-                <Card className="p-8 shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl dark:bg-slate-900/40 relative overflow-hidden group h-full">
+                <Card className="p-8 shadow-sm border-indigo-200/50 bg-indigo-200/40 backdrop-blur-xl dark:bg-slate-900/40 relative overflow-hidden group h-full">
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                         <History size={100} />
                     </div>
                     <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight mb-8 flex items-center gap-3">
-                        <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950/40 rounded-xl">
+                        <div className="p-2.5 bg-emerald-300/40 dark:bg-emerald-950/40 rounded-xl">
                             <CreditCard size={20} className="text-emerald-600 dark:text-emerald-400" />
                         </div>
                         Wallet Insights
                     </h2>
                     <div className="space-y-4 relative z-10">
-                        <div className="p-4 bg-indigo-50/30 dark:bg-slate-950/40 rounded-2xl border border-indigo-100/50 dark:border-white/5">
+                        <div className="p-4 bg-indigo-300/20 dark:bg-slate-950/40 rounded-2xl border border-indigo-300/30 dark:border-white/5">
                             <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Available Funds</p>
                             <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tight">₹{currentGeneralDeposit.toLocaleString()}</p>
                         </div>
@@ -98,10 +98,10 @@ const Payments = () => {
                 </Card>
             </div>
 
-            <Card className="p-0 overflow-hidden shadow-sm border-indigo-100/50 bg-white/90 backdrop-blur-xl dark:bg-slate-900/40">
-                <div className="p-8 border-b border-indigo-100/50 dark:border-white/5 bg-indigo-50/20 dark:bg-slate-900/50 flex items-center justify-between">
+            <Card className="p-0 overflow-hidden shadow-sm border-indigo-200/50 bg-indigo-200/40 backdrop-blur-xl dark:bg-slate-900/40">
+                <div className="p-8 border-b border-indigo-200/50 dark:border-white/5 bg-indigo-300/20 dark:bg-slate-900/50 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-indigo-100 dark:bg-indigo-950/40 rounded-2xl shadow-sm">
+                        <div className="p-3 bg-indigo-300/40 dark:bg-indigo-950/40 rounded-2xl shadow-sm">
                             <AlertCircle size={20} className="text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <div>
@@ -110,7 +110,7 @@ const Payments = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
+                        <span className="text-[10px] font-black text-indigo-700 dark:text-slate-400 uppercase tracking-widest bg-indigo-300/40 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-indigo-300/30 dark:border-white/5 shadow-sm">
                             {ledgerItems.length} Entries
                         </span>
                     </div>
@@ -130,10 +130,10 @@ const Payments = () => {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: idx * 0.05 }}
-                                        className="p-8 hover:bg-indigo-50/20 dark:hover:bg-white/5 transition-all group opacity-80"
+                                        className="p-8 hover:bg-indigo-300/40 transition-all group opacity-80"
                                     >
                                         <div className="flex items-start gap-6">
-                                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/10 group-hover:scale-110 transition-transform duration-500">
+                                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border bg-emerald-300/40 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-400/30 dark:border-emerald-500/10 group-hover:scale-110 transition-transform duration-500">
                                                 <CheckCircle size={20} />
                                             </div>
                                             <div className="flex-1">
@@ -165,7 +165,7 @@ const Payments = () => {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="w-20 h-20 bg-slate-50 dark:bg-slate-950/40 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-slate-200 dark:border-white/10"
+                                className="w-20 h-20 bg-indigo-200/40 dark:bg-slate-950/40 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-indigo-300/30 dark:border-white/10"
                             >
                                 <CheckCircle size={32} className="text-slate-300 dark:text-slate-700" />
                             </motion.div>

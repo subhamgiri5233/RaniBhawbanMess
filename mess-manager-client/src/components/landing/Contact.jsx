@@ -12,7 +12,7 @@ const Contact = ({ onLoginClick }) => {
                 transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
                 className="text-center mb-12"
             >
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-bold mb-5 uppercase tracking-widest">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-5 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
                     <Sparkles size={13} /> Get In Touch
                 </div>
                 <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
@@ -33,7 +33,7 @@ const Contact = ({ onLoginClick }) => {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                    className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl space-y-6"
+                    className="p-8 rounded-3xl bg-indigo-300/10 border border-indigo-400/20 backdrop-blur-xl space-y-6"
                 >
                     <div className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0">
@@ -53,8 +53,8 @@ const Contact = ({ onLoginClick }) => {
                             <p className="text-slate-400 text-sm font-medium">Contact the admin for access credentials and onboarding support.</p>
                         </div>
                     </div>
-                    <div className="pt-4 border-t border-white/5">
-                        <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">
+                    <div className="pt-4 border-t border-indigo-500/20">
+                        <p className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-widest rounded-lg inline-block">
                             Admin-approved access only · Secure login
                         </p>
                     </div>

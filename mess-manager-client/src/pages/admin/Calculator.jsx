@@ -675,7 +675,7 @@ const Calculator = () => {
     return (
         <div className="space-y-6 pb-12">
             {/* Power Banner */}
-            <div className="relative overflow-hidden bg-white/90 dark:bg-slate-900 shadow-sm p-8 rounded-[2.5rem] border border-indigo-100/50 dark:border-white/5 backdrop-blur-xl group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
+            <div className="relative overflow-hidden rb-card p-8 group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
                 <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
                 </div>
@@ -686,13 +686,13 @@ const Calculator = () => {
                             <Sparkles size={14} className="text-primary-500 animate-pulse" />
                             <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.3em]">Institutional Revenue Audit</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
+                        <h1 className="text-4xl rb-header flex items-center gap-3">
                             Monthly Calculator
-                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/50 text-[10px] font-black text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-900/50 uppercase tracking-widest">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-300/40 dark:bg-primary-950/50 text-[10px] font-black text-indigo-700 dark:text-primary-400 border border-indigo-300 dark:border-primary-900/50 uppercase tracking-widest">
                                 {globalMonth}
                             </span>
                         </h1>
-                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
                             Finalize shared expenses and generate individual member accounting
                         </p>
                     </div>
@@ -701,7 +701,7 @@ const Calculator = () => {
                         <Button 
                             onClick={generatePDF} 
                             disabled={!perHeadResult || !mealChargeResult} 
-                            className="h-12 px-6 rounded-2xl shadow-lg shadow-indigo-500/10 active:scale-95 transition-all flex items-center gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 font-black text-xs uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-700"
+                            className="h-12 px-6 rounded-2xl shadow-lg bg-indigo-300/40 dark:bg-slate-800 text-indigo-900 dark:text-white border border-indigo-300/30 dark:border-white/10 font-black text-xs uppercase tracking-widest hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-all active:scale-95"
                         >
                             <Download size={16} />
                             Download PDF
@@ -721,13 +721,13 @@ const Calculator = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Per Head Metrics */}
-                <Card className="relative overflow-hidden p-8 border-slate-200/60 dark:border-white/5 bg-white/90 dark:bg-slate-900/40 backdrop-blur-md group/card">
+                <Card className="rb-card rb-shadow-blue p-8 relative overflow-hidden group/card">
                     <div className="absolute -right-10 -top-10 opacity-[0.03] dark:opacity-[0.05] group-hover/card:rotate-12 transition-transform duration-700 pointer-events-none">
                         <CalculatorIcon size={200} />
                     </div>
 
-                    <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight mb-8 flex items-center gap-3">
-                        <div className="p-2.5 bg-primary-100 dark:bg-primary-950/50 rounded-2xl text-primary-600 dark:text-primary-400"><CalculatorIcon size={20} /></div>
+                    <h2 className="text-xl rb-header mb-8 flex items-center gap-3 text-slate-900 dark:text-slate-50">
+                        <div className="p-2.5 bg-indigo-300/40 dark:bg-primary-950/50 rounded-2xl text-indigo-700 dark:text-primary-400 shadow-inner"><CalculatorIcon size={20} /></div>
                         Shared Subscriptions
                     </h2>
                     
@@ -746,10 +746,10 @@ const Calculator = () => {
                                             onFocus={(e) => e.target.select()}
                                             readOnly={isAutoFetched}
                                             className={cn(
-                                                "w-full bg-slate-50/50 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black transition-all ring-1 focus:ring-2",
+                                                "w-full bg-indigo-300/40 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black transition-all ring-1 focus:ring-2",
                                                 isAutoFetched 
-                                                    ? "ring-emerald-100/50 dark:ring-emerald-900/20 text-emerald-600 dark:text-emerald-400" 
-                                                    : "ring-slate-100 dark:ring-white/5 focus:ring-primary-500/50 text-slate-900 dark:text-white"
+                                                    ? "ring-emerald-400/30 dark:ring-emerald-900/20 text-emerald-700 dark:text-emerald-400" 
+                                                    : "ring-indigo-300/30 dark:ring-white/5 focus:ring-primary-500/50 text-slate-900 dark:text-white"
                                             )}
                                         />
                                         {isAutoFetched && <div className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" title="Auto-fetched from vault" />}
@@ -759,9 +759,9 @@ const Calculator = () => {
                         })}
                     </div>
 
-                    <div className="flex items-center justify-between p-6 bg-slate-50/50 dark:bg-slate-900/50 rounded-[1.5rem] border border-slate-100 dark:border-white/5 shadow-inner">
+                    <div className="flex items-center justify-between p-6 bg-indigo-300/40 dark:bg-slate-900/50 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 shadow-inner">
                         <div>
-                            <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Active Population</p>
+                            <p className="text-[8px] font-black text-slate-700 dark:text-slate-500 uppercase tracking-widest mb-1">Active Population</p>
                             <p className="text-xl font-black text-slate-900 dark:text-slate-50">{members.length} Members</p>
                         </div>
                         <Button 
@@ -788,13 +788,13 @@ const Calculator = () => {
                 </Card>
 
                 {/* Meal Charge Section */}
-                <Card className="relative overflow-hidden p-8 border-slate-200/60 dark:border-white/5 bg-white/90 dark:bg-slate-900/40 backdrop-blur-md group/meal">
+                <Card className="rb-card rb-shadow-orange p-8 relative overflow-hidden group/meal">
                     <div className="absolute -right-10 -top-10 opacity-[0.03] dark:opacity-[0.05] group-hover/meal:rotate-12 transition-transform duration-700 pointer-events-none text-amber-500">
                         <TrendingUp size={200} />
                     </div>
 
-                    <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight mb-8 flex items-center gap-3">
-                        <div className="p-2.5 bg-amber-100 dark:bg-amber-950/50 rounded-2xl text-amber-600 dark:text-amber-400"><TrendingUp size={20} /></div>
+                    <h2 className="text-xl rb-header mb-8 flex items-center gap-3 text-slate-900 dark:text-slate-50">
+                        <div className="p-2.5 bg-amber-200 dark:bg-amber-950/50 rounded-2xl text-amber-700 dark:text-amber-400 shadow-inner"><TrendingUp size={20} /></div>
                         Meal Unit Value
                     </h2>
 
@@ -807,7 +807,7 @@ const Calculator = () => {
                                         type="number"
                                         value={mealInputs.totalMarket}
                                         readOnly
-                                        className="w-full bg-emerald-50/50 dark:bg-emerald-950/20 border-none rounded-2xl px-5 py-4 text-sm font-black text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-100/50 dark:ring-emerald-900/30"
+                                        className="w-full bg-emerald-300/40 dark:bg-emerald-950/20 border-none rounded-2xl px-5 py-4 text-sm font-black text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-400/30 dark:ring-emerald-900/30"
                                     />
                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                                 </div>
@@ -819,7 +819,7 @@ const Calculator = () => {
                                     type="number"
                                     value={mealInputs.rice}
                                     readOnly
-                                    className="w-full bg-slate-50/50 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black text-slate-900 dark:text-white ring-1 ring-slate-100 dark:ring-white/5"
+                                    className="w-full bg-indigo-300/40 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black text-slate-900 dark:text-white ring-1 ring-indigo-400/30 dark:ring-white/5"
                                 />
                             </div>
 
@@ -829,7 +829,7 @@ const Calculator = () => {
                                     type="number"
                                     value={mealInputs.guest}
                                     readOnly
-                                    className="w-full bg-slate-50/50 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black text-slate-900 dark:text-white ring-1 ring-slate-100 dark:ring-white/5"
+                                    className="w-full bg-indigo-300/40 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black text-slate-900 dark:text-white ring-1 ring-indigo-400/30 dark:ring-white/5"
                                 />
                             </div>
 
@@ -840,7 +840,7 @@ const Calculator = () => {
                                         type="number"
                                         value={mealInputs.totalMeal}
                                         readOnly
-                                        className="w-full bg-amber-50/50 dark:bg-amber-950/20 border-none rounded-2xl px-5 py-4 text-sm font-black text-amber-700 dark:text-amber-400 ring-1 ring-amber-100/50 dark:ring-amber-900/30"
+                                        className="w-full bg-amber-300/40 dark:bg-amber-950/20 border-none rounded-2xl px-5 py-4 text-sm font-black text-amber-700 dark:text-amber-400 ring-1 ring-amber-400/30 dark:ring-amber-900/30"
                                     />
                                     <p className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest">
                                         Includes {MIN_MEALS}+ Min
@@ -875,11 +875,11 @@ const Calculator = () => {
                 {(perHeadResult && mealChargeResult) && (
                     <div className="mt-12 space-y-6">
                     <div className="flex items-center gap-3 px-2">
-                        <div className="p-2 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl"><Users size={18} /></div>
-                        <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Institutional Audit Ledger</h3>
+                        <div className="p-2 bg-indigo-300/40 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl"><Users size={18} /></div>
+                        <h3 className="text-lg rb-header">Institutional Audit Ledger</h3>
                     </div>
 
-                    <Card className="relative overflow-hidden p-0 border-slate-200/60 dark:border-white/5 bg-white/90 dark:bg-slate-900/40 backdrop-blur-md shadow-2xl">
+                    <Card className="rb-card p-0 overflow-hidden mb-12 shadow-2xl">
                         <div className="overflow-x-auto custom-scrollbar">
                             <table className="w-full border-collapse min-w-[1000px]">
                                 <thead>
@@ -899,8 +899,8 @@ const Calculator = () => {
                                         if (!memberId) return null;
                                         
                                         return (
-                                            <tr key={memberId} className="group hover:bg-slate-50 dark:hover:bg-white/5 transition-colors duration-200">
-                                                <td className="p-5 sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-black transition-colors z-10 shadow-lg">
+                                            <tr key={memberId} className="group hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-colors duration-200 border-b border-indigo-200/30 last:border-0">
+                                                <td className="p-5 sticky left-0 bg-indigo-300/40 dark:bg-slate-900 group-hover:bg-indigo-300/60 transition-colors z-10 shadow-lg">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-800 flex items-center justify-center text-white text-xs font-black shadow-lg">
                                                             {(item?.name || item?.memberName || '?').charAt(0)}
@@ -915,8 +915,8 @@ const Calculator = () => {
                                                     <div className={cn(
                                                         "px-4 py-2 rounded-xl border inline-block min-w-[80px]",
                                                         item?.isBelowMinimum 
-                                                            ? "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 shadow-rose-500/10 border border-rose-100 dark:border-rose-900/20" 
-                                                            : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-100 dark:border-emerald-900/20"
+                                                            ? "bg-rose-300/40 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 shadow-rose-500/10 border border-rose-200 dark:border-rose-900/20" 
+                                                            : "bg-emerald-300/40 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-200 dark:border-emerald-900/20"
                                                     )}>
                                                         <div className="flex flex-col">
                                                             <span className="text-xs font-black">{(Number(item?.meals) || 0)} Units</span>
@@ -925,13 +925,13 @@ const Calculator = () => {
                                                     </div>
                                                 </td>
                                                 <td className="p-5">
-                                                    <div className="px-4 py-2 bg-slate-50 dark:bg-black/30 rounded-xl border border-slate-100 dark:border-white/5 text-center">
-                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">₹{(Number(item?.marketExpense) || 0).toLocaleString()}</span>
+                                                    <div className="px-4 py-2 bg-indigo-200/40 dark:bg-black/30 rounded-xl border border-indigo-200/50 dark:border-white/5 text-center">
+                                                        <span className="text-xs font-black text-slate-800 dark:text-slate-300">₹{(Number(item?.marketExpense) || 0).toLocaleString()}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-5 text-center">
-                                                    <div className="px-4 py-2 bg-slate-50 dark:bg-black/30 rounded-xl border border-slate-100 dark:border-white/5 inline-block min-w-[60px]">
-                                                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">{Number(item?.guest) || 0}</span>
+                                                    <div className="px-4 py-2 bg-indigo-200/40 dark:bg-black/30 rounded-xl border border-indigo-200/50 dark:border-white/5 inline-block min-w-[60px]">
+                                                        <span className="text-xs font-black text-slate-800 dark:text-slate-300">{Number(item?.guest) || 0}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-5 text-center text-xs font-black text-slate-600 dark:text-slate-400">
@@ -943,18 +943,18 @@ const Calculator = () => {
                                                             type="number"
                                                             value={item?.deposit === 0 ? '' : (item?.deposit || '')}
                                                             onChange={(e) => handleIndividualChange(memberId, 'deposit', e.target.value)}
-                                                            className="w-[100px] bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-black text-center focus:border-primary-500 outline-none transition-all shadow-sm"
+                                                            className="w-[100px] bg-indigo-300/40 dark:bg-slate-800 border-2 border-indigo-300/30 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-black text-center focus:border-primary-500 outline-none transition-all shadow-sm"
                                                             placeholder="0"
                                                         />
-                                                        <span className="text-[8px] font-black text-primary-500 uppercase tracking-tighter opacity-60">GEN: ₹{Number(item?.genDeposit) || 0}</span>
+                                                        <span className="text-[8px] font-black text-primary-600 uppercase tracking-tighter opacity-60">GEN: ₹{Number(item?.genDeposit) || 0}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-5 text-right pr-8">
                                                     <div className={cn(
                                                         "inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-xs shadow-lg",
                                                         (Number(item?.balance) || 0) > 0 
-                                                            ? "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 shadow-rose-500/10 border border-rose-100 dark:border-rose-900/20" 
-                                                            : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-100 dark:border-emerald-900/20"
+                                                            ? "bg-rose-300/40 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 shadow-rose-500/10 border border-rose-200 dark:border-rose-900/20" 
+                                                            : "bg-emerald-300/40 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-200 dark:border-emerald-900/20"
                                                     )}>
                                                         ₹{Math.abs(Math.round(Number(item?.balance) || 0))}
                                                         <span className="text-[8px] font-bold uppercase opacity-60">{(Number(item?.balance) || 0) > 0 ? 'PAY' : 'GET'}</span>

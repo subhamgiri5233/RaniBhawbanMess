@@ -15,7 +15,7 @@ const Input = ({ label, icon: Icon, value, onChange, type = 'text', className, r
                 {Icon && (
                     <div className={cn(
                         "absolute left-4 transition-all duration-300 z-10",
-                        isFloating ? "text-primary-500 scale-110" : "text-slate-400"
+                        isFloating ? "text-primary-500 scale-110" : "text-indigo-400/60"
                     )}>
                         <Icon size={18} />
                     </div>
@@ -29,7 +29,7 @@ const Input = ({ label, icon: Icon, value, onChange, type = 'text', className, r
                     onBlur={() => setIsFocused(false)}
                     required={required}
                     className={cn(
-                        "w-full p-5 bg-slate-100/50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-2xl focus:border-indigo-500/50 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-slate-900 dark:text-white font-bold placeholder-transparent backdrop-blur-md",
+                        "w-full p-5 bg-indigo-200/50 dark:bg-white/5 border border-indigo-300/30 dark:border-white/5 rounded-2xl focus:border-indigo-500/50 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-slate-900 dark:text-white font-bold placeholder-transparent backdrop-blur-md",
                         Icon ? "pl-14" : "px-5",
                         Component === 'textarea' && "resize-none min-h-[120px]"
                     )}
@@ -49,7 +49,7 @@ const Input = ({ label, icon: Icon, value, onChange, type = 'text', className, r
                         Icon && !isFloating ? "ml-8" : "",
                         isFloating
                             ? "text-indigo-600 dark:text-indigo-400 bg-transparent"
-                            : "text-slate-500 dark:text-slate-400"
+                            : "text-indigo-500/80 dark:text-slate-400"
                     )}
                 >
                     {label} {required && isFloating && <span className="text-rose-500 ml-1">*</span>}
