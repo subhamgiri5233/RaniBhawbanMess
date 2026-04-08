@@ -143,9 +143,18 @@ router.delete('/:id', auth, async (req, res) => {
         }
 
         // Permission check: Admin can delete anything, members can only delete their own
-        const userId = req.user.id || req.user.userId || req.user._id?.toString();
-        if (req.user.role !== 'admin' && expense.paidBy !== userId) {
-            return res.status(403).json({ message: 'Not authorized to delete this expense' });
+        // paidBy may be stored as member _id OR auth user id — check all possible fields
+        const possibleUserIds = [
+            req.user.id,
+            req.user.userId,
+            req.user._id,
+            req.user.memberId,
+            req.user.name
+        ].filter(Boolean).map(String);
+        const paidBy = String(expense.paidBy || '');
+        const isOwner = possibleUserIds.some(uid => uid === paidBy);
+        if (req.user.role !== 'admin' && !isOwner) {
+            return res.status(403).json({ message: 'Only admin can delete this expense' });
         }
 
         const deletedExpense = await Expense.findByIdAndDelete(id);

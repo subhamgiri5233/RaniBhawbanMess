@@ -49,7 +49,7 @@ const MemberExpenses = () => {
         { name: 'Others', key: 'others', count: getCatCount('others'), total: getCatTotal('others'), icon: Package, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-900/40' },
     ];
 
-    const myApprovedTotal = expenses.filter(e => (e.paidBy === myId || e.paidBy === String(myId))).reduce((acc, e) => acc + (e.amount || 0), 0);
+    const myApprovedTotal = expenses.filter(e => (e.paidBy === myId || e.paidBy === String(myId) || e.paidBy === user?.name)).reduce((acc, e) => acc + (e.amount || 0), 0);
 
     const monthLabel = globalMonth
         ? new Date(`${globalMonth}-01`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
@@ -281,7 +281,7 @@ const MemberExpenses = () => {
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                             {filteredExpenses.map(e => {
-                                const isMine = e.paidBy === myId || e.paidBy === String(myId);
+                                const isMine = e.paidBy === myId || e.paidBy === String(myId) || e.paidBy === user?.name;
                                 const payer = members.find(m => (m._id === e.paidBy || m.userId === e.paidBy));
                                 
                                 return (

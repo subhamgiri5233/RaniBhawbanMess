@@ -131,7 +131,7 @@ const AddExpense = () => {
                 return e.paidBy === 'admin';
             }
         }
-        return e.paidBy === (user.id || user.userId || user._id);
+        return e.paidBy === (user.id || user.userId || user._id) || e.paidBy === user.name;
     }).reverse();
 
     const categoryTotal = historyItems.reduce((sum, e) => sum + (e.amount || 0), 0);

@@ -100,9 +100,9 @@ const MemberDashboard = () => {
     const myMarketExpenses = useMemo(() => {
         if (!Array.isArray(expenses)) return [];
         return expenses.filter(
-            e => (e.paidBy === user?.id || e.paidBy === user?._id) && e.category === 'market' && e.status === 'approved'
+            e => (e.paidBy === user?.id || e.paidBy === user?._id || e.paidBy === user?.userId || e.paidBy === user?.name || e.paidBy === currentMember?._id) && e.category === 'market'
         );
-    }, [expenses, user?.id, user?._id]);
+    }, [expenses, user?.id, user?._id, user?.userId, user?.name, currentMember?._id]);
 
     const totalMarketAmount = useMemo(() => {
         return myMarketExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -126,12 +126,11 @@ const MemberDashboard = () => {
         if (!Array.isArray(expenses)) return 0;
         return expenses
             .filter(e =>
-                (e.paidBy === user?.id || e.paidBy === user?._id) &&
-                ['gas', 'wifi', 'electric'].includes(e.category) &&
-                e.status === 'approved'
+                (e.paidBy === user?.id || e.paidBy === user?._id || e.paidBy === user?.userId || e.paidBy === user?.name || e.paidBy === currentMember?._id) &&
+                ['gas', 'wifi', 'electric'].includes(e.category)
             )
             .reduce((sum, e) => sum + (e.amount || 0), 0);
-    }, [expenses, user?.id, user?._id]);
+    }, [expenses, user?.id, user?._id, user?.userId, user?.name, currentMember?._id]);
 
     return (
         <motion.div
