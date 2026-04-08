@@ -123,22 +123,42 @@ const AddExpense = () => {
 
     const historyItems = expenses.filter(e => {
         if (isAdmin) {
+            // Unified View: Show actual purchases (admin-paid) in the list if filtering,
+            // but hide redundant 'payment' records which are now summarized in pills.
+            const isPurchase = e.paidBy === 'admin';
+            const isPayment = e.paidBy !== 'admin';
+
             if (activeTab === 'deposit') {
-                const isMemberExpense = e.paidBy !== 'admin';
                 const matchesFilter = filterCategory === 'all' || e.category === filterCategory;
-                return isMemberExpense && matchesFilter;
+                // Only show purchases in the list when viewing a specific category,
+                // hide payments because they are in the pills.
+                if (filterCategory !== 'all') {
+                    return isPurchase && matchesFilter;
+                }
+                // In 'All' view, we can show everything or just purchases. 
+                // Given the user request, focus on purchases.
+                return isPurchase;
             } else {
-                return e.paidBy === 'admin';
+                return isPurchase;
             }
         }
+        // For members, only show their own records
         return e.paidBy === (user.id || user.userId || user._id) || e.paidBy === user.name;
     }).reverse();
 
     const categoryTotal = historyItems.reduce((sum, e) => sum + (e.amount || 0), 0);
 
     const contributorTotals = useMemo(() => {
+        if (!expenses) return [];
+        // Find all member-paid records for the current category
+        const memberPayments = expenses.filter(e => {
+            const isPayment = e.paidBy !== 'admin';
+            const matchesCategory = filterCategory === 'all' || e.category === filterCategory;
+            return isPayment && matchesCategory;
+        });
+
         const totalsByPayer = {};
-        historyItems.forEach(e => {
+        memberPayments.forEach(e => {
             const payer = e.paidBy;
             if (!totalsByPayer[payer]) totalsByPayer[payer] = 0;
             totalsByPayer[payer] += (e.amount || 0);
@@ -155,7 +175,7 @@ const AddExpense = () => {
             })
             .filter(item => item.amount > 0)
             .sort((a, b) => b.amount - a.amount);
-    }, [historyItems, members]);
+    }, [expenses, members, filterCategory]);
 
     return (
         <motion.div
@@ -471,21 +491,21 @@ const AddExpense = () => {
                                     </div>
 
                                     {contributorTotals.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 pt-2">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
                                             {contributorTotals.map((item, idx) => (
                                                 <motion.div
                                                     key={item.id}
-                                                    initial={{ opacity: 0, scale: 0.8 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: idx * 0.05 }}
-                                                    className="flex items-center gap-2 px-3 py-1.5 bg-white/50 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5 rounded-full shadow-sm hover:scale-105 transition-transform"
+                                                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800/40 border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:border-indigo-200 dark:hover:border-white/10 transition-all group/pill hover:scale-[1.02]"
                                                 >
-                                                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-[8px] font-black text-white uppercase">
-                                                        {item.name.charAt(0)}
+                                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-xs font-black text-white shadow-lg shadow-indigo-500/20 group-hover/pill:rotate-6 transition-transform">
+                                                        {item.name.charAt(0).toUpperCase()}
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[9px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tighter leading-none">{item.name}</span>
-                                                        <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 tracking-tighter">₹{item.amount.toLocaleString()}</span>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate">{item.name}</span>
+                                                        <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 tracking-tighter">₹{item.amount.toLocaleString()}</span>
                                                     </div>
                                                 </motion.div>
                                             ))}
