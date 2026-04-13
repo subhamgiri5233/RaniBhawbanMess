@@ -135,11 +135,15 @@ const MarketDuty = () => {
 
     const getMemberName = (id) => {
         if (!id) return 'Unknown';
+        if (id === 'OFF_DAY') return 'Mess Holiday';
         const member = members.find(m => (m._id === id || m.id === id));
         return member ? member.name : 'Unknown Member';
     };
 
     const getMemberColor = (id) => {
+        if (id === 'OFF_DAY') {
+            return { text: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-300/40 dark:bg-slate-500/20', border: 'border-slate-300/30 dark:border-slate-500/30' };
+        }
         const colors = [
             { text: 'text-indigo-700 dark:text-indigo-400', bg: 'bg-indigo-300/40 dark:bg-indigo-500/20', border: 'border-indigo-300/30 dark:border-indigo-500/30' },
             { text: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-300/40 dark:bg-emerald-500/20', border: 'border-emerald-300/30 dark:border-emerald-500/30' },
@@ -370,13 +374,13 @@ const MarketDuty = () => {
                                     isMineApproved && "bg-gradient-to-br from-indigo-600 to-purple-700 text-white border-transparent shadow-xl md:shadow-2xl shadow-indigo-500/30 active:scale-95",
                                     isMinePending && "bg-amber-300/40 dark:bg-amber-500/10 text-amber-900 dark:text-amber-400 border-amber-300 dark:border-amber-500/30 border-dashed animate-pulse-subtle",
                                     // OTHERS (admin sees it as reassignable, others see it as taken)
-                                    isApproved && !isMineApproved && !isAdmin && "bg-indigo-300/40 dark:bg-slate-950/20 text-indigo-400/50 dark:text-slate-700 cursor-not-allowed border-indigo-300/30 dark:border-white/5",
-                                    isApproved && !isMineApproved && isAdmin && "bg-indigo-300/40 dark:bg-slate-950/20 text-indigo-400/50 dark:text-slate-700 border-indigo-300/30 dark:border-white/5 hover:border-primary-400 hover:shadow-xl hover:-translate-y-1 cursor-pointer active:scale-95",
-                                    isRequested && !isMinePending && !isApproved && "bg-indigo-300/40 dark:bg-slate-950/10 text-indigo-400/50 dark:text-slate-600 border-indigo-300/30 dark:border-white/5 border-dashed",
+                                    isApproved && !isMineApproved && !isAdmin && "bg-indigo-100/30 dark:bg-slate-950/40 text-indigo-400/50 dark:text-slate-700 cursor-not-allowed border-indigo-200/30 dark:border-white/5",
+                                    isApproved && !isMineApproved && isAdmin && "bg-indigo-100/30 dark:bg-slate-950/40 text-indigo-400/50 dark:text-slate-700 border-indigo-200/30 dark:border-white/5 hover:border-primary-400 hover:shadow-xl hover:-translate-y-1 cursor-pointer active:scale-95",
+                                    isRequested && !isMinePending && !isApproved && "bg-amber-50/30 dark:bg-slate-950/10 text-amber-400/50 dark:text-slate-600 border-amber-200/30 dark:border-white/5 border-dashed",
                                     // EMPTY
-                                    !isApproved && !isRequested && !isPastMonth && "bg-indigo-300/40 dark:bg-slate-900 border-indigo-400/30 dark:border-slate-800/80 hover:border-primary-400 dark:hover:border-primary-600 hover:shadow-xl md:hover:shadow-2xl hover:-translate-y-1 md:hover:-translate-y-1.5 cursor-pointer active:scale-95",
+                                    !isApproved && !isRequested && !isPastMonth && "bg-slate-50 dark:bg-slate-800/20 border-slate-200 dark:border-slate-800/80 hover:border-primary-400 dark:hover:border-primary-600 hover:shadow-xl md:hover:shadow-2xl hover:-translate-y-1 md:hover:-translate-y-1.5 cursor-pointer active:scale-95",
                                     // PAST MONTH
-                                    !isApproved && !isRequested && isPastMonth && "bg-indigo-300/40 dark:bg-slate-950/40 text-indigo-300 dark:text-slate-800 cursor-not-allowed border-indigo-300/30 dark:border-slate-900/40"
+                                    !isApproved && !isRequested && isPastMonth && "bg-slate-100/50 dark:bg-slate-950/60 text-slate-300 dark:text-slate-800 cursor-not-allowed border-slate-200/50 dark:border-slate-900/40"
                                 )}
                             >
                                 <div className="flex w-full justify-between items-start">
@@ -399,15 +403,18 @@ const MarketDuty = () => {
                                         const memberColor = getMemberColor(displayInfo.assignedMemberId);
                                         const isMine = displayInfo.assignedMemberId === user.id;
                                         const isDisplayApproved = displayInfo.status === 'approved';
+                                        const isOffDay = displayInfo.assignedMemberId === 'OFF_DAY';
 
                                         return (
                                             <div className="w-full">
                                                 <div className="flex items-center gap-1.5 md:gap-2 mt-1 min-w-0">
                                                     <div className={cn(
                                                         "w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-[8px] md:text-[10px] font-black shadow-sm group-hover/day:scale-110 transition-transform duration-500",
-                                                        (isMine && isDisplayApproved) ? "bg-indigo-300/40 text-white border border-white/30 backdrop-blur-md" : `${memberColor.bg} ${memberColor.text} border ${memberColor.border}`
+                                                        (isMine && isDisplayApproved) ? "bg-indigo-300/40 text-white border border-white/30 backdrop-blur-md" : 
+                                                        isOffDay ? "bg-rose-50 dark:bg-rose-500/10 text-rose-600 border border-rose-200 dark:border-rose-500/20" :
+                                                        `${memberColor.bg} ${memberColor.text} border ${memberColor.border}`
                                                     )}>
-                                                        {getMemberName(displayInfo.assignedMemberId)?.charAt(0).toUpperCase()}
+                                                        {isOffDay ? <X size={window.innerWidth < 640 ? 10 : 14} className="text-rose-600" /> : getMemberName(displayInfo.assignedMemberId)?.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
                                                         <span className={cn(
@@ -425,8 +432,11 @@ const MarketDuty = () => {
                                                             </span>
                                                         )}
                                                         {isApproved && (approvedInfo.assignedMemberId !== user.id || !isMine) && (
-                                                            <span className="text-[6px] md:text-[7px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-600 mt-0.5 hidden sm:block">
-                                                                Reserved
+                                                            <span className={cn(
+                                                                "text-[6px] md:text-[7px] font-black uppercase tracking-widest mt-0.5 hidden sm:block",
+                                                                approvedInfo.assignedMemberId === 'OFF_DAY' ? 'text-rose-500' : 'text-slate-400 dark:text-slate-600'
+                                                            )}>
+                                                                {approvedInfo.assignedMemberId === 'OFF_DAY' ? 'Holiday' : 'Reserved'}
                                                             </span>
                                                         )}
                                                     </div>
@@ -493,7 +503,53 @@ const MarketDuty = () => {
                 title={`Duty for ${selectedModalDate ? format(selectedModalDate, 'dd MMM yyyy') : ''}`}
             >
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Select a member to assign or approve</p>
+                    {/* Mess Holiday Toggle (Admin Only) */}
+                    {isAdmin && (
+                        <div className="mb-6 p-4 rounded-[1.5rem] bg-indigo-300/40 dark:bg-slate-900/50 border border-indigo-300/30 dark:border-white/5">
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                                        <ShoppingCart size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-black text-slate-900 dark:text-white">Mess Holiday</p>
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">No market on this day</p>
+                                    </div>
+                                </div>
+                                {(() => {
+                                    const dayInfos = selectedModalDate ? getDaysInfo(selectedModalDate) : [];
+                                    const offDayRecord = dayInfos.find(d => d.assignedMemberId === 'OFF_DAY');
+                                    return (
+                                        <button
+                                            onClick={() => {
+                                                if (offDayRecord) {
+                                                    if (window.confirm('Remove Mess Holiday for this date?')) {
+                                                        rejectMarketRequest(offDayRecord._id || offDayRecord.id);
+                                                        setIsModalOpen(false);
+                                                    }
+                                                } else {
+                                                    if (window.confirm('Mark this day as Mess Holiday? This will reject all pending requests.')) {
+                                                        allocateMarketDay(format(selectedModalDate, 'yyyy-MM-dd'), 'OFF_DAY', 'manual_assign');
+                                                        setIsModalOpen(false);
+                                                    }
+                                                }
+                                            }}
+                                            className={cn(
+                                                "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border-2 shadow-sm",
+                                                offDayRecord 
+                                                    ? "bg-rose-500 text-white border-transparent shadow-rose-500/20" 
+                                                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-primary-500"
+                                            )}
+                                        >
+                                            {offDayRecord ? 'Remove Holiday' : 'Set as Holiday'}
+                                        </button>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                    )}
+
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Select a member to assign or approve</p>
 
                     {members.map(member => {
                         const dayInfos = selectedModalDate ? getDaysInfo(selectedModalDate) : [];
