@@ -56,8 +56,8 @@ const Features = () => {
         },
         {
             icon: Calculator,
-            title: 'Monthly Calculator',
-            description: 'Auto-calculates per-member meal costs, expenses, and dues. Generates professional PDF reports with Bengali font support.',
+            title: 'Audit Engine',
+            description: 'Auto-calculates precise meal rates and member dues with zero margin for error. Supports Bengali formatting for local reporting.',
             color: 'text-purple-600 dark:text-purple-400',
             bg: 'bg-purple-500/10 dark:bg-purple-500/20',
             border: 'border-purple-500/20',
@@ -110,8 +110,8 @@ const Features = () => {
         },
         {
             icon: Clock,
-            title: 'Cultural Integration',
-            description: 'Interactive Bengali digit clock and daily spiritual messages from the Bhagavad Gita. Festival particle effects for Durga Puja & Diwali.',
+            title: 'Attendance History',
+            description: 'Comprehensive historical logs of meal attendance and guest records, ensuring no discrepancies in monthly audits.',
             color: 'text-yellow-600 dark:text-yellow-400',
             bg: 'bg-yellow-500/10 dark:bg-yellow-500/20',
             border: 'border-yellow-500/20',

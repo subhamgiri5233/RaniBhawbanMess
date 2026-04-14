@@ -64,31 +64,31 @@ const Hero = ({ onLoginClick }) => {
                 >
                     <motion.div
                         variants={heroBadge}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 border border-indigo-400/30 dark:border-white/10 text-indigo-700 dark:text-indigo-300 text-xs font-black uppercase tracking-widest mb-8 backdrop-blur-md"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 border border-indigo-400/30 dark:border-white/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-8 backdrop-blur-md"
                     >
                         <Sparkles size={14} className="text-amber-500" />
-                        🚀 Mess Management System Active
+                        Rani Bhawban Financial Terminal
                     </motion.div>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.5 }}
-                        className="text-5xl md:text-8xl font-[900] text-slate-900 dark:text-white mb-8 tracking-[-0.05em] uppercase leading-[0.9]"
+                        className="text-5xl md:text-8xl font-[950] text-slate-900 dark:text-white mb-8 tracking-[-0.07em] uppercase leading-[0.85]"
                     >
-                        Manage the mess
+                        Precision Mess
                         <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-800 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400">
-                            Without any stress
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-800 dark:from-indigo-400 dark:via-primary-400 dark:to-indigo-300">
+                            Management.
                         </span>
                     </motion.h1>
                     <motion.p
                         variants={heroText}
                         transition={{ delay: 0.2 }}
-                        className="mx-auto max-w-2xl text-xl text-slate-600 dark:text-slate-300 mb-12 font-medium leading-relaxed"
+                        className="mx-auto max-w-2xl text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 font-medium leading-relaxed"
                         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     >
-                        A premium, all-in-one solution to manage meals, expenses, and payments with professional-grade reporting and total transparency.
+                        The ultimate administrative backbone for Rani Bhawban Mess. Automate meal tracking, manage precise financial accounting, and generate audit-ready reports with institutional transparency.
                     </motion.p>
                     <motion.div
                         variants={heroText}

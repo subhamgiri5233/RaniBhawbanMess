@@ -44,10 +44,10 @@ const Benefits = () => {
                         </h2>
                         <div className="space-y-6">
                             {[
-                                'Real-time automated calculations',
-                                'Bengali & English calendar support',
-                                'Secure role-based access control',
-                                'Mobile-responsive professional UI'
+                                'Unmatched financial audit transparency',
+                                'Precise Bengali PDF reporting engine',
+                                'Secure role-based mess administration',
+                                'Market duty logic with auto-collision detection'
                             ].map((benefit, i) => (
                                 <motion.div
                                     key={i}

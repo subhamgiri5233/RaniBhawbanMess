@@ -7,7 +7,7 @@ import ThreeBackground from '../components/three/ThreeBackground';
 import NavbarComponent from '../components/landing/Navbar';
 import HeroComponent from '../components/landing/Hero';
 import FeaturesComponent from '../components/landing/Features';
-import CultureSectionComponent from '../components/landing/CultureSection';
+
 import BenefitsComponent from '../components/landing/Benefits';
 import ContactComponent from '../components/landing/Contact';
 import FooterComponent from '../components/landing/Footer';
@@ -16,7 +16,7 @@ import FooterComponent from '../components/landing/Footer';
 const Navbar = memo(NavbarComponent);
 const Hero = memo(HeroComponent);
 const Features = memo(FeaturesComponent);
-const CultureSection = memo(CultureSectionComponent);
+
 const Benefits = memo(BenefitsComponent);
 const Contact = memo(ContactComponent);
 const Footer = memo(FooterComponent);
@@ -47,8 +47,7 @@ const LandingPage = () => {
                 {/* Grid Section */}
                 <Features />
 
-                {/* Spiritual & Cultural Section */}
-                <CultureSection />
+
 
                 {/* Bento Style Benefits */}
                 <Benefits />
