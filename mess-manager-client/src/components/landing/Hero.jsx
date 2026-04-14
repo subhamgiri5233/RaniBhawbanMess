@@ -128,7 +128,7 @@ const Hero = ({ onLoginClick }) => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.6 + i * 0.1, duration: 0.5 }}
-                            className="flex items-center gap-3 px-6 py-4 rounded-[2rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-white/10 shadow-premium"
+                            className="flex items-center gap-3 px-6 py-4 rounded-[1.5rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-white/10 shadow-premium"
                         >
                             <div className={`w-10 h-10 rounded-xl ${i === 0 ? 'bg-blue-500/10' : i === 1 ? 'bg-orange-500/10' : 'bg-emerald-500/10'} flex items-center justify-center`}>
                                 <Icon size={20} className={i === 0 ? 'text-blue-500' : i === 1 ? 'text-orange-500' : 'text-emerald-500'} />
@@ -146,3 +146,5 @@ const Hero = ({ onLoginClick }) => {
 };
 
 export default Hero;
+
+

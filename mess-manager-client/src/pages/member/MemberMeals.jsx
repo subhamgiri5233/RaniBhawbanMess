@@ -125,7 +125,7 @@ const MemberMeals = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-8 border-l-indigo-600 shadow-sm p-8 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 transition-colors">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-8 border-l-indigo-600 shadow-sm p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 transition-colors">
                 <div className="flex-1">
                     <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-tight">My Meal Registry</h1>
                     <p className="text-[9px] sm:text-xs font-bold text-indigo-500/80 dark:text-slate-400 mt-1 uppercase tracking-widest leading-relaxed">Manage daily presence & guests</p>
@@ -307,9 +307,9 @@ const MemberMeals = () => {
                             className="relative w-full max-w-xl group"
                         >
                             {/* Animated Background Glow */}
-                            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-primary-500 to-emerald-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-primary-500 to-emerald-500 rounded-[1.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                             
-                            <Card className="p-5 md:p-10 shadow-3xl shadow-black/60 border-indigo-300/30 bg-indigo-300/40 dark:bg-slate-900/40 overflow-hidden relative backdrop-blur-2xl rounded-[2.5rem] flex flex-col max-h-[90vh]">
+                            <Card className="p-5 md:p-10 shadow-3xl shadow-black/60 border-indigo-300/30 bg-indigo-300/40 dark:bg-slate-900/40 overflow-hidden relative backdrop-blur-2xl rounded-[1.5rem] flex flex-col max-h-[90vh]">
                                 <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:scale-125 transition-transform duration-700">
                                     <Sparkles size={160} />
                                 </div>
@@ -355,7 +355,7 @@ const MemberMeals = () => {
                                                         type="button"
                                                         onClick={() => setGuestMealTime(time)}
                                                         className={cn(
-                                                            "p-5 rounded-[2rem] border-2 transition-all font-black uppercase tracking-widest text-[10px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
+                                                            "p-5 rounded-[1.5rem] border-2 transition-all font-black uppercase tracking-widest text-[10px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
                                                             guestMealTime === time
                                                                 ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
                                                                 : "border-indigo-400/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-900/60 text-indigo-400 hover:border-indigo-300 hover:text-indigo-600 dark:hover:text-slate-300"
@@ -379,7 +379,7 @@ const MemberMeals = () => {
                                                         key={key}
                                                         onClick={() => setSelectedMealType(key)}
                                                         className={cn(
-                                                            "p-5 rounded-[2rem] border-2 transition-all group flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
+                                                            "p-5 rounded-[1.5rem] border-2 transition-all group flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
                                                             selectedMealType === key
                                                                 ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
                                                                 : "border-indigo-200/50 dark:border-white/5 bg-indigo-200/30 dark:bg-slate-950/50 text-indigo-400 hover:border-indigo-300 hover:bg-indigo-300/40 dark:hover:bg-slate-800"
@@ -428,3 +428,5 @@ const MemberMeals = () => {
 };
 
 export default MemberMeals;
+
+

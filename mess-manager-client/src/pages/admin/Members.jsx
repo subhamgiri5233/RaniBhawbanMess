@@ -258,7 +258,7 @@ const Members = () => {
                     </div>
                     <Button
                         onClick={() => setShowAddForm(!showAddForm)}
-                        className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all px-8 py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs border-0 group/btn"
+                        className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all px-8 py-7 rounded-[1.5rem] font-black uppercase tracking-widest text-xs border-0 group/btn"
                     >
                         <UserPlus size={18} className="mr-2 group-hover:rotate-12 transition-transform" />
                         Add Member
@@ -396,7 +396,7 @@ const Members = () => {
                                 <tr>
                                     <td colSpan={5} className="p-24 text-center">
                                         <div className="flex flex-col items-center gap-4">
-                                            <div className="w-20 h-20 rounded-[2rem] bg-indigo-300/40 dark:bg-slate-900 flex items-center justify-center border border-dashed border-indigo-400/30 dark:border-slate-800">
+                                            <div className="w-20 h-20 rounded-[1.5rem] bg-indigo-300/40 dark:bg-slate-900 flex items-center justify-center border border-dashed border-indigo-400/30 dark:border-slate-800">
                                                 <Search size={32} className="text-slate-300 dark:text-slate-700" />
                                             </div>
                                             <div>
@@ -434,7 +434,7 @@ const Members = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-indigo-300/40 dark:bg-slate-900 rounded-[2.5rem] p-5 md:p-8 max-w-2xl w-full shadow-3xl shadow-indigo-950/40 border border-indigo-300/30 dark:border-indigo-800/30 overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-xl"
+                            className="bg-indigo-300/40 dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-8 max-w-2xl w-full shadow-3xl shadow-indigo-950/40 border border-indigo-300/30 dark:border-indigo-800/30 overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-xl"
                         >
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-indigo-300/30 dark:border-indigo-800/30 mb-6 md:mb-8 flex-shrink-0">
                                 <div className="flex items-center gap-5">
@@ -544,7 +544,7 @@ const Members = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-indigo-300/40 dark:bg-slate-900 rounded-[2rem] p-8 max-sm w-full shadow-2xl border border-indigo-300/30 dark:border-slate-800 backdrop-blur-xl"
+                            className="bg-indigo-300/40 dark:bg-slate-900 rounded-[1.5rem] p-8 max-sm w-full shadow-2xl border border-indigo-300/30 dark:border-slate-800 backdrop-blur-xl"
                         >
                             <div className="w-16 h-16 bg-red-300/40 dark:bg-red-900/30 rounded-2xl flex items-center justify-center text-red-600 mb-6 mx-auto">
                                 <Trash2 size={32} />
@@ -576,3 +576,5 @@ const Members = () => {
 };
 
 export default Members;
+
+

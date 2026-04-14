@@ -73,7 +73,7 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
 
     return (
         <div className={cn(
-            "p-6 sm:p-8 rounded-[2.5rem] border transition-all duration-300 group relative overflow-hidden",
+            "p-6 sm:p-8 rounded-[1.5rem] border transition-all duration-300 group relative overflow-hidden",
             isCurrentUser
                 ? "bg-indigo-300 dark:bg-slate-900 shadow-2xl shadow-primary-500/20 border-primary-500/40 ring-1 ring-primary-500/20"
                 : "bg-indigo-300/40 dark:bg-slate-900/40 border-indigo-300/30 dark:border-white/5 hover:border-primary-500/20 backdrop-blur-md"
@@ -286,7 +286,7 @@ const Reports = () => {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
             
             {/* Power Banner */}
-            <div className="relative overflow-hidden bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-8 rounded-[2.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
+            <div className="relative overflow-hidden bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
                 <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
                 </div>
@@ -316,7 +316,7 @@ const Reports = () => {
                     <p className="font-black text-xs uppercase tracking-widest">Syncing Database...</p>
                 </div>
             ) : error ? (
-                <div className="p-8 rounded-[2rem] bg-rose-300/40 dark:bg-rose-950/20 text-center flex flex-col items-center gap-4 border border-rose-300/30 dark:border-rose-900/30">
+                <div className="p-8 rounded-[1.5rem] bg-rose-300/40 dark:bg-rose-950/20 text-center flex flex-col items-center gap-4 border border-rose-300/30 dark:border-rose-900/30">
                     <AlertCircle className="text-rose-500" size={32} />
                     <h3 className="font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Sync Failed</h3>
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">{error}</p>
@@ -424,3 +424,5 @@ const Reports = () => {
 };
 
 export default Reports;
+
+

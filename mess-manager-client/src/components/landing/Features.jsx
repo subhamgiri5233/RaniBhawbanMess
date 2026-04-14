@@ -169,7 +169,7 @@ const Features = () => {
                         whileHover={{ y: -10, scale: 1.03, transition: { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] } }}
                         style={{ transformStyle: "preserve-3d" }}
                     >
-                        <Card className={`h-full p-10 border border-indigo-400/30 bg-indigo-300/40 dark:bg-slate-900 shadow-premium transition-all duration-500 group rounded-[3rem] relative overflow-hidden`}>
+                        <Card className={`h-full p-10 border border-indigo-400/30 bg-indigo-300/40 dark:bg-slate-900 shadow-premium transition-all duration-500 group rounded-[1.5rem] relative overflow-hidden`}>
                             {/* Hover accent shadow */}
                             <div className={`absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 ${feature.bg.split(' ')[0]}`} />
                             
@@ -187,3 +187,5 @@ const Features = () => {
 };
 
 export default Features;
+
+

@@ -282,3 +282,5 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
 };
 
 export default AvatarPicker;
+
+

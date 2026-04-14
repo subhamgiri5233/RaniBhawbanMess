@@ -252,7 +252,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
     }, [activeCell, members]);
 
     return (
-        <div className="bg-indigo-300/40 dark:bg-slate-900/50 backdrop-blur-xl border border-indigo-400/30 dark:border-white/5 rounded-[2rem] shadow-[0_4px_24px_rgba(79,70,229,0.13)] dark:shadow-premium-dark flex flex-col relative max-h-[700px]">
+        <div className="bg-indigo-300/40 dark:bg-slate-900/50 backdrop-blur-xl border border-indigo-400/30 dark:border-white/5 rounded-[1.5rem] shadow-[0_4px_24px_rgba(79,70,229,0.13)] dark:shadow-premium-dark flex flex-col relative max-h-[700px]">
             <div className="overflow-auto custom-scrollbar flex-1 rounded-t-[2rem]">
                 {MealGrid}
             </div>
@@ -301,7 +301,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                             exit={{ opacity: 0, scale: 0.9 }}
                             className="relative w-full max-w-sm"
                         >
-                            <div className="bg-indigo-50 dark:bg-slate-900 shadow-2xl rounded-[2.5rem] border border-indigo-200 dark:border-white/10 p-8 overflow-hidden relative group">
+                            <div className="bg-indigo-50 dark:bg-slate-900 shadow-2xl rounded-[1.5rem] border border-indigo-200 dark:border-white/10 p-8 overflow-hidden relative group">
                                 <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
                                     <TrendingUp size={120} className="text-primary-500" />
                                 </div>
@@ -356,3 +356,5 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
 };
 
 export default MealMonthlySheet;
+
+

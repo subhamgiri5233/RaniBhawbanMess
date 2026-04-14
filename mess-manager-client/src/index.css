@@ -41,7 +41,7 @@
 
   /* Rani Bhawban Design (RBD) Tokens */
   .rb-card {
-    @apply bg-indigo-100/90 dark:bg-slate-900 border-indigo-200/50 dark:border-white/5 shadow-premium rounded-[3rem] transition-all duration-300 backdrop-blur-xl;
+    @apply bg-indigo-100/90 dark:bg-slate-900 border-indigo-200/50 dark:border-white/5 shadow-premium rounded-[1.5rem] transition-all duration-300 backdrop-blur-xl;
   }
 
   .rb-header {
@@ -152,3 +152,4 @@
     background: transparent;
   }
 }
+

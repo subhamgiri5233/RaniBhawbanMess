@@ -73,3 +73,5 @@ const AnalogClock = memo(({ hourAngle, minuteAngle, secondAngle, theme }) => {
 AnalogClock.displayName = 'AnalogClock';
 
 export default AnalogClock;
+
+

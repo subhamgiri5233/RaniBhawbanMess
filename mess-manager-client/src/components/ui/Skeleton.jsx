@@ -50,3 +50,5 @@ Skeleton.Table = ({ rows = 5 }) => (
 );
 
 export default Skeleton;
+
+

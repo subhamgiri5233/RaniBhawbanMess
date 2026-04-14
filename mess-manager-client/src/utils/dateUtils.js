@@ -30,3 +30,5 @@ export const getBirthdayStatus = (dateOfBirth) => {
         daysLeft: isToday ? 0 : diffDays
     };
 };
+
+

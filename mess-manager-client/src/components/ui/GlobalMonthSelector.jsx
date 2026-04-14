@@ -59,7 +59,7 @@ const GlobalMonthSelector = () => {
         <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-indigo-300/30 dark:bg-slate-900/60 backdrop-blur-md border border-indigo-400/30 dark:border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-2 sm:p-2.5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-indigo-500/5"
+            className="bg-indigo-300/30 dark:bg-slate-900/60 backdrop-blur-md border border-indigo-400/30 dark:border-white/10 rounded-[1.5rem] sm:rounded-[1.5rem] p-2 sm:p-2.5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-indigo-500/5"
         >
             {/* Legend / Icon - Hidden on Mobile */}
             <div className="hidden lg:flex items-center gap-3 pl-2">
@@ -131,3 +131,5 @@ const GlobalMonthSelector = () => {
 };
 
 export default GlobalMonthSelector;
+
+

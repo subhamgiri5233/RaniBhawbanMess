@@ -127,3 +127,5 @@ const Navbar = ({ onLoginClick }) => {
 };
 
 export default Navbar;
+
+

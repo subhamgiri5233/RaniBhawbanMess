@@ -298,7 +298,7 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-950/80 backdrop-blur-sm px-4" onClick={onClose}>
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} className="bg-indigo-300/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 rounded-[2.5rem] p-5 md:p-8 w-full max-w-md shadow-3xl shadow-indigo-900/50 relative overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} className="bg-indigo-300/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 rounded-[1.5rem] p-5 md:p-8 w-full max-w-md shadow-3xl shadow-indigo-900/50 relative overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6 flex-shrink-0">
                     <div>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Update Payment</h3>
@@ -467,7 +467,7 @@ const MonthlySummary = () => {
                     <p className="font-bold text-sm tracking-tight uppercase">Syncing Database...</p>
                 </div>
             ) : error ? (
-                <div className="p-8 rounded-[2rem] bg-rose-300/40 dark:bg-rose-950/20 text-center flex flex-col items-center gap-4 border border-rose-300 dark:border-rose-900/30">
+                <div className="p-8 rounded-[1.5rem] bg-rose-300/40 dark:bg-rose-950/20 text-center flex flex-col items-center gap-4 border border-rose-300 dark:border-rose-900/30">
                     <AlertCircle className="text-rose-500" size={32} />
                     <h3 className="font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Sync Failed</h3>
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">{error}</p>
@@ -605,3 +605,5 @@ const MonthlySummary = () => {
 };
 
 export default MonthlySummary;
+
+

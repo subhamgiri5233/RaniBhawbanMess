@@ -395,9 +395,9 @@ const Meals = () => {
                             className="relative w-full max-w-xl group"
                         >
                             {/* Animated Background Glow */}
-                            <div className="absolute -inset-1 bg-gradient-to-r from-primary-500 via-indigo-500 to-purple-500 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                            <div className="absolute -inset-1 bg-gradient-to-r from-primary-500 via-indigo-500 to-purple-500 rounded-[1.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                             
-                            <Card className="p-5 md:p-10 shadow-3xl shadow-black/60 border-indigo-400/30 bg-indigo-300/40 dark:bg-slate-900/90 overflow-hidden relative backdrop-blur-2xl rounded-[2.5rem] flex flex-col max-h-[90vh]">
+                            <Card className="p-5 md:p-10 shadow-3xl shadow-black/60 border-indigo-400/30 bg-indigo-300/40 dark:bg-slate-900/90 overflow-hidden relative backdrop-blur-2xl rounded-[1.5rem] flex flex-col max-h-[90vh]">
                                 <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:scale-125 transition-transform duration-700">
                                     <Sparkles size={160} />
                                 </div>
@@ -457,7 +457,7 @@ const Meals = () => {
                                                         type="button"
                                                         onClick={() => setGuestMealTime(time)}
                                                         className={cn(
-                                                            "p-5 rounded-[2rem] border-2 transition-all font-black uppercase tracking-widest text-[10px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
+                                                            "p-5 rounded-[1.5rem] border-2 transition-all font-black uppercase tracking-widest text-[10px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
                                                             guestMealTime === time
                                                                 ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
                                                                 : "border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-900/60 text-indigo-500 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-slate-300"
@@ -481,7 +481,7 @@ const Meals = () => {
                                                         key={key}
                                                         onClick={() => setSelectedMealType(key)}
                                                         className={cn(
-                                                            "p-5 rounded-[2rem] border-2 transition-all group flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
+                                                            "p-5 rounded-[1.5rem] border-2 transition-all group flex flex-col items-center justify-center gap-1.5 relative overflow-hidden",
                                                             selectedMealType === key
                                                                 ? "border-primary-500 bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-105"
                                                                 : "border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-slate-950/50 text-indigo-400 hover:border-indigo-400 hover:bg-white dark:hover:bg-slate-800"
@@ -530,3 +530,5 @@ const Meals = () => {
 };
 
 export default Meals;
+
+

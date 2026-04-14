@@ -30,3 +30,5 @@ export const addBengaliFont = async (doc) => {
         return Promise.resolve();
     }
 };
+
+

@@ -40,3 +40,5 @@ const DigitalClock = memo(({ digitalTime, dateInfo, bengaliDate, variant, theme 
 DigitalClock.displayName = 'DigitalClock';
 
 export default DigitalClock;
+
+

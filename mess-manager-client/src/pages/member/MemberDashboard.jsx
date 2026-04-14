@@ -138,7 +138,7 @@ const MemberDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-5 sm:p-8 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-5 sm:p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl">
                 <div className="flex items-center gap-4 sm:gap-6">
                     {/* Avatar */}
                     <AvatarPicker
@@ -162,7 +162,7 @@ const MemberDashboard = () => {
             </div>
 
             {/* Clock Component */}
-            <div className="rounded-[2rem] overflow-hidden shadow-sm border border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40">
+            <div className="rounded-[1.5rem] overflow-hidden shadow-sm border border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40">
                 <Clock />
             </div>
 
@@ -479,3 +479,5 @@ const MemberDashboard = () => {
 };
 
 export default MemberDashboard;
+
+

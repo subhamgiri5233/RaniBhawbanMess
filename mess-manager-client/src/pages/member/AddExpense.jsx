@@ -268,7 +268,7 @@ const AddExpense = () => {
                                                                     type="button"
                                                                     onClick={() => setCategory(cat.id)}
                                                                     className={cn(
-                                                                        "flex-shrink-0 min-w-[120px] p-6 rounded-[2.5rem] border-2 transition-all flex flex-col items-center gap-4 group/cat relative overflow-hidden snap-center",
+                                                                        "flex-shrink-0 min-w-[120px] p-6 rounded-[1.5rem] border-2 transition-all flex flex-col items-center gap-4 group/cat relative overflow-hidden snap-center",
                                                                         category === cat.id
                                                                             ? cn(
                                                                                 "border-primary-500 dark:border-primary-400 bg-indigo-300/40 dark:bg-primary-950/40 scale-[1.05] shadow-2xl shadow-primary-500/20",
@@ -290,7 +290,7 @@ const AddExpense = () => {
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <div className="p-6 rounded-[2rem] bg-gradient-to-r from-indigo-300/40 to-blue-300/40 dark:from-indigo-950/20 dark:to-blue-950/20 border border-indigo-300/30 dark:border-indigo-900/30 flex items-center justify-between group/market shadow-sm">
+                                                    <div className="p-6 rounded-[1.5rem] bg-gradient-to-r from-indigo-300/40 to-blue-300/40 dark:from-indigo-950/20 dark:to-blue-950/20 border border-indigo-300/30 dark:border-indigo-900/30 flex items-center justify-between group/market shadow-sm">
                                                         <div className="flex items-center gap-4">
                                                             <div className="p-3 bg-indigo-300/40 rounded-2xl group-hover/market:rotate-12 transition-transform shadow-inner border border-indigo-400/20"><Sparkles size={20} className="text-primary-600 dark:text-indigo-400" /></div>
                                                             <div>
@@ -374,7 +374,7 @@ const AddExpense = () => {
                                                                 type="button"
                                                                 onClick={() => setPaymentPurpose(opt.id)}
                                                                 className={cn(
-                                                                    "flex-shrink-0 min-w-[100px] p-5 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 group/opt relative overflow-hidden snap-center",
+                                                                    "flex-shrink-0 min-w-[100px] p-5 rounded-[1.5rem] border-2 transition-all flex flex-col items-center gap-3 group/opt relative overflow-hidden snap-center",
                                                                     paymentPurpose === opt.id
                                                                         ? cn(
                                                                             "border-indigo-500 dark:border-indigo-400 bg-indigo-300/40 dark:bg-indigo-950/40 scale-[1.05] shadow-2xl shadow-indigo-500/20",
@@ -504,3 +504,5 @@ const AddExpense = () => {
 };
 
 export default AddExpense;
+
+

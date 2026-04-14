@@ -307,7 +307,7 @@ const Expenses = () => {
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center py-10 text-center">
-                            <div className="w-20 h-20 bg-primary-300/40 dark:bg-primary-500/20 rounded-[2.5rem] flex items-center justify-center mb-6 rotate-12 transition-transform hover:rotate-0 border border-primary-400/20 shadow-lg shadow-primary-500/10">
+                            <div className="w-20 h-20 bg-primary-300/40 dark:bg-primary-500/20 rounded-[1.5rem] flex items-center justify-center mb-6 rotate-12 transition-transform hover:rotate-0 border border-primary-400/20 shadow-lg shadow-primary-500/10">
                                 <Filter className="text-primary-500" size={32} />
                             </div>
                             <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Mission Control</h4>
@@ -447,3 +447,5 @@ const Expenses = () => {
 };
 
 export default Expenses;
+
+

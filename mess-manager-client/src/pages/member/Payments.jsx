@@ -46,7 +46,7 @@ const Payments = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-8 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Financial Hub</h1>
                     <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
@@ -181,3 +181,5 @@ const Payments = () => {
 };
 
 export default Payments;
+
+

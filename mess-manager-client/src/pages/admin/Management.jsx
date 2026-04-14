@@ -705,7 +705,7 @@ const Management = () => {
                     <div className="p-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {/* Min Meals */}
-                            <div className="space-y-4 p-7 bg-indigo-300/40 dark:bg-slate-900/40 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
+                            <div className="space-y-4 p-7 bg-indigo-300/40 dark:bg-slate-900/40 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
                                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover/card:scale-125 transition-transform duration-700">
                                     <Calendar size={80} />
                                 </div>
@@ -723,7 +723,7 @@ const Management = () => {
                             </div>
 
                             {/* Guest Prices */}
-                            <div className="md:col-span-1 lg:col-span-2 space-y-4 p-7 bg-indigo-300/40 dark:bg-slate-900/40 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
+                            <div className="md:col-span-1 lg:col-span-2 space-y-4 p-7 bg-indigo-300/40 dark:bg-slate-900/40 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 relative overflow-hidden group/card shadow-sm">
                                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover/card:scale-125 transition-transform duration-700">
                                     <ShoppingCart size={80} />
                                 </div>
@@ -749,3 +749,5 @@ const Management = () => {
 };
 
 export default Management;
+
+

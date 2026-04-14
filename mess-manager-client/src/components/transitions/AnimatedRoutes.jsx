@@ -39,3 +39,5 @@ const AnimatedRoutes = ({ children }) => {
 };
 
 export default AnimatedRoutes;
+
+

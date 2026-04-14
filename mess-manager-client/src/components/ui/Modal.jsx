@@ -57,7 +57,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
                             stiffness: 250,
                             duration: 0.5
                         }}
-                        className="relative w-full max-w-lg bg-indigo-950/40 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_20px_100px_rgba(0,0,0,0.5)] overflow-hidden z-10 border border-indigo-400/20"
+                        className="relative w-full max-w-lg bg-indigo-950/40 backdrop-blur-3xl rounded-[1.5rem] shadow-[0_20px_100px_rgba(0,0,0,0.5)] overflow-hidden z-10 border border-indigo-400/20"
                         style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -86,3 +86,5 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 
 export default Modal;
+
+

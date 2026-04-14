@@ -182,7 +182,7 @@ const MarketDuty = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8 pb-12"
         >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-8 border-l-indigo-600 shadow-sm p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl transition-colors">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-8 border-l-indigo-600 shadow-sm p-5 md:p-8 rounded-[1.5rem] md:rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl transition-colors">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Market Duty</h1>
                     <p className="text-[10px] md:text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Reserve your dates for mess collection</p>
@@ -470,7 +470,7 @@ const MarketDuty = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 }}
-                className="bg-indigo-300/40 dark:bg-slate-900/50 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-sm border border-indigo-300/30 dark:border-white/10 relative overflow-hidden group border-l-8 border-l-indigo-600"
+                className="bg-indigo-300/40 dark:bg-slate-900/50 rounded-[1.5rem] md:rounded-[1.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-sm border border-indigo-300/30 dark:border-white/10 relative overflow-hidden group border-l-8 border-l-indigo-600"
             >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-150 transition-all duration-1000"></div>
 
@@ -632,3 +632,5 @@ const MarketDuty = () => {
 };
 
 export default MarketDuty;
+
+

@@ -90,7 +90,7 @@ const Benefits = () => {
                         }}
                         style={{ transformStyle: "preserve-3d" }}
                     >
-                        <Card className="bg-indigo-300/50 dark:bg-slate-800/50 border border-indigo-400/30 dark:border-white/5 p-8 rounded-[3rem] shadow-premium transition-all">
+                        <Card className="bg-indigo-300/50 dark:bg-slate-800/50 border border-indigo-400/30 dark:border-white/5 p-8 rounded-[1.5rem] shadow-premium transition-all">
                             {/* Real stats grid */}
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 {statCards.map(({ icon: Icon, label, value, color, bg, border }, i) => (
@@ -143,3 +143,5 @@ const Benefits = () => {
 };
 
 export default Benefits;
+
+

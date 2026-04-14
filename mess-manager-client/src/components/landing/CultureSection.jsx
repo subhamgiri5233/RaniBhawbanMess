@@ -56,9 +56,9 @@ const CultureSection = () => {
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
-                            className="relative w-64 h-64 md:w-80 md:h-80 bg-gradient-to-br from-amber-500 to-orange-600 rounded-[3rem] shadow-2xl flex items-center justify-center p-8 group"
+                            className="relative w-64 h-64 md:w-80 md:h-80 bg-gradient-to-br from-amber-500 to-orange-600 rounded-[1.5rem] shadow-2xl flex items-center justify-center p-8 group"
                         >
-                            <div className="absolute inset-4 border-2 border-white/20 rounded-[2rem] group-hover:inset-2 transition-all duration-700" />
+                            <div className="absolute inset-4 border-2 border-white/20 rounded-[1.5rem] group-hover:inset-2 transition-all duration-700" />
                             <div className="text-center text-white">
                                 <div className="text-6xl md:text-7xl mb-4">🕉️</div>
                                 <p className="font-bold text-xl mb-1">Gita Verse</p>
@@ -77,3 +77,5 @@ const CultureSection = () => {
 };
 
 export default CultureSection;
+
+
