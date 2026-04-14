@@ -469,7 +469,7 @@ const AddExpense = () => {
                                                     {expense.category === 'spices' && '🌶️ Spices'}
                                                     {expense.category === 'rice' && '🍚 Rice'}
                                                     {expense.category === 'deposit' && '💰 Deposit'}
-                                                    {expense.category === 'wifi' && '📶 WiFi'}
+                                                    {expense.category === 'wifi' && '🛜 WiFi'}
                                                     {expense.category === 'gas' && '🔥 Gas'}
                                                     {expense.category === 'electric' && '⚡ Electric'}
                                                     {(expense.category === 'others' || expense.category === 'other') && '📦 Other'}
