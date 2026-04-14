@@ -9,6 +9,7 @@ import HeroComponent from '../components/landing/Hero';
 import FeaturesComponent from '../components/landing/Features';
 
 import BenefitsComponent from '../components/landing/Benefits';
+import RoadmapComponent from '../components/landing/Roadmap';
 import ContactComponent from '../components/landing/Contact';
 import FooterComponent from '../components/landing/Footer';
 
@@ -18,6 +19,7 @@ const Hero = memo(HeroComponent);
 const Features = memo(FeaturesComponent);
 
 const Benefits = memo(BenefitsComponent);
+const Roadmap = memo(RoadmapComponent);
 const Contact = memo(ContactComponent);
 const Footer = memo(FooterComponent);
 
@@ -51,6 +53,9 @@ const LandingPage = () => {
 
                 {/* Bento Style Benefits */}
                 <Benefits />
+
+                {/* V5 Roadmap Section */}
+                <Roadmap />
 
                 {/* Contact */}
                 <Contact onLoginClick={handleLoginClick} />

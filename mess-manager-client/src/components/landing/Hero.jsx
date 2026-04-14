@@ -1,6 +1,6 @@
-import { motion, useTypewriter, useCursor } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState, useEffect, memo } from 'react';
-import { Sparkles, ArrowRight, ChevronRight, Users, Utensils, TrendingUp } from 'lucide-react';
+import { Sparkles, ArrowRight, ChevronRight } from 'lucide-react';
 import Button from '../ui/Button';
 
 const TypewriterText = ({ text, delay = 0 }) => {
@@ -44,11 +44,7 @@ const Hero = ({ onLoginClick }) => {
         transition: { duration: 1.6, ease: [0.19, 1, 0.22, 1], type: "spring", stiffness: 35, damping: 20 }
     };
 
-    const stats = [
-        { icon: Users, label: 'Members', value: '20+' },
-        { icon: Utensils, label: 'Meals / Month', value: '500+' },
-        { icon: TrendingUp, label: 'Features', value: '13' },
-    ];
+
 
     return (
         <section className="max-w-[1600px] mx-auto px-6 mb-24 relative" style={{ perspective: "1500px" }}>
@@ -78,10 +74,10 @@ const Hero = ({ onLoginClick }) => {
                         transition={{ duration: 0.8, delay: 0.5 }}
                         className="text-5xl md:text-8xl font-[950] text-slate-900 dark:text-white mb-8 tracking-[-0.07em] uppercase leading-[0.85]"
                     >
-                        Precision Mess
+                        Mess handled.
                         <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-800 dark:from-indigo-400 dark:via-primary-400 dark:to-indigo-300">
-                            Management.
+                            Stress cancelled.
                         </span>
                     </motion.h1>
 
@@ -121,34 +117,6 @@ const Hero = ({ onLoginClick }) => {
                             See features <ChevronRight className="ml-1 group-hover:translate-x-1 transition-transform" size={20} />
                         </motion.a>
                     </motion.div>
-                </motion.div>
-
-                {/* Stats Row */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: 0.5 }}
-                    className="mt-16 flex flex-wrap justify-center gap-6 w-full"
-                >
-                    {stats.map(({ icon: Icon, label, value }, i) => (
-                        <motion.div
-                            key={label}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.6 + i * 0.1, duration: 0.5 }}
-                            className="flex items-center gap-3 px-6 py-4 rounded-[1.5rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 shadow-premium group cursor-default"
-                        >
-                            <div className={`w-10 h-10 rounded-xl ${i === 0 ? 'bg-blue-500/10' : i === 1 ? 'bg-orange-500/10' : 'bg-emerald-500/10'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                <Icon size={20} className={i === 0 ? 'text-blue-500' : i === 1 ? 'text-orange-500' : 'text-emerald-500'} />
-                            </div>
-                            <div className="text-left">
-                                <p className="text-slate-900 dark:text-white font-[950] text-xl leading-none tracking-tighter">{value}</p>
-                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">{label}</p>
-                            </div>
-                        </motion.div>
-                    ))}
                 </motion.div>
             </div>
         </section>
