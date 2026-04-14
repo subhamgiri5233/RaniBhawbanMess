@@ -166,7 +166,9 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
                             { k: 'deposit', l: 'Deposit', i: Coins, c: 'emerald' },
                             { k: 'gas', l: 'Gas', i: Flame, c: 'amber' },
                             { k: 'wifi', l: 'Wifi', i: Wifi, c: 'blue' },
-                            { k: 'electric', l: 'Electric', i: Zap, c: 'rose' }
+                            { k: 'electric', l: 'Electric', i: Zap, c: 'rose' },
+                            { k: 'spices', l: 'Spices', i: Flame, c: 'orange' },
+                            { k: 'rice', l: 'Rice', i: ShoppingBag, c: 'emerald' }
                         ];
                         return cats.map(cat => {
                             const val = Number(m.expenses?.[cat.k]) || 0;

@@ -462,6 +462,7 @@ const AddExpense = () => {
                                                     expense.category === 'wifi' && "bg-blue-300/20 text-blue-600 border-blue-400/20",
                                                     expense.category === 'gas' && "bg-rose-300/20 text-rose-600 border-rose-400/20",
                                                     expense.category === 'electric' && "bg-amber-300/20 text-amber-600 border-amber-400/20",
+                                                    (expense.category === 'others' || expense.category === 'other') && "bg-slate-300/20 text-slate-600 border-slate-400/20",
                                                     "bg-slate-300/20 text-slate-600 border-slate-400/20"
                                                 )}>
                                                     {expense.category === 'market' && '🛒 Market'}
@@ -471,7 +472,8 @@ const AddExpense = () => {
                                                     {expense.category === 'wifi' && '📶 WiFi'}
                                                     {expense.category === 'gas' && '🔥 Gas'}
                                                     {expense.category === 'electric' && '⚡ Electric'}
-                                                    {!['market', 'spices', 'rice', 'deposit', 'wifi', 'gas', 'electric'].includes(expense.category) && expense.category}
+                                                    {(expense.category === 'others' || expense.category === 'other') && '📦 Other'}
+                                                    {!['market', 'spices', 'rice', 'deposit', 'wifi', 'gas', 'electric', 'others', 'other'].includes(expense.category) && <span>{expense.category}</span>}
                                                 </span>
                                             </td>
                                             <td className="p-4 text-right text-sm font-black text-slate-900 dark:text-slate-100 tabular-nums">
