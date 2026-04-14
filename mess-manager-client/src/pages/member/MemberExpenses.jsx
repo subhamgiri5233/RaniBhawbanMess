@@ -35,17 +35,17 @@ const Expenses = () => {
         .filter(expense => {
             // Hide admin market expenses
             if (expense.category === 'market' && (String(expense.paidBy).toLowerCase() === 'admin')) return false;
-            
+
             const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
             const selMember = (members || []).find(m => (m._id || m.id) === selectedMember);
-            
+
             // Robust member matching (handles ID, Name, and 'admin' case-insensitively)
-            const memberMatch = selectedMember === 'all' || 
-                              String(expense.paidBy).toLowerCase() === String(selectedMember).toLowerCase() || 
-                              (selMember && String(expense.paidBy).toLowerCase() === String(selMember.name).toLowerCase());
-            
+            const memberMatch = selectedMember === 'all' ||
+                String(expense.paidBy).toLowerCase() === String(selectedMember).toLowerCase() ||
+                (selMember && String(expense.paidBy).toLowerCase() === String(selMember.name).toLowerCase());
+
             const monthMatch = matchesMonth(expense.date);
-                              
+
             return categoryMatch && memberMatch && monthMatch;
         })
         .sort((a, b) => {
@@ -136,8 +136,8 @@ const Expenses = () => {
         <div className="space-y-6 pb-32">
             <div className="flex items-center justify-between">
                 <div>
-                   <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Expense Management</h1>
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5">{monthLabel} Mess Transparency</p>
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Expense Management</h1>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5">{monthLabel} Mess Transparency</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="hidden sm:block px-4 py-2 bg-emerald-300/40 dark:bg-emerald-500/20 border border-emerald-500/30 rounded-xl shadow-inner">
@@ -228,8 +228,8 @@ const Expenses = () => {
                                 <div className="px-4 py-2 bg-primary-300/40 dark:bg-primary-500/20 rounded-2xl border border-primary-500/20 backdrop-blur-md">
                                     <p className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest text-center mb-0.5">Total Monthly</p>
                                     <p className="text-2xl font-black text-primary-600 dark:text-primary-400 tracking-tight">₹{(() => {
-                                        const memberExpenses = expenses.filter(e => 
-                                            (String(e.paidBy).toLowerCase() === String(selectedMember).toLowerCase()) && 
+                                        const memberExpenses = expenses.filter(e =>
+                                            (String(e.paidBy).toLowerCase() === String(selectedMember).toLowerCase()) &&
                                             matchesMonth(e.date)
                                         );
                                         return memberExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
@@ -240,8 +240,8 @@ const Expenses = () => {
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                                 {(() => {
                                     const isAdmin = String(selectedMember).toLowerCase() === 'admin';
-                                    const memberExpenses = expenses.filter(e => 
-                                        (String(e.paidBy).toLowerCase() === String(selectedMember).toLowerCase()) && 
+                                    const memberExpenses = expenses.filter(e =>
+                                        (String(e.paidBy).toLowerCase() === String(selectedMember).toLowerCase()) &&
                                         matchesMonth(e.date)
                                     );
 
@@ -407,7 +407,7 @@ const Expenses = () => {
                                             {expense.category === 'spices' && <>🌶️ Spices</>}
                                             {expense.category === 'rice' && <>🍚 Rice</>}
                                             {expense.category === 'deposit' && <>💰 Deposit</>}
-                                            {expense.category === 'wifi' && <>📶 WiFi</>}
+                                            {expense.category === 'wifi' && <>🛜 WiFi</>}
                                             {expense.category === 'gas' && <>🔥 Gas</>}
                                             {expense.category === 'electric' && <>⚡ Electric</>}
                                             {expense.category === 'others' && <>📦 Other</>}

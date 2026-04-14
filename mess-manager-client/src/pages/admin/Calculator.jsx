@@ -675,33 +675,33 @@ const Calculator = () => {
     return (
         <div className="space-y-6 pb-12">
             {/* Power Banner */}
-            <div className="relative overflow-hidden rb-card p-8 group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
+            <div className="relative overflow-hidden rb-card p-5 md:p-8 group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
                 <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
                 </div>
 
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 mb-2">
                             <Sparkles size={14} className="text-primary-500 animate-pulse" />
-                            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.3em]">Institutional Revenue Audit</span>
+                            <span className="text-[9px] md:text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">Institutional Revenue Audit</span>
                         </div>
-                        <h1 className="text-4xl rb-header flex items-center gap-3">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl rb-header flex flex-wrap items-center gap-2 md:gap-3">
                             Monthly Calculator
-                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-300/40 dark:bg-primary-950/50 text-[10px] font-black text-indigo-700 dark:text-primary-400 border border-indigo-300 dark:border-primary-900/50 uppercase tracking-widest">
+                            <span className="inline-flex items-center px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-indigo-300/40 dark:bg-primary-950/50 text-[9px] md:text-[10px] font-black text-indigo-700 dark:text-primary-400 border border-indigo-300 dark:border-primary-900/50 uppercase tracking-widest whitespace-nowrap">
                                 {globalMonth}
                             </span>
                         </h1>
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
+                        <p className="text-xs md:text-sm font-bold text-slate-700 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
                             Finalize shared expenses and generate individual member accounting
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
                         <Button 
                             onClick={generatePDF} 
                             disabled={!perHeadResult || !mealChargeResult} 
-                            className="h-12 px-6 rounded-2xl shadow-lg bg-indigo-300/40 dark:bg-slate-800 text-indigo-900 dark:text-white border border-indigo-300/30 dark:border-white/10 font-black text-xs uppercase tracking-widest hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-all active:scale-95"
+                            className="h-11 md:h-12 px-5 md:px-6 rounded-2xl shadow-lg bg-indigo-300/40 dark:bg-slate-800 text-indigo-900 dark:text-white border border-indigo-300/30 dark:border-white/10 font-black text-xs uppercase tracking-widest hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-all active:scale-95 flex items-center justify-center gap-2"
                         >
                             <Download size={16} />
                             Download PDF
@@ -710,7 +710,7 @@ const Calculator = () => {
                         <Button
                             onClick={handleSubmitToMonthlyReport}
                             disabled={submittingReport || !perHeadResult || !mealChargeResult}
-                            className="h-12 px-8 rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-500 border-none text-white font-black text-xs uppercase tracking-[0.1em] flex items-center gap-2"
+                            className="h-11 md:h-12 px-6 md:px-8 rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-500 border-none text-white font-black text-xs uppercase tracking-[0.1em] flex items-center justify-center gap-2"
                         >
                             <Save size={16} />
                             {submittingReport ? 'Finalizing...' : 'Submit to Report'}
@@ -721,7 +721,7 @@ const Calculator = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Per Head Metrics */}
-                <Card className="rb-card rb-shadow-blue p-8 relative overflow-hidden group/card">
+                <Card className="rb-card rb-shadow-blue p-5 md:p-8 relative overflow-hidden group/card">
                     <div className="absolute -right-10 -top-10 opacity-[0.03] dark:opacity-[0.05] group-hover/card:rotate-12 transition-transform duration-700 pointer-events-none">
                         <CalculatorIcon size={200} />
                     </div>
@@ -731,7 +731,7 @@ const Calculator = () => {
                         Shared Subscriptions
                     </h2>
                     
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-8 mb-8">
+                    <div className="grid grid-cols-2 gap-x-4 md:gap-x-6 gap-y-6 md:gap-y-8 mb-8">
                         {Object.keys(bills).map(key => {
                             const isAutoFetched = ['gas', 'wifi', 'electric', 'spices', 'others'].includes(key);
                             return (
@@ -788,7 +788,7 @@ const Calculator = () => {
                 </Card>
 
                 {/* Meal Charge Section */}
-                <Card className="rb-card rb-shadow-orange p-8 relative overflow-hidden group/meal">
+                <Card className="rb-card rb-shadow-orange p-5 md:p-8 relative overflow-hidden group/meal">
                     <div className="absolute -right-10 -top-10 opacity-[0.03] dark:opacity-[0.05] group-hover/meal:rotate-12 transition-transform duration-700 pointer-events-none text-amber-500">
                         <TrendingUp size={200} />
                     </div>
@@ -799,7 +799,7 @@ const Calculator = () => {
                     </h2>
 
                     <div className="space-y-6 mb-8">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 gap-4 md:gap-6">
                             <div className="space-y-1.5 col-span-2">
                                 <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Aggregate Market (₹)</label>
                                 <div className="relative">
