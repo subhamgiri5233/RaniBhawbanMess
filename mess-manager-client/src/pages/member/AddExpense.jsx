@@ -124,7 +124,7 @@ const AddExpense = () => {
             alert(`❌ Error: ${res.error || 'Failed to record transaction'}`);
         }
     };
-  
+
     const historyItems = useMemo(() => {
         if (!expenses) return [];
         return expenses.filter(e => {
@@ -132,13 +132,13 @@ const AddExpense = () => {
             if (e.date && globalMonth && !e.date.startsWith(globalMonth)) return false;
 
             const myId = user.id || user.userId || user._id;
-            
+
             if (isAdmin) {
                 // Admin sees what they entered in the current tab context
                 if (activeTab === 'expense') return e.paidBy === 'admin';
                 return e.paidBy !== 'admin'; // Deposits
             }
-            
+
             return e.paidBy === myId || e.paidBy === String(myId) || e.paidBy === user.name;
         }).sort((a, b) => {
             // Sort by date descending
@@ -181,7 +181,7 @@ const AddExpense = () => {
                         <div className="flex items-center gap-1.5 p-1.5 bg-indigo-300/40 dark:bg-slate-800/50 border border-indigo-300/30 dark:border-white/5 rounded-[1.5rem] backdrop-blur-sm self-start lg:self-center">
                             <button
                                 className={cn(
-                                    "px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                                    "px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
                                     activeTab === 'expense'
                                         ? "bg-indigo-300/40 dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-[0_8px_20px_rgba(99,102,241,0.15)] scale-[1.02] border border-indigo-400/20"
                                         : "text-indigo-500/60 hover:text-indigo-600 dark:hover:text-slate-300"
@@ -193,7 +193,7 @@ const AddExpense = () => {
                             </button>
                             <button
                                 className={cn(
-                                    "px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                                    "px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
                                     activeTab === 'deposit'
                                         ? "bg-emerald-300/40 dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-[0_8px_20px_rgba(16,185,129,0.15)] scale-[1.02] border border-emerald-400/20"
                                         : "text-indigo-500/60 hover:text-indigo-600 dark:hover:text-slate-300"
@@ -241,7 +241,7 @@ const AddExpense = () => {
                                         <form onSubmit={handleExpenseSubmit} className="space-y-8">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                                                 <Input label="Transaction Date" type="date" value={transactionDate} onChange={e => { const newDate = e.target.value; setTransactionDate(newDate); const newMonth = newDate.substring(0, 7); if (newMonth !== globalMonth) setGlobalMonth(newMonth); }} className="bg-indigo-300/40 dark:bg-slate-950/50 border-indigo-300/30" required />
-                                                <Input label="Item Description" placeholder="e.g. 5kg Rice or Gas Refill" value={title} onChange={e => setTitle(e.target.value)} className="bg-indigo-300/40 dark:bg-slate-950/50 border-indigo-300/30" required />
+                                                <Input label="Item Description" value={title} onChange={e => setTitle(e.target.value)} className="bg-indigo-300/40 dark:bg-slate-950/50 border-indigo-300/30" required />
                                             </div>
                                             <div className="relative pt-2">
                                                 <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 mb-3 block">Total Amount (₹)</label>

@@ -33,7 +33,7 @@ const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
                         <div className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors uppercase">{member.name}</div>
                         <div className="flex items-center gap-1.5 mt-1">
                             <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">UID:</span>
-                            <span className="text-[10px] font-black text-primary-700 dark:text-primary-400 uppercase tracking-widest bg-primary-300/40 dark:bg-primary-500/10 px-2 py-0.5 rounded-md border border-primary-400/20">
+                            <span className="text-[10px] font-black text-primary-700 dark:text-primary-400 tracking-widest bg-primary-300/40 dark:bg-primary-500/10 px-2 py-0.5 rounded-md border border-primary-400/20">
                                 {member.userId}
                             </span>
                         </div>

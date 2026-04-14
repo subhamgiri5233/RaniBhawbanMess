@@ -5,25 +5,7 @@ import { motion } from 'framer-motion';
 const GlobalMonthSelector = () => {
     const { globalMonth, setGlobalMonth } = useData();
 
-    // Generate last 6 months and next 2 months for quick selection, plus current month
-    const getMonthOptions = () => {
-        const options = [];
-        const monthNames = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
 
-        // Show all months for 2024, 2025, 2026, and 2027
-        for (let year = 2024; year <= 2027; year++) {
-            for (let month = 0; month < 12; month++) {
-                const monthNum = String(month + 1).padStart(2, '0');
-                const value = `${year}-${monthNum}`;
-                const label = `${monthNames[month]} ${year}`;
-                options.push({ value, label });
-            }
-        }
-        return options;
-    };
 
     const handlePreviousMonth = () => {
         if (!globalMonth || typeof globalMonth !== 'string') return;
