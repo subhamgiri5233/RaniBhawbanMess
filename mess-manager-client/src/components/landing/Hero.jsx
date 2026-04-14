@@ -1,49 +1,47 @@
-import { motion } from 'framer-motion';
+import { motion, useTypewriter, useCursor } from 'framer-motion';
+import { useState, useEffect, memo } from 'react';
 import { Sparkles, ArrowRight, ChevronRight, Users, Utensils, TrendingUp } from 'lucide-react';
 import Button from '../ui/Button';
 
+const TypewriterText = ({ text, delay = 0 }) => {
+    const [displayText, setDisplayText] = useState('');
+    
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            let i = 0;
+            const timer = setInterval(() => {
+                setDisplayText(text.slice(0, i));
+                i++;
+                if (i > text.length) clearInterval(timer);
+            }, 30);
+            return () => clearInterval(timer);
+        }, delay);
+        return () => clearTimeout(timeout);
+    }, [text, delay]);
+
+    return (
+        <span className="relative">
+            {displayText}
+            <motion.span 
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+                className="inline-block w-1 h-5 bg-indigo-500 ml-1 mb-[-4px]"
+            />
+        </span>
+    );
+};
+
 const Hero = ({ onLoginClick }) => {
-    // ... existing variants
     const heroBadge = {
-        initial: {
-            opacity: 0,
-            scale: 0.5,
-            rotateZ: -90
-        },
-        animate: {
-            opacity: 1,
-            scale: 1,
-            rotateZ: 0
-        },
-        transition: {
-            duration: 1,
-            ease: [0.34, 1.56, 0.64, 1],
-            delay: 0.3
-        }
+        initial: { opacity: 0, scale: 0.5, rotateZ: -90 },
+        animate: { opacity: 1, scale: 1, rotateZ: 0 },
+        transition: { duration: 1, ease: [0.34, 1.56, 0.64, 1], delay: 0.3 }
     };
 
     const heroText = {
-        initial: {
-            opacity: 0,
-            y: 40,
-            rotateX: 20,
-            scale: 0.95,
-            z: -60
-        },
-        animate: {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            scale: 1,
-            z: 0
-        },
-        transition: {
-            duration: 1.6,
-            ease: [0.19, 1, 0.22, 1],
-            type: "spring",
-            stiffness: 35,
-            damping: 20
-        }
+        initial: { opacity: 0, y: 40, rotateX: 20, scale: 0.95, z: -60 },
+        animate: { opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0 },
+        transition: { duration: 1.6, ease: [0.19, 1, 0.22, 1], type: "spring", stiffness: 35, damping: 20 }
     };
 
     const stats = [
@@ -66,9 +64,14 @@ const Hero = ({ onLoginClick }) => {
                         variants={heroBadge}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 border border-indigo-400/30 dark:border-white/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-8 backdrop-blur-md"
                     >
-                        <Sparkles size={14} className="text-amber-500" />
-                        Rani Bhawban Financial Terminal
+                        <motion.div 
+                            animate={{ scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="w-2 h-2 rounded-full bg-emerald-500"
+                        />
+                        Rani Bhawban Terminal v4.0
                     </motion.div>
+                    
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -81,25 +84,32 @@ const Hero = ({ onLoginClick }) => {
                             Management.
                         </span>
                     </motion.h1>
-                    <motion.p
+
+                    <motion.div
                         variants={heroText}
-                        transition={{ delay: 0.2 }}
-                        className="mx-auto max-w-2xl text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 font-medium leading-relaxed"
-                        initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-                        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        className="mx-auto max-w-2xl text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 font-medium leading-relaxed min-h-[4.5rem]"
                     >
-                        The ultimate administrative backbone for Rani Bhawban Mess. Automate meal tracking, manage precise financial accounting, and generate audit-ready reports with institutional transparency.
-                    </motion.p>
+                        <TypewriterText 
+                            delay={1500}
+                            text="The ultimate administrative backbone for Rani Bhawban Mess. Automate meal tracking, manage precise financial accounting, and generate audit-ready reports with institutional transparency."
+                        />
+                    </motion.div>
+
                     <motion.div
                         variants={heroText}
                         transition={{ delay: 0.3 }}
-                        className="flex flex-col sm:flex-row items-center justify-center gap-4"
+                        className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8"
                     >
                         <Button
                             onClick={onLoginClick}
                             size="lg"
                             className="w-full sm:w-auto px-10 py-5 text-lg font-black uppercase tracking-widest rounded-3xl shadow-2xl shadow-indigo-500/20 bg-indigo-600 hover:bg-indigo-700 text-white transition-all relative overflow-hidden group"
                         >
+                            <motion.div 
+                                className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                                animate={{ x: ['-100%', '100%'] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            />
                             <div className="relative z-10 flex items-center justify-center">
                                 Launch Terminal <ArrowRight className="ml-2" size={20} />
                             </div>
@@ -128,13 +138,13 @@ const Hero = ({ onLoginClick }) => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.6 + i * 0.1, duration: 0.5 }}
-                            className="flex items-center gap-3 px-6 py-4 rounded-[1.5rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-white/10 shadow-premium"
+                            className="flex items-center gap-3 px-6 py-4 rounded-[1.5rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 shadow-premium group cursor-default"
                         >
-                            <div className={`w-10 h-10 rounded-xl ${i === 0 ? 'bg-blue-500/10' : i === 1 ? 'bg-orange-500/10' : 'bg-emerald-500/10'} flex items-center justify-center`}>
+                            <div className={`w-10 h-10 rounded-xl ${i === 0 ? 'bg-blue-500/10' : i === 1 ? 'bg-orange-500/10' : 'bg-emerald-500/10'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                                 <Icon size={20} className={i === 0 ? 'text-blue-500' : i === 1 ? 'text-orange-500' : 'text-emerald-500'} />
                             </div>
                             <div className="text-left">
-                                <p className="text-slate-900 dark:text-white font-[900] text-xl leading-none tracking-tighter">{value}</p>
+                                <p className="text-slate-900 dark:text-white font-[950] text-xl leading-none tracking-tighter">{value}</p>
                                 <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">{label}</p>
                             </div>
                         </motion.div>
@@ -145,6 +155,6 @@ const Hero = ({ onLoginClick }) => {
     );
 };
 
-export default Hero;
+export default memo(Hero);
 
 

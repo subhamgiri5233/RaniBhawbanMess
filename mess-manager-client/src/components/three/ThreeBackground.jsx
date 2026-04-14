@@ -132,6 +132,49 @@ const ThreeBackground = memo(({ isFocused }) => {
             blobs.push(mesh);
         });
 
+        // --- Digital Grid Floor ---
+        const gridVertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const gridFragmentShader = `
+            varying vec2 vUv;
+            uniform float uTime;
+            uniform vec3 uColor;
+
+            void main() {
+                vec2 grid = abs(fract(vUv * 50.0 - 0.5) - 0.5) / fwidth(vUv * 50.0);
+                float line = min(grid.x, grid.y);
+                float alpha = 1.0 - smoothstep(0.0, 1.0, line);
+                
+                // Fade out at edges
+                float dist = distance(vUv, vec2(0.5));
+                alpha *= smoothstep(0.5, 0.2, dist);
+                
+                gl_FragColor = vec4(uColor, alpha * 0.15);
+            }
+        `;
+
+        const gridPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(200, 200),
+            new THREE.ShaderMaterial({
+                vertexShader: gridVertexShader,
+                fragmentShader: gridFragmentShader,
+                transparent: true,
+                uniforms: {
+                    uTime: { value: 0 },
+                    uColor: { value: new THREE.Color('#4f46e5') }
+                }
+            })
+        );
+        gridPlane.rotation.x = -Math.PI / 2;
+        gridPlane.position.y = -20;
+        scene.add(gridPlane);
+
         // --- Simplified Grain Overlay ---
         const grainVertexShader = `
             varying vec2 vUv;
@@ -217,6 +260,7 @@ const ThreeBackground = memo(({ isFocused }) => {
             }
 
             grainPlane.material.uniforms.uTime.value = elapsedTime;
+            gridPlane.material.uniforms.uTime.value = elapsedTime;
             camera.position.x += (mouseRef.current.x * 2 - camera.position.x) * 0.02;
             camera.position.y += (mouseRef.current.y * 2 - camera.position.y) * 0.02;
             camera.lookAt(0, 0, 0);
@@ -245,6 +289,8 @@ const ThreeBackground = memo(({ isFocused }) => {
             });
             grainPlane.geometry.dispose();
             grainPlane.material.dispose();
+            gridPlane.geometry.dispose();
+            gridPlane.material.dispose();
             renderer.dispose();
         };
     }, []);
