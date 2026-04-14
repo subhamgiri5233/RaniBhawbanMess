@@ -85,7 +85,7 @@ const Layout = () => {
                 onClick={handleRefresh}
                 disabled={isRefreshing}
                 title={isRefreshing ? 'Refreshing...' : 'Refresh all data'}
-                className="hidden md:flex items-center gap-2 fixed top-4 right-6 z-50 px-3 py-1.5 bg-indigo-100 dark:bg-slate-900 border border-indigo-200/50 dark:border-white/10 rounded-xl shadow-md text-indigo-600 dark:text-slate-500 hover:text-primary-700 dark:hover:text-primary-400 hover:border-primary-400 hover:shadow-lg transition-all duration-200 text-xs font-black uppercase tracking-widest disabled:opacity-60"
+                className="hidden md:flex items-center gap-2 fixed top-4 right-6 z-50 px-3 py-1.5 bg-indigo-100 dark:bg-slate-900 border border-indigo-200/50 dark:border-white/10 rounded-2xl shadow-md text-indigo-600 dark:text-slate-500 hover:text-primary-700 dark:hover:text-primary-400 hover:border-primary-400 hover:shadow-lg transition-all duration-200 text-xs font-black uppercase tracking-widest disabled:opacity-60"
             >
                 <RefreshCw size={13} className={isRefreshing ? 'animate-spin text-primary-500' : ''} />
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}

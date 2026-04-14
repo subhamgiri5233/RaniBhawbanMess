@@ -181,7 +181,7 @@ const AddExpense = () => {
                         <div className="flex items-center gap-1.5 p-1.5 bg-indigo-300/40 dark:bg-slate-800/50 border border-indigo-300/30 dark:border-white/5 rounded-[1.5rem] backdrop-blur-sm self-start lg:self-center">
                             <button
                                 className={cn(
-                                    "px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                                    "px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
                                     activeTab === 'expense'
                                         ? "bg-indigo-300/40 dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-[0_8px_20px_rgba(99,102,241,0.15)] scale-[1.02] border border-indigo-400/20"
                                         : "text-indigo-500/60 hover:text-indigo-600 dark:hover:text-slate-300"
@@ -193,7 +193,7 @@ const AddExpense = () => {
                             </button>
                             <button
                                 className={cn(
-                                    "px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                                    "px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
                                     activeTab === 'deposit'
                                         ? "bg-emerald-300/40 dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-[0_8px_20px_rgba(16,185,129,0.15)] scale-[1.02] border border-emerald-400/20"
                                         : "text-indigo-500/60 hover:text-indigo-600 dark:hover:text-slate-300"

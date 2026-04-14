@@ -29,7 +29,7 @@ const Input = ({ label, icon: Icon, value, onChange, type = 'text', className, r
                     onBlur={() => setIsFocused(false)}
                     required={required}
                     className={cn(
-                        "w-full p-5 bg-indigo-200/50 dark:bg-white/5 border border-indigo-300/30 dark:border-white/5 rounded-2xl focus:border-indigo-500/50 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-slate-900 dark:text-white font-bold placeholder-transparent backdrop-blur-md",
+                        "w-full p-5 bg-indigo-200/50 dark:bg-white/5 border border-indigo-300/30 dark:border-white/5 rounded-3xl focus:border-indigo-500/50 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-slate-900 dark:text-white font-bold placeholder-transparent backdrop-blur-md",
                         Icon ? "pl-14" : "px-5",
                         Component === 'textarea' && "resize-none min-h-[120px]"
                     )}
