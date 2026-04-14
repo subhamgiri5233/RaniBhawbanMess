@@ -25,7 +25,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-indigo-950/40 backdrop-blur-md"
+                        className="absolute inset-0 dark:bg-indigo-950/40 bg-indigo-50/30 backdrop-blur-md"
                     />
 
                     {/* Modal Content */}
@@ -57,18 +57,18 @@ const Modal = ({ isOpen, onClose, title, children }) => {
                             stiffness: 250,
                             duration: 0.5
                         }}
-                        className="relative w-full max-w-lg bg-indigo-950/40 backdrop-blur-3xl rounded-[1.5rem] shadow-[0_20px_100px_rgba(0,0,0,0.5)] overflow-hidden z-10 border border-indigo-400/20"
+                        className="relative w-full max-w-lg dark:bg-indigo-950/40 bg-white shadow-[0_40px_100px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_100px_rgba(0,0,0,0.5)] backdrop-blur-3xl rounded-[2.5rem] overflow-hidden z-10 border border-indigo-400/20 dark:border-white/10"
                         style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-8 border-b border-white/5">
-                            <h2 className="text-3xl font-black bg-gradient-to-r from-white via-indigo-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
+                        <div className="flex items-center justify-between p-10 border-b border-indigo-500/5 dark:border-white/5">
+                            <h2 className="text-3xl font-[950] dark:bg-gradient-to-r dark:from-white dark:via-indigo-400 dark:to-purple-400 bg-gradient-to-r from-indigo-900 via-indigo-700 to-primary-600 bg-clip-text text-transparent tracking-tighter uppercase">
                                 {title}
                             </h2>
                             <button
                                 onClick={onClose}
-                                className="p-2 text-slate-500 hover:text-white hover:bg-indigo-300/40 rounded-2xl transition-all"
+                                className="p-3 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-500/10 dark:hover:bg-indigo-300/40 rounded-2xl transition-all"
                             >
                                 <X size={24} />
                             </button>

@@ -46,9 +46,9 @@ const LoginForm = ({ onSuccess }) => {
                     className="space-y-6"
                 >
                     {/* Role Switcher */}
-                    <div className="flex bg-indigo-300/40 dark:bg-indigo-950/30 p-1.5 rounded-2xl mb-8 relative border border-indigo-400/30 dark:border-indigo-500/30 backdrop-blur-md shadow-inner">
+                    <div className="flex bg-indigo-50 dark:bg-indigo-950/30 p-1.5 rounded-2xl mb-10 relative border border-indigo-200/50 dark:border-indigo-500/30 backdrop-blur-md shadow-inner">
                         <motion.div
-                            className="absolute top-1.5 bottom-1.5 bg-indigo-100 dark:bg-indigo-500/20 shadow-md dark:shadow-[0_0_20px_rgba(99,102,241,0.2)] rounded-xl border border-indigo-300 dark:border-indigo-400/30"
+                            className="absolute top-1.5 bottom-1.5 bg-white dark:bg-indigo-500/20 shadow-sm dark:shadow-[0_0_20px_rgba(99,102,241,0.2)] rounded-xl border border-indigo-200 dark:border-indigo-400/30"
                             initial={false}
                             animate={{
                                 left: role === 'admin' ? '6px' : '50%',
@@ -57,9 +57,9 @@ const LoginForm = ({ onSuccess }) => {
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                         />
                         <button
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 relative z-10 ${role === 'admin'
-                                ? 'text-indigo-700 dark:text-indigo-100 font-bold'
-                                : 'text-indigo-500/80 dark:text-indigo-300/60 hover:text-indigo-800 dark:hover:text-indigo-200'
+                            className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl transition-all duration-300 relative z-10 ${role === 'admin'
+                                ? 'text-indigo-900 dark:text-indigo-100 font-black uppercase tracking-widest text-[10px]'
+                                : 'text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-indigo-600 dark:hover:text-indigo-200'
                                 }`}
                             onClick={() => { setRole('admin'); setError(''); setUserId(''); setPassword(''); }}
                         >
@@ -72,9 +72,9 @@ const LoginForm = ({ onSuccess }) => {
                             Admin
                         </button>
                         <button
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 relative z-10 ${role === 'member'
-                                ? 'text-indigo-700 dark:text-indigo-100 font-bold'
-                                : 'text-indigo-500/80 dark:text-indigo-300/60 hover:text-indigo-800 dark:hover:text-indigo-200'
+                            className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl transition-all duration-300 relative z-10 ${role === 'member'
+                                ? 'text-indigo-900 dark:text-indigo-100 font-black uppercase tracking-widest text-[10px]'
+                                : 'text-slate-400 font-bold uppercase tracking-widest text-[10px] hover:text-indigo-600 dark:hover:text-indigo-200'
                                 }`}
                             onClick={() => { setRole('member'); setError(''); setUserId(''); setPassword(''); }}
                         >
@@ -133,7 +133,7 @@ const LoginForm = ({ onSuccess }) => {
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
-                                    className="flex items-center gap-2 text-indigo-900 dark:text-indigo-100 text-sm font-medium bg-indigo-200/50 dark:bg-indigo-900/40 p-4 rounded-2xl border border-indigo-400/30 backdrop-blur-md"
+                                    className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/30 backdrop-blur-md"
                                 >
                                     <AlertCircle size={16} />
                                     {error}
