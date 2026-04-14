@@ -26,36 +26,36 @@ const Contact = ({ onLoginClick }) => {
                 </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Info card */}
                 <motion.div
                     initial={{ opacity: 0, x: -30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                    className="p-8 rounded-3xl bg-indigo-300/10 border border-indigo-400/20 backdrop-blur-xl space-y-6"
+                    className="p-10 md:p-14 rounded-[2.5rem] bg-indigo-200/40 dark:bg-indigo-300/5 border border-indigo-400/20 dark:border-white/5 backdrop-blur-xl space-y-8 flex flex-col justify-center"
                 >
-                    <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                            <MapPin size={18} className="text-emerald-400" />
+                    <div className="flex items-start gap-5">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                            <MapPin size={22} className="text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
-                            <p className="text-white font-bold mb-1">Location</p>
-                            <p className="text-slate-400 text-sm font-medium">Rani Bhawban Mess, West Bengal, India</p>
+                            <p className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-sm mb-2">Location</p>
+                            <p className="text-slate-600 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">Rani Bhawban Mess, West Bengal, India</p>
                         </div>
                     </div>
-                    <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                            <MessageCircle size={18} className="text-emerald-400" />
+                    <div className="flex items-start gap-5">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                            <MessageCircle size={22} className="text-indigo-600 dark:text-emerald-400" />
                         </div>
                         <div>
-                            <p className="text-white font-bold mb-1">WhatsApp</p>
-                            <p className="text-slate-400 text-sm font-medium">Contact the admin for access credentials and onboarding support.</p>
+                            <p className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-sm mb-2">WhatsApp</p>
+                            <p className="text-slate-600 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">Contact the admin for access credentials and onboarding support.</p>
                         </div>
                     </div>
-                    <div className="pt-4 border-t border-indigo-500/20">
-                        <p className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-widest rounded-lg inline-block">
-                            Admin-approved access only · Secure login
+                    <div className="pt-6 border-t border-indigo-500/10 dark:border-white/5">
+                        <p className="px-4 py-2 bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-500/10 dark:border-white/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl inline-block">
+                             AUTHORIZED ACCESS ONLY // SECURE_HANDSHAKE
                         </p>
                     </div>
                 </motion.div>
@@ -67,20 +67,20 @@ const Contact = ({ onLoginClick }) => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                     whileHover={{ y: -6, transition: { duration: 0.3 } }}
-                    className="relative p-8 rounded-3xl bg-gradient-to-br from-emerald-500/15 via-teal-500/5 to-cyan-500/10 border border-emerald-500/25 backdrop-blur-xl overflow-hidden flex flex-col justify-between gap-8"
+                    className="relative p-10 md:p-14 rounded-[2.5rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-400/20 dark:border-white/5 backdrop-blur-xl overflow-hidden flex flex-col justify-between gap-10"
                 >
-                    <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
-                    <div className="relative z-10">
-                        <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Already a member?</h3>
-                        <p className="text-slate-300 font-medium leading-relaxed text-sm">
-                            Log in to access your dashboard, track your meals, check dues, and view monthly summaries — all in one place.
+                    <div className="absolute -top-16 -right-16 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
+                    <div className="relative z-10 text-center lg:text-left">
+                        <h3 className="text-3xl font-[950] text-slate-900 dark:text-white mb-4 tracking-tighter uppercase leading-none">Already a member?</h3>
+                        <p className="text-slate-600 dark:text-slate-400 font-bold uppercase tracking-widest text-[11px] leading-relaxed opacity-80">
+                            Access the terminal to monitor real-time nutrition loops, financial transparency, and regional market duty protocols.
                         </p>
                     </div>
                     <Button
                         onClick={onLoginClick}
-                        className="relative z-10 w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 group"
+                        className="relative z-10 w-full py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 group shadow-2xl"
                     >
-                        Get Started <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        Initialize Dashboard <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </Button>
                 </motion.div>
             </div>

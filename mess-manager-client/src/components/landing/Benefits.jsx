@@ -8,15 +8,15 @@ const Benefits = () => {
 
     return (
         <section id="benefits" className="container mx-auto px-6 mb-32">
-            <div className="flex justify-center">
-                {/* Main Bento Card - Centered */}
+            <div className="w-full">
+                {/* Main Bento Card - Full Frame */}
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="w-full max-w-4xl"
+                    className="w-full"
                 >
-                    <Card className="bg-indigo-200/40 dark:bg-slate-900 border-0 p-10 md:p-16 flex flex-col justify-center relative overflow-hidden min-h-[480px]">
+                    <Card className="bg-indigo-200/40 dark:bg-slate-900 border-0 p-10 md:p-20 flex flex-col justify-center relative overflow-hidden min-h-[500px]">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2" />
                         
                         <motion.h2 className="text-4xl md:text-5xl font-[950] text-slate-900 dark:text-white mb-10 tracking-tighter uppercase leading-[0.9] relative z-20">

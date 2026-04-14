@@ -178,7 +178,7 @@ const Features = () => {
                             </div>
                             
                             <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3 tracking-tighter uppercase leading-none">{feature.title}</h3>
-                            <p className="text-slate-500 dark:text-slate-500 text-[11px] leading-relaxed font-bold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity flex-grow">{feature.description}</p>
+                            <p className="text-slate-600 dark:text-slate-500 text-[11px] leading-relaxed font-bold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity flex-grow">{feature.description}</p>
                             
                             {/* Bottom Scanner Line */}
                             <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500/0 group-hover:bg-indigo-500/30 transition-all overflow-hidden">

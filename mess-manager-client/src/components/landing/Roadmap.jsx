@@ -79,7 +79,7 @@ const Roadmap = () => {
 
                             <div className="relative z-10 flex-grow">
                                 <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-4">{item.title}</h3>
-                                <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest leading-relaxed mb-8 opacity-80 min-h-[4rem]">
+                                <p className="text-slate-600 dark:text-slate-500 text-[11px] font-bold uppercase tracking-widest leading-relaxed mb-8 opacity-80 min-h-[4rem]">
                                     {item.description}
                                 </p>
                             </div>

@@ -298,7 +298,7 @@ const ThreeBackground = memo(({ isFocused }) => {
     return (
         <div
             ref={containerRef}
-            className="fixed inset-0 z-0 bg-[#010411] transition-opacity duration-1000"
+            className="fixed inset-0 z-0 dark:bg-[#010411] bg-transparent transition-opacity duration-1000"
             style={{ pointerEvents: 'none', opacity: 0 }}
         />
     );
