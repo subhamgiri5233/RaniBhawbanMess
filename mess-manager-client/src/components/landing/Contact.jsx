@@ -1,15 +1,10 @@
-import { motion } from 'framer-motion';
 import { MessageCircle, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import Button from '../ui/Button';
 
 const Contact = ({ onLoginClick }) => {
     return (
         <section id="contact" className="container mx-auto px-6 mb-32">
-            <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.1 }}
-                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            <div
                 className="text-center mb-12"
             >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-5 uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.1)]">
@@ -24,15 +19,11 @@ const Contact = ({ onLoginClick }) => {
                 <p className="text-slate-400 font-medium max-w-xl mx-auto">
                     Contact the mess admin to get your account set up, or login directly if you already have access.
                 </p>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Info card */}
-                <motion.div
-                    initial={{ opacity: 0, x: -30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                <div
                     className="p-10 md:p-14 rounded-[2.5rem] bg-indigo-200/40 dark:bg-indigo-300/5 border border-indigo-400/20 dark:border-white/5 backdrop-blur-xl space-y-8 flex flex-col justify-center"
                 >
                     <div className="flex items-start gap-5">
@@ -58,16 +49,11 @@ const Contact = ({ onLoginClick }) => {
                              AUTHORIZED ACCESS ONLY // SECURE_HANDSHAKE
                         </p>
                     </div>
-                </motion.div>
+                </div>
 
                 {/* CTA card */}
-                <motion.div
-                    initial={{ opacity: 0, x: 30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    whileHover={{ y: -6, transition: { duration: 0.3 } }}
-                    className="relative p-10 md:p-14 rounded-[2.5rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-400/20 dark:border-white/5 backdrop-blur-xl overflow-hidden flex flex-col justify-between gap-10"
+                <div
+                    className="relative p-10 md:p-14 rounded-[2.5rem] bg-indigo-200/40 dark:bg-slate-900 border border-indigo-400/20 dark:border-white/5 backdrop-blur-xl overflow-hidden flex flex-col justify-between gap-10 hover:-translate-y-1 transition-all duration-300"
                 >
                     <div className="absolute -top-16 -right-16 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
                     <div className="relative z-10 text-center lg:text-left">
@@ -82,7 +68,7 @@ const Contact = ({ onLoginClick }) => {
                     >
                         Initialize Dashboard <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </Button>
-                </motion.div>
+                </div>
             </div>
         </section>
     );

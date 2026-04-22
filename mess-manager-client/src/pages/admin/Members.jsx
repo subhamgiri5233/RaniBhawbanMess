@@ -5,7 +5,6 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { Trash2, UserPlus, Search, Calendar, Cake, User, Mail, Shield, Phone, History, Info, Eye, EyeOff, Pencil, Check, X, Download } from 'lucide-react';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { getBirthdayStatus } from '../../utils/dateUtils';
 import api from '../../lib/api';
@@ -16,12 +15,7 @@ import { MESS_CONFIG } from '../../config';
 // Optimized Row Component
 const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
     return (
-        <motion.tr
-            layout
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ delay: index * 0.05 }}
+        <tr
             className="hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-all group border-b border-indigo-300/30 last:border-0"
         >
             <td className="p-4 sm:p-6">
@@ -96,7 +90,7 @@ const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
                     </button>
                 </div>
             </td>
-        </motion.tr>
+        </tr>
     );
 });
 
@@ -232,9 +226,7 @@ const Members = () => {
 
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+        <div
             className="space-y-8 pb-12"
         >
             {/* Header with clean light mode / dark mode variants */}
@@ -267,15 +259,10 @@ const Members = () => {
             </div>
 
             {/* Add Member Form */}
-            <AnimatePresence>
-                {showAddForm && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, height: 'auto', scale: 1 }}
-                        exit={{ opacity: 0, height: 0, scale: 0.95 }}
-                        transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-                        className="overflow-hidden"
-                    >
+            {showAddForm && (
+                <div
+                    className="overflow-hidden"
+                >
                         <Card className="rb-card rb-shadow-blue p-8 mb-4">
                             <form onSubmit={handleSubmit} className="space-y-10">
                                 <div className="flex items-center gap-5 pb-8 border-b border-indigo-300/30 dark:border-white/5">
@@ -352,9 +339,8 @@ const Members = () => {
                                 </div>
                             </form>
                         </Card>
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
 
             {/* Members Table Card */}
             <Card className="rb-card p-0 overflow-hidden mb-8">
@@ -381,7 +367,6 @@ const Members = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-indigo-300/30 dark:divide-slate-800">
-                            <AnimatePresence mode="popLayout">
                                 {filteredMembers.map((member, index) => (
                                     <MemberRow 
                                         key={member._id || member.id}
@@ -391,7 +376,6 @@ const Members = () => {
                                         onDelete={handleDelete}
                                     />
                                 ))}
-                            </AnimatePresence>
                             {filteredMembers.length === 0 && (
                                 <tr>
                                     <td colSpan={5} className="p-24 text-center">
@@ -427,15 +411,11 @@ const Members = () => {
             </Card>
 
             {/* Edit Member Modal */}
-            <AnimatePresence>
-                {editingMember && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-indigo-950/60 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-indigo-300/40 dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-8 max-w-2xl w-full shadow-3xl shadow-indigo-950/40 border border-indigo-300/30 dark:border-indigo-800/30 overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-xl"
-                        >
+            {editingMember && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-indigo-950/60 backdrop-blur-sm">
+                    <div
+                        className="bg-indigo-300/40 dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-8 max-w-2xl w-full shadow-3xl shadow-indigo-950/40 border border-indigo-300/30 dark:border-indigo-800/30 overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-xl"
+                    >
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-indigo-300/30 dark:border-indigo-800/30 mb-6 md:mb-8 flex-shrink-0">
                                 <div className="flex items-center gap-5">
                                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-xl shadow-indigo-500/20 rotate-3 shrink-0">
@@ -531,21 +511,16 @@ const Members = () => {
                                 </Button>
                             </div>
 
-                        </motion.div>
                     </div>
-                )}
-            </AnimatePresence>
+                </div>
+            )}
 
             {/* Delete Confirmation Modal */}
-            <AnimatePresence>
-                {confirmDelete && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="bg-indigo-300/40 dark:bg-slate-900 rounded-[1.5rem] p-8 max-sm w-full shadow-2xl border border-indigo-300/30 dark:border-slate-800 backdrop-blur-xl"
-                        >
+            {confirmDelete && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div
+                        className="bg-indigo-300/40 dark:bg-slate-900 rounded-[1.5rem] p-8 max-sm w-full shadow-2xl border border-indigo-300/30 dark:border-slate-800 backdrop-blur-xl"
+                    >
                             <div className="w-16 h-16 bg-red-300/40 dark:bg-red-900/30 rounded-2xl flex items-center justify-center text-red-600 mb-6 mx-auto">
                                 <Trash2 size={32} />
                             </div>
@@ -567,11 +542,10 @@ const Members = () => {
                                     Delete
                                 </button>
                             </div>
-                        </motion.div>
                     </div>
-                )}
-            </AnimatePresence>
-        </motion.div>
+                </div>
+            )}
+        </div>
     );
 };
 

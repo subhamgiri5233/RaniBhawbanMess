@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useState, useEffect, memo } from 'react';
 import { Sparkles, ArrowRight, ChevronRight } from 'lucide-react';
 import Button from '../ui/Button';
@@ -22,10 +21,8 @@ const TypewriterText = ({ text, delay = 0 }) => {
     return (
         <span className="relative">
             {displayText}
-            <motion.span 
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-                className="inline-block w-1 h-5 bg-indigo-500 ml-1 mb-[-4px]"
+            <span 
+                className="inline-block w-1 h-5 bg-indigo-500 ml-1 mb-[-4px] animate-pulse"
             />
         </span>
     );
@@ -47,31 +44,19 @@ const Hero = ({ onLoginClick }) => {
 
 
     return (
-        <section className="max-w-[1600px] mx-auto px-6 mb-24 relative" style={{ perspective: "1500px" }}>
+        <section className="max-w-[1600px] mx-auto px-6 mb-24 relative">
             <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-                <motion.div
-                    initial="initial"
-                    whileInView="animate"
-                    viewport={{ margin: "-150px", amount: 0.3 }}
-                    style={{ transformStyle: "preserve-3d" }}
-                    className="w-full"
-                >
-                    <motion.div
-                        variants={heroBadge}
+                <div className="w-full">
+                    <div
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 border border-indigo-400/30 dark:border-white/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-8 backdrop-blur-md"
                     >
-                        <motion.div 
-                            animate={{ scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="w-2 h-2 rounded-full bg-emerald-500"
+                        <div 
+                            className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
                         />
                         Rani Bhawban Terminal v4.0
-                    </motion.div>
+                    </div>
                     
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.5 }}
+                    <h1
                         className="text-5xl md:text-8xl font-[950] text-slate-900 dark:text-white mb-8 tracking-[-0.07em] uppercase leading-[0.85]"
                     >
                         Mess handled.
@@ -79,21 +64,18 @@ const Hero = ({ onLoginClick }) => {
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-800 dark:from-indigo-400 dark:via-primary-400 dark:to-indigo-300">
                             Stress cancelled.
                         </span>
-                    </motion.h1>
+                    </h1>
 
-                    <motion.div
-                        variants={heroText}
+                    <div
                         className="mx-auto max-w-2xl text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 font-medium leading-relaxed min-h-[4.5rem]"
                     >
                         <TypewriterText 
                             delay={1500}
                             text="The ultimate administrative backbone for Rani Bhawban Mess. Automate meal tracking, manage precise financial accounting, and generate audit-ready reports with institutional transparency."
                         />
-                    </motion.div>
+                    </div>
 
-                    <motion.div
-                        variants={heroText}
-                        transition={{ delay: 0.3 }}
+                    <div
                         className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8"
                     >
                         <Button
@@ -101,23 +83,25 @@ const Hero = ({ onLoginClick }) => {
                             size="lg"
                             className="w-full sm:w-auto px-10 py-5 text-lg font-black uppercase tracking-widest rounded-3xl shadow-2xl shadow-indigo-500/20 bg-indigo-600 hover:bg-indigo-700 text-white transition-all relative overflow-hidden group"
                         >
-                            <motion.div 
-                                className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                                animate={{ x: ['-100%', '100%'] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            <div 
+                                className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"
+                                style={{
+                                    backgroundSize: '200% 100%',
+                                    backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
+                                }}
                             />
                             <div className="relative z-10 flex items-center justify-center">
                                 Launch Terminal <ArrowRight className="ml-2" size={20} />
                             </div>
                         </Button>
-                        <motion.a
+                        <a
                             href="#features"
                             className="w-full sm:w-auto px-8 py-5 text-slate-400 font-bold hover:text-indigo-400 transition-colors flex items-center justify-center group"
                         >
                             See features <ChevronRight className="ml-1 group-hover:translate-x-1 transition-transform" size={20} />
-                        </motion.a>
-                    </motion.div>
-                </motion.div>
+                        </a>
+                    </div>
+                </div>
             </div>
         </section>
     );

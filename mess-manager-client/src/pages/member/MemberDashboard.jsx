@@ -6,7 +6,6 @@ import Clock from '../../components/ui/Clock';
 import AvatarPicker, { getAvatarUrl } from '../../components/ui/AvatarPicker';
 import { Wallet, Utensils, ShoppingCart, Star, TrendingUp, Calendar as CalendarIcon, Lock, Eye, EyeOff, Check, Plus } from 'lucide-react';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { MESS_CONFIG } from '../../config';
 import api from '../../lib/api';
@@ -133,11 +132,7 @@ const MemberDashboard = () => {
     }, [expenses, user?.id, user?._id, user?.userId, user?.name, currentMember?._id]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8 pb-12"
-        >
+        <div className="space-y-8 pb-12">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-5 sm:p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl">
                 <div className="flex items-center gap-4 sm:gap-6">
                     {/* Avatar */}
@@ -242,12 +237,8 @@ const MemberDashboard = () => {
             </div>
 
             {/* Guest Meals Detail Card */}
-            <AnimatePresence>
-                {myGuestMeals.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                    >
+            {myGuestMeals.length > 0 && (
+                    <div>
                         <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40 mt-8">
                             <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900/50">
                                 <div className="flex items-center gap-4">
@@ -297,9 +288,8 @@ const MemberDashboard = () => {
                                 })}
                             </div>
                         </Card>
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
 
             {/* Market History - Two Tab-like Cards */}
             {(myMarketExpenses.length > 0 || myMarketDays.length > 0) && (
@@ -474,7 +464,7 @@ const MemberDashboard = () => {
                     </button>
                 </form>
             </Card>
-        </motion.div>
+        </div>
     );
 };
 

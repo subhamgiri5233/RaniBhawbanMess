@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
 import Card from '../../components/ui/Card';
 import { TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, Wallet, Zap, Wifi } from 'lucide-react';
@@ -17,29 +17,24 @@ const Expenses = () => {
     };
 
     // Robust month matching (handles YYYY-MM-DD and DD-MM-YYYY smoothly)
-    const matchesMonth = (dateStr) => {
+    const matchesMonth = useCallback((dateStr) => {
         if (!dateStr || !globalMonth) return false;
-        // Normalize separators to handle inconsistent data (Mirroring DataContext fix)
         const d = String(dateStr).replace(/[ /]/g, '-');
         const gm = globalMonth.replace(/[ /]/g, '-');
         return d.includes(gm) ||
             (d.includes('-') && d.split('-').reverse().join('-').includes(gm));
-    };
+    }, [globalMonth]);
 
     // Filter expenses based on category and member
     // Exclude admin market expenses (admin only adds spices/other)
-    const filteredExpenses = expenses
+    const filteredExpenses = useMemo(() => expenses
         .filter(expense => {
-            // Hide admin market expenses
             if (expense.category === 'market' && String(expense.paidBy).toLowerCase() === 'admin') return false;
-            
             const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
             const selMember = (members || []).find(m => (m._id || m.id) === selectedMember);
-            
-            const memberMatch = selectedMember === 'all' || 
-                              String(expense.paidBy).toLowerCase() === String(selectedMember).toLowerCase() || 
-                              (selMember && String(expense.paidBy).toLowerCase() === String(selMember.name).toLowerCase());
-            
+            const memberMatch = selectedMember === 'all' ||
+                String(expense.paidBy).toLowerCase() === String(selectedMember).toLowerCase() ||
+                (selMember && String(expense.paidBy).toLowerCase() === String(selMember.name).toLowerCase());
             const monthMatch = matchesMonth(expense.date);
             return categoryMatch && memberMatch && monthMatch;
         })
@@ -49,13 +44,12 @@ const Expenses = () => {
                 const s = String(d).replace(/[ /]/g, '-');
                 const parts = s.split('-');
                 if (parts.length === 3 && parts[0].length < 4) {
-                    // Reorder DD-MM-YYYY to YYYY-MM-DD for browser safety
                     return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
                 }
                 return new Date(s).getTime();
             };
             return parseDate(b.date) - parseDate(a.date);
-        });
+        }), [expenses, activeCategory, selectedMember, members, matchesMonth]);
 
     // Category-wise breakdown for the SELECTED MONTH
     const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && matchesMonth(e.date));
@@ -281,7 +275,7 @@ const Expenses = () => {
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center py-10 text-center">
-                            <div className="w-20 h-20 bg-primary-300/40 dark:bg-primary-500/20 rounded-[1.5rem] flex items-center justify-center mb-6 rotate-12 transition-transform hover:rotate-0 border border-primary-400/20 shadow-lg shadow-primary-500/10">
+                            <div className="w-20 h-20 bg-primary-300/40 dark:bg-primary-500/20 rounded-[2.5rem] flex items-center justify-center mb-6 rotate-12 transition-transform hover:rotate-0 border border-primary-400/20 shadow-lg shadow-primary-500/10">
                                 <Filter className="text-primary-500" size={32} />
                             </div>
                             <h4 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Mission Control</h4>
@@ -293,7 +287,10 @@ const Expenses = () => {
 
 
             {/* Filters */}
-            <Card className="px-5 py-4 bg-slate-100 dark:bg-slate-950/80 backdrop-blur-md border border-slate-200 dark:border-white/5 mb-6 shadow-sm rounded-2xl flex flex-wrap items-center gap-5">
+            <Card
+                className="bg-slate-100 dark:bg-slate-950/80 backdrop-blur-md border border-slate-200 dark:border-white/5 mb-6 shadow-sm rounded-2xl"
+                innerClassName="px-5 py-4 flex flex-wrap items-center gap-5"
+            >
                 <div className="flex items-center gap-2.5">
                     <Filter size={16} className="text-primary-600 dark:text-primary-500/80" />
                     <span className="text-[13px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.15em]">Filters:</span>
@@ -381,7 +378,7 @@ const Expenses = () => {
                                             {expense.category === 'spices' && <>🌶️ Spices</>}
                                             {expense.category === 'rice' && <>🍚 Rice</>}
                                             {expense.category === 'deposit' && <>💰 Deposit</>}
-                                            {expense.category === 'wifi' && <>📶 WiFi</>}
+                                            {expense.category === 'wifi' && <>🛜 WiFi</>}
                                             {expense.category === 'gas' && <>🔥 Gas</>}
                                             {expense.category === 'electric' && <>⚡ Electric</>}
                                             {expense.category === 'others' && <>📦 Other</>}
@@ -421,5 +418,3 @@ const Expenses = () => {
 };
 
 export default Expenses;
-
-

@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import {
     Users, Utensils, Calculator, Receipt, Clock,
     ShoppingCart, Bell, FileText, BarChart2, Smartphone, CreditCard,
@@ -7,15 +6,7 @@ import {
 import Card from '../ui/Card';
 
 const Features = () => {
-    const fadeUp = {
-        initial: { opacity: 0, y: 40, rotateX: 15, scale: 0.96, z: -40 },
-        animate: { opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0 },
-        transition: { duration: 1.4, ease: [0.16, 1, 0.3, 1], type: "spring", stiffness: 40, damping: 25 }
-    };
 
-    const staggerContainer = {
-        animate: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } }
-    };
 
     const features = [
         {
@@ -131,11 +122,7 @@ const Features = () => {
     return (
         <section id="features" className="container mx-auto px-6 mb-32">
             {/* Section Header */}
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
+            <div
                 className="text-center mb-14"
             >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 border border-indigo-400/30 dark:border-white/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-5">
@@ -150,24 +137,18 @@ const Features = () => {
                 <p className="text-slate-500 dark:text-slate-500 font-bold max-w-2xl mx-auto text-sm uppercase tracking-widest opacity-80">
                     Deployed as a distributed administrative layer for total regional transparency.
                 </p>
-            </motion.div>
+            </div>
 
 
-            <motion.div
-                variants={staggerContainer}
-                initial="initial"
-                whileInView="animate"
-                viewport={{ once: true, amount: 0.05 }}
+            <div
                 className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-                style={{ perspective: "1200px" }}
             >
                 {features.map((feature, index) => (
-                    <motion.div
+                    <div
                         key={index}
-                        variants={fadeUp}
-                        whileHover={{ y: -5, transition: { duration: 0.3 } }}
+                        className="hover:-translate-y-2 transition-transform duration-300"
                     >
-                        <Card className="h-full p-8 border border-indigo-400/20 bg-indigo-200/40 dark:bg-slate-900/40 shadow-premium transition-all duration-500 group rounded-[2rem] relative overflow-hidden flex flex-col">
+                        <Card className="h-full p-8 border border-indigo-400/20 bg-indigo-200/40 dark:bg-slate-900/40 shadow-premium group rounded-[2rem] relative overflow-hidden flex flex-col">
                             {/* Feature Numbering */}
                             <div className="absolute top-6 right-8 font-mono text-[10px] font-black opacity-20 group-hover:opacity-40 transition-opacity text-indigo-500">
                                 0{index + 1} // SYS_FEATURE
@@ -182,16 +163,14 @@ const Features = () => {
                             
                             {/* Bottom Scanner Line */}
                             <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500/0 group-hover:bg-indigo-500/30 transition-all overflow-hidden">
-                                <motion.div 
-                                    animate={{ x: ['-100%', '100%'] }} 
-                                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                                    className="w-1/2 h-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent" 
+                                <div 
+                                    className="w-1/2 h-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent animate-shimmer" 
                                 />
                             </div>
                         </Card>
-                    </motion.div>
+                    </div>
                 ))}
-            </motion.div>
+            </div>
         </section>
     );
 };

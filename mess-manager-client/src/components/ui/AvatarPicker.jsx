@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Check, X, Loader2, Upload, Smile } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
@@ -130,19 +129,13 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
 
             {/* Modal — portalled to document.body */}
             {createPortal(
-                <AnimatePresence>
+                <>
                     {isOpen && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                        <div
                             className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
                             onClick={(e) => e.target === e.currentTarget && setIsOpen(false)}
                         >
-                            <motion.div
-                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                                animate={{ scale: 1, opacity: 1, y: 0 }}
-                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            <div
                                 className="bg-indigo-300/90 dark:bg-slate-900 rounded-3xl shadow-2xl border border-indigo-400/30 dark:border-white/10 w-full max-w-md overflow-hidden"
                             >
                                 {/* Header */}
@@ -184,10 +177,7 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
 
                                 {/* Preview */}
                                 <div className="flex items-center justify-center py-5 bg-gradient-to-b from-indigo-50/30 dark:from-slate-800/20 to-transparent">
-                                    <motion.img
-                                        key={previewSrc}
-                                        initial={{ scale: 0.85, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
+                                    <img
                                         src={previewSrc}
                                         alt="Preview"
                                         className="w-20 h-20 sm:w-24 sm:h-24 aspect-square rounded-full border-4 border-indigo-500 shadow-xl shadow-indigo-500/20 object-cover"
@@ -271,10 +261,10 @@ const AvatarPicker = ({ currentAvatar, memberId, onSaved }) => {
                                                 status === 'error' ? 'Error — Retry' : 'Save Avatar'}
                                     </button>
                                 </div>
-                            </motion.div>
-                        </motion.div>
+                            </div>
+                        </div>
                     )}
-                </AnimatePresence>,
+                </>,
                 document.body
             )}
         </div>

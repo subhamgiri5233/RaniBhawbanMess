@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Menu, X } from 'lucide-react';
 import Button from '../ui/Button';
 
@@ -43,14 +42,11 @@ const Navbar = ({ onLoginClick }) => {
                     onClick={() => window.location.reload()}
                     title="Refresh Page"
                 >
-                    <motion.div
-                        initial={{ rotate: -90, scale: 0.5, opacity: 0 }}
-                        animate={{ rotate: 0, scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                    <div
                         className="w-10 h-10 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)] border border-white/20"
                     >
                         <Home className="text-white fill-current" size={24} />
-                    </motion.div>
+                    </div>
                     <div className="flex overflow-hidden">
                         <span className="text-xl font-[900] bg-gradient-to-r from-slate-900 dark:from-white via-indigo-600 dark:via-indigo-400 to-indigo-900 dark:to-indigo-500 bg-clip-text text-transparent tracking-[-0.05em] uppercase">
                             Rani Bhawban
@@ -71,10 +67,8 @@ const Navbar = ({ onLoginClick }) => {
                         >
                             {link.label}
                             {activeSection === link.href.slice(1) && (
-                                <motion.div
-                                    layoutId="nav-pill"
+                                <div
                                     className="absolute inset-0 bg-indigo-500/10 border border-indigo-500/20 rounded-xl"
-                                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                                 />
                             )}
                         </button>
@@ -100,27 +94,21 @@ const Navbar = ({ onLoginClick }) => {
             </div>
 
             {/* Mobile Menu */}
-            <AnimatePresence>
-                {mobileOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -16 }}
-                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                        className="md:hidden border-t border-indigo-400/30 dark:border-white/5 bg-indigo-200/80 dark:bg-slate-950/90 backdrop-blur-2xl px-6 py-4 flex flex-col gap-1 shadow-2xl"
-                    >
-                        {navLinks.map(link => (
-                            <button
-                                key={link.label}
-                                onClick={() => handleNavClick(link.href)}
-                                className="text-left px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 font-semibold text-sm transition-all"
-                            >
-                                {link.label}
-                            </button>
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {mobileOpen && (
+                <div
+                    className="md:hidden border-t border-indigo-400/30 dark:border-white/5 bg-indigo-200/80 dark:bg-slate-950/90 backdrop-blur-2xl px-6 py-4 flex flex-col gap-1 shadow-2xl"
+                >
+                    {navLinks.map(link => (
+                        <button
+                            key={link.label}
+                            onClick={() => handleNavClick(link.href)}
+                            className="text-left px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 font-semibold text-sm transition-all"
+                        >
+                            {link.label}
+                        </button>
+                    ))}
+                </div>
+            )}
         </nav>
     );
 };

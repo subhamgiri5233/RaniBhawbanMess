@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Globe, CreditCard, Mail, Zap, Terminal, Cpu, Database } from 'lucide-react';
 import { memo } from 'react';
 import Card from '../ui/Card';
@@ -37,10 +36,7 @@ const Roadmap = () => {
     return (
         <section id="roadmap" className="container mx-auto px-6 mb-32">
             {/* Header */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+            <div
                 className="text-center mb-16"
             >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
@@ -50,16 +46,12 @@ const Roadmap = () => {
                     V5.0 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-primary-500">Roadmap.</span>
                 </h2>
                 <p className="text-slate-500 font-bold uppercase tracking-widest text-xs opacity-60">The future of Rani Bhawban Mess management.</p>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {roadmapItems.map((item, i) => (
-                    <motion.div
+                    <div
                         key={item.title}
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.1 }}
                     >
                         <Card className="p-8 h-full flex flex-col border-indigo-500/10 bg-indigo-200/40 dark:bg-slate-900/40 group relative overflow-hidden">
                             {/* Background decoration */}
@@ -91,24 +83,19 @@ const Roadmap = () => {
                                     <span className="text-[10px] font-mono text-indigo-400">{item.pct}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-indigo-500/10 rounded-full overflow-hidden">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        whileInView={{ width: `${item.pct}%` }}
-                                        transition={{ duration: 1.5, ease: "easeOut" }}
-                                        className="h-full bg-indigo-500"
+                                    <div
+                                        style={{ width: `${item.pct}%` }}
+                                        className="h-full bg-indigo-500 transition-all duration-1000 ease-out"
                                     />
                                 </div>
                             </div>
                         </Card>
-                    </motion.div>
+                    </div>
                 ))}
             </div>
 
             {/* Bottom Footer Callout */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
+            <div
                 className="mt-12 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 flex flex-col md:flex-row items-center justify-between gap-6"
             >
                 <div className="flex items-center gap-4">
@@ -116,14 +103,12 @@ const Roadmap = () => {
                     <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Backend Infrastructure Synced with V5 Protocols</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <motion.div 
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="w-2 h-2 rounded-full bg-emerald-500"
+                    <div 
+                        className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
                     />
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Core Engine Stable</span>
                 </div>
-            </motion.div>
+            </div>
         </section>
     );
 };

@@ -5,7 +5,6 @@ import api from '../../lib/api';
 import Card from '../../components/ui/Card';
 import Clock from '../../components/ui/Clock';
 import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, TrendingUp, ArrowUpRight, Crown, Wallet, ShoppingCart, Flame, Wheat, Package, Wifi, Zap } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import Skeleton from '../../components/ui/Skeleton';
 
@@ -79,11 +78,7 @@ const AdminDashboard = () => {
     ], [marketExpenses, spicesExpenses, riceExpenses, othersExpenses]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8 pb-12"
-        >
+        <div className="space-y-8 pb-12">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl sm:text-5xl rb-header">Dashboard</h1>
@@ -108,12 +103,7 @@ const AdminDashboard = () => {
                     </>
                 ) : (
                     stats.map((stat, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.1 }}
-                        >
+                        <div key={index}>
                                 <Card className={cn(
                                     "rb-card p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden",
                                     stat.bg === 'bg-indigo-300/40 dark:bg-blue-950/20' ? 'rb-shadow-blue' : 'rb-shadow-orange'
@@ -143,7 +133,7 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
                             </Card>
-                        </motion.div>
+                        </div>
                     ))
                 )}
             </div>
@@ -161,12 +151,7 @@ const AdminDashboard = () => {
                     expenseBreakdown.map((item, index) => {
                         const Icon = item.icon;
                         return (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 + index * 0.05 }}
-                            >
+                            <div key={index}>
                                 <Card className={cn(
                                     "rb-card p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden",
                                     item.title === 'Market' ? 'rb-shadow-indigo' : 
@@ -193,19 +178,14 @@ const AdminDashboard = () => {
                                         </h3>
                                     </div>
                                 </Card>
-                            </motion.div>
+                            </div>
                         );
                     })
                 )}
             </div>
 
             {/* Member Summary Section */}
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-            >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="rb-card p-0 overflow-hidden rb-shadow-blue">
                     <div className="p-6 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-slate-900/50 flex justify-between items-center">
                         <div className="flex items-center gap-3">
@@ -238,16 +218,11 @@ const AdminDashboard = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    <AnimatePresence mode="popLayout">
-                                        {(memberSummary || []).map((member, index) => (
-                                            <motion.tr
-                                                key={member._id}
-                                                layout
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.1 + index * 0.05 }}
-                                                className="hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-all group border-b border-indigo-300/30 last:border-0"
-                                            >
+                                    (memberSummary || []).map((member, index) => (
+                                        <tr
+                                            key={member._id}
+                                            className="hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-all group border-b border-indigo-300/30 last:border-0"
+                                        >
                                                 <td className="p-4 md:p-6">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-indigo-500 dark:text-slate-400 group-hover:from-primary-600 group-hover:to-primary-700 group-hover:text-white transition-all duration-500 shadow-sm uppercase shrink-0">
@@ -264,9 +239,8 @@ const AdminDashboard = () => {
                                                 <td className="p-4 md:p-6 text-center">
                                                     <span className="font-black text-violet-600 dark:text-violet-400 text-sm md:text-lg">₹{member.monthlyDeposit}</span>
                                                 </td>
-                                            </motion.tr>
-                                        ))}
-                                    </AnimatePresence>
+                                        </tr>
+                                    ))
                                 )}
                             </tbody>
                         </table>
@@ -312,8 +286,8 @@ const AdminDashboard = () => {
                         </table>
                     </div>
                 </Card>
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 };
 

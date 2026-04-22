@@ -5,7 +5,6 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { Receipt, PlusCircle, History, Trash2, TrendingUp, ArrowRight, User, Wallet, Sparkles, Info, X, ShoppingBag, Flame, Wifi, Zap, Package, Calendar, ShoppingCart, Utensils, Filter, Search } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 const AddExpense = () => {
@@ -152,11 +151,7 @@ const AddExpense = () => {
     }, [expenses, globalMonth, user, isAdmin, activeTab]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8 pb-12"
-        >
+        <div className="space-y-8 pb-12">
             <div className="relative overflow-hidden rb-card p-6 sm:p-10 group">
                 <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
@@ -211,14 +206,8 @@ const AddExpense = () => {
 
             <div className="grid grid-cols-1 gap-12 items-start">
                 <div className="space-y-8">
-                    <AnimatePresence mode="wait">
-                        {(!isAdmin || activeTab === 'expense') ? (
-                            <motion.div
-                                key="expense-form"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                            >
+                    {(!isAdmin || activeTab === 'expense') ? (
+                        <div key="expense-form">
                                 <Card className="rb-card rb-shadow-indigo p-6 sm:p-10 relative group overflow-hidden">
                                     <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-primary-500/20 transition-all"></div>
                                     <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -282,9 +271,6 @@ const AddExpense = () => {
                                                                     <cat.i size={24} className={cn("transition-all duration-500", category === cat.id ? (cat.c === 'orange' ? "text-orange-500" : cat.c === 'emerald' ? "text-emerald-500" : "text-indigo-500") : "text-slate-300 opacity-40 group-hover/cat:scale-125 group-hover/cat:opacity-100")} />
                                                                     <span className={cn("text-[11px] font-black uppercase tracking-[0.2em]", category === cat.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400 group-hover:text-slate-600")}>{cat.n}</span>
 
-                                                                    {category === cat.id && (
-                                                                        <motion.div layoutId="category-glow" className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-white/10 dark:via-white/2 dark:to-white/5 pointer-events-none" />
-                                                                    )}
                                                                 </button>
                                                             ))}
                                                         </div>
@@ -309,14 +295,9 @@ const AddExpense = () => {
                                         </form>
                                     </div>
                                 </Card>
-                            </motion.div>
+                            </div>
                         ) : (
-                            <motion.div
-                                key="deposit-form"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                            >
+                            <div key="deposit-form">
                                 <Card className="rb-card rb-shadow-emerald p-6 sm:p-10 relative group overflow-hidden">
                                     <div className="absolute -top-20 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
                                     <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -388,10 +369,7 @@ const AddExpense = () => {
                                                                 <opt.i size={20} className={cn("transition-all duration-500", paymentPurpose === opt.id ? "text-indigo-500" : "text-slate-300 opacity-40 group-hover/opt:scale-125 group-hover/opt:opacity-100")} />
                                                                 <span className={cn("text-[10px] font-black uppercase tracking-[0.1em]", paymentPurpose === opt.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400 group-hover:text-slate-600")}>{opt.n}</span>
 
-                                                                {paymentPurpose === opt.id && (
-                                                                    <motion.div layoutId="purpose-glow" className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-white/10 dark:via-white/2 dark:to-white/5 pointer-events-none" />
-                                                                )}
-                                                            </button>
+                                                                </button>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -403,9 +381,8 @@ const AddExpense = () => {
                                         </form>
                                     </div>
                                 </Card>
-                            </motion.div>
+                            </div>
                         )}
-                    </AnimatePresence>
                 </div>
 
             </div>
@@ -499,7 +476,7 @@ const AddExpense = () => {
                     </Card>
                 </div>
             )}
-        </motion.div>
+        </div>
     );
 };
 

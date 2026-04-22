@@ -4,7 +4,6 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { CreditCard, History, AlertCircle, CheckCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 const Payments = () => {
@@ -41,11 +40,7 @@ const Payments = () => {
     })();
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8 pb-12"
-        >
+        <div className="space-y-8 pb-12">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Financial Hub</h1>
@@ -118,18 +113,13 @@ const Payments = () => {
 
                 <div className="divide-y divide-slate-100 dark:divide-white/5">
                     {ledgerItems.length > 0 ? (
-                        <AnimatePresence mode="popLayout">
-                            {(ledgerItems || []).map((item, idx) => {
+                            (ledgerItems || []).map((item, idx) => {
                                 const itemId = item._id || item.id;
                                 const amount = item.paymentAmount || 0;
 
                                 return (
-                                    <motion.div
+                                    <div
                                         key={itemId}
-                                        layout
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: idx * 0.05 }}
                                         className="p-8 hover:bg-indigo-300/40 transition-all group opacity-80"
                                     >
                                         <div className="flex items-start gap-6">
@@ -156,19 +146,14 @@ const Payments = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 );
-                            })}
-                        </AnimatePresence>
+                            })
                     ) : (
                         <div className="p-24 text-center">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="w-20 h-20 bg-indigo-200/40 dark:bg-slate-950/40 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-indigo-300/30 dark:border-white/10"
-                            >
+                            <div className="w-20 h-20 bg-indigo-200/40 dark:bg-slate-950/40 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dashed border-indigo-300/30 dark:border-white/10">
                                 <CheckCircle size={32} className="text-slate-300 dark:text-slate-700" />
-                            </motion.div>
+                            </div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-relaxed">
                                 No verified payments or deposit records found for this period.
                             </p>
@@ -176,7 +161,7 @@ const Payments = () => {
                     )}
                 </div>
             </Card>
-        </motion.div>
+        </div>
     );
 };
 

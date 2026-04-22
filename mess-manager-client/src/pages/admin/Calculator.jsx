@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -773,9 +772,7 @@ const Calculator = () => {
                     </div>
 
                     {perHeadResult && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
+                        <div 
                             className="mt-6 p-6 rounded-[1.5rem] bg-gradient-to-br from-primary-600 to-indigo-700 text-white shadow-2xl shadow-primary-500/20 relative overflow-hidden"
                         >
                             <div className="relative z-10 text-center">
@@ -783,7 +780,7 @@ const Calculator = () => {
                                 <p className="text-4xl font-black tracking-tighter">₹{perHeadResult.perHeadAmount.toFixed(2)}</p>
                                 <p className="text-[10px] font-bold text-white/50 mt-1">Total Vault Withdrawal: ₹{perHeadResult.totalAmount.toFixed(0)}</p>
                             </div>
-                        </motion.div>
+                        </div>
                     )}
                 </Card>
 
@@ -860,14 +857,12 @@ const Calculator = () => {
                     </div>
 
                     {mealChargeResult && (
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
+                        <div 
                             className="p-6 rounded-[1.5rem] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-2xl shadow-amber-500/20 text-center relative overflow-hidden"
                         >
                             <p className="text-[9px] font-black text-white/60 uppercase tracking-widest mb-1">Standard Meal Charge</p>
                             <p className="text-4xl font-black">₹{mealChargeResult.mealCharge.toFixed(2)}</p>
-                        </motion.div>
+                        </div>
                     )}
                 </Card>
             </div>

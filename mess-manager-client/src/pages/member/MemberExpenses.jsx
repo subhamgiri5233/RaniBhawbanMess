@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
@@ -21,31 +21,24 @@ const Expenses = () => {
     };
 
     // Robust month matching (handles YYYY-MM-DD and DD-MM-YYYY smoothly)
-    const matchesMonth = (dateStr) => {
+    const matchesMonth = useCallback((dateStr) => {
         if (!dateStr || !globalMonth) return false;
-        // Normalize separators to handle inconsistent data (Mirroring DataContext fix)
         const d = String(dateStr).replace(/[ /]/g, '-');
         const gm = globalMonth.replace(/[ /]/g, '-');
         return d.includes(gm) ||
             (d.includes('-') && d.split('-').reverse().join('-').includes(gm));
-    };
+    }, [globalMonth]);
 
     // Filter expenses based on category and member
-    const filteredExpenses = expenses
+    const filteredExpenses = useMemo(() => expenses
         .filter(expense => {
-            // Hide admin market expenses
             if (expense.category === 'market' && (String(expense.paidBy).toLowerCase() === 'admin')) return false;
-
             const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
             const selMember = (members || []).find(m => (m._id || m.id) === selectedMember);
-
-            // Robust member matching (handles ID, Name, and 'admin' case-insensitively)
             const memberMatch = selectedMember === 'all' ||
                 String(expense.paidBy).toLowerCase() === String(selectedMember).toLowerCase() ||
                 (selMember && String(expense.paidBy).toLowerCase() === String(selMember.name).toLowerCase());
-
             const monthMatch = matchesMonth(expense.date);
-
             return categoryMatch && memberMatch && monthMatch;
         })
         .sort((a, b) => {
@@ -54,13 +47,12 @@ const Expenses = () => {
                 const s = String(d).replace(/[ /]/g, '-');
                 const parts = s.split('-');
                 if (parts.length === 3 && parts[0].length < 4) {
-                    // Reorder DD-MM-YYYY to YYYY-MM-DD for browser safety
                     return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
                 }
                 return new Date(s).getTime();
             };
             return parseDate(b.date) - parseDate(a.date);
-        });
+        }), [expenses, activeCategory, selectedMember, members, matchesMonth]);
 
     // Calculated totals for this member specifically (Only for current month)
     const myApprovedTotal = expenses.filter(e => {
@@ -319,7 +311,10 @@ const Expenses = () => {
 
 
             {/* Filters */}
-            <Card className="px-5 py-4 bg-slate-100 dark:bg-slate-950/80 backdrop-blur-md border border-slate-200 dark:border-white/5 mb-6 shadow-sm rounded-2xl flex flex-wrap items-center gap-5">
+            <Card
+                className="bg-slate-100 dark:bg-slate-950/80 backdrop-blur-md border border-slate-200 dark:border-white/5 mb-6 shadow-sm rounded-2xl"
+                innerClassName="px-5 py-4 flex flex-wrap items-center gap-5"
+            >
                 <div className="flex items-center gap-2.5">
                     <Filter size={16} className="text-primary-600 dark:text-primary-500/80" />
                     <span className="text-[13px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-[0.15em]">Filters:</span>

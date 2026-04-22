@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
 import { ShoppingCart, Calendar as CalendarIcon, Check, ChevronLeft, ChevronRight, Lock, X, Info, Utensils, Sparkles, TrendingUp, Inbox, User } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils'; // Assuming cn is imported from utils
 import Modal from '../../components/ui/Modal';
 
@@ -12,12 +11,14 @@ const MarketDuty = () => {
     const {
         marketSchedule, allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, members, managerAllocation,
-        refreshData, globalMonth, setGlobalMonth, marketDutyLimits
+        refreshMarket, globalMonth, setGlobalMonth, marketDutyLimits
     } = useData();
     const { user, isLoading } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedModalDate, setSelectedModalDate] = useState(null);
+    // Track which request IDs are currently being approved/rejected to show loading
+    const [pendingActionIds, setPendingActionIds] = useState(new Set());
 
     // Sync currentDate with globalMonth
     useEffect(() => {
@@ -27,9 +28,10 @@ const MarketDuty = () => {
         }
     }, [globalMonth]);
 
-    // Ensure latest data is loaded when visiting this page
+    // Ensure latest market data is loaded when visiting this page
     useEffect(() => {
-        refreshData();
+        refreshMarket();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (isLoading || !user) {
@@ -177,11 +179,7 @@ const MarketDuty = () => {
     const pendingRequests = currentMonthSchedule.filter(d => d.status === 'pending');
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8 pb-12"
-        >
+        <div className="space-y-8 pb-12">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-8 border-l-indigo-600 shadow-sm p-5 md:p-8 rounded-[1.5rem] md:rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl transition-colors">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Market Duty</h1>
@@ -215,14 +213,8 @@ const MarketDuty = () => {
 
             {/* Manager Request Handler */}
             {/* Manager Request Handler */}
-            <AnimatePresence>
-                {isManager && pendingRequests.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                    >
+            {isManager && pendingRequests.length > 0 && (
+                    <div className="overflow-hidden">
                         <Card className="p-8 border-l-8 border-amber-500 bg-amber-300/40 dark:bg-amber-900/10 shadow-xl shadow-amber-500/5 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                                 <Inbox size={120} className="text-amber-500" />
@@ -235,11 +227,8 @@ const MarketDuty = () => {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {pendingRequests.map(req => (
-                                    <motion.div
-                                        key={req.date}
-                                        layout
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
+                                    <div
+                                        key={req._id || req.id}
                                         className="flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900 p-5 rounded-3xl shadow-premium border border-amber-300/40 dark:border-amber-500/10 group/item hover:scale-[1.02] transition-all"
                                     >
                                         <div className="flex items-center gap-4">
@@ -255,25 +244,36 @@ const MarketDuty = () => {
                                         </div>
                                         <div className="flex gap-2">
                                             <button
-                                                className="text-slate-400 hover:text-rose-600 p-2.5 rounded-xl hover:bg-rose-300/40 dark:hover:bg-rose-500/10 transition-all active:scale-90"
-                                                onClick={() => rejectMarketRequest(req._id || req.id)}
+                                                className="text-slate-400 hover:text-rose-600 p-2.5 rounded-xl hover:bg-rose-300/40 dark:hover:bg-rose-500/10 transition-all active:scale-90 disabled:opacity-40"
+                                                disabled={pendingActionIds.has(req._id || req.id)}
+                                                onClick={async () => {
+                                                    const id = req._id || req.id;
+                                                    setPendingActionIds(prev => new Set([...prev, id]));
+                                                    await rejectMarketRequest(id);
+                                                    setPendingActionIds(prev => { const n = new Set(prev); n.delete(id); return n; });
+                                                }}
                                             >
                                                 <X size={20} />
                                             </button>
                                             <button
-                                                className="text-slate-400 hover:text-emerald-600 p-2.5 rounded-xl hover:bg-emerald-300/40 dark:hover:bg-emerald-500/10 transition-all active:scale-90"
-                                                onClick={() => approveMarketRequest(req._id || req.id)}
+                                                className="text-slate-400 hover:text-emerald-600 p-2.5 rounded-xl hover:bg-emerald-300/40 dark:hover:bg-emerald-500/10 transition-all active:scale-90 disabled:opacity-40"
+                                                disabled={pendingActionIds.has(req._id || req.id)}
+                                                onClick={async () => {
+                                                    const id = req._id || req.id;
+                                                    setPendingActionIds(prev => new Set([...prev, id]));
+                                                    await approveMarketRequest(id);
+                                                    setPendingActionIds(prev => { const n = new Set(prev); n.delete(id); return n; });
+                                                }}
                                             >
                                                 <Check size={20} />
                                             </button>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 ))}
                             </div>
                         </Card>
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
 
             <Card className="p-4 md:p-8 border border-indigo-300/30 dark:border-white/5 dark:bg-slate-900/50 shadow-sm bg-indigo-300/40">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
@@ -359,12 +359,8 @@ const MarketDuty = () => {
                         const isMinePending = pendingInfos.some(p => p.assignedMemberId === user.id);
 
                         return (
-                            <motion.button
+                            <button
                                 key={dateStr}
-                                layout
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: dayIdx * 0.01 }}
                                 onClick={() => handleDayClick(day)}
                                 disabled={isPastMonth || (!isAdmin && approvedInfo && approvedInfo.assignedMemberId !== user.id)}
                                 className={cn(
@@ -460,16 +456,13 @@ const MarketDuty = () => {
                                         </div>
                                     </div>
                                 )}
-                            </motion.button>
+                            </button>
                         );
                     })}
                 </div>
             </Card>
 
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 }}
+            <div
                 className="bg-indigo-300/40 dark:bg-slate-900/50 rounded-[1.5rem] md:rounded-[1.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-sm border border-indigo-300/30 dark:border-white/10 relative overflow-hidden group border-l-8 border-l-indigo-600"
             >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-150 transition-all duration-1000"></div>
@@ -494,7 +487,7 @@ const MarketDuty = () => {
                         System Active
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             {/* Member Selection Modal for Admins */}
             <Modal
@@ -627,7 +620,7 @@ const MarketDuty = () => {
                     })}
                 </div>
             </Modal>
-        </motion.div>
+        </div>
     );
 };
 

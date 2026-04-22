@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Home } from 'lucide-react';
 
 const navLinks = [
@@ -68,21 +67,12 @@ const Footer = () => {
                         Developed with
                     </span>
 
-                    <motion.span
-                        animate={{
-                            opacity: [1, 0.4, 1],
-                            scale: [1, 1.2, 1],
-                        }}
-                        transition={{
-                            duration: 0.8,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                        className="inline-block text-xl"
+                    <span
+                        className="inline-block text-xl animate-pulse"
                         style={{ lineHeight: 1 }}
                     >
                         ❤️
-                    </motion.span>
+                    </span>
 
                     <span className="font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent text-sm">
                         Subham Giri

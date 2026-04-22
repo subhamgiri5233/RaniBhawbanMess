@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 const Input = ({ label, icon: Icon, value, onChange, type = 'text', className, required, as: Component = 'input', ...props }) => {
@@ -36,30 +35,25 @@ const Input = ({ label, icon: Icon, value, onChange, type = 'text', className, r
                     {...props}
                 />
 
-                <motion.label
-                    initial={false}
-                    animate={{
-                        y: isFloating ? -34 : 0,
-                        x: isFloating ? (Icon ? -36 : 0) : 0,
-                        scale: isFloating ? 0.85 : 1,
-                    }}
-                    transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                <label
                     className={cn(
-                        "absolute left-4 pointer-events-none transition-colors duration-300 uppercase tracking-[0.2em] font-black text-[10px]",
+                        "absolute left-4 pointer-events-none transition-all duration-300 uppercase tracking-[0.2em] font-black text-[10px]",
                         Icon && !isFloating ? "ml-8" : "",
                         isFloating
-                            ? "text-indigo-600 dark:text-indigo-400 bg-transparent"
-                            : "text-indigo-500/80 dark:text-slate-400"
+                            ? "text-indigo-600 dark:text-indigo-400 -translate-y-[34px] scale-[0.85] bg-transparent"
+                            : "text-indigo-500/80 dark:text-slate-400 translate-y-0 scale-100",
+                        isFloating && Icon && "-translate-x-[36px]"
                     )}
                 >
                     {label} {required && isFloating && <span className="text-rose-500 ml-1">*</span>}
-                </motion.label>
+                </label>
 
                 {/* Subtle border animation */}
-                <motion.div
-                    initial={false}
-                    animate={{ scaleX: isFocused ? 1 : 0 }}
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 origin-center rounded-full"
+                <div
+                    className={cn(
+                        "absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 origin-center rounded-full transition-transform duration-300",
+                        isFocused ? "scale-x-100" : "scale-x-0"
+                    )}
                 />
             </div>
         </div>

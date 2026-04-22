@@ -6,7 +6,6 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { ChefHat, UserCheck, UserRound, Users, ChevronDown, Calendar, Search, Trash2, ShoppingCart, Rocket, Lock, CheckCircle2, Clock, X } from 'lucide-react';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
 
@@ -58,13 +57,8 @@ const MarketDutyItem = ({ member, month, initialValue, onSave }) => {
                     className="w-16 px-3 py-1.5 bg-indigo-300/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 rounded-xl text-xs font-black text-center focus:ring-2 focus:ring-indigo-500/20 outline-none"
                 />
                 
-                <AnimatePresence mode="wait">
-                    {(isDirty || status !== 'idle') && (
-                        <motion.button
-                            key={status}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
+                {(isDirty || status !== 'idle') && (
+                        <button
                             onClick={handleSave}
                             disabled={status === 'loading'}
                             className={cn(
@@ -79,9 +73,8 @@ const MarketDutyItem = ({ member, month, initialValue, onSave }) => {
                             {status === 'success' && <CheckCircle2 size={14} />}
                             {status === 'error' && <X size={14} />}
                             {status === 'idle' && isDirty && <Rocket size={14} />}
-                        </motion.button>
+                        </button>
                     )}
-                </AnimatePresence>
             </div>
         </div>
     );
@@ -279,12 +272,8 @@ const Management = () => {
                     className="pr-12"
                 />
                 
-                <AnimatePresence>
-                    {(isDirty || status !== 'idle') && (
-                        <motion.div
-                            initial={{ opacity: 0, x: 10, scale: 0.8 }}
-                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                            exit={{ opacity: 0, x: 10, scale: 0.8 }}
+                {(isDirty || status !== 'idle') && (
+                        <div
                             className="absolute right-3 bottom-0.5 z-20"
                         >
                             <button
@@ -303,27 +292,22 @@ const Management = () => {
                                 {status === 'error' && <X size={16} />}
                                 {status === 'idle' && isDirty && <Rocket size={16} />}
                             </button>
-                        </motion.div>
+                        </div>
                     )}
-                </AnimatePresence>
                 
                 {status === 'success' && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
+                    <div 
                         className="absolute -bottom-5 right-2 text-[8px] font-black text-emerald-500 uppercase tracking-widest"
                     >
                         Synced Successfully
-                    </motion.div>
+                    </div>
                 )}
             </div>
         );
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <div
             className="space-y-6"
         >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -408,20 +392,10 @@ const Management = () => {
                         </div>
 
                         {/* Cooking Records List - all records */}
-                        <div className="space-y-3 max-h-64 overflow-y-auto px-1 scrollbar-hide">
-                            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Search size={10} /> Recent cooking activities
-                            </h3>
-                            <AnimatePresence mode="popLayout">
+                            <div className="space-y-3 max-h-64 overflow-y-auto px-1 scrollbar-hide">
                                 {cookingRecords.length > 0 ? (
                                     cookingRecords.map((record, index) => (
-                                        <motion.div
-                                            key={record._id}
-                                            layout
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, scale: 0.95 }}
-                                            transition={{ delay: index * 0.05 }}
+                                        <div
                                             className="flex items-center justify-between p-4 bg-indigo-300/40 dark:bg-slate-950/40 border border-indigo-300/30 dark:border-white/5 rounded-2xl hover:bg-indigo-300/50 dark:hover:bg-slate-900/60 hover:shadow-lg hover:shadow-amber-500/5 transition-all group"
                                         >
                                             <div className="flex items-center gap-4">
@@ -450,18 +424,15 @@ const Management = () => {
                                             >
                                                 <Trash2 size={14} />
                                             </button>
-                                        </motion.div>
+                                        </div>
                                     ))
                                 ) : (
-                                    <motion.p
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
+                                    <p
                                         className="text-center text-slate-400 font-bold py-12 italic bg-indigo-300/40 dark:bg-slate-900/20 rounded-3xl border border-dashed border-indigo-300/30 dark:border-slate-800"
                                     >
                                         No cooking records found
-                                    </motion.p>
+                                    </p>
                                 )}
-                            </AnimatePresence>
                         </div>
 
                         {/* Cooking Duty Rotation Tracker */}
@@ -550,20 +521,10 @@ const Management = () => {
                         </div>
 
                         {/* Manager Records List - all records */}
-                        <div className="space-y-3 max-h-64 overflow-y-auto px-1 scrollbar-hide">
-                            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Search size={10} /> Recent management records
-                            </h3>
-                            <AnimatePresence mode="popLayout">
+                            <div className="space-y-3 max-h-64 overflow-y-auto px-1 scrollbar-hide">
                                 {managerRecords.length > 0 ? (
                                     managerRecords.map((record, index) => (
-                                        <motion.div
-                                            key={record._id}
-                                            layout
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, scale: 0.95 }}
-                                            transition={{ delay: index * 0.05 }}
+                                        <div
                                             className="flex items-center justify-between p-4 bg-indigo-300/40 dark:bg-slate-950/40 border border-indigo-300/30 dark:border-white/5 rounded-2xl hover:bg-indigo-300/50 dark:hover:bg-slate-900/60 hover:shadow-lg hover:shadow-primary-500/5 transition-all group"
                                         >
                                             <div className="flex items-center gap-4">
@@ -584,18 +545,15 @@ const Management = () => {
                                             >
                                                 <Trash2 size={14} />
                                             </button>
-                                        </motion.div>
+                                        </div>
                                     ))
                                 ) : (
-                                    <motion.p
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
+                                    <p
                                         className="text-center text-slate-400 font-bold py-12 italic bg-indigo-300/40 dark:bg-slate-900/20 rounded-3xl border border-dashed border-indigo-300/30 dark:border-slate-800"
                                     >
                                         No manager records found
-                                    </motion.p>
+                                    </p>
                                 )}
-                            </AnimatePresence>
                         </div>
 
                         {/* Manager Duty Rotation Tracker */}
@@ -636,11 +594,7 @@ const Management = () => {
             </div>
 
             {/* Monthly Market Duty Section */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-            >
+            <div>
                 <Card className="p-0 overflow-hidden rb-card rb-shadow-indigo">
                     <div className="p-6 border-b border-indigo-900/30 bg-indigo-300/40 dark:bg-indigo-950/20">
                         <div className="flex items-center justify-between">
@@ -681,14 +635,10 @@ const Management = () => {
                         )}
                     </div>
                 </Card>
-            </motion.div>
+            </div>
 
             {/* System Configuration Section */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-            >
+            <div>
                 <Card className="p-0 overflow-hidden rb-card rb-shadow-indigo !shadow-slate-200/40 dark:!shadow-none mb-12">
                     <div className="p-6 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-white/5">
                         <div className="flex items-center gap-3">
@@ -743,8 +693,8 @@ const Management = () => {
                         </div>
                     </div>
                 </Card>
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 };
 

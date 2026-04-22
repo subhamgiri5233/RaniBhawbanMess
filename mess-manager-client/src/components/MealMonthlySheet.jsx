@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { getDaysInMonth, format, parseISO } from 'date-fns';
 import { Check, X, Info, TrendingUp, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 
 const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMouseEnter, onMouseLeave, isHoveredRowDay }) => {
@@ -111,7 +110,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
         const map = new Map();
         (meals || []).forEach(m => {
             if (m && m.memberId && m.date && m.type) {
-                const key = `${m.memberId}| ${m.date}| ${m.type} `;
+                const key = `${m.memberId}|${m.date}|${m.type}`;
                 map.set(key, true);
             }
         });
@@ -119,7 +118,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
     }, [meals]);
 
     const getStatus = (memberId, dateStr, type) => {
-        return mealsMap.has(`${memberId}| ${dateStr}| ${type} `);
+        return mealsMap.has(`${memberId}|${dateStr}|${type}`);
     };
 
     // 4. Calculate All Member Totals in ONE PASS (O(N + M))
@@ -284,21 +283,14 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                 </div>
             </div>
 
-            <AnimatePresence>
                 {activeCell && popupLabel && (
                     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                        <div
                             onClick={() => setActiveCell(null)}
                             className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
                         />
-                        <motion.div
+                        <div
                             ref={popoverRef}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
                             className="relative w-full max-w-sm"
                         >
                             <div className="bg-indigo-50 dark:bg-slate-900 shadow-2xl rounded-[1.5rem] border border-indigo-200 dark:border-white/10 p-8 overflow-hidden relative group">
@@ -347,10 +339,9 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                                     Dismiss
                                 </button>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 )}
-            </AnimatePresence>
         </div>
     );
 };

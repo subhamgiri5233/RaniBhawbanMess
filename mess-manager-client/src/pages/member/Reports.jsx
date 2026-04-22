@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
     ClipboardList, CheckCircle2, Clock, AlertCircle, Users,
     ShoppingBag, Wifi, Zap, Utensils, Flame,
@@ -63,7 +62,7 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
 
     const dBal = ((dMCost + dGCost + (Number(dHead) || 0)) - effectiveContribution);
 
-    // SMART BALANCE ENGINE: Match Admin Truth
+
     // If status is 'clear', balance is definitively 0.
     // Otherwise, it's the remaining balance after payments (submittedAmount).
     let rem = m.paymentStatus === 'clear' ? 0 : Math.round(dBal) - (Number(m.submittedAmount) || 0);
@@ -283,7 +282,7 @@ const Reports = () => {
     }, [data, searchQuery]);
 
     return (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
             
             {/* Power Banner */}
             <div className="relative overflow-hidden bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
@@ -323,7 +322,7 @@ const Reports = () => {
                 </div>
             ) : data && (
                 <>
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                    <div>
                         <Card className="p-0 overflow-hidden border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-900 shadow-xl">
                             <div className="p-4 sm:p-5 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-black/30 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -349,7 +348,7 @@ const Reports = () => {
                                 ))}
                             </div>
                         </Card>
-                    </motion.div>
+                    </div>
 
                     <Card className="p-0 overflow-hidden border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-900 mt-6 shadow-xl">
                         <div className="p-4 sm:p-5 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-black/30 flex items-center justify-between">
@@ -419,7 +418,7 @@ const Reports = () => {
                     </div>
                 </>
             )}
-        </motion.div>
+        </div>
     );
 };
 

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
     ClipboardList, X, Save, Crown,
     CheckCircle2, Clock, AlertCircle, Users,
@@ -297,8 +296,8 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
     };
 
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-950/80 backdrop-blur-sm px-4" onClick={onClose}>
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} className="bg-indigo-300/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 rounded-[1.5rem] p-5 md:p-8 w-full max-w-md shadow-3xl shadow-indigo-900/50 relative overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-950/80 backdrop-blur-sm px-4" onClick={onClose}>
+            <div className="bg-indigo-300/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 rounded-[1.5rem] p-5 md:p-8 w-full max-w-md shadow-3xl shadow-indigo-900/50 relative overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6 flex-shrink-0">
                     <div>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Update Payment</h3>
@@ -338,8 +337,8 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
                     <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-indigo-300/30 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-black text-xs hover:bg-rose-300/40 transition-colors">Cancel</button>
                     <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-black text-xs disabled:opacity-60 shadow-lg shadow-primary-500/20">{saving ? 'Saving...' : 'Save Changes'}</button>
                 </div>
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 };
 
@@ -447,7 +446,7 @@ const MonthlySummary = () => {
     }, [data]);
 
     return (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-lg shadow-primary-500/20"><ClipboardList className="text-white" size={24} /></div>
@@ -474,9 +473,8 @@ const MonthlySummary = () => {
                 </div>
             ) : data && (
                 <>
-                    <AnimatePresence>
-                        {!data.sharedExpense && (
-                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-2">
+                    {!data.sharedExpense && (
+                        <div className="mb-2">
                                 <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
                                         <div className="p-1.5 bg-rose-500 rounded-lg"><AlertCircle size={14} className="text-white" /></div>
@@ -489,9 +487,8 @@ const MonthlySummary = () => {
                                         No Record
                                     </div>
                                 </div>
-                            </motion.div>
+                            </div>
                         )}
-                    </AnimatePresence>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
                         {[
@@ -597,10 +594,8 @@ const MonthlySummary = () => {
                 </>
             )}
 
-            <AnimatePresence>
-                {editingMember && <PaymentModal member={editingMember} month={monthStr} onClose={() => setEditingMember(null)} onSaved={handlePaymentSaved} />}
-            </AnimatePresence>
-        </motion.div>
+            {editingMember && <PaymentModal member={editingMember} month={monthStr} onClose={() => setEditingMember(null)} onSaved={handlePaymentSaved} />}
+        </div>
     );
 };
 

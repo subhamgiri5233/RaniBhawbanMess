@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { UserCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../../lib/utils';
 
 const LoginForm = ({ onSuccess }) => {
     const { login } = useAuth();
@@ -37,24 +37,16 @@ const LoginForm = ({ onSuccess }) => {
 
     return (
         <div className="w-full">
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key="login-content"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="space-y-6"
-                >
+            <div
+                className="space-y-6"
+            >
                     {/* Role Switcher */}
                     <div className="flex bg-indigo-50 dark:bg-indigo-950/30 p-1.5 rounded-2xl mb-10 relative border border-indigo-200/50 dark:border-indigo-500/30 backdrop-blur-md shadow-inner">
-                        <motion.div
-                            className="absolute top-1.5 bottom-1.5 bg-white dark:bg-indigo-500/20 shadow-sm dark:shadow-[0_0_20px_rgba(99,102,241,0.2)] rounded-xl border border-indigo-200 dark:border-indigo-400/30"
-                            initial={false}
-                            animate={{
-                                left: role === 'admin' ? '6px' : '50%',
-                                right: role === 'admin' ? '50%' : '6px'
-                            }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        <div
+                            className={cn(
+                                "absolute top-1.5 bottom-1.5 bg-white dark:bg-indigo-500/20 shadow-sm dark:shadow-[0_0_20px_rgba(99,102,241,0.2)] rounded-xl border border-indigo-200 dark:border-indigo-400/30 transition-all duration-300",
+                                role === 'admin' ? "left-1.5 right-[50%]" : "left-[50%] right-1.5"
+                            )}
                         />
                         <button
                             className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl transition-all duration-300 relative z-10 ${role === 'admin'
@@ -63,12 +55,11 @@ const LoginForm = ({ onSuccess }) => {
                                 }`}
                             onClick={() => { setRole('admin'); setError(''); setUserId(''); setPassword(''); }}
                         >
-                            <motion.div
-                                animate={{ scale: role === 'admin' ? 1.1 : 1, filter: role === 'admin' ? 'drop-shadow(0 0 8px rgba(99,102,241,0.8))' : 'none' }}
-                                transition={{ duration: 0.3 }}
+                            <div
+                                className={cn("transition-all duration-300", role === 'admin' && "scale-110 drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]")}
                             >
                                 <ShieldCheck size={20} />
-                            </motion.div>
+                            </div>
                             Admin
                         </button>
                         <button
@@ -78,31 +69,20 @@ const LoginForm = ({ onSuccess }) => {
                                 }`}
                             onClick={() => { setRole('member'); setError(''); setUserId(''); setPassword(''); }}
                         >
-                            <motion.div
-                                animate={{ scale: role === 'member' ? 1.1 : 1, filter: role === 'member' ? 'drop-shadow(0 0 8px rgba(147, 51, 234, 0.8))' : 'none' }}
-                                transition={{ duration: 0.3 }}
+                            <div
+                                className={cn("transition-all duration-300", role === 'member' && "scale-110 drop-shadow-[0_0_8px_rgba(147,51,234,0.8)]")}
                             >
                                 <UserCircle2 size={20} />
-                            </motion.div>
+                            </div>
                             Member
                         </button>
                     </div>
 
-                    <motion.form
-                        key={role}
-                        initial={{ opacity: 0, x: role === 'admin' ? -50 : 50, rotateY: role === 'admin' ? -15 : 15 }}
-                        animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                        exit={{ opacity: 0, x: role === 'admin' ? 50 : -50, rotateY: role === 'admin' ? 15 : -15 }}
-                        transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
+                    <form
                         onSubmit={handleLogin}
                         className="space-y-8"
-                        style={{ transformStyle: "preserve-3d" }}
                     >
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                        >
+                        <div>
                             <Input
                                 label="User ID"
                                 icon={UserCircle2}
@@ -111,12 +91,8 @@ const LoginForm = ({ onSuccess }) => {
                                 onChange={(e) => setUserId(e.target.value)}
                                 required
                             />
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.15 }}
-                        >
+                        </div>
+                        <div>
                             <Input
                                 label="Password"
                                 icon={ShieldCheck}
@@ -125,27 +101,18 @@ const LoginForm = ({ onSuccess }) => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
-                        </motion.div>
+                        </div>
 
-                        <AnimatePresence mode="wait">
-                            {error && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/30 backdrop-blur-md"
-                                >
-                                    <AlertCircle size={16} />
-                                    {error}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        {error && (
+                            <div
+                                className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/30 backdrop-blur-md animate-fade-in"
+                            >
+                                <AlertCircle size={16} />
+                                {error}
+                            </div>
+                        )}
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                        >
+                        <div>
                             <Button
                                 className="w-full py-5 text-lg font-black bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 shadow-[0_10px_40px_rgba(99,102,241,0.3)] border border-indigo-500/20 rounded-[1.5rem] transform active:scale-[0.98] transition-all duration-300 uppercase tracking-widest text-xs"
                                 size="lg"
@@ -161,10 +128,9 @@ const LoginForm = ({ onSuccess }) => {
                                     `Login as ${role === 'admin' ? 'Admin' : 'Member'}`
                                 )}
                             </Button>
-                        </motion.div>
-                    </motion.form>
-                </motion.div>
-            </AnimatePresence>
+                        </div>
+                    </form>
+                </div>
         </div>
     );
 };

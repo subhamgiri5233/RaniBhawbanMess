@@ -243,20 +243,42 @@ export const DataProvider = ({ children }) => {
     }, [refreshMarket]);
 
     const approveMarketRequest = useCallback(async (requestId) => {
+        // Optimistic UI Update
+        setMarketSchedule(prev => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach(month => {
+                updated[month] = updated[month].map(req => 
+                    (req._id === requestId || req.id === requestId) ? { ...req, status: 'approved' } : req
+                );
+            });
+            return updated;
+        });
+
         try {
             await api.put(`/market/id/${requestId}`, { status: 'approved' });
             await refreshMarket();
         } catch (error) {
             console.error('Approve market request failed', error);
+            await refreshMarket(); // Rollback on error
         }
     }, [refreshMarket]);
 
     const rejectMarketRequest = useCallback(async (requestId) => {
+        // Optimistic UI Update
+        setMarketSchedule(prev => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach(month => {
+                updated[month] = updated[month].filter(req => req._id !== requestId && req.id !== requestId);
+            });
+            return updated;
+        });
+
         try {
             await api.put(`/market/id/${requestId}`, { status: 'rejected' });
             await refreshMarket();
         } catch (error) {
             console.error('Reject market request failed', error);
+            await refreshMarket(); // Rollback on error
         }
     }, [refreshMarket]);
 
@@ -284,33 +306,66 @@ export const DataProvider = ({ children }) => {
 
     // Meal Actions
     const addMeal = useCallback(async (date, memberIds, type, isGuest = false, guestMealType = null, mealTime = null) => {
+        // Optimistic UI: Add temporary items to state
+        const tempMeals = memberIds.map(id => ({
+            _id: `temp-${Date.now()}-${id}`,
+            date,
+            memberId: id,
+            type,
+            isGuest,
+            guestMealType,
+            mealTime,
+            loading: true
+        }));
+        setMeals(prev => [...prev, ...tempMeals]);
+
         try {
-            const newMealsResult = [];
-            for (const memberId of memberIds) {
+            // Parallel API calls for better performance
+            const promises = memberIds.map(memberId => {
                 const payload = { date, memberId, type };
                 if (isGuest) { payload.isGuest = true; payload.guestMealType = guestMealType; payload.mealTime = mealTime; }
-                const response = await api.post('/meals', payload);
-                newMealsResult.push(response.data);
-            }
-            setMeals(prev => [...prev, ...newMealsResult]);
+                return api.post('/meals', payload);
+            });
+            
+            const responses = await Promise.all(promises);
+            const newMealsResult = responses.map(r => r.data);
+            
+            // Replace temp items with actual server data
+            setMeals(prev => [
+                ...prev.filter(m => !tempMeals.some(tm => tm._id === m._id)),
+                ...newMealsResult
+            ]);
         } catch (error) {
             console.error('Add meal failed', error);
+            // Rollback optimistic update
+            setMeals(prev => prev.filter(m => !tempMeals.some(tm => tm._id === m._id)));
+            alert('Failed to add meal. Please try again.');
         }
     }, []);
 
     const removeMeal = useCallback(async (date, memberId, type, mealId = null) => {
+        // Optimistic UI: Remove item from local state immediately
+        let removedItem = null;
+        setMeals(prev => {
+            if (mealId) {
+                removedItem = prev.find(m => m._id === mealId || m.id === mealId);
+                return prev.filter(m => m._id !== mealId && m.id !== mealId);
+            }
+            const idx = prev.findIndex(m => m.date === date && m.memberId === memberId && m.type === type);
+            if (idx === -1) return prev;
+            removedItem = prev[idx];
+            return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
+        });
+
         try {
             const payload = { date, memberId, type };
             if (mealId) payload.mealId = mealId;
             await api.delete('/meals', { data: payload });
-            setMeals(prev => {
-                if (mealId) return prev.filter(m => m._id !== mealId && m.id !== mealId);
-                const idx = prev.findIndex(m => m.date === date && m.memberId === memberId && m.type === type);
-                if (idx === -1) return prev;
-                return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-            });
         } catch (error) {
             console.error('Remove meal failed', error);
+            // Rollback on error
+            if (removedItem) setMeals(prev => [...prev, removedItem]);
+            alert('Failed to remove meal. Please try again.');
         }
     }, []);
 
@@ -463,6 +518,7 @@ export const DataProvider = ({ children }) => {
         removeGuestMeal, addExpense, updateExpense, deleteExpense,
         allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, setManagerForMonth, markCookingFinished, getCookingDuty,
+        updateSystemSetting, loadingDaily,
     ]);
 
     return (
