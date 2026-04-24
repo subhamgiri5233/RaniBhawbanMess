@@ -89,4 +89,21 @@ router.delete('/:id', auth, requireAdmin, async (req, res) => {
     }
 });
 
+// Start a new cycle (delete one record per member) - Admin only
+router.delete('/manage/cycle', auth, requireAdmin, async (req, res) => {
+    try {
+        const recordsToDelete = await CookingRecord.aggregate([
+            { $sort: { createdAt: 1 } },
+            { $group: { _id: '$memberId', recordId: { $first: '$_id' } } }
+        ]);
+        
+        const ids = recordsToDelete.map(r => r.recordId);
+        await CookingRecord.deleteMany({ _id: { $in: ids } });
+        
+        res.json({ message: 'Cycle updated: one record removed per member' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

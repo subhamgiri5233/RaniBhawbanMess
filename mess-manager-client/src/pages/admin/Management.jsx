@@ -148,15 +148,27 @@ const Management = () => {
     // All non-admin members
     const memberList = members.filter(m => m.role !== 'admin');
 
-    // Who has EVER cooked (no date filter — full rotation tracking)
-    const cookedEver = new Set(cookingRecords.map(r => r.memberId));
-    const doneCooks = memberList.filter(m => cookedEver.has(m._id || m.id));
-    const pendingCooks = memberList.filter(m => !cookedEver.has(m._id || m.id));
+    // Cooking Duty Stats
+    const cookCounts = cookingRecords.reduce((acc, r) => {
+        acc[r.memberId] = (acc[r.memberId] || 0) + 1;
+        return acc;
+    }, {});
+    const doneCooks = memberList.filter(m => cookCounts[m._id || m.id]).map(m => ({
+        ...m,
+        count: cookCounts[m._id || m.id]
+    }));
+    const pendingCooks = memberList.filter(m => !cookCounts[m._id || m.id]);
 
-    // Who has EVER been manager (no date filter)
-    const managedEver = new Set(managerRecords.map(r => r.memberId));
-    const doneManagers = memberList.filter(m => managedEver.has(m._id || m.id));
-    const pendingManagers = memberList.filter(m => !managedEver.has(m._id || m.id));
+    // Manager Duty Stats
+    const managerCounts = managerRecords.reduce((acc, r) => {
+        acc[r.memberId] = (acc[r.memberId] || 0) + 1;
+        return acc;
+    }, {});
+    const doneManagers = memberList.filter(m => managerCounts[m._id || m.id]).map(m => ({
+        ...m,
+        count: managerCounts[m._id || m.id]
+    }));
+    const pendingManagers = memberList.filter(m => !managerCounts[m._id || m.id]);
 
     // Add cooking record
     const handleAddCooking = async () => {
@@ -231,6 +243,30 @@ const Management = () => {
         } catch (error) {
             console.error('Error deleting manager record:', error);
             alert('Failed to delete manager record');
+        }
+    };
+
+    // Start New Cooking Cycle
+    const handleStartCookingCycle = async () => {
+        if (!window.confirm('This will start a new cycle and remove one record per member. Extra duties will be carried over. Continue?')) return;
+        try {
+            await api.delete('/cooking/manage/cycle');
+            fetchCookingRecords();
+        } catch (error) {
+            console.error('Error starting new cooking cycle:', error);
+            alert('Failed to start new cooking cycle');
+        }
+    };
+
+    // Start New Manager Cycle
+    const handleStartManagerCycle = async () => {
+        if (!window.confirm('This will start a new cycle and remove one record per member. Extra duties will be carried over. Continue?')) return;
+        try {
+            await api.delete('/managers/manage/cycle');
+            fetchManagerRecords();
+        } catch (error) {
+            console.error('Error starting new manager cycle:', error);
+            alert('Failed to start new manager cycle');
         }
     };
 
@@ -441,9 +477,17 @@ const Management = () => {
                                 <Clock size={10} /> Cooking Duty Rotation
                             </h3>
                             {pendingCooks.length === 0 ? (
-                                <div className="flex items-center gap-2 p-3 bg-emerald-300/40 dark:bg-emerald-950/20 rounded-2xl border border-emerald-400/30 dark:border-emerald-900/30">
-                                    <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0" />
-                                    <p className="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have cooked.</p>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 p-3 bg-emerald-300/40 dark:bg-emerald-950/20 rounded-2xl border border-emerald-400/30 dark:border-emerald-900/30">
+                                        <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0" />
+                                        <p className="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have cooked.</p>
+                                    </div>
+                                    <Button
+                                        onClick={handleStartCookingCycle}
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[10px] py-2 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-95 transition-all"
+                                    >
+                                        Start New Cycle
+                                    </Button>
                                 </div>
                             ) : (
                                 <div className="space-y-2.5">
@@ -459,8 +503,10 @@ const Management = () => {
                                         <div>
                                             <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1.5">Done ✓ ({doneCooks.length})</p>
                                             <div className="flex flex-wrap gap-1.5">
-                                                {doneCooks.map(m => (
-                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-300/40 dark:bg-emerald-950/20 border border-emerald-400/30 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                            {doneCooks.map(m => (
+                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-300/40 dark:bg-emerald-950/20 border border-emerald-400/30 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-400 text-[10px] font-black rounded-lg">
+                                                        {m.name} {m.count > 1 && <span className="ml-1 text-[8px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-md">x{m.count}</span>}
+                                                    </span>
                                                 ))}
                                             </div>
                                         </div>
@@ -562,9 +608,17 @@ const Management = () => {
                                 <Clock size={10} /> Manager Duty Rotation
                             </h3>
                             {pendingManagers.length === 0 ? (
-                                <div className="flex items-center gap-2 p-3 bg-emerald-300/40 dark:bg-emerald-950/20 rounded-2xl border border-emerald-400/30 dark:border-emerald-900/30">
-                                    <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0" />
-                                    <p className="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have managed.</p>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 p-3 bg-emerald-300/40 dark:bg-emerald-950/20 rounded-2xl border border-emerald-400/30 dark:border-emerald-900/30">
+                                        <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0" />
+                                        <p className="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">🎉 Cycle Complete! All members have managed.</p>
+                                    </div>
+                                    <Button
+                                        onClick={handleStartManagerCycle}
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[10px] py-2 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-95 transition-all"
+                                    >
+                                        Start New Cycle
+                                    </Button>
                                 </div>
                             ) : (
                                 <div className="space-y-2.5">
@@ -581,7 +635,9 @@ const Management = () => {
                                             <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1.5">Done ✓ ({doneManagers.length})</p>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {doneManagers.map(m => (
-                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-300/40 dark:bg-emerald-950/20 border border-emerald-400/30 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-400 text-[10px] font-black rounded-lg">{m.name}</span>
+                                                    <span key={m._id || m.id} className="px-2.5 py-1 bg-emerald-300/40 dark:bg-emerald-950/20 border border-emerald-400/30 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-400 text-[10px] font-black rounded-lg">
+                                                        {m.name} {m.count > 1 && <span className="ml-1 text-[8px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-md">x{m.count}</span>}
+                                                    </span>
                                                 ))}
                                             </div>
                                         </div>
