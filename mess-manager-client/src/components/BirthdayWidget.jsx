@@ -82,13 +82,18 @@ const BirthdayWidget = () => {
             ? 'Rani Bhawban Mess Family' 
             : user?.name || 'A Friend from Mess';
 
-        // Construct structured WhatsApp link
+        // Construct structured WhatsApp link (using unicode for emojis to prevent encoding issues)
+        const star = '\uD83C\uDF1F';
+        const cake = '\uD83C\uDF82';
+        const sparkles = '\u2728';
+        const party = '\uD83C\uDF89';
+
         const message = 
-`🌟 *HAPPY BIRTHDAY ${member.name.toUpperCase()}!* 🌟
+`${star} *HAPPY BIRTHDAY ${member.name.toUpperCase()}!* ${star}
 
-Wishing you a day filled with joy, laughter, and premium moments! May this year bring you closer to all your dreams. 🎂✨
+Wishing you a day filled with joy, laughter, and premium moments! May this year bring you closer to all your dreams. ${cake}${sparkles}
 
-🎉 _Best wishes from:_
+${party} _Best wishes from:_
 *${senderName}*`;
 
         const encodedMessage = encodeURIComponent(message);
