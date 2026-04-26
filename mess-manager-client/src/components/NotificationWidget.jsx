@@ -25,8 +25,8 @@ const NotificationWidget = () => {
         if (permission === 'granted' && !sentNotifs.has(id)) {
             const options = {
                 body: body,
-                icon: '/icons/home.png?v=10',
-                badge: '/icons/home.png?v=10',
+                icon: window.location.origin + '/icons/home.png?v=10',
+                badge: window.location.origin + '/icons/home.png?v=10',
                 vibrate: [200, 100, 200],
                 tag: id 
             };
@@ -59,21 +59,32 @@ const NotificationWidget = () => {
 
         // 1. Check Tomorrow's Market
         const monthSchedule = marketSchedule[currentMonth] || [];
+        const todayMarket = monthSchedule.find(m => m.date === todayStr && m.status === 'approved');
         const tomorrowMarket = monthSchedule.find(m => m.date === tomorrowStr && m.status === 'approved');
         
+        // ONLY show "Starts Tomorrow" if they are NOT already on duty today
         if (tomorrowMarket) {
-            const memberName = tomorrowMarket.assignedMemberName || getName(tomorrowMarket.assignedMemberId, 'Someone');
-            const msg = `From tomorrow, ${memberName}'s market starts.`;
-            list.push({
-                id: 'tomorrow-market',
-                type: 'info',
-                icon: ShoppingCart,
-                message: msg,
-                title: 'Market Duty Reminder',
-                color: 'text-indigo-600 dark:text-indigo-400',
-                bg: 'bg-indigo-50 dark:bg-indigo-950/30',
-                border: 'border-indigo-200 dark:border-indigo-900/30'
-            });
+            const isAlreadyOnDutyToday = todayMarket && todayMarket.assignedMemberId === tomorrowMarket.assignedMemberId;
+            
+            if (!isAlreadyOnDutyToday) {
+                const memberName = tomorrowMarket.assignedMemberName || getName(tomorrowMarket.assignedMemberId, 'Someone');
+                const isMe = tomorrowMarket.assignedMemberId === user?._id || tomorrowMarket.assignedMemberId === user?.id || tomorrowMarket.assignedMemberId === user?.userId;
+                
+                const msg = isMe 
+                    ? `From tomorrow, your market duty starts! 🛒`
+                    : `From tomorrow, ${memberName}'s market starts.`;
+
+                list.push({
+                    id: 'tomorrow-market',
+                    type: 'info',
+                    icon: ShoppingCart,
+                    message: msg,
+                    title: 'Market Duty Reminder',
+                    color: 'text-indigo-600 dark:text-indigo-400',
+                    bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+                    border: 'border-indigo-200 dark:border-indigo-900/30'
+                });
+            }
         }
 
         // 2. Check for Birthdays Today
@@ -85,7 +96,9 @@ const NotificationWidget = () => {
 
         birthdayMembers.forEach(member => {
             const memberId = member._id || member.id;
-            const isMe = memberId === user?._id || memberId === user?.id;
+            // Enhanced "Is it me?" check
+            const isMe = memberId === user?._id || memberId === user?.id || memberId === user?.userId || (member.userId && (member.userId === user?._id || member.userId === user?.id));
+            
             const title = isMe ? "Happy Birthday! 🎂" : "Birthday Celebration! 🎉";
             const msg = isMe 
                 ? `Happy Birthday ${user.name}! Have a wonderful day filled with joy! ✨`
@@ -104,7 +117,6 @@ const NotificationWidget = () => {
         });
 
         // 3. Check Today's Market Entry
-        const todayMarket = monthSchedule.find(m => m.date === todayStr && m.status === 'approved');
         if (todayMarket) {
             const hasMarketExpense = expenses.some(e => 
                 e.category === 'market' && 
@@ -113,7 +125,8 @@ const NotificationWidget = () => {
             
             if (!hasMarketExpense) {
                 const memberName = todayMarket.assignedMemberName || getName(todayMarket.assignedMemberId, 'Someone');
-                const isAssigned = user?._id === todayMarket.assignedMemberId || user?.id === todayMarket.assignedMemberId;
+                const isAssigned = user?._id === todayMarket.assignedMemberId || user?.id === todayMarket.assignedMemberId || user?.userId === todayMarket.assignedMemberId;
+                
                 const msg = isAssigned 
                         ? `Hey ${user.name}, you haven't written today's market details yet!`
                         : `${memberName} has not written today's market details yet.`;
