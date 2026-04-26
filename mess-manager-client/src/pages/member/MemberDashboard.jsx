@@ -11,6 +11,7 @@ import { MESS_CONFIG } from '../../config';
 import api from '../../lib/api';
 import Skeleton from '../../components/ui/Skeleton';
 import BirthdayWidget from '../../components/BirthdayWidget';
+import NoticeBoard from '../../components/NoticeBoard';
 
 const MemberDashboard = () => {
     const { user } = useAuth();

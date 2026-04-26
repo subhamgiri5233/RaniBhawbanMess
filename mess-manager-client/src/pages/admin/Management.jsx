@@ -8,6 +8,7 @@ import { ChefHat, UserCheck, UserRound, Users, ChevronDown, Calendar, Search, Tr
 import { format } from 'date-fns';
 import { cn } from '../../lib/utils';
 import api from '../../lib/api';
+import NoticeBoard from '../../components/NoticeBoard';
 
 const MarketDutyItem = ({ member, month, initialValue, onSave }) => {
     const [localValue, setLocalValue] = useState(initialValue || 4);
@@ -749,6 +750,11 @@ const Management = () => {
                         </div>
                     </div>
                 </Card>
+            </div>
+
+            {/* Official Notice Board Tool */}
+            <div className="pb-10">
+                <NoticeBoard isAdminView={true} />
             </div>
         </div>
     );

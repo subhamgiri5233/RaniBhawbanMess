@@ -9,6 +9,7 @@ import { cn } from '../../lib/utils';
 import Skeleton from '../../components/ui/Skeleton';
 import BirthdayWidget from '../../components/BirthdayWidget';
 import NotificationWidget from '../../components/NotificationWidget';
+import NoticeBoard from '../../components/NoticeBoard';
 
 const AdminDashboard = () => {
     const { members, expenses, meals, globalMonth, loadingDaily } = useData();

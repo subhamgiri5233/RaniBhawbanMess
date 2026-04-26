@@ -56,12 +56,7 @@ const Layout = () => {
                     >
                         <RefreshCw size={18} className={isRefreshing ? 'animate-spin text-primary-500' : ''} />
                     </button>
-                    <button
-                        onClick={toggleTheme}
-                        className="p-2.5 text-indigo-200 dark:text-slate-500 hover:bg-indigo-900/50 dark:hover:bg-white/5 rounded-xl transition-all active:scale-90"
-                    >
-                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} className="text-amber-500" />}
-                    </button>
+                    <ThemeToggle />
                     <button
                         onClick={() => setIsSidebarOpen(true)}
                         className="p-2.5 ml-1 bg-indigo-900/60 dark:bg-indigo-500/10 text-indigo-100 dark:text-indigo-400 rounded-xl transition-all shadow-inner active:scale-90 border border-indigo-800/30 dark:border-indigo-500/20"
@@ -80,16 +75,19 @@ const Layout = () => {
                 {isDesktopCollapsed ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
             </button>
 
-            {/* Global Refresh Button — desktop, top-right corner */}
-            <button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                title={isRefreshing ? 'Refreshing...' : 'Refresh all data'}
-                className="hidden md:flex items-center gap-2 fixed top-4 right-6 z-50 px-3 py-1.5 bg-indigo-100 dark:bg-slate-900 border border-indigo-200/50 dark:border-white/10 rounded-2xl shadow-md text-indigo-600 dark:text-slate-500 hover:text-primary-700 dark:hover:text-primary-400 hover:border-primary-400 hover:shadow-lg transition-all duration-200 text-xs font-black uppercase tracking-widest disabled:opacity-60"
-            >
-                <RefreshCw size={13} className={isRefreshing ? 'animate-spin text-primary-500' : ''} />
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
-            </button>
+            {/* Global Actions — desktop, top-right corner */}
+            <div className="hidden md:flex items-center gap-3 fixed top-4 right-6 z-50">
+                <button
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    title={isRefreshing ? 'Refreshing...' : 'Refresh all data'}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-indigo-100 dark:bg-slate-900 border border-indigo-200/50 dark:border-white/10 rounded-2xl shadow-md text-indigo-600 dark:text-slate-500 hover:text-primary-700 dark:hover:text-primary-400 hover:border-primary-400 hover:shadow-lg transition-all duration-200 text-xs font-black uppercase tracking-widest disabled:opacity-60"
+                >
+                    <RefreshCw size={13} className={isRefreshing ? 'animate-spin text-primary-500' : ''} />
+                    {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                </button>
+                <ThemeToggle />
+            </div>
 
             <main
                 className={`min-h-screen p-4 md:p-8 transition-all duration-300 ${isDesktopCollapsed ? 'md:ml-16' : 'md:ml-64'}`}

@@ -15,6 +15,8 @@ import api from '../../lib/api';
 import { cn } from '../../lib/utils';
 import Card from '../../components/ui/Card';
 import { useData } from '../../context/DataContext';
+import { generateBillPDF } from '../../utils/pdfReport';
+import { Download, FileDown } from 'lucide-react';
 
 // ─── Month/year helpers ─────────────────────────────────────────────────────
 
@@ -222,21 +224,41 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-indigo-300/40 dark:bg-black/40 p-2 rounded-2xl border border-indigo-300/30 dark:border-white/5 shadow-sm transition-all hover:scale-105">
-                    <div className="text-right flex flex-col items-end">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
-                            {rem > 0 ? 'Payable Balance' : rem < 0 ? 'Receivable Balance' : 'Clear Status'}
-                        </span>
-                        <span className={cn(
-                            "text-lg font-black leading-none",
-                            rem > 0 ? "text-rose-600" : rem < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"
-                        )}>₹{Math.abs(rem)}</span>
-                    </div>
-                    <div className={cn(
-                        "w-8 h-8 rounded-xl flex items-center justify-center shadow-lg transition-transform",
-                        rem > 0 ? "bg-rose-500 shadow-rose-500/20" : rem < 0 ? "bg-emerald-500 shadow-emerald-500/20" : "bg-indigo-300/40 dark:bg-slate-700 shadow-none"
-                    )}>
-                        {rem > 0 ? <TrendingDown size={16} className="text-white" /> : rem < 0 ? <TrendingUp size={16} className="text-white" /> : <CheckCircle2 size={16} className="text-slate-500" />}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => generateBillPDF({
+                            name: m.memberName,
+                            meals: m.regularMeals || 0,
+                            mealCharge: dRate,
+                            mealCost: dMCost,
+                            guestMeals: m.guestMeals || 0,
+                            fixedCost: dHead,
+                            marketContribution: effectiveContribution,
+                            deposit: m.submittedAmount || 0,
+                            balance: rem
+                        }, { month: bills?.month || 'Current Month' })}
+                        className="p-2.5 bg-indigo-300/40 dark:bg-white/5 text-indigo-600 dark:text-slate-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-90 flex items-center gap-2 border border-indigo-300/30 dark:border-white/10 group/pdf"
+                        title="Download PDF Bill"
+                    >
+                        <FileDown size={14} className="group-hover/pdf:scale-110 transition-transform" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">PDF Bill</span>
+                    </button>
+                    <div className="flex items-center gap-3 bg-indigo-300/40 dark:bg-black/40 p-2 rounded-2xl border border-indigo-300/30 dark:border-white/5 shadow-sm transition-all hover:scale-105">
+                        <div className="text-right flex flex-col items-end">
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
+                                {rem > 0 ? 'Payable Balance' : rem < 0 ? 'Receivable Balance' : 'Clear Status'}
+                            </span>
+                            <span className={cn(
+                                "text-lg font-black leading-none",
+                                rem > 0 ? "text-rose-600" : rem < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"
+                            )}>₹{Math.abs(rem)}</span>
+                        </div>
+                        <div className={cn(
+                            "w-8 h-8 rounded-xl flex items-center justify-center shadow-lg transition-transform",
+                            rem > 0 ? "bg-rose-500 shadow-rose-500/20" : rem < 0 ? "bg-emerald-500 shadow-emerald-500/20" : "bg-indigo-300/40 dark:bg-slate-700 shadow-none"
+                        )}>
+                            {rem > 0 ? <TrendingDown size={16} className="text-white" /> : rem < 0 ? <TrendingUp size={16} className="text-white" /> : <CheckCircle2 size={16} className="text-slate-500" />}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -460,6 +482,40 @@ const MonthlySummary = () => {
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    <button 
+                        onClick={() => {
+                            filteredMembers.forEach(m => {
+                                const offM = (data?.sharedExpense?.memberBalances || []).find(mb => mb.memberId === (m._id || m.memberId)) || {};
+                                const chargedRegMeals = m.chargedMeals || Math.max(stats.minLimit, Number(m.regularMeals) || 0);
+                                const lMCost = chargedRegMeals * stats.rate;
+                                const lGCost = (Number(m.guestMeals) || 0) * stats.rate;
+                                const totalContribution = Object.values(m.expenses || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+                                const finalizedContribution = Number(offM.totalContribution ?? totalContribution); 
+                                const dMCost = Number(offM.mealCost ?? lMCost) || 0;
+                                const dGCost = Number(offM.guestMealCost ?? offM.guestCost ?? lGCost) || 0;
+                                const signedOffBal = offM.type === 'Get' ? -Number(offM.balance) : Number(offM.balance);
+                                const dBal = signedOffBal || ((dMCost + dGCost + Number(stats.head)) - finalizedContribution);
+                                const rem = Math.round(dBal) - (Number(m.submittedAmount) || 0);
+
+                                generateBillPDF({
+                                    name: m.memberName,
+                                    meals: m.regularMeals || 0,
+                                    mealCharge: stats.rate,
+                                    mealCost: dMCost,
+                                    guestMeals: m.guestMeals || 0,
+                                    fixedCost: stats.head,
+                                    marketContribution: finalizedContribution,
+                                    deposit: m.submittedAmount || 0,
+                                    balance: rem
+                                }, { month: data?.sharedExpense?.bills?.month || 'Current Month' });
+                            });
+                        }}
+                        className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all"
+                        title="Download All Member Bills as PDF"
+                    >
+                        <Download size={14} />
+                        Download All Invoices
+                    </button>
                     <button onClick={fetchSummary} className="p-3 bg-indigo-300/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-white/10 rounded-2xl text-indigo-500 shadow-sm active:scale-95 transition-all hover:rotate-180"><RefreshCw size={18} className={loading ? 'animate-spin' : ''} /></button>
                 </div>
             </div>
