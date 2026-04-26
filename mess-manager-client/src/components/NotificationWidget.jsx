@@ -26,7 +26,6 @@ const NotificationWidget = () => {
             const options = {
                 body: body,
                 icon: window.location.origin + '/icons/home.png?v=25',
-                badge: window.location.origin + '/icons/icon-192x192.png?v=25',
                 vibrate: [200, 100, 200],
                 tag: id 
             };
@@ -67,23 +66,26 @@ const NotificationWidget = () => {
             const isAlreadyOnDutyToday = todayMarket && todayMarket.assignedMemberId === tomorrowMarket.assignedMemberId;
             
             if (!isAlreadyOnDutyToday) {
-                const memberName = tomorrowMarket.assignedMemberName || getName(tomorrowMarket.assignedMemberId, 'Someone');
-                const isMe = tomorrowMarket.assignedMemberId === user?._id || tomorrowMarket.assignedMemberId === user?.id || tomorrowMarket.assignedMemberId === user?.userId;
+                const memberId = tomorrowMarket.assignedMemberId;
+                const memberName = tomorrowMarket.assignedMemberName || getName(memberId, 'Someone');
+                const isMe = memberId === user?._id || memberId === user?.id || memberId === user?.userId;
                 
-                const msg = isMe 
-                    ? `From tomorrow, your market duty starts! 🛒`
-                    : `From tomorrow, ${memberName}'s market starts.`;
+                if (isMe || user?.role === 'admin') {
+                    const msg = isMe 
+                        ? `From tomorrow, your market duty starts! 🛒`
+                        : `From tomorrow, ${memberName}'s market starts.`;
 
-                list.push({
-                    id: 'tomorrow-market',
-                    type: 'info',
-                    icon: ShoppingCart,
-                    message: msg,
-                    title: 'Market Duty Reminder',
-                    color: 'text-indigo-600 dark:text-indigo-400',
-                    bg: 'bg-indigo-50 dark:bg-indigo-950/30',
-                    border: 'border-indigo-200 dark:border-indigo-900/30'
-                });
+                    list.push({
+                        id: 'tomorrow-market',
+                        type: 'info',
+                        icon: ShoppingCart,
+                        message: msg,
+                        title: 'Market Duty Reminder',
+                        color: 'text-indigo-600 dark:text-indigo-400',
+                        bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+                        border: 'border-indigo-200 dark:border-indigo-900/30'
+                    });
+                }
             }
         }
 
@@ -125,7 +127,7 @@ const NotificationWidget = () => {
             // Check if today is the LAST day (tomorrow is either empty or someone else)
             const isLastDay = !tomorrowMarket || tomorrowMarket.assignedMemberId !== memberId;
 
-            if (isLastDay) {
+            if (isLastDay && (isMe || user?.role === 'admin')) {
                 const msg = isMe 
                     ? `মার্কেট শেষ ড্রাম টা ফেলে দিও! ✅`
                     : `${memberName} এর মার্কেট শেষ, ড্রাম টা ফেলে দিতে বলো।`;
@@ -147,7 +149,7 @@ const NotificationWidget = () => {
                 (e.date === todayStr || e.date === format(today, 'dd-MM-yyyy'))
             );
             
-            if (!hasMarketExpense) {
+            if (!hasMarketExpense && (isMe || user?.role === 'admin')) {
                 const msg = isMe 
                         ? `Hey ${user.name}, you haven't written today's market details yet!`
                         : `${memberName} has not written today's market details yet.`;
