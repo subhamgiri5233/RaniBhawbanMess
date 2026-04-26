@@ -73,8 +73,22 @@ const BirthdayWidget = () => {
         }
     }, [isMyBirthday]);
 
-    const handleWish = (memberId) => {
+    const handleWish = (member) => {
+        const memberId = member._id || member.id;
         setWishedMembers(prev => new Set([...prev, memberId]));
+        
+        // Construct WhatsApp link
+        const message = `Happy Birthday ${member.name}! 🎉 Wishing you a fantastic day and a great year ahead! 🎂 - From Rani Bhawban Mess family`;
+        const encodedMessage = encodeURIComponent(message);
+        
+        // Clean phone number (remove +, spaces, dashes)
+        const phoneNumber = member.mobile ? member.mobile.replace(/\D/g, '') : '';
+        
+        if (phoneNumber) {
+            window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+        } else {
+            alert('Mobile number not found for this member.');
+        }
     };
 
     if (birthdayData.today.length === 0 && birthdayData.upcoming.length === 0) {
@@ -212,7 +226,7 @@ const BirthdayWidget = () => {
 
                                     {!isMe && (
                                         <button
-                                            onClick={() => handleWish(memberId)}
+                                            onClick={() => handleWish(member)}
                                             disabled={hasWished}
                                             className={cn(
                                                 "px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-3 active:scale-95",
