@@ -25,8 +25,7 @@ const NotificationWidget = () => {
         if (permission === 'granted' && !sentNotifs.has(id)) {
             const options = {
                 body: body,
-                icon: window.location.origin + '/icons/home.png?v=10',
-                badge: window.location.origin + '/icons/home.png?v=10',
+                icon: window.location.origin + '/icons/home.png?v=25',
                 vibrate: [200, 100, 200],
                 tag: id 
             };

@@ -53,8 +53,7 @@ self.addEventListener('push', (event) => {
     
     const options = {
         body: data.body,
-        icon: '/icons/home.png?v=10',
-        badge: '/icons/home.png?v=10',
+        icon: '/icons/home.png?v=25',
         vibrate: [100, 50, 100],
         data: {
             url: data.url || '/'
