@@ -82,12 +82,6 @@ const BirthdayWidget = () => {
             ? 'Rani Bhawban Mess Family' 
             : user?.name || 'A Friend from Mess';
 
-        // Using direct emojis that are universally supported
-        const cake = '🎂';
-        const sparkles = '✨';
-        const party = '🎉';
-        const balloon = '🎈';
-
         // 10 Unique Randomized wishes for variety
         const wishes = [
             "Wishing you a day filled with joy, laughter, and premium moments! May this year bring you closer to all your dreams.",
@@ -104,19 +98,17 @@ const BirthdayWidget = () => {
         
         const randomWish = wishes[Math.floor(Math.random() * wishes.length)];
 
-        // Using Unicode surrogate pairs for maximum compatibility across Laptop & Mobile
-        const f1 = '\uD83E\uDD73'; // 🥳
-        const f2 = '\uD83C\uDF82'; // 🎂
-        const f3 = '\uD83C\uDF89'; // 🎉
-        const f4 = '\uD83D\uDC90'; // 💐
-        const f5 = '\uD83C\uDF7C'; // 🍼
-        const f6 = '\uD83C\uDF81'; // 🎁
-        const f7 = '\uD83C\uDF88'; // 🎈
+        // Using specific surrogate pairs for a cleaner, structured look
+        const cake = '\uD83C\uDF82'; // 🎂
+        const sparkles = '\u2728';   // ✨
+        const party = '\uD83C\uDF89'; // 🎉
+        const balloon = '\uD83C\uDF88'; // 🎈
+        const gift = '\uD83C\uDF81';    // 🎁
 
-        const emojiLine = `${f1} ${f2} ${f3} ${f4} ${f5} ${f6} ${f7}`;
-        const header = `${emojiLine}\n*HAPPY BIRTHDAY ${member.name.toUpperCase()}!*\n${emojiLine}`;
-        const body = `${randomWish}`;
-        const footer = `_Best wishes from:_\n*${senderName}*`;
+        // Construct structured WhatsApp link (Cleaner & Less Cluttered)
+        const header = `${cake} *HAPPY BIRTHDAY ${member.name.toUpperCase()}!* ${cake}`;
+        const body = `${randomWish} ${sparkles}`;
+        const footer = `${party} _Best wishes from:_\n*${senderName}* ${gift}${balloon}`;
         
         const message = `${header}\n\n${body}\n\n${footer}`;
         const encodedMessage = encodeURIComponent(message);
