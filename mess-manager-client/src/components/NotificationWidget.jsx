@@ -149,7 +149,7 @@ const NotificationWidget = () => {
                 (e.date === todayStr || e.date === format(today, 'dd-MM-yyyy'))
             );
             
-            if (!hasMarketExpense) {
+            if (!hasMarketExpense && (isMe || user?.role === 'admin')) {
                 const msg = isMe 
                         ? `Hey ${user.name}, you haven't written today's market details yet!`
                         : `${memberName} has not written today's market details yet.`;
