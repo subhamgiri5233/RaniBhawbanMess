@@ -754,7 +754,7 @@ const Management = () => {
 
             {/* Official Notice Board Tool */}
             <div className="pb-10">
-                <NoticeBoard isAdminView={true} />
+                {/* <NoticeBoard isAdminView={true} /> */}
             </div>
         </div>
     );

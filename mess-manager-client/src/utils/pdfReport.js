@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 
 export const generateBillPDF = (member, summaryData) => {
@@ -62,7 +62,7 @@ export const generateBillPDF = (member, summaryData) => {
         ['Individual Expenses/Payments', '-', `INR ${member.deposit.toFixed(2)}`],
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
         startY: 85,
         head: [tableData[0]],
         body: tableData.slice(1),
@@ -82,7 +82,7 @@ export const generateBillPDF = (member, summaryData) => {
     });
 
     // Final Calculation Row
-    const finalY = doc.lastAutoTable.finalY + 10;
+    const finalY = (doc).lastAutoTable.finalY + 10;
     doc.setFontSize(11);
     doc.setTextColor(...secondaryColor);
     doc.setFont('helvetica', 'bold');

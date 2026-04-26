@@ -5,18 +5,18 @@ import {
     CheckCircle2, Clock, AlertCircle, Users,
     ShoppingBag, Wifi, Zap, Utensils, Flame,
     Coffee, FileText, Loader2, RefreshCw, Search, Newspaper, UserRound, Calculator, TrendingUp, TrendingDown,
-    Calendar, ChevronLeft, ChevronRight, ChevronDown, Coins, Activity, Shield, PlusCircle
+    Calendar, ChevronLeft, ChevronRight, ChevronDown, Coins, Activity, Shield, PlusCircle,
+    Download, FileDown
 } from 'lucide-react';
-
-const HomeIcon = ({ size = 18, className }) => (
-    <img src="/icons/home.png" alt="Home" className={cn("object-contain", className)} style={{ width: size, height: size }} />
-);
 import api from '../../lib/api';
 import { cn } from '../../lib/utils';
 import Card from '../../components/ui/Card';
 import { useData } from '../../context/DataContext';
 import { generateBillPDF } from '../../utils/pdfReport';
-import { Download, FileDown } from 'lucide-react';
+
+const HomeIcon = ({ size = 18, className }) => (
+    <img src="/icons/home.png" alt="Home" className={cn("object-contain", className)} style={{ width: size, height: size }} />
+);
 
 // ─── Month/year helpers ─────────────────────────────────────────────────────
 
@@ -484,30 +484,32 @@ const MonthlySummary = () => {
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={() => {
-                            filteredMembers.forEach(m => {
-                                const offM = (data?.sharedExpense?.memberBalances || []).find(mb => mb.memberId === (m._id || m.memberId)) || {};
-                                const chargedRegMeals = m.chargedMeals || Math.max(stats.minLimit, Number(m.regularMeals) || 0);
-                                const lMCost = chargedRegMeals * stats.rate;
-                                const lGCost = (Number(m.guestMeals) || 0) * stats.rate;
-                                const totalContribution = Object.values(m.expenses || {}).reduce((a, b) => a + (Number(b) || 0), 0);
-                                const finalizedContribution = Number(offM.totalContribution ?? totalContribution); 
-                                const dMCost = Number(offM.mealCost ?? lMCost) || 0;
-                                const dGCost = Number(offM.guestMealCost ?? offM.guestCost ?? lGCost) || 0;
-                                const signedOffBal = offM.type === 'Get' ? -Number(offM.balance) : Number(offM.balance);
-                                const dBal = signedOffBal || ((dMCost + dGCost + Number(stats.head)) - finalizedContribution);
-                                const rem = Math.round(dBal) - (Number(m.submittedAmount) || 0);
+                            filteredMembers.forEach((m, index) => {
+                                setTimeout(() => {
+                                    const offM = (data?.sharedExpense?.memberBalances || []).find(mb => mb.memberId === (m._id || m.memberId)) || {};
+                                    const chargedRegMeals = m.chargedMeals || Math.max(stats.minLimit, Number(m.regularMeals) || 0);
+                                    const lMCost = chargedRegMeals * stats.rate;
+                                    const lGCost = (Number(m.guestMeals) || 0) * stats.rate;
+                                    const totalContribution = Object.values(m.expenses || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+                                    const finalizedContribution = Number(offM.totalContribution ?? totalContribution); 
+                                    const dMCost = Number(offM.mealCost ?? lMCost) || 0;
+                                    const dGCost = Number(offM.guestMealCost ?? offM.guestCost ?? lGCost) || 0;
+                                    const signedOffBal = offM.type === 'Get' ? -Number(offM.balance) : Number(offM.balance);
+                                    const dBal = signedOffBal || ((dMCost + dGCost + Number(stats.head)) - finalizedContribution);
+                                    const rem = Math.round(dBal) - (Number(m.submittedAmount) || 0);
 
-                                generateBillPDF({
-                                    name: m.memberName,
-                                    meals: m.regularMeals || 0,
-                                    mealCharge: stats.rate,
-                                    mealCost: dMCost,
-                                    guestMeals: m.guestMeals || 0,
-                                    fixedCost: stats.head,
-                                    marketContribution: finalizedContribution,
-                                    deposit: m.submittedAmount || 0,
-                                    balance: rem
-                                }, { month: data?.sharedExpense?.bills?.month || 'Current Month' });
+                                    generateBillPDF({
+                                        name: m.memberName,
+                                        meals: m.regularMeals || 0,
+                                        mealCharge: stats.rate,
+                                        mealCost: dMCost,
+                                        guestMeals: m.guestMeals || 0,
+                                        fixedCost: stats.head,
+                                        marketContribution: finalizedContribution,
+                                        deposit: m.submittedAmount || 0,
+                                        balance: rem
+                                    }, { month: data?.sharedExpense?.bills?.month || 'Current Month' });
+                                }, index * 800); // 800ms delay between each download to prevent browser block
                             });
                         }}
                         className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all"

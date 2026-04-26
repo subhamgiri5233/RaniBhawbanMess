@@ -50,13 +50,6 @@ const Layout = () => {
                     <h2 className="text-sm font-black text-indigo-100 dark:text-slate-100 uppercase tracking-tighter">Rani Bhawban Mess</h2>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                        className="p-2.5 text-indigo-200 dark:text-slate-500 hover:bg-indigo-900/50 dark:hover:bg-white/5 rounded-xl transition-all active:scale-90"
-                    >
-                        <RefreshCw size={18} className={isRefreshing ? 'animate-spin text-primary-500' : ''} />
-                    </button>
                     <ThemeToggle />
                     <button
                         onClick={() => setIsSidebarOpen(true)}
@@ -78,15 +71,6 @@ const Layout = () => {
 
             {/* Global Actions — desktop, top-right corner */}
             <div className="hidden md:flex items-center gap-3 fixed top-4 right-6 z-50">
-                <button
-                    onClick={handleRefresh}
-                    disabled={isRefreshing}
-                    title={isRefreshing ? 'Refreshing...' : 'Refresh all data'}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-indigo-100 dark:bg-slate-900 border border-indigo-200/50 dark:border-white/10 rounded-2xl shadow-md text-indigo-600 dark:text-slate-500 hover:text-primary-700 dark:hover:text-primary-400 hover:border-primary-400 hover:shadow-lg transition-all duration-200 text-xs font-black uppercase tracking-widest disabled:opacity-60"
-                >
-                    <RefreshCw size={13} className={isRefreshing ? 'animate-spin text-primary-500' : ''} />
-                    {isRefreshing ? 'Refreshing...' : 'Refresh'}
-                </button>
                 <ThemeToggle />
             </div>
 
