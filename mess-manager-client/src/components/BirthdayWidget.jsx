@@ -89,27 +89,28 @@ const BirthdayWidget = () => {
         const party = String.fromCodePoint(0x1F389);
         const balloon = String.fromCodePoint(0x1F388);
 
-        // Randomized wishes for variety
+        // 10 Unique Randomized wishes for variety
         const wishes = [
             "Wishing you a day filled with joy, laughter, and premium moments! May this year bring you closer to all your dreams.",
             "Have a spectacular birthday! Hope your day is as amazing as you are. Cheers to another year of great memories!",
             "Warmest wishes on your special day! May your birthday be full of happiness and your heart full of love.",
             "Happy birthday! Sending you lots of love and good vibes on your big day. Enjoy every single moment!",
             "Another year older, another year wiser! Hope your birthday is simply wonderful. Have the best time today!",
-            "May your day be as bright as your smile and as lovely as your heart. Happy birthday to an awesome person!"
+            "May your day be as bright as your smile and as lovely as your heart. Happy birthday to an awesome person!",
+            "Wishing you a birthday that's as special as you are! May all your wishes come true today and always.",
+            "To a fantastic member of our mess - Happy Birthday! Hope your day is packed with fun and celebration.",
+            "Sending you sunshine and smiles on your birthday! Have a wonderful day and a brilliant year ahead.",
+            "Happy Birthday! May your day be filled with all the things that make you happy. You deserve the best!"
         ];
         
         const randomWish = wishes[Math.floor(Math.random() * wishes.length)];
 
-        // Construct structured WhatsApp link
-        const message = 
-`${star} *HAPPY BIRTHDAY ${member.name.toUpperCase()}!* ${star}
-
-${randomWish} ${cake}${sparkles}${balloon}
-
-${party} _Best wishes from:_
-*${senderName}*`;
-
+        // Construct structured WhatsApp link with explicit line breaks
+        const header = `${star} *HAPPY BIRTHDAY ${member.name.toUpperCase()}!* ${star}`;
+        const body = `${randomWish} ${cake}${sparkles}${balloon}`;
+        const footer = `${party} _Best wishes from:_\n*${senderName}*`;
+        
+        const message = `${header}\n\n${body}\n\n${footer}`;
         const encodedMessage = encodeURIComponent(message);
         
         // Clean phone number
