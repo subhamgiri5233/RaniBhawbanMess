@@ -10,6 +10,7 @@ import GlobalMonthSelector from '../ui/GlobalMonthSelector';
 import { useState } from 'react';
 import { Menu, Sun, Moon, PanelLeftClose, PanelLeftOpen, RefreshCw } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import NotificationWidget from '../NotificationWidget';
 
 const Layout = () => {
     const { user } = useAuth();
@@ -81,6 +82,9 @@ const Layout = () => {
                     <div className="sticky top-[57px] md:top-0 z-30 -mx-4 px-4 py-2 md:-mx-8 md:px-8 md:py-4 bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-md border-b border-indigo-100 dark:border-white/5 transition-all">
                         <GlobalMonthSelector />
                     </div>
+                    
+                    <NotificationWidget />
+
                     <AnimatedRoutes>
                         <Outlet />
                     </AnimatedRoutes>

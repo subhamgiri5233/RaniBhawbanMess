@@ -117,16 +117,37 @@ const NotificationWidget = () => {
 
         // 3. Check Today's Market Entry
         if (todayMarket) {
+            const memberId = todayMarket.assignedMemberId;
+            const isMe = memberId === user?._id || memberId === user?.id || memberId === user?.userId;
+            const memberName = todayMarket.assignedMemberName || getName(memberId, 'Someone');
+
+            // Check if today is the LAST day (tomorrow is either empty or someone else)
+            const isLastDay = !tomorrowMarket || tomorrowMarket.assignedMemberId !== memberId;
+
+            if (isLastDay) {
+                const msg = isMe 
+                    ? `মার্কেট শেষ ড্রাম টা ফেলে দিও! ✅`
+                    : `${memberName} এর মার্কেট শেষ, ড্রাম টা ফেলে দিতে বলো।`;
+                
+                list.push({
+                    id: `market-finished-${memberId}-${todayStr}`,
+                    type: 'success',
+                    icon: ShoppingCart,
+                    message: msg,
+                    title: 'Market Duty Finished',
+                    color: 'text-emerald-600 dark:text-emerald-400',
+                    bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+                    border: 'border-emerald-200 dark:border-emerald-900/30'
+                });
+            }
+
             const hasMarketExpense = expenses.some(e => 
                 e.category === 'market' && 
                 (e.date === todayStr || e.date === format(today, 'dd-MM-yyyy'))
             );
             
             if (!hasMarketExpense) {
-                const memberName = todayMarket.assignedMemberName || getName(todayMarket.assignedMemberId, 'Someone');
-                const isAssigned = user?._id === todayMarket.assignedMemberId || user?.id === todayMarket.assignedMemberId || user?.userId === todayMarket.assignedMemberId;
-                
-                const msg = isAssigned 
+                const msg = isMe 
                         ? `Hey ${user.name}, you haven't written today's market details yet!`
                         : `${memberName} has not written today's market details yet.`;
                 

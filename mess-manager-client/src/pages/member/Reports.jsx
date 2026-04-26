@@ -17,6 +17,8 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { MESS_CONFIG } from '../../config';
 import { addBengaliFont } from '../../utils/bengaliFont';
+import { generateBillPDF } from '../../utils/pdfReport';
+import { FileDown } from 'lucide-react';
 
 // ─── Status badge (Read Only for Members) ──────────────────────────────────
 const STATUS_CONFIG = {
@@ -163,6 +165,25 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
                         )}
                     </div>
                 </div>
+
+                <button
+                    onClick={() => generateBillPDF({
+                        name: m.memberName,
+                        meals: m.regularMeals || 0,
+                        mealCharge: dRate,
+                        mealCost: dMCost,
+                        guestMeals: m.guestMeals || 0,
+                        fixedCost: dHead,
+                        marketContribution: effectiveContribution,
+                        deposit: m.submittedAmount || 0,
+                        balance: rem
+                    }, { month: 'Current Month' })}
+                    className="p-2.5 bg-indigo-300/40 dark:bg-white/5 text-indigo-600 dark:text-slate-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-90 flex items-center gap-2 border border-indigo-300/30 dark:border-white/10 group/pdf"
+                    title="Download My PDF Bill"
+                >
+                    <FileDown size={14} className="group-hover/pdf:scale-110 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Download PDF Bill</span>
+                </button>
             </div>
 
             <div className="mt-4 pt-6 border-t border-slate-100 dark:border-white/5">

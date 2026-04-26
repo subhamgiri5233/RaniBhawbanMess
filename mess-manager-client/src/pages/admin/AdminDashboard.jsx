@@ -8,7 +8,6 @@ import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, Trendi
 import { cn } from '../../lib/utils';
 import Skeleton from '../../components/ui/Skeleton';
 import BirthdayWidget from '../../components/BirthdayWidget';
-import NotificationWidget from '../../components/NotificationWidget';
 import NoticeBoard from '../../components/NoticeBoard';
 
 const AdminDashboard = () => {
@@ -100,9 +99,6 @@ const AdminDashboard = () => {
 
             {/* Birthday Spotlight */}
             <BirthdayWidget />
-
-            {/* Smart Notifications */}
-            <NotificationWidget />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                 {(loadingDaily && meals.length === 0) ? (
