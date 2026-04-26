@@ -46,6 +46,11 @@ router.post('/restore/:id', auth, requireAdmin, async (req, res) => {
 
         res.json({ message: 'Item restored successfully', restoredItem });
     } catch (err) {
+        if (err.code === 11000) {
+            return res.status(400).json({ 
+                message: `Restoration failed: A record with this unique identity already exists in the destination. Please check the active ${req.body.type || 'records'}.` 
+            });
+        }
         res.status(500).json({ message: err.message });
     }
 });

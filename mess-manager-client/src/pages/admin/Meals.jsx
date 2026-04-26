@@ -68,7 +68,7 @@ const Meals = () => {
         guestMealLabels: MESS_CONFIG.GUEST_CONFIG.LABELS
     }), [settings]);
 
-    const handleAddGuest = async () => {
+    const handleAddGuest = () => {
         if (!selectedMember) {
             alert('⚠️ Please select a member (Host Account) first!');
             return;
@@ -84,16 +84,18 @@ const Meals = () => {
             return;
         }
 
-        try {
-            await addGuestMeal(guestDate, selectedMember, selectedMealType, guestMealTime);
-            setShowGuestDialog(false);
-            setSelectedMember('');
-            setSelectedMealType('meat');
-            setGuestMealTime('lunch');
-        } catch (error) {
-            console.error('Failed to add guest meal:', error);
-            alert(`Error adding guest meal: ${error.response?.data?.message || error.message || error}`);
-        }
+        // Fire and forget (Optimistic update in DataContext handles the UI)
+        addGuestMeal(guestDate, selectedMember, selectedMealType, guestMealTime)
+            .catch(error => {
+                console.error('Failed to add guest meal:', error);
+                alert(`Error adding guest meal: ${error.response?.data?.message || error.message || error}`);
+            });
+
+        // Close and reset immediately for "instant" feel
+        setShowGuestDialog(false);
+        setSelectedMember('');
+        setSelectedMealType('meat');
+        setGuestMealTime('lunch');
     };
 
 

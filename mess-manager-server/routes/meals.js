@@ -72,11 +72,63 @@ router.post('/', auth, async (req, res) => {
         }
 
         const newMeal = new Meal(mealData);
-        await newMeal.save();
-        res.status(201).json(newMeal);
+        const savedMeal = await newMeal.save();
+        res.status(201).json(savedMeal);
     } catch (err) {
         if (err.code === 11000) {
             return res.status(400).json({ error: 'Meal already exists' });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/meals/bulk - Add multiple meals - Requires auth
+router.post('/bulk', auth, async (req, res) => {
+    try {
+        const { date, memberIds, type } = req.body;
+
+        if (!Array.isArray(memberIds) || memberIds.length === 0) {
+            return res.status(400).json({ error: 'memberIds must be a non-empty array' });
+        }
+
+        // Security: Members can only add their own meals
+        if (req.user.role === 'member') {
+            const onlySelf = memberIds.every(id => id === req.user.id);
+            if (!onlySelf) {
+                return res.status(403).json({ error: 'Access denied. You can only record your own meals.' });
+            }
+        }
+
+        // Fetch all members in one go
+        const members = await User.find({
+            $or: [
+                { _id: { $in: memberIds } },
+                { userId: { $in: memberIds } }
+            ]
+        });
+
+        const mealsToInsert = memberIds.map(memberId => {
+            const user = members.find(m => String(m._id) === String(memberId) || m.userId === String(memberId));
+            return {
+                date,
+                memberId,
+                memberName: user ? user.name : 'Unknown',
+                type,
+                isGuest: false
+            };
+        });
+
+        // Use insertMany with ordered: false to skip duplicates and continue
+        const result = await Meal.insertMany(mealsToInsert, { ordered: false });
+        res.status(201).json(result);
+    } catch (err) {
+        // If some succeeded and some failed due to duplicates, we might get a partial success or error
+        if (err.code === 11000 || err.name === 'BulkWriteError') {
+            // Some records were inserted, some were skipped
+            return res.status(201).json({ 
+                message: 'Bulk insert completed with some duplicates skipped',
+                insertedCount: err.result?.nInserted || 0 
+            });
         }
         res.status(500).json({ error: err.message });
     }

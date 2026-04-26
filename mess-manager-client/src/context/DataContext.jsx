@@ -304,44 +304,74 @@ export const DataProvider = ({ children }) => {
 
     const getCookingDuty = useCallback((date) => cookingDuties.find(d => d.date === date), [cookingDuties]);
 
+    // Guest Meal Functions
+    const addGuestMeal = useCallback(async (date, memberId, guestMealType, mealTime) => {
+        // Optimistic UI update
+        const tempId = `temp-guest-${Date.now()}`;
+        const host = members.find(m => m._id === memberId || m.id === memberId);
+        const tempGuest = {
+            _id: tempId,
+            date,
+            memberId,
+            memberName: host ? host.name : 'Unknown',
+            guestMealType,
+            mealTime,
+            amount: MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0,
+            loading: true
+        };
+        
+        setGuestMeals(prev => [...prev, tempGuest]);
+
+        try {
+            const settingKey = `guest_price_${guestMealType}`;
+            const dbSetting = settings.find(s => s.key === settingKey);
+            const amount = dbSetting ? Number(dbSetting.value) : (MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0);
+
+            const response = await api.post('/guest-meals', { date, memberId, guestMealType, mealTime, amount });
+            
+            // Replace temp item with real one
+            setGuestMeals(prev => prev.map(gm => gm._id === tempId ? response.data : gm));
+        } catch (error) {
+            console.error('Add guest meal failed', error);
+            // Rollback
+            setGuestMeals(prev => prev.filter(gm => gm._id !== tempId));
+            throw error;
+        }
+    }, [settings, members]);
+
     // Meal Actions
     const addMeal = useCallback(async (date, memberIds, type, isGuest = false, guestMealType = null, mealTime = null) => {
+        // If it's a guest meal, we use the regular post for now (or bulk if we want later)
+        // But for multiple members, we definitely want bulk.
+        if (isGuest) {
+            // Re-use logic or call addGuestMeal
+            return addGuestMeal(date, memberIds[0], guestMealType, mealTime);
+        }
+
         // Optimistic UI: Add temporary items to state
         const tempMeals = memberIds.map(id => ({
             _id: `temp-${Date.now()}-${id}`,
             date,
             memberId: id,
             type,
-            isGuest,
-            guestMealType,
-            mealTime,
+            isGuest: false,
             loading: true
         }));
         setMeals(prev => [...prev, ...tempMeals]);
 
         try {
-            // Parallel API calls for better performance
-            const promises = memberIds.map(memberId => {
-                const payload = { date, memberId, type };
-                if (isGuest) { payload.isGuest = true; payload.guestMealType = guestMealType; payload.mealTime = mealTime; }
-                return api.post('/meals', payload);
-            });
+            // Single bulk API call instead of multiple individual ones
+            const response = await api.post('/meals/bulk', { date, memberIds, type });
             
-            const responses = await Promise.all(promises);
-            const newMealsResult = responses.map(r => r.data);
-            
-            // Replace temp items with actual server data
-            setMeals(prev => [
-                ...prev.filter(m => !tempMeals.some(tm => tm._id === m._id)),
-                ...newMealsResult
-            ]);
+            // Re-fetch only this month's meals to get fresh state (most reliable)
+            await refreshMeals();
         } catch (error) {
-            console.error('Add meal failed', error);
+            console.error('Add bulk meal failed', error);
             // Rollback optimistic update
             setMeals(prev => prev.filter(m => !tempMeals.some(tm => tm._id === m._id)));
-            alert('Failed to add meal. Please try again.');
+            alert('Failed to add meals. Please try again.');
         }
-    }, []);
+    }, [refreshMeals, addGuestMeal]);
 
     const removeMeal = useCallback(async (date, memberId, type, mealId = null) => {
         // Optimistic UI: Remove item from local state immediately
@@ -368,21 +398,6 @@ export const DataProvider = ({ children }) => {
             alert('Failed to remove meal. Please try again.');
         }
     }, []);
-
-    // Guest Meal Functions
-    const addGuestMeal = useCallback(async (date, memberId, guestMealType, mealTime) => {
-        try {
-            const settingKey = `guest_price_${guestMealType}`;
-            const dbSetting = settings.find(s => s.key === settingKey);
-            const amount = dbSetting ? Number(dbSetting.value) : (MESS_CONFIG.GUEST_CONFIG.PRICES[guestMealType] || 0);
-
-            const response = await api.post('/guest-meals', { date, memberId, guestMealType, mealTime, amount });
-            setGuestMeals(prev => [...prev, response.data]);
-        } catch (error) {
-            console.error('Add guest meal failed', error);
-            throw error;
-        }
-    }, [settings]);
 
     const removeGuestMeal = useCallback(async (guestMealId) => {
         try {

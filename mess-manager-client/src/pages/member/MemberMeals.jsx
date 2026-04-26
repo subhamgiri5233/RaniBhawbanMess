@@ -75,21 +75,23 @@ const MemberMeals = () => {
         guestMealLabels: MESS_CONFIG.GUEST_CONFIG.LABELS
     }), [settings]);
 
-    const handleAddGuest = async () => {
+    const handleAddGuest = () => {
         if (!selectedMealType) {
             alert('⚠️ Please select a menu item!');
             return;
         }
 
-        try {
-            await addGuestMeal(guestDate, user.id, selectedMealType, guestMealTime);
-            setShowGuestDialog(false);
-            setSelectedMealType('meat');
-            setGuestMealTime('lunch');
-        } catch (error) {
-            console.error('Failed to add guest meal:', error);
-            alert(`Error sharing guest meal: ${error.response?.data?.message || error.message}`);
-        }
+        // Fire and forget (Optimistic update in DataContext handles the UI)
+        addGuestMeal(guestDate, user.id, selectedMealType, guestMealTime)
+            .catch(error => {
+                console.error('Failed to add guest meal:', error);
+                alert(`Error sharing guest meal: ${error.response?.data?.message || error.message}`);
+            });
+
+        // Close and reset immediately for "instant" feel
+        setShowGuestDialog(false);
+        setSelectedMealType('meat');
+        setGuestMealTime('lunch');
     };
 
     // Get my guest meals for current month - now global

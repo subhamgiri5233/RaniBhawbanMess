@@ -9,15 +9,18 @@ import { format } from 'date-fns';
 const Bin = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('all'); // all, Expense, Meal, Member
+    const [error, setError] = useState(null);
+    const [filter, setFilter] = useState('all'); // all, Expense, Meal, Member, GuestMeal, MarketRequest
 
     const fetchTrash = async () => {
         setLoading(true);
         try {
+            setError(null);
             const res = await api.get('/trash');
-            setItems(res.data);
+            setItems(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Failed to fetch trash:', err);
+            setError(err.response?.data?.message || 'Failed to connect to the bin database');
         } finally {
             setLoading(false);
         }
@@ -64,9 +67,20 @@ const Bin = () => {
         switch (type) {
             case 'Expense': return '💰';
             case 'Meal': return '🍱';
+            case 'GuestMeal': return '🌟';
+            case 'MarketRequest': return '🛒';
             case 'Member': return '👤';
             default: return '📄';
         }
+    };
+
+    const getItemName = (item) => {
+        if (item.data.description) return item.data.description;
+        if (item.data.name) return item.data.name;
+        if (item.type === 'Meal' || item.type === 'GuestMeal') {
+            return `${item.type}: ${item.data.memberName || 'Unknown'}`;
+        }
+        return `${item.type} Record`;
     };
 
     return (
@@ -83,7 +97,7 @@ const Bin = () => {
 
                 <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2 bg-indigo-300/40 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-indigo-400/30 dark:border-white/5">
-                        {['all', 'Expense', 'Meal', 'Member'].map((f) => (
+                        {['all', 'Expense', 'Meal', 'GuestMeal', 'MarketRequest', 'Member'].map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFilter(f)}
@@ -94,7 +108,7 @@ const Bin = () => {
                                         : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
                                 )}
                             >
-                                {f}
+                                {f === 'GuestMeal' ? 'Guest' : f === 'MarketRequest' ? 'Market' : f}
                             </button>
                         ))}
                     </div>
@@ -116,6 +130,17 @@ const Bin = () => {
                     <div className="p-20 flex flex-col items-center justify-center gap-4 bg-indigo-300/20 dark:bg-slate-900/40 rounded-[2rem] border border-dashed border-indigo-400/30">
                         <RefreshCcw size={40} className="text-slate-300 animate-spin" />
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading archived data...</p>
+                    </div>
+                ) : error ? (
+                    <div className="p-20 flex flex-col items-center justify-center gap-6 bg-rose-500/5 rounded-[2rem] border border-dashed border-rose-500/30">
+                        <div className="w-16 h-16 bg-rose-500/10 rounded-3xl flex items-center justify-center border border-rose-500/20">
+                            <AlertCircle size={32} className="text-rose-500" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight">Access Error</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-rose-500 mt-1">{error}</p>
+                            <Button onClick={fetchTrash} className="mt-6 bg-rose-500 text-white">Retry Connection</Button>
+                        </div>
                     </div>
                 ) : filteredItems.length === 0 ? (
                     <div className="p-20 flex flex-col items-center justify-center gap-6 bg-indigo-300/20 dark:bg-slate-900/40 rounded-[2rem] border border-dashed border-indigo-400/30">
@@ -142,12 +167,14 @@ const Bin = () => {
                                                 {getIcon(item.type)}
                                             </div>
                                             <div>
-                                                <div className="flex items-center gap-2">
+                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[9px] font-black px-2 py-0.5 bg-rose-500/10 text-rose-600 rounded-md uppercase tracking-widest">{item.type}</span>
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{format(new Date(item.deletedAt), 'MMM dd, HH:mm')}</span>
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                                        {item.deletedAt ? format(new Date(item.deletedAt), 'MMM dd, HH:mm') : 'Unknown Date'}
+                                                    </span>
                                                 </div>
                                                 <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 tracking-tight mt-1 truncate max-w-[150px]">
-                                                    {item.data.description || item.data.name || `${item.type} Record`}
+                                                    {getItemName(item)}
                                                 </h3>
                                             </div>
                                         </div>
@@ -162,16 +189,24 @@ const Bin = () => {
                                                     <span className="text-sm font-black text-rose-600">₹{item.data.amount}</span>
                                                 </div>
                                             )}
-                                            {item.type === 'Meal' && (
+                                            {(item.type === 'Meal' || item.type === 'GuestMeal') && (
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-[9px] font-black text-slate-500 uppercase">Details</span>
-                                                    <span className="text-xs font-black text-slate-700 dark:text-slate-300 capitalize">{item.data.memberName} • {item.data.type}</span>
+                                                    <span className="text-xs font-black text-slate-700 dark:text-slate-300 capitalize">
+                                                        {item.data.memberName} • {item.data.type || item.data.guestMealType}
+                                                    </span>
                                                 </div>
                                             )}
                                             {item.type === 'Member' && (
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-[9px] font-black text-slate-500 uppercase">Email</span>
                                                     <span className="text-xs font-black text-slate-700 dark:text-slate-300">{item.data.email || 'No email'}</span>
+                                                </div>
+                                            )}
+                                            {item.type === 'MarketRequest' && (
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase">Target Date</span>
+                                                    <span className="text-xs font-black text-slate-700 dark:text-slate-300">{item.data.date}</span>
                                                 </div>
                                             )}
                                         </div>

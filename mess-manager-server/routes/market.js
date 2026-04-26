@@ -150,6 +150,16 @@ router.put('/id/:id', auth, async (req, res) => {
         }
 
         if (status === 'rejected') {
+            // Move to Trash before deleting
+            const trashedItem = new Trash({
+                originalId: req.params.id,
+                type: 'MarketRequest',
+                data: existing.toObject(),
+                deletedBy: req.user.id || req.user.userId,
+                deletedByName: req.user.name
+            });
+            await trashedItem.save();
+
             // For rejection, we usually just delete to keep calendar clean for requests
             await MarketRequest.findByIdAndDelete(req.params.id);
 
