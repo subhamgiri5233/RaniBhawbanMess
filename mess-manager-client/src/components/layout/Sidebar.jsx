@@ -74,8 +74,8 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false }) => {
 
     const memberLinks = [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { to: '/member-meals', icon: Utensils, label: 'Meals' },
         { to: '/market', icon: ShoppingBag, label: 'Market Duty' },
+        { to: '/member-meals', icon: Utensils, label: 'Meals' },
         { to: '/add-expense', icon: CreditCard, label: 'Add Expense' },
         { to: '/member-expenses', icon: Receipt, label: 'Expenses' },
         { to: '/payments', icon: CreditCard, label: 'Payments' },
