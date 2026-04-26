@@ -3,6 +3,14 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Admin = require('../models/Admin');
+const webpush = require('web-push');
+
+// Configure web-push
+webpush.setVapidDetails(
+    process.env.VAPID_MAILTO || 'mailto:adarshagiri@gmail.com',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+);
 
 // Simple JWT token generator
 const generateToken = (user) => {
@@ -75,6 +83,7 @@ router.post('/login', async (req, res) => {
                         name: user.name,
                         role: 'member',
                         userId: user.userId,
+                        notificationPermission: user.notificationPermission || 'default',
                         avatar: `https://ui-avatars.com/api/?name=${user.name}&background=random`
                     }
                 });
@@ -98,7 +107,32 @@ router.get('/verify', async (req, res) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        res.json({ success: true, user: decoded });
+        
+        // Fetch fresh data from DB to get latest permissions/avatar/etc.
+        let userData;
+        if (decoded.role === 'admin') {
+            const admin = await Admin.findById(decoded.id);
+            userData = {
+                id: admin._id,
+                username: admin.username,
+                role: 'admin',
+                name: 'Mess Admin',
+                avatar: 'https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff'
+            };
+        } else {
+            const user = await User.findById(decoded.id);
+            if (!user) return res.status(401).json({ success: false, message: 'User no longer exists' });
+            userData = {
+                id: user._id,
+                name: user.name,
+                role: 'member',
+                userId: user.userId,
+                notificationPermission: user.notificationPermission || 'default',
+                avatar: user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`
+            };
+        }
+        
+        res.json({ success: true, user: userData });
     } catch (err) {
         res.status(401).json({ success: false, message: 'Invalid token' });
     }
@@ -155,6 +189,77 @@ router.patch('/update-avatar', auth, async (req, res) => {
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
+});
+
+// Update notification permission status
+router.patch('/update-notification-permission', auth, async (req, res) => {
+    try {
+        const { permission } = req.body;
+        if (!permission) {
+            return res.status(400).json({ success: false, message: 'Permission status is required' });
+        }
+        
+        let updatedUser;
+        if (req.user.role === 'admin') {
+            updatedUser = await Admin.findByIdAndUpdate(
+                req.user.id,
+                { notificationPermission: permission },
+                { new: true }
+            );
+        } else {
+            updatedUser = await User.findByIdAndUpdate(
+                req.user.id,
+                { notificationPermission: permission },
+                { new: true }
+            );
+        }
+        
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        res.json({ success: true, notificationPermission: updatedUser.notificationPermission });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Save Web Push subscription
+router.post('/subscribe', auth, async (req, res) => {
+    try {
+        const { subscription } = req.body;
+        if (!subscription) {
+            return res.status(400).json({ success: false, message: 'Subscription is required' });
+        }
+        
+        let updatedUser;
+        if (req.user.role === 'admin') {
+            updatedUser = await Admin.findByIdAndUpdate(
+                req.user.id,
+                { pushSubscription: subscription },
+                { new: true }
+            );
+        } else {
+            updatedUser = await User.findByIdAndUpdate(
+                req.user.id,
+                { pushSubscription: subscription },
+                { new: true }
+            );
+        }
+        
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        res.status(201).json({ success: true, message: 'Subscription saved' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Get VAPID Public Key
+router.get('/vapid-public-key', (req, res) => {
+    res.json({ publicKey: process.env.VAPID_PUBLIC_KEY });
 });
 
 module.exports = router;

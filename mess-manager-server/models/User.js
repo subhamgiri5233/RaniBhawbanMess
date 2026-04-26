@@ -10,6 +10,8 @@ const userSchema = new mongoose.Schema({
     joinedAt: { type: String },
     dateOfBirth: { type: String },
     avatar: { type: String, default: null }, // DiceBear seed string
+    notificationPermission: { type: String, default: 'default' }, // 'default', 'granted', 'denied'
+    pushSubscription: { type: Object, default: null }, // Web Push subscription object
     createdAt: { type: Date, default: Date.now }
 });
 

@@ -3,7 +3,7 @@ import { useData } from '../../context/DataContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { Trash2, UserPlus, Search, Calendar, Cake, User, Mail, Shield, Phone, History, Info, Eye, EyeOff, Pencil, Check, X, Download } from 'lucide-react';
+import { Trash2, UserPlus, Search, Calendar, Cake, User, Mail, Shield, Phone, History, Info, Eye, EyeOff, Pencil, Check, X, Download, Bell, BellRing, BellOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '../../lib/utils';
 import { getBirthdayStatus } from '../../utils/dateUtils';
@@ -70,6 +70,36 @@ const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
                             </div>
                         );
                     })()}
+                </div>
+            </td>
+            <td className="p-4 sm:p-6">
+                <div className="flex flex-col gap-1">
+                    {(() => {
+                        const status = member.notificationPermission || 'default';
+                        if (status === 'granted') {
+                            return (
+                                <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest bg-emerald-300/40 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-400/20 w-fit">
+                                    <BellRing size={12} className="animate-pulse" />
+                                    Active
+                                </div>
+                            );
+                        } else if (status === 'denied') {
+                            return (
+                                <div className="flex items-center gap-1.5 text-[10px] font-black text-rose-600 dark:text-rose-400 bg-rose-300/40 dark:bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-400/20 w-fit">
+                                    <BellOff size={12} />
+                                    Blocked
+                                </div>
+                            );
+                        } else {
+                            return (
+                                <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 dark:text-slate-500 bg-indigo-300/20 dark:bg-slate-800/50 px-2.5 py-1 rounded-lg border border-indigo-300/30 dark:border-slate-800 w-fit">
+                                    <Bell size={12} />
+                                    Not Set
+                                </div>
+                            );
+                        }
+                    })()}
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter ml-1">Push Notifs</p>
                 </div>
             </td>
             <td className="p-6 text-right">
@@ -145,6 +175,20 @@ const Members = () => {
             password: member.password || ''
         });
         setShowEditPassword(false);
+    };
+
+    const sendTestNotification = async () => {
+        if (!window.confirm('Send a test push notification to ALL active members?')) return;
+        
+        try {
+            const res = await api.post('/notifications/test-all');
+            if (res.data.success) {
+                alert('Test notifications sent successfully!');
+            }
+        } catch (error) {
+            console.error('Failed to send test notification:', error);
+            alert('Failed to send test notification. Check console for details.');
+        }
     };
 
     const handleEditSubmit = async (e) => {
@@ -248,13 +292,22 @@ const Members = () => {
                             Comprehensive directory of mess members. Manage profiles, track deposits, and oversee memberships.
                         </p>
                     </div>
-                    <Button
-                        onClick={() => setShowAddForm(!showAddForm)}
-                        className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all px-8 py-7 rounded-[1.5rem] font-black uppercase tracking-widest text-xs border-0 group/btn"
-                    >
-                        <UserPlus size={18} className="mr-2 group-hover:rotate-12 transition-transform" />
-                        Add Member
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            onClick={sendTestNotification}
+                            className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-6 py-5 rounded-[1.5rem] flex items-center gap-2 group transition-all active:scale-95"
+                        >
+                            <BellRing size={18} className="text-indigo-500 group-hover:rotate-12 transition-transform" />
+                            <span className="font-black uppercase tracking-widest text-[10px]">Test All</span>
+                        </Button>
+                        <Button
+                            onClick={() => setShowAddForm(!showAddForm)}
+                            className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all px-8 py-7 rounded-[1.5rem] font-black uppercase tracking-widest text-xs border-0 group/btn"
+                        >
+                            <UserPlus size={18} className="mr-2 group-hover:rotate-12 transition-transform" />
+                            Add Member
+                        </Button>
+                    </div>
                 </div>
             </div>
 
@@ -363,6 +416,7 @@ const Members = () => {
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Identity</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Contact</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Birthday</th>
+                                <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Notif</th>
                                 <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>

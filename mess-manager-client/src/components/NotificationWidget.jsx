@@ -3,9 +3,10 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { AlertCircle, ShoppingCart, UtensilsCrossed, Cake } from 'lucide-react';
 import { format, addDays, parseISO } from 'date-fns';
+import api from '../lib/api';
 
 const NotificationWidget = () => {
-    const { user } = useAuth();
+    const { user, setUser } = useAuth();
     const { marketSchedule, expenses, meals, members } = useData();
     const [permission, setPermission] = useState(() => 
         (typeof window !== 'undefined' && 'Notification' in window) ? Notification.permission : 'default'
@@ -17,6 +18,68 @@ const NotificationWidget = () => {
             Notification.requestPermission().then(setPermission);
         }
     }, []);
+
+    // Sync notification status to server
+    useEffect(() => {
+        if (user && permission && (permission === 'granted' || permission === 'denied')) {
+            const syncPermission = async () => {
+                try {
+                    // Only sync if it's different from what we have in the local user object
+                    if (permission !== user.notificationPermission) {
+                        const response = await api.patch('/auth/update-notification-permission', { permission });
+                        if (response.data.success) {
+                            setUser(prev => ({ ...prev, notificationPermission: permission }));
+                        }
+                    }
+
+                    // If granted, also handle Web Push subscription
+                    if (permission === 'granted' && 'serviceWorker' in navigator) {
+                        const registration = await navigator.serviceWorker.ready;
+                        
+                        // Check if already subscribed
+                        let subscription = await registration.pushManager.getSubscription();
+                        
+                        if (!subscription) {
+                            // Fetch VAPID public key
+                            const { data } = await api.get('/auth/vapid-public-key');
+                            const publicKey = data.publicKey;
+                            
+                            // Subscribe
+                            subscription = await registration.pushManager.subscribe({
+                                userVisibleOnly: true,
+                                applicationServerKey: urlBase64ToUint8Array(publicKey)
+                            });
+                        }
+                        
+                        // Send subscription to server
+                        await api.post('/auth/subscribe', { subscription });
+                    }
+                } catch (error) {
+                    console.error('Failed to sync notification permission or subscription:', error);
+                }
+            };
+            
+            // Small delay to ensure everything is loaded
+            const timer = setTimeout(syncPermission, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [permission, user, setUser]);
+
+    // Helper to convert VAPID key
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
 
     const triggerSystemNotification = (id, title, body) => {
         if (permission === 'granted' && !sentNotifs.has(id)) {

@@ -3,6 +3,7 @@ const router = express.Router();
 const Notification = require('../models/Notification');
 const Settings = require('../models/Settings');
 const { auth, requireAdmin } = require('../middleware/auth');
+const { sendPushNotification } = require('../utils/pushNotifications');
 
 // Get All Notifications - Admin only, or restricted to current user (optional: limit/month)
 router.get('/', auth, async (req, res) => {
@@ -61,6 +62,10 @@ router.post('/', auth, async (req, res) => {
             metadata
         });
         const savedNotif = await newNotif.save();
+        
+        // Trigger background push notification
+        sendPushNotification(userId, 'New Notification', message, metadata?.url);
+        
         res.status(201).json(savedNotif);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -90,6 +95,9 @@ router.post('/payment/bulk', auth, requireAdmin, async (req, res) => {
 
             const savedNotif = await newNotif.save();
             notifications.push(savedNotif);
+            
+            // Trigger background push notification
+            sendPushNotification(member.userId, 'Payment Update', message);
         }
 
         res.status(201).json({
@@ -277,6 +285,30 @@ router.post('/whatsapp/official/bulk', auth, requireAdmin, async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+});
+
+// Send Test Notification to All Subscribed Users - Admin only
+router.post('/test-all', auth, requireAdmin, async (req, res) => {
+    try {
+        const title = 'System Test';
+        const message = 'This is a test notification from the Mess Manager. Your background alerts are working correctly!';
+        
+        // 1. Save to database for history
+        const newNotif = new Notification({
+            userId: 'all',
+            message,
+            type: 'system',
+            metadata: { isTest: true }
+        });
+        await newNotif.save();
+        
+        // 2. Trigger background push to all
+        await sendPushNotification('all', title, message);
+        
+        res.json({ success: true, message: 'Test notifications sent to all active members' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
