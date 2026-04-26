@@ -1,14 +1,16 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
-import { Bell, AlertCircle, ShoppingCart, UtensilsCrossed, Info } from 'lucide-react';
+import { Bell, AlertCircle, ShoppingCart, UtensilsCrossed, Info, Cake } from 'lucide-react';
 import { format, addDays, isSameDay, parseISO } from 'date-fns';
 import { cn } from '../lib/utils';
 
 const NotificationWidget = () => {
     const { user } = useAuth();
-    const { marketSchedule, expenses, meals } = useData();
-    const [permission, setPermission] = useState(Notification.permission);
+    const { marketSchedule, expenses, meals, members } = useData();
+    const [permission, setPermission] = useState(() => 
+        (typeof window !== 'undefined' && 'Notification' in window) ? Notification.permission : 'default'
+    );
     const [sentNotifs, setSentNotifs] = useState(new Set());
 
     useEffect(() => {
@@ -68,7 +70,6 @@ const NotificationWidget = () => {
         }
 
         // 2. Check for Birthdays Today
-        const { members } = useData();
         const birthdayMembers = (members || []).filter(member => {
             if (!member.dateOfBirth) return false;
             const dob = new Date(member.dateOfBirth);
