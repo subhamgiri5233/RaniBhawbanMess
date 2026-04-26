@@ -26,6 +26,7 @@ const NotificationWidget = () => {
             const options = {
                 body: body,
                 icon: window.location.origin + '/icons/home.png?v=25',
+                badge: window.location.origin + '/icons/home.png?v=25',
                 vibrate: [200, 100, 200],
                 tag: id 
             };
