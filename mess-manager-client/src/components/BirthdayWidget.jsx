@@ -82,12 +82,11 @@ const BirthdayWidget = () => {
             ? 'Rani Bhawban Mess Family' 
             : user?.name || 'A Friend from Mess';
 
-        // Emojis using CodePoints for maximum compatibility
-        const star = String.fromCodePoint(0x1F31F);
-        const cake = String.fromCodePoint(0x1F382);
-        const sparkles = String.fromCodePoint(0x2728);
-        const party = String.fromCodePoint(0x1F389);
-        const balloon = String.fromCodePoint(0x1F388);
+        // Using direct emojis that are universally supported
+        const cake = '🎂';
+        const sparkles = '✨';
+        const party = '🎉';
+        const balloon = '🎈';
 
         // 10 Unique Randomized wishes for variety
         const wishes = [
@@ -105,8 +104,8 @@ const BirthdayWidget = () => {
         
         const randomWish = wishes[Math.floor(Math.random() * wishes.length)];
 
-        // Construct structured WhatsApp link with explicit line breaks
-        const header = `${star} *HAPPY BIRTHDAY ${member.name.toUpperCase()}!* ${star}`;
+        // Construct structured WhatsApp link with absolute safety
+        const header = `*🎂 HAPPY BIRTHDAY ${member.name.toUpperCase()}! 🎂*`;
         const body = `${randomWish} ${cake}${sparkles}${balloon}`;
         const footer = `${party} _Best wishes from:_\n*${senderName}*`;
         
