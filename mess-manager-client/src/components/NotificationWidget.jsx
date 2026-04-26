@@ -23,6 +23,8 @@ const NotificationWidget = () => {
             const options = {
                 body,
                 icon: window.location.origin + '/icons/home.png?v=25',
+                // Professional white silhouette house icon (SVG) for the status bar badge
+                badge: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMCAyMHYtNmg0djZoNXYtOGgzTDEyIDMgMiAxMmgzdjh6Ii8+PC9zdmc+',
                 vibrate: [200, 100, 200],
                 tag: id 
             };
