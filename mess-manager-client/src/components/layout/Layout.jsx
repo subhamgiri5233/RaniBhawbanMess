@@ -9,6 +9,7 @@ import GlobalMonthSelector from '../ui/GlobalMonthSelector';
 
 import { useState } from 'react';
 import { Menu, Sun, Moon, PanelLeftClose, PanelLeftOpen, RefreshCw } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 const Layout = () => {
     const { user } = useAuth();
