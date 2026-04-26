@@ -127,7 +127,7 @@ const NotificationWidget = () => {
             // Check if today is the LAST day (tomorrow is either empty or someone else)
             const isLastDay = !tomorrowMarket || tomorrowMarket.assignedMemberId !== memberId;
 
-            if (isLastDay) {
+            if (isLastDay && (isMe || user?.role === 'admin')) {
                 const msg = isMe 
                     ? `মার্কেট শেষ ড্রাম টা ফেলে দিও! ✅`
                     : `${memberName} এর মার্কেট শেষ, ড্রাম টা ফেলে দিতে বলো।`;
