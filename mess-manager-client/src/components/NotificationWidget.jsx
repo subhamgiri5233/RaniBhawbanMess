@@ -67,7 +67,35 @@ const NotificationWidget = () => {
             triggerSystemNotification('tomorrow-market', 'Market Duty Reminder', msg);
         }
 
-        // 2. Check Today's Market Entry
+        // 2. Check for Birthdays Today
+        const { members } = useData();
+        const birthdayMembers = (members || []).filter(member => {
+            if (!member.dateOfBirth) return false;
+            const dob = new Date(member.dateOfBirth);
+            return dob.getDate() === today.getDate() && dob.getMonth() === today.getMonth();
+        });
+
+        birthdayMembers.forEach(member => {
+            const memberId = member._id || member.id;
+            const isMe = memberId === user?._id || memberId === user?.id;
+            const title = isMe ? "Happy Birthday! 🎂" : "Birthday Celebration! 🎉";
+            const msg = isMe 
+                ? `Happy Birthday ${user.name}! Have a wonderful day filled with joy! ✨`
+                : `Today is ${member.name}'s birthday! Don't forget to wish them. 🎈`;
+            
+            list.push({
+                id: `birthday-${memberId}`,
+                type: 'info',
+                icon: Cake,
+                message: msg,
+                color: 'text-pink-600 dark:text-pink-400',
+                bg: 'bg-pink-50 dark:bg-pink-950/30',
+                border: 'border-pink-200 dark:border-pink-900/30'
+            });
+            triggerSystemNotification(`birthday-${memberId}`, title, msg);
+        });
+
+        // 3. Check Today's Market Entry
         const todayMarket = monthSchedule.find(m => m.date === todayStr && m.status === 'approved');
         if (todayMarket) {
             const hasMarketExpense = expenses.some(e => 
@@ -117,7 +145,7 @@ const NotificationWidget = () => {
         }
 
         return list;
-    }, [marketSchedule, expenses, meals, user, permission, sentNotifs]);
+    }, [marketSchedule, expenses, meals, user, permission, sentNotifs, members]);
 
     if (notifications.length === 0) return null;
 
