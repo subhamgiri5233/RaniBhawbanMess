@@ -1,4 +1,4 @@
-// Server last updated: 2026-03-08T15:25
+// Server last updated: 2026-04-26T18:47
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -113,7 +113,7 @@ app.get('/', (req, res) => {
     res.json({
         message: 'Mess Manager API is running',
         version: '2.0.0',
-        fingerprint: 'prod-sync-v16.02', // Diagnostic ID
+        fingerprint: 'prod-sync-v16.45', // Diagnostic ID
         security: 'enabled'
     });
 });
