@@ -198,34 +198,9 @@ const NotificationWidget = () => {
         }
     }, [notifications]);
 
-    if (notifications.length === 0) return null;
-
-    return (
-        <div className="grid grid-cols-1 gap-3 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-            {notifications.map((notif) => (
-                <div 
-                    key={notif.id}
-                    className={cn(
-                        "flex items-center gap-4 p-4 rounded-2xl border shadow-sm transition-all hover:shadow-md",
-                        notif.bg,
-                        notif.border
-                    )}
-                >
-                    <div className={cn("p-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-sm shrink-0", notif.color)}>
-                        <notif.icon size={20} />
-                    </div>
-                    <div className="flex-1">
-                        <p className={cn("text-[11px] sm:text-xs font-bold uppercase tracking-wider", notif.color)}>
-                            Notice Board
-                        </p>
-                        <p className="text-sm sm:text-base font-black text-slate-900 dark:text-slate-100 tracking-tight mt-0.5">
-                            {notif.message}
-                        </p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
+    // Logic still runs, but we return null so nothing shows in the UI
+    // as requested by the user. Only System Push Notifications will trigger.
+    return null;
 };
 
 export default NotificationWidget;
