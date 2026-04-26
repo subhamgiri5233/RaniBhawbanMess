@@ -84,41 +84,44 @@ const Bin = () => {
     };
 
     return (
-        <div className="space-y-8 pb-12">
+        <div className="space-y-6 sm:space-y-8 pb-12 px-2 sm:px-0">
             {/* Header section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-8 border-l-rose-500 shadow-sm p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 transition-colors">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-4 sm:border-l-8 border-l-rose-500 shadow-sm p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-indigo-300/30 dark:border-white/5 transition-colors">
                 <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                        <Trash2 size={24} className="text-rose-500" />
-                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-tight">Recycle Bin</h1>
+                        <Trash2 size={24} className="text-rose-500 shrink-0" />
+                        <h1 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight leading-tight uppercase">Recycle Bin</h1>
                     </div>
-                    <p className="text-[9px] sm:text-xs font-bold text-rose-500/80 dark:text-slate-400 mt-1 uppercase tracking-widest leading-relaxed">Recover or permanently remove deleted data</p>
+                    <p className="text-[8px] sm:text-xs font-bold text-rose-500/80 dark:text-slate-400 mt-1 uppercase tracking-widest leading-relaxed">Recover or permanently remove deleted data</p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2 bg-indigo-300/40 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-indigo-400/30 dark:border-white/5">
-                        {['all', 'Expense', 'Meal', 'GuestMeal', 'MarketRequest', 'Member'].map((f) => (
-                            <button
-                                key={f}
-                                onClick={() => setFilter(f)}
-                                className={cn(
-                                    "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-                                    filter === f 
-                                        ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" 
-                                        : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
-                                )}
-                            >
-                                {f === 'GuestMeal' ? 'Guest' : f === 'MarketRequest' ? 'Market' : f}
-                            </button>
-                        ))}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                    {/* Scrollable Filter Container */}
+                    <div className="flex items-center gap-2 bg-indigo-300/40 dark:bg-slate-800/50 p-1.5 rounded-2xl border border-indigo-400/30 dark:border-white/5 overflow-x-auto scrollbar-hide no-scrollbar">
+                        <div className="flex items-center gap-2 whitespace-nowrap px-1">
+                            {['all', 'Expense', 'Meal', 'GuestMeal', 'MarketRequest', 'Member'].map((f) => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFilter(f)}
+                                    className={cn(
+                                        "px-4 py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all",
+                                        filter === f 
+                                            ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" 
+                                            : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+                                    )}
+                                >
+                                    {f === 'GuestMeal' ? 'Guest' : f === 'MarketRequest' ? 'Market' : f}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     
                     <Button 
                         onClick={handleClearAll}
                         disabled={items.length === 0}
-                        className="bg-rose-100 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-200 dark:border-rose-900/30 h-12 px-6 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-none transition-all active:scale-95 flex items-center gap-2"
+                        className="bg-rose-100 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-200 dark:border-rose-900/30 h-10 sm:h-12 px-6 rounded-2xl font-black uppercase text-[9px] sm:text-[10px] tracking-widest shadow-none transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
-                        <Trash size={16} />
+                        <Trash size={14} />
                         Empty Bin
                     </Button>
                 </div>
