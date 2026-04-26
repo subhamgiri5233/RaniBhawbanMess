@@ -104,9 +104,10 @@ const BirthdayWidget = () => {
         
         const randomWish = wishes[Math.floor(Math.random() * wishes.length)];
 
-        // Construct structured WhatsApp link with absolute safety
-        const header = `*HAPPY BIRTHDAY ${member.name.toUpperCase()}!*`;
-        const body = `${randomWish}`;
+        // Construct structured WhatsApp link with requested emojis
+        const emojiSet = "🥳🥳🎂🎂🎉🎉💐💐🍼🍼🎁🎁🎈🎈";
+        const header = `*${emojiSet}*\n*HAPPY BIRTHDAY ${member.name.toUpperCase()}!*`;
+        const body = `${randomWish} 🎂🎉🎈`;
         const footer = `_Best wishes from:_\n*${senderName}*`;
         
         const message = `${header}\n\n${body}\n\n${footer}`;
