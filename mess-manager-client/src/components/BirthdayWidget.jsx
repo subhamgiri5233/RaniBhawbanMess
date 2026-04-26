@@ -105,15 +105,18 @@ const BirthdayWidget = () => {
         const randomWish = wishes[Math.floor(Math.random() * wishes.length)];
 
         // Construct structured WhatsApp link with absolute safety
-        const header = `*🎂 HAPPY BIRTHDAY ${member.name.toUpperCase()}! 🎂*`;
-        const body = `${randomWish} ${cake}${sparkles}${balloon}`;
-        const footer = `${party} _Best wishes from:_\n*${senderName}*`;
+        const header = `*HAPPY BIRTHDAY ${member.name.toUpperCase()}!*`;
+        const body = `${randomWish}`;
+        const footer = `_Best wishes from:_\n*${senderName}*`;
         
         const message = `${header}\n\n${body}\n\n${footer}`;
         const encodedMessage = encodeURIComponent(message);
         
-        // Clean phone number
-        const phoneNumber = member.mobile ? member.mobile.replace(/\D/g, '') : '';
+        // Clean phone number and add India country code (91) if missing
+        let phoneNumber = member.mobile ? member.mobile.replace(/\D/g, '') : '';
+        if (phoneNumber.length === 10) {
+            phoneNumber = `91${phoneNumber}`;
+        }
         
         if (phoneNumber) {
             window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
