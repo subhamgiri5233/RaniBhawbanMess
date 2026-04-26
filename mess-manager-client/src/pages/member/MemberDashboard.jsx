@@ -177,7 +177,7 @@ const MemberDashboard = () => {
                     <>
                         <Card className="p-6 md:p-8 group hover:-translate-y-1 transition-all duration-500">
                             <div className="flex items-start justify-between mb-4">
-                                 <div className="p-4 rounded-2xl bg-indigo-300/40 text-indigo-600 dark:text-indigo-400 dark:bg-indigo-500/20 group-hover:scale-110 transition-transform shadow-inner border border-indigo-400/20">
+                                <div className="p-4 rounded-2xl bg-indigo-300/40 text-indigo-600 dark:text-indigo-400 dark:bg-indigo-500/20 group-hover:scale-110 transition-transform shadow-inner border border-indigo-400/20">
                                     <Utensils size={24} />
                                 </div>
                                 <TrendingUp size={16} className="text-slate-300 dark:text-slate-700" />
@@ -242,58 +242,58 @@ const MemberDashboard = () => {
 
             {/* Guest Meals Detail Card */}
             {myGuestMeals.length > 0 && (
-                    <div>
-                        <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40 mt-8">
-                            <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900/50">
-                                <div className="flex items-center gap-4">
-                                     <div className="p-3 bg-purple-300/40 dark:bg-purple-900/30 rounded-2xl shadow-inner border border-purple-400/20">
-                                        <Utensils className="text-purple-600 dark:text-purple-400" size={20} />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Guest Log</h2>
-                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Detailed breakdown of visiting meals</p>
-                                    </div>
+                <div>
+                    <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40 mt-8">
+                        <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900/50">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-purple-300/40 dark:bg-purple-900/30 rounded-2xl shadow-inner border border-purple-400/20">
+                                    <Utensils className="text-purple-600 dark:text-purple-400" size={20} />
                                 </div>
-                                <span className="text-[10px] font-black bg-purple-300/40 dark:bg-purple-900/40 text-purple-800 dark:text-purple-400 px-4 py-2 rounded-xl border border-purple-300/30 dark:border-purple-500/10 tracking-widest uppercase">
-                                    {myGuestMeals.length} Total • ₹{totalGuestAmount}
-                                </span>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Guest Log</h2>
+                                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Detailed breakdown of visiting meals</p>
+                                </div>
                             </div>
-                            <div className="p-4 space-y-4 max-h-[500px] overflow-y-auto scrollbar-hide">
-                                {myGuestMeals.map((guest, idx) => {
-                                    const guestIcons = MESS_CONFIG.GUEST_CONFIG.ICONS;
-                                    const mealTimeIcons = { lunch: '☀️', dinner: '🌙' };
+                            <span className="text-[10px] font-black bg-purple-300/40 dark:bg-purple-900/40 text-purple-800 dark:text-purple-400 px-4 py-2 rounded-xl border border-purple-300/30 dark:border-purple-500/10 tracking-widest uppercase">
+                                {myGuestMeals.length} Total • ₹{totalGuestAmount}
+                            </span>
+                        </div>
+                        <div className="p-4 space-y-4 max-h-[500px] overflow-y-auto scrollbar-hide">
+                            {myGuestMeals.map((guest, idx) => {
+                                const guestIcons = MESS_CONFIG.GUEST_CONFIG.ICONS;
+                                const mealTimeIcons = { lunch: '☀️', dinner: '🌙' };
 
-                                    return (
-                                        <div
-                                            key={`guest-${guest._id || idx}`}
-                                            className="flex items-center justify-between p-6 bg-indigo-300/40 backdrop-blur-lg dark:bg-slate-900/60 rounded-[1.5rem] hover:bg-indigo-300/60 dark:hover:bg-white/5 transition-all border border-indigo-300/30 dark:border-white/5 group"
-                                        >
-                                            <div className="flex items-center gap-5">
-                                                <div className="w-14 h-14 rounded-2xl bg-indigo-300/30 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-500">
-                                                    {guestIcons[guest.guestMealType]}
-                                                </div>
-                                                <div>
-                                                    <p className="font-black text-slate-900 dark:text-slate-50 capitalize tracking-tight flex items-center gap-3">
-                                                        {guest.guestMealType}
-                                                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-300/40 dark:bg-slate-800 font-bold opacity-60">
-                                                            {mealTimeIcons[guest.mealTime]} {guest.mealTime}
-                                                        </span>
-                                                    </p>
-                                                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
-                                                        {format(new Date(guest.date), 'dd MMMM yyyy')}
-                                                    </p>
-                                                </div>
+                                return (
+                                    <div
+                                        key={`guest-${guest._id || idx}`}
+                                        className="flex items-center justify-between p-6 bg-indigo-300/40 backdrop-blur-lg dark:bg-slate-900/60 rounded-[1.5rem] hover:bg-indigo-300/60 dark:hover:bg-white/5 transition-all border border-indigo-300/30 dark:border-white/5 group"
+                                    >
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-14 h-14 rounded-2xl bg-indigo-300/30 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-500">
+                                                {guestIcons[guest.guestMealType]}
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-xl font-black text-purple-600 dark:text-purple-400 tracking-tight">₹{guestMealPrices[guest.guestMealType]}</p>
+                                            <div>
+                                                <p className="font-black text-slate-900 dark:text-slate-50 capitalize tracking-tight flex items-center gap-3">
+                                                    {guest.guestMealType}
+                                                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-300/40 dark:bg-slate-800 font-bold opacity-60">
+                                                        {mealTimeIcons[guest.mealTime]} {guest.mealTime}
+                                                    </span>
+                                                </p>
+                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
+                                                    {format(new Date(guest.date), 'dd MMMM yyyy')}
+                                                </p>
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </Card>
-                    </div>
-                )}
+                                        <div className="text-right">
+                                            <p className="text-xl font-black text-purple-600 dark:text-purple-400 tracking-tight">₹{guestMealPrices[guest.guestMealType]}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </Card>
+                </div>
+            )}
 
             {/* Market History - Two Tab-like Cards */}
             {(myMarketExpenses.length > 0 || myMarketDays.length > 0) && (
@@ -302,7 +302,7 @@ const MemberDashboard = () => {
                     <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40">
                         <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900/50">
                             <div className="flex items-center gap-4">
-                                 <div className="p-3 bg-amber-300/40 dark:bg-amber-900/30 rounded-2xl shadow-inner border border-amber-400/20">
+                                <div className="p-3 bg-amber-300/40 dark:bg-amber-900/30 rounded-2xl shadow-inner border border-amber-400/20">
                                     <ShoppingCart className="text-amber-600 dark:text-amber-400" size={20} />
                                 </div>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Market Outlay</h2>
@@ -348,7 +348,7 @@ const MemberDashboard = () => {
                     <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40">
                         <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900/50">
                             <div className="flex items-center gap-4">
-                                 <div className="p-3 bg-indigo-300/40 dark:bg-indigo-900/30 rounded-2xl shadow-inner border border-indigo-400/20">
+                                <div className="p-3 bg-indigo-300/40 dark:bg-indigo-900/30 rounded-2xl shadow-inner border border-indigo-400/20">
                                     <CalendarIcon className="text-indigo-600 dark:text-indigo-400" size={20} />
                                 </div>
                                 <h2 className="text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Duty Roster</h2>
@@ -365,7 +365,7 @@ const MemberDashboard = () => {
                                         className="flex items-center justify-between p-5 bg-indigo-300/40 dark:bg-slate-900/60 rounded-2xl hover:bg-indigo-300/60 dark:hover:bg-white/5 transition-all border border-indigo-300/30 dark:border-white/5"
                                     >
                                         <div className="flex items-center gap-4">
-                                             <div className="w-10 h-10 rounded-xl bg-indigo-300/30 dark:bg-indigo-900/20 flex items-center justify-center">
+                                            <div className="w-10 h-10 rounded-xl bg-indigo-300/30 dark:bg-indigo-900/20 flex items-center justify-center">
                                                 <ShoppingCart size={16} className="text-indigo-500" />
                                             </div>
                                             <div>
@@ -394,7 +394,7 @@ const MemberDashboard = () => {
             {/* Change Password Section */}
             <Card className="p-0 overflow-hidden shadow-sm border-indigo-300/30 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40 mt-8">
                 <div className="p-8 border-b border-indigo-300/30 dark:border-white/5 flex items-center gap-4 bg-indigo-300/40 dark:bg-slate-900/50">
-                     <div className="p-3 bg-rose-300/40 dark:bg-rose-900/30 rounded-2xl shadow-inner border border-rose-400/20">
+                    <div className="p-3 bg-rose-300/40 dark:bg-rose-900/30 rounded-2xl shadow-inner border border-rose-400/20">
                         <Lock className="text-rose-700 dark:text-rose-400" size={20} />
                     </div>
                     <div>

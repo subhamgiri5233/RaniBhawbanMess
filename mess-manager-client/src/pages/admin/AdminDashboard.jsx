@@ -8,6 +8,7 @@ import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, Trendi
 import { cn } from '../../lib/utils';
 import Skeleton from '../../components/ui/Skeleton';
 import BirthdayWidget from '../../components/BirthdayWidget';
+import NotificationWidget from '../../components/NotificationWidget';
 
 const AdminDashboard = () => {
     const { members, expenses, meals, globalMonth, loadingDaily } = useData();
@@ -99,6 +100,9 @@ const AdminDashboard = () => {
             {/* Birthday Spotlight */}
             <BirthdayWidget />
 
+            {/* Smart Notifications */}
+            <NotificationWidget />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                 {(loadingDaily && meals.length === 0) ? (
                     <>
@@ -108,10 +112,10 @@ const AdminDashboard = () => {
                 ) : (
                     stats.map((stat, index) => (
                         <div key={index}>
-                                <Card className={cn(
-                                    "rb-card p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden",
-                                    stat.bg === 'bg-indigo-300/40 dark:bg-blue-950/20' ? 'rb-shadow-blue' : 'rb-shadow-orange'
-                                )}>
+                            <Card className={cn(
+                                "rb-card p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden",
+                                stat.bg === 'bg-indigo-300/40 dark:bg-blue-950/20' ? 'rb-shadow-blue' : 'rb-shadow-orange'
+                            )}>
                                 {/* Background decoration */}
                                 <div className={cn(
                                     "absolute -right-6 -bottom-6 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 pointer-events-none",
@@ -158,9 +162,9 @@ const AdminDashboard = () => {
                             <div key={index}>
                                 <Card className={cn(
                                     "rb-card p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden",
-                                    item.title === 'Market' ? 'rb-shadow-indigo' : 
-                                    item.title === 'Spices' ? 'rb-shadow-orange' : 
-                                    item.title === 'Rice' ? 'rb-shadow-emerald' : 'rb-shadow-indigo'
+                                    item.title === 'Market' ? 'rb-shadow-indigo' :
+                                        item.title === 'Spices' ? 'rb-shadow-orange' :
+                                            item.title === 'Rice' ? 'rb-shadow-emerald' : 'rb-shadow-indigo'
                                 )}>
                                     {/* Background decoration */}
                                     <div className={cn(
@@ -227,22 +231,22 @@ const AdminDashboard = () => {
                                             key={member._id}
                                             className="hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-all group border-b border-indigo-300/30 last:border-0"
                                         >
-                                                <td className="p-4 md:p-6">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-indigo-500 dark:text-slate-400 group-hover:from-primary-600 group-hover:to-primary-700 group-hover:text-white transition-all duration-500 shadow-sm uppercase shrink-0">
-                                                            {(member.name || '?').charAt(0)}
-                                                        </div>
-                                                        <span className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-sm md:text-base">{member.name}</span>
+                                            <td className="p-4 md:p-6">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center font-black text-xs md:text-sm text-indigo-500 dark:text-slate-400 group-hover:from-primary-600 group-hover:to-primary-700 group-hover:text-white transition-all duration-500 shadow-sm uppercase shrink-0">
+                                                        {(member.name || '?').charAt(0)}
                                                     </div>
-                                                </td>
-                                                <td className="p-4 md:p-6 text-center">
-                                                        <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-orange-300/40 dark:bg-amber-950/20 text-orange-700 dark:text-amber-400 font-black border border-orange-300/30 dark:border-amber-900/30 text-xs md:text-sm">
-                                                            {member.totalMeals}
-                                                        </span>
-                                                </td>
-                                                <td className="p-4 md:p-6 text-center">
-                                                    <span className="font-black text-violet-600 dark:text-violet-400 text-sm md:text-lg">₹{member.monthlyDeposit}</span>
-                                                </td>
+                                                    <span className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-sm md:text-base">{member.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 md:p-6 text-center">
+                                                <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-orange-300/40 dark:bg-amber-950/20 text-orange-700 dark:text-amber-400 font-black border border-orange-300/30 dark:border-amber-900/30 text-xs md:text-sm">
+                                                    {member.totalMeals}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 md:p-6 text-center">
+                                                <span className="font-black text-violet-600 dark:text-violet-400 text-sm md:text-lg">₹{member.monthlyDeposit}</span>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
