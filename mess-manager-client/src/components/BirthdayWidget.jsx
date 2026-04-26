@@ -82,16 +82,30 @@ const BirthdayWidget = () => {
             ? 'Rani Bhawban Mess Family' 
             : user?.name || 'A Friend from Mess';
 
-        // Construct structured WhatsApp link (using unicode for emojis to prevent encoding issues)
-        const star = '\uD83C\uDF1F';
-        const cake = '\uD83C\uDF82';
-        const sparkles = '\u2728';
-        const party = '\uD83C\uDF89';
+        // Emojis using CodePoints for maximum compatibility
+        const star = String.fromCodePoint(0x1F31F);
+        const cake = String.fromCodePoint(0x1F382);
+        const sparkles = String.fromCodePoint(0x2728);
+        const party = String.fromCodePoint(0x1F389);
+        const balloon = String.fromCodePoint(0x1F388);
 
+        // Randomized wishes for variety
+        const wishes = [
+            "Wishing you a day filled with joy, laughter, and premium moments! May this year bring you closer to all your dreams.",
+            "Have a spectacular birthday! Hope your day is as amazing as you are. Cheers to another year of great memories!",
+            "Warmest wishes on your special day! May your birthday be full of happiness and your heart full of love.",
+            "Happy birthday! Sending you lots of love and good vibes on your big day. Enjoy every single moment!",
+            "Another year older, another year wiser! Hope your birthday is simply wonderful. Have the best time today!",
+            "May your day be as bright as your smile and as lovely as your heart. Happy birthday to an awesome person!"
+        ];
+        
+        const randomWish = wishes[Math.floor(Math.random() * wishes.length)];
+
+        // Construct structured WhatsApp link
         const message = 
 `${star} *HAPPY BIRTHDAY ${member.name.toUpperCase()}!* ${star}
 
-Wishing you a day filled with joy, laughter, and premium moments! May this year bring you closer to all your dreams. ${cake}${sparkles}
+${randomWish} ${cake}${sparkles}${balloon}
 
 ${party} _Best wishes from:_
 *${senderName}*`;
