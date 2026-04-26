@@ -10,6 +10,7 @@ import { cn } from '../../lib/utils';
 import { MESS_CONFIG } from '../../config';
 import api from '../../lib/api';
 import Skeleton from '../../components/ui/Skeleton';
+import BirthdayWidget from '../../components/BirthdayWidget';
 
 const MemberDashboard = () => {
     const { user } = useAuth();
@@ -155,6 +156,9 @@ const MemberDashboard = () => {
                     <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-widest">Active Member</span>
                 </div>
             </div>
+
+            {/* Birthday Spotlight */}
+            <BirthdayWidget />
 
             {/* Clock Component */}
             <div className="rounded-[1.5rem] overflow-hidden shadow-sm border border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 backdrop-blur-xl dark:bg-slate-900/40">

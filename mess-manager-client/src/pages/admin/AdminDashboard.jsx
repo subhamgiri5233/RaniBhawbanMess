@@ -7,6 +7,7 @@ import Clock from '../../components/ui/Clock';
 import { Users, Receipt, UtensilsCrossed, Pencil, Check, X, Trash2, Save, TrendingUp, ArrowUpRight, Crown, Wallet, ShoppingCart, Flame, Wheat, Package, Wifi, Zap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import Skeleton from '../../components/ui/Skeleton';
+import BirthdayWidget from '../../components/BirthdayWidget';
 
 const AdminDashboard = () => {
     const { members, expenses, meals, globalMonth, loadingDaily } = useData();
@@ -94,6 +95,9 @@ const AdminDashboard = () => {
 
             {/* Clock Component */}
             <Clock />
+
+            {/* Birthday Spotlight */}
+            <BirthdayWidget />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                 {(loadingDaily && meals.length === 0) ? (

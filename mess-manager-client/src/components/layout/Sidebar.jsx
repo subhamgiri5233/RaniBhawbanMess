@@ -18,7 +18,8 @@ import {
     FileText,
     Sun,
     Moon,
-    ClipboardList
+    ClipboardList,
+    Trash2
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import Button from '../ui/Button';
@@ -64,9 +65,11 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false }) => {
         { to: '/meals', icon: Utensils, label: 'Meals' },
         { to: '/expenses', icon: Receipt, label: 'Expenses' },
         { to: '/calculator', icon: Calculator, label: 'Calculator' },
-        { to: '/monthly-summary', icon: ClipboardList, label: 'Monthly Summary' },
         { to: '/management', icon: UserCheck, label: 'Management' },
+        { to: '/monthly-summary', icon: ClipboardList, label: 'Monthly Summary' },
         { to: '/settings', icon: SettingsIcon, label: 'Settings' },
+        { to: '/bin', icon: Trash2, label: 'Bin' },
+
     ];
 
     const memberLinks = [
@@ -106,10 +109,15 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false }) => {
                 )}>
                     {!isCollapsed && (
                         <div>
-                            <h2 className="text-lg font-black text-white tracking-tight">
-                                Rani Bhawban Mess
-                            </h2>
-                            <p className="text-xs text-indigo-200 dark:text-slate-500 mt-0.5 font-bold uppercase tracking-widest">
+                            <div className="flex items-center gap-2 mb-0.5">
+                                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center shadow-inner border border-white/10 overflow-hidden">
+                                    <img src="/icons/home.png" alt="Logo" className="w-5 h-5 object-contain" />
+                                </div>
+                                <h2 className="text-base font-black text-white tracking-tight">
+                                    Rani Bhawban Mess
+                                </h2>
+                            </div>
+                            <p className="text-xs text-indigo-200 dark:text-slate-500 font-bold uppercase tracking-widest">
                                 {user.role === 'admin' ? (
                                     <>Manager • {currentManager ? currentManager.memberName.split(' ')[0] : user.name.split(' ')[0]}</>
                                 ) : (

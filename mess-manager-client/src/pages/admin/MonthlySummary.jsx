@@ -4,9 +4,13 @@ import {
     ClipboardList, X, Save, Crown,
     CheckCircle2, Clock, AlertCircle, Users,
     ShoppingBag, Wifi, Zap, Utensils, Flame,
-    Coffee, FileText, Loader2, RefreshCw, Search, Home, Newspaper, UserRound, Calculator, TrendingUp, TrendingDown,
+    Coffee, FileText, Loader2, RefreshCw, Search, Newspaper, UserRound, Calculator, TrendingUp, TrendingDown,
     Calendar, ChevronLeft, ChevronRight, ChevronDown, Coins, Activity, Shield, PlusCircle
 } from 'lucide-react';
+
+const HomeIcon = ({ size = 18, className }) => (
+    <img src="/icons/home.png" alt="Home" className={cn("object-contain", className)} style={{ width: size, height: size }} />
+);
 import api from '../../lib/api';
 import { cn } from '../../lib/utils';
 import Card from '../../components/ui/Card';
@@ -537,7 +541,7 @@ const MonthlySummary = () => {
 
                     <Card className="p-0 overflow-hidden rb-card rb-shadow-indigo mt-8">
                         <div className="p-4 sm:p-5 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-black/30 flex items-center justify-between">
-                            <div className="flex items-center gap-3"><div className="p-2 bg-indigo-300/40 dark:bg-white/5 text-slate-500 rounded-lg"><Home size={18} /></div><h2 className="text-[11px] sm:text-xs rb-header opacity-70">Fixed Operational Bills</h2></div>
+                            <div className="flex items-center gap-3"><div className="p-2 bg-indigo-300/40 dark:bg-white/5 text-slate-500 rounded-lg"><HomeIcon size={18} /></div><h2 className="text-[11px] sm:text-xs rb-header opacity-70">Fixed Operational Bills</h2></div>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 sm:p-6">
                             {['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others'].map(key => {
@@ -548,7 +552,7 @@ const MonthlySummary = () => {
                                     gas: { icon: Flame, label: 'Gas', color: 'text-rose-500' },
                                     paper: { icon: Newspaper, label: 'Paper', color: 'text-orange-500' },
                                     didi: { icon: UserRound, label: 'Didi', color: 'text-purple-500' },
-                                    houseRent: { icon: Home, label: 'House Rent', color: 'text-indigo-500' },
+                                    houseRent: { icon: HomeIcon, label: 'House Rent', color: 'text-indigo-500' },
                                     spices: { icon: Coffee, label: 'Spices', color: 'text-amber-600' },
                                     others: { icon: FileText, label: 'Others', color: 'text-slate-500' }
                                 };

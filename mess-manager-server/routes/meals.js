@@ -3,6 +3,7 @@ const router = express.Router();
 const Meal = require('../models/Meal');
 const User = require('../models/User');
 const Settings = require('../models/Settings');
+const Trash = require('../models/Trash');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 // GET /api/meals - Get all meals (optional: filter by date) - Requires auth
@@ -110,7 +111,18 @@ router.delete('/', auth, async (req, res) => {
         if (!result) {
             return res.status(404).json({ error: 'Meal not found' });
         }
-        res.json({ message: 'Meal removed' });
+
+        // Move to Trash
+        const trashedItem = new Trash({
+            originalId: result._id,
+            type: 'Meal',
+            data: result.toObject(),
+            deletedBy: req.user.id || req.user.userId,
+            deletedByName: req.user.name
+        });
+        await trashedItem.save();
+
+        res.json({ message: 'Meal moved to bin' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

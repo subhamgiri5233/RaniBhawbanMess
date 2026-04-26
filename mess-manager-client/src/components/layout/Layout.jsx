@@ -43,10 +43,10 @@ const Layout = () => {
             {/* Mobile Header - Premium Floating Glassmorphism */}
             <div className="md:hidden sticky top-0 z-[40] px-4 py-3 bg-indigo-950/40 dark:bg-slate-950/80 backdrop-blur-xl border-b border-indigo-900/50 dark:border-white/10 flex items-center justify-between transition-all shadow-sm shadow-indigo-950/5">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
-                        <span className="text-white text-[10px] font-black italic">RB</span>
+                    <div className="w-8 h-8 rounded-lg bg-white/10 dark:bg-white/5 flex items-center justify-center shadow-lg border border-white/10 overflow-hidden">
+                        <img src="/icons/home.png" alt="Logo" className="w-6 h-6 object-contain" />
                     </div>
-                    <h2 className="text-sm font-black text-indigo-100 dark:text-slate-100 uppercase tracking-tighter">Rani Bhawban</h2>
+                    <h2 className="text-sm font-black text-indigo-100 dark:text-slate-100 uppercase tracking-tighter">Rani Bhawban Mess</h2>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <button

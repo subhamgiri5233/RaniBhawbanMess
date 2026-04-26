@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Meal = require('../models/Meal');
+const Trash = require('../models/Trash');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 // Simple in-memory cache for members list (invalidated on any write)
@@ -157,9 +158,24 @@ router.patch('/:id/password', auth, requireAdmin, async (req, res) => {
 // Remove Member - Admin only
 router.delete('/:id', auth, requireAdmin, async (req, res) => {
     try {
+        const member = await User.findById(req.params.id);
+        if (!member) {
+            return res.status(404).json({ message: 'Member not found' });
+        }
+
+        // Move to Trash
+        const trashedItem = new Trash({
+            originalId: req.params.id,
+            type: 'Member',
+            data: member.toObject(),
+            deletedBy: req.user.id || req.user.userId,
+            deletedByName: req.user.name
+        });
+        await trashedItem.save();
+
         await User.findByIdAndDelete(req.params.id);
         invalidateMembersCache();
-        res.json({ message: 'Member removed' });
+        res.json({ message: 'Member moved to bin' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

@@ -1,4 +1,3 @@
-import { Home } from 'lucide-react';
 
 const navLinks = [
     { label: 'Features', href: '#features' },
@@ -18,8 +17,8 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-10">
                 {/* Brand */}
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.4)] border border-white/20 shrink-0">
-                        <Home className="text-white fill-current" size={18} />
+                    <div className="w-9 h-9 bg-indigo-300/10 dark:bg-slate-900 rounded-xl flex items-center justify-center shadow-lg border border-indigo-400/20 overflow-hidden shrink-0">
+                        <img src="/icons/home.png" alt="Home" className="w-6 h-6 object-contain" />
                     </div>
                     <div>
                         <p className="text-white font-black text-base tracking-tight">Rani Bhawban</p>

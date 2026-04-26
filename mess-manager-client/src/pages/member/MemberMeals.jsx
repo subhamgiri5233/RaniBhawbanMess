@@ -150,10 +150,11 @@ const MemberMeals = () => {
                     </div>
                 </div>
                 <MealMonthlySheet
-                    members={currentMember}
+                    members={members}
                     meals={meals}
                     selectedDate={selectedDate}
                     onToggleMeal={handleToggleMeal}
+                    editableMemberId={user.id}
                 />
             </div>
 

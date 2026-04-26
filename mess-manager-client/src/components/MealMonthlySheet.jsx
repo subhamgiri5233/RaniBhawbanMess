@@ -3,17 +3,24 @@ import { getDaysInMonth, format, parseISO } from 'date-fns';
 import { Check, X, Info, TrendingUp, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMouseEnter, onMouseLeave, isHoveredRowDay }) => {
+const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMouseEnter, onMouseLeave, isHoveredRowDay, isEditable }) => {
     const lunchStatus = getStatus(memberId, day.dateStr, 'lunch');
     const dinnerStatus = getStatus(memberId, day.dateStr, 'dinner');
     const isToday = day.dateStr === todayStr;
 
+    const handleAction = (e, type) => {
+        if (!isEditable) return;
+        onClick(e, memberId, day.dateStr, type);
+    };
+
     return (
         <td
             className={cn(
-                "p-1.5 border-r border-indigo-300/20 dark:border-white/5 text-center cursor-pointer transition-all relative group/cell",
+                "p-1.5 border-r border-indigo-300/20 dark:border-white/5 text-center transition-all relative group/cell",
+                isEditable ? "cursor-pointer" : "cursor-not-allowed opacity-40",
                 isToday && "bg-primary-500/10 dark:bg-primary-500/5",
-                !isToday && isHoveredRowDay && "bg-indigo-300/30 dark:bg-slate-800/20"
+                !isToday && isHoveredRowDay && "bg-indigo-300/30 dark:bg-slate-800/20",
+                !isToday && format(parseISO(day.dateStr), 'i') === '7' && "bg-rose-500/[0.03] dark:bg-rose-500/[0.02]"
             )}
             onMouseEnter={() => onMouseEnter({ dateStr: day.dateStr, dayNum: day.dayNum, memberId })}
             onMouseLeave={onMouseLeave}
@@ -21,7 +28,7 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
             <div className="flex flex-col gap-1.5 items-center justify-center">
                 {/* Lunch Indicator */}
                 <div
-                    onClick={(e) => onClick(e, memberId, day.dateStr, 'lunch')}
+                    onClick={(e) => handleAction(e, 'lunch')}
                     className={cn(
                         "w-5 h-5 rounded-[0.4rem] flex items-center justify-center transition-all duration-300 relative z-10",
                         lunchStatus
@@ -36,7 +43,7 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
                 </div>
                 {/* Dinner Indicator */}
                 <div
-                    onClick={(e) => onClick(e, memberId, day.dateStr, 'dinner')}
+                    onClick={(e) => handleAction(e, 'dinner')}
                     className={cn(
                         "w-5 h-5 rounded-[0.4rem] flex items-center justify-center transition-all duration-300 relative z-10",
                         dinnerStatus
@@ -54,14 +61,23 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
     );
 });
 
-const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellClick, onCellMouseEnter, onCellMouseLeave, hoveredCell }) => {
+const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellClick, onCellMouseEnter, onCellMouseLeave, hoveredCell, editableMemberId }) => {
     const mId = member._id || member.id;
+    const isEditable = !editableMemberId || String(editableMemberId) === String(mId);
 
     return (
-        <tr className="border-b group hover:bg-indigo-300/30 dark:hover:bg-white/5 transition-colors border-indigo-300/20 dark:border-white/5">
-            <td className="p-4 min-w-[170px] border-r border-indigo-400/30 dark:border-white/5 font-black text-slate-900 dark:text-slate-100 sticky left-0 bg-indigo-300/60 dark:bg-slate-950 z-20 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)]">
+        <tr className={cn(
+            "border-b group transition-colors border-indigo-300/20 dark:border-white/5",
+            isEditable ? "hover:bg-indigo-300/30 dark:hover:bg-white/5" : "opacity-40 grayscale-[0.3]"
+        )}>
+            <td className={cn(
+                "p-4 min-w-[170px] border-r border-indigo-400/30 dark:border-white/5 font-black sticky left-0 z-20 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-colors",
+                isEditable 
+                    ? "bg-indigo-300/60 dark:bg-slate-950 text-slate-900 dark:text-slate-100" 
+                    : "bg-indigo-300/40 dark:bg-slate-900/40 text-slate-500 dark:text-slate-500 cursor-not-allowed"
+            )}>
                 <div className="flex flex-col">
-                    <span className="font-black text-slate-900 dark:text-slate-100">{member.name}</span>
+                    <span className="font-black">{member.name}</span>
                     <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">L & D Registry</span>
                 </div>
             </td>
@@ -76,6 +92,7 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
                     onMouseEnter={onCellMouseEnter}
                     onMouseLeave={onCellMouseLeave}
                     isHoveredRowDay={hoveredCell?.dayNum === day.dayNum}
+                    isEditable={isEditable}
                 />
             ))}
             <td className="p-4 text-center font-black backdrop-blur-sm bg-indigo-300/30 dark:bg-indigo-500/5">
@@ -86,7 +103,7 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
     );
 });
 
-const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
+const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editableMemberId }) => {
     // 1. Get days in the month
     const currentDate = useMemo(() => parseISO(selectedDate), [selectedDate]);
     const year = currentDate.getFullYear();
@@ -179,6 +196,18 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
         setActiveCell(null);
     };
 
+    // Sort members: editableMemberId first
+    const sortedMembers = useMemo(() => {
+        if (!editableMemberId || !members) return members;
+        return [...members].sort((a, b) => {
+            const aId = a._id || a.id;
+            const bId = b._id || b.id;
+            if (String(aId) === String(editableMemberId)) return -1;
+            if (String(bId) === String(editableMemberId)) return 1;
+            return 0;
+        });
+    }, [members, editableMemberId]);
+
     // 5. MEMOIZED GRID - THIS IS THE CRITICAL UI PERFORMANCE FIX
     // We isolate the grid so it only re-renders when data (meals/members) changes,
     // not when the 'activeCell' (popup) state changes.
@@ -202,8 +231,19 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                                                 : 'text-indigo-600/60 dark:text-slate-500 bg-indigo-300/30 dark:bg-slate-950/40'
                                     )}
                                 >
-                                    <div className="flex flex-col items-center gap-0.5">
-                                        <span>{day.dayNum}</span>
+                                    <div className="flex flex-col items-center gap-0">
+                                        <span className={cn(
+                                            "text-[6px] uppercase font-black tracking-tighter mb-[2px]",
+                                            format(parseISO(day.dateStr), 'i') === '7' ? "text-rose-500 dark:text-rose-400 opacity-100" : "opacity-60"
+                                        )}>
+                                            {format(parseISO(day.dateStr), 'EEE')}
+                                        </span>
+                                        <span className={cn(
+                                            "flex items-center justify-center w-5 h-5 rounded-full transition-all",
+                                            format(parseISO(day.dateStr), 'i') === '7' && !isToday && "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                                        )}>
+                                            {day.dayNum}
+                                        </span>
                                         {isToday && (
                                             <span className="text-[6px] text-white/80 font-black tracking-tighter animate-pulse">
                                                 NOW
@@ -220,7 +260,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {(members || []).map(member => (
+                    {(sortedMembers || []).map(member => (
                         <MealRow
                             key={member._id || member.id}
                             member={member}
@@ -232,12 +272,13 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal }) => {
                             onCellMouseEnter={setHoveredCell}
                             onCellMouseLeave={() => setHoveredCell(null)}
                             hoveredCell={hoveredCell}
+                            editableMemberId={editableMemberId}
                         />
                     ))}
                 </tbody>
             </table>
         );
-    }, [members, days, getStatus, todayStr, memberTotals, handleCellClick, hoveredCell]);
+    }, [sortedMembers, days, getStatus, todayStr, memberTotals, handleCellClick, hoveredCell, editableMemberId]);
 
     // Pre-calculate popup labels - extremely fast
     const popupLabel = useMemo(() => {

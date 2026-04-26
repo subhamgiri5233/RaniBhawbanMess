@@ -4,6 +4,7 @@ const Expense = require('../models/Expense');
 const Settings = require('../models/Settings');
 const MonthlySharedExpense = require('../models/MonthlySharedExpense');
 const MonthlySummary = require('../models/MonthlySummary');
+const Trash = require('../models/Trash');
 const { auth, requireAdmin } = require('../middleware/auth');
 
 
@@ -170,8 +171,18 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(403).json({ message: 'Only admin can delete this expense' });
         }
 
-        const deletedExpense = await Expense.findByIdAndDelete(id);
-        res.json({ message: 'Expense deleted successfully', deletedExpense });
+        // Move to Trash instead of deleting
+        const trashedItem = new Trash({
+            originalId: id,
+            type: 'Expense',
+            data: expense.toObject(),
+            deletedBy: req.user.id || req.user.userId,
+            deletedByName: req.user.name
+        });
+        await trashedItem.save();
+
+        await Expense.findByIdAndDelete(id);
+        res.json({ message: 'Expense moved to bin', deletedExpense: expense });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

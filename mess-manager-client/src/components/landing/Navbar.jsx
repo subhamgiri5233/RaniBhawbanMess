@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Button from '../ui/Button';
 
 const navLinks = [
@@ -43,9 +43,9 @@ const Navbar = ({ onLoginClick }) => {
                     title="Refresh Page"
                 >
                     <div
-                        className="w-10 h-10 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)] border border-white/20"
+                        className="w-10 h-10 bg-indigo-300/10 dark:bg-slate-900 rounded-xl flex items-center justify-center shadow-lg border border-indigo-400/20 overflow-hidden"
                     >
-                        <Home className="text-white fill-current" size={24} />
+                        <img src="/icons/home.png" alt="Home" className="w-7 h-7 object-contain" />
                     </div>
                     <div className="flex overflow-hidden">
                         <span className="text-xl font-[900] bg-gradient-to-r from-slate-900 dark:from-white via-indigo-600 dark:via-indigo-400 to-indigo-900 dark:to-indigo-500 bg-clip-text text-transparent tracking-[-0.05em] uppercase">

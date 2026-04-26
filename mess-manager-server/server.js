@@ -165,6 +165,9 @@ app.use('/api/daily', dailyRoutes);
 const gitaRoutes = require('./routes/gita');
 app.use('/api/gita', gitaRoutes);
 
+const trashRoutes = require('./routes/trash');
+app.use('/api/trash', trashRoutes);
+
 
 
 

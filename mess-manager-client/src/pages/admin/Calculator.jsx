@@ -8,7 +8,7 @@ import Input from '../../components/ui/Input';
 import { 
     Calculator as CalculatorIcon, Download, Save, TrendingUp, Sparkles, 
     Users, Activity, TrendingDown, CheckCircle2, AlertCircle, RefreshCw,
-    UserRound, Home, Wifi, Zap, Flame, Newspaper, Coffee, FileText, Coins
+    UserRound, Wifi, Zap, Flame, Newspaper, Coffee, FileText, Coins
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -695,26 +695,6 @@ const Calculator = () => {
                             Finalize shared expenses and generate individual member accounting
                         </p>
                     </div>
-
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
-                        <Button 
-                            onClick={generatePDF} 
-                            disabled={!perHeadResult || !mealChargeResult} 
-                            className="h-11 md:h-12 px-5 md:px-6 rounded-2xl shadow-lg bg-indigo-300/40 dark:bg-slate-800 text-indigo-900 dark:text-white border border-indigo-300/30 dark:border-white/10 font-black text-xs uppercase tracking-widest hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-all active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            <Download size={16} />
-                            Download PDF
-                        </Button>
-
-                        <Button
-                            onClick={handleSubmitToMonthlyReport}
-                            disabled={submittingReport || !perHeadResult || !mealChargeResult}
-                            className="h-11 md:h-12 px-6 md:px-8 rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-500 border-none text-white font-black text-xs uppercase tracking-[0.1em] flex items-center justify-center gap-2"
-                        >
-                            <Save size={16} />
-                            {submittingReport ? 'Finalizing...' : 'Submit to Report'}
-                        </Button>
-                    </div>
                 </div>
             </div>
 
@@ -964,6 +944,27 @@ const Calculator = () => {
                     </Card>
                 </div>
             )}
+
+            {/* Bottom Actions Section */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 mb-8 p-8 bg-indigo-300/20 dark:bg-slate-900/40 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-sm">
+                <Button 
+                    onClick={generatePDF} 
+                    disabled={!perHeadResult || !mealChargeResult} 
+                    className="w-full sm:w-auto h-14 px-8 rounded-2xl shadow-lg bg-indigo-300/40 dark:bg-slate-800 text-indigo-900 dark:text-white border border-indigo-300/30 dark:border-white/10 font-black text-xs uppercase tracking-widest hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-all active:scale-95 flex items-center justify-center gap-3"
+                >
+                    <Download size={20} />
+                    Download Analysis PDF
+                </Button>
+
+                <Button
+                    onClick={handleSubmitToMonthlyReport}
+                    disabled={submittingReport || !perHeadResult || !mealChargeResult}
+                    className="w-full sm:w-auto h-14 px-10 rounded-2xl shadow-2xl shadow-emerald-500/20 active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-500 border-none text-white font-black text-xs uppercase tracking-[0.1em] flex items-center justify-center gap-3"
+                >
+                    <Save size={20} />
+                    {submittingReport ? 'Finalizing...' : 'Submit to Monthly Report'}
+                </Button>
+            </div>
         </div>
     );
 };

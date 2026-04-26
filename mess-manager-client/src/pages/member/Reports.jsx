@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
     ClipboardList, CheckCircle2, Clock, AlertCircle, Users,
     ShoppingBag, Wifi, Zap, Utensils, Flame,
-    Home, Newspaper, UserRound, RefreshCw, Activity, PlusCircle, Coffee,
+    Newspaper, UserRound, RefreshCw, Activity, PlusCircle, Coffee,
     Calendar, TrendingUp, TrendingDown, Coins, Download, FileText, Search
 } from 'lucide-react';
+
+const HomeIcon = ({ size = 18, className }) => (
+    <img src="/icons/home.png" alt="Home" className={cn("object-contain", className)} style={{ width: size, height: size }} />
+);
 import api from '../../lib/api';
 import { cn } from '../../lib/utils';
 import Card from '../../components/ui/Card';
@@ -170,7 +174,7 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
                             ? [
                                 { k: 'rice', l: 'Rice', i: Newspaper, c: 'emerald' },
                                 { k: 'spices', l: 'Spices', i: Flame, c: 'amber' },
-                                { k: 'others', l: 'Other', i: Home, c: 'slate' }
+                                { k: 'others', l: 'Other', i: HomeIcon, c: 'slate' }
                             ]
                             : [
                                 { k: 'market', l: 'Market', i: ShoppingBag, c: 'indigo' },
@@ -353,7 +357,7 @@ const Reports = () => {
                     <Card className="p-0 overflow-hidden border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-900 mt-6 shadow-xl">
                         <div className="p-4 sm:p-5 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-black/30 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-300/40 dark:bg-white/5 text-indigo-700 dark:text-slate-100 rounded-lg border border-indigo-400/20"><Home size={18} /></div>
+                                <div className="p-2 bg-indigo-300/40 dark:bg-white/5 text-indigo-700 dark:text-slate-100 rounded-lg border border-indigo-400/20"><HomeIcon size={18} /></div>
                                 <h2 className="text-[11px] sm:text-xs font-black text-slate-700 dark:text-slate-100 uppercase tracking-tight">Fixed Operational Bills</h2>
                             </div>
                         </div>
@@ -366,7 +370,7 @@ const Reports = () => {
                                     gas: { icon: Flame, label: 'Gas', color: 'text-rose-500' },
                                     paper: { icon: Newspaper, label: 'Paper', color: 'text-orange-500' },
                                     didi: { icon: UserRound, label: 'Didi', color: 'purple-500' },
-                                    houseRent: { icon: Home, label: 'House Rent', color: 'text-indigo-500' },
+                                    houseRent: { icon: HomeIcon, label: 'House Rent', color: 'text-indigo-500' },
                                     spices: { icon: Coffee, label: 'Spices', color: 'text-amber-600' },
                                     others: { icon: FileText, label: 'Others', color: 'text-slate-500' }
                                 };

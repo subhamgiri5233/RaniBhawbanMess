@@ -4,6 +4,7 @@ const GuestMeal = require('../models/GuestMeal');
 const User = require('../models/User');
 const { auth, requireAdmin } = require('../middleware/auth');
 const Settings = require('../models/Settings');
+const Trash = require('../models/Trash');
 
 // GET /api/guest-meals - Get all guest meals (optional: filter by date or month) - Requires auth
 router.get('/', auth, async (req, res) => {
@@ -83,7 +84,17 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(404).json({ error: 'Guest meal not found' });
         }
 
-        res.json({ message: 'Guest meal removed successfully' });
+        // Move to Trash
+        const trashedItem = new Trash({
+            originalId: id,
+            type: 'GuestMeal',
+            data: result.toObject(),
+            deletedBy: req.user.id || req.user.userId,
+            deletedByName: req.user.name
+        });
+        await trashedItem.save();
+
+        res.json({ message: 'Guest meal moved to bin' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
