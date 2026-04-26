@@ -77,11 +77,23 @@ const BirthdayWidget = () => {
         const memberId = member._id || member.id;
         setWishedMembers(prev => new Set([...prev, memberId]));
         
-        // Construct WhatsApp link
-        const message = `Happy Birthday ${member.name}! 🎉 Wishing you a fantastic day and a great year ahead! 🎂 - From Rani Bhawban Mess family`;
+        // Determine sender name
+        const senderName = user?.role === 'admin' 
+            ? 'Rani Bhawban Mess Family' 
+            : user?.name || 'A Friend from Mess';
+
+        // Construct structured WhatsApp link
+        const message = 
+`🌟 *HAPPY BIRTHDAY ${member.name.toUpperCase()}!* 🌟
+
+Wishing you a day filled with joy, laughter, and premium moments! May this year bring you closer to all your dreams. 🎂✨
+
+🎉 _Best wishes from:_
+*${senderName}*`;
+
         const encodedMessage = encodeURIComponent(message);
         
-        // Clean phone number (remove +, spaces, dashes)
+        // Clean phone number
         const phoneNumber = member.mobile ? member.mobile.replace(/\D/g, '') : '';
         
         if (phoneNumber) {
