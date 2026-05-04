@@ -114,13 +114,32 @@ router.post('/', auth, async (req, res) => {
 // Update status by ID (New more specific route)
 router.put('/id/:id', auth, async (req, res) => {
     const { status } = req.body;
+    console.log(`[Market] Received PUT /id/${req.params.id} with status: ${status} from user: ${req.user.name} (${req.user.role})`);
     try {
         const existing = await MarketRequest.findById(req.params.id);
-        if (!existing) return res.status(404).json({ message: 'Request not found' });
+        if (!existing) {
+            console.log(`[Market] Request ${req.params.id} not found`);
+            return res.status(404).json({ message: 'Request not found' });
+        }
 
         const isAdmin = req.user.role === 'admin';
-        if (!isAdmin && status === 'approved') {
-            return res.status(403).json({ message: 'Only admins can approve requests' });
+        
+        // Find if user is the assigned manager for the month of this request
+        let isManager = false;
+        if (!isAdmin) {
+            const Manager = require('../models/Manager');
+            const requestMonth = existing.date.substring(0, 7);
+            const managerDoc = await Manager.findOne({ month: requestMonth });
+            if (managerDoc && (managerDoc.memberId === req.user.id || managerDoc.memberId === req.user.userId)) {
+                isManager = true;
+            }
+        }
+
+        console.log(`[Market] User role logic - isAdmin: ${isAdmin}, isManager: ${isManager}`);
+
+        if (!isAdmin && !isManager && status === 'approved') {
+            console.log(`[Market] 403 Forbidden: Only admins or managers can approve`);
+            return res.status(403).json({ message: 'Only admins or the assigned manager can approve requests' });
         }
 
         if (status === 'approved') {
@@ -147,38 +166,52 @@ router.put('/id/:id', auth, async (req, res) => {
                 metadata: { date: existing.date }
             }).save();
 
+            console.log(`[Market] Successfully approved request ${existing._id}`);
             return res.json(existing);
         }
 
         if (status === 'rejected') {
+            // A regular member can only reject their OWN pending request
+            if (!isAdmin && !isManager) {
+                if (existing.assignedMemberId !== req.user.id && existing.assignedMemberId !== req.user.userId) {
+                    console.log(`[Market] 403 Forbidden: Member tried to reject someone else's request`);
+                    return res.status(403).json({ message: 'You can only cancel your own requests' });
+                }
+            }
+
             // Move to Trash before deleting
             const trashedItem = new Trash({
                 originalId: req.params.id,
                 type: 'MarketRequest',
                 data: existing.toObject(),
                 deletedBy: req.user.id || req.user.userId,
-                deletedByName: req.user.name
+                deletedByName: req.user.name || 'Unknown'
             });
             await trashedItem.save();
+            console.log(`[Market] Saved rejected request to Trash`);
 
             // For rejection, we usually just delete to keep calendar clean for requests
             await MarketRequest.findByIdAndDelete(req.params.id);
+            console.log(`[Market] Deleted request ${req.params.id}`);
 
-            // If admin rejected it (and it wasn't a self-cancel), notify
-            if (isAdmin && existing.assignedMemberId !== req.user.id) {
+            // If admin or manager rejected it (and it wasn't a self-cancel), notify
+            if ((isAdmin || isManager) && existing.assignedMemberId !== req.user.id && existing.assignedMemberId !== req.user.userId) {
                 await new Notification({
                     userId: existing.assignedMemberId,
                     message: `Your market request for ${existing.date} was REJECTED.`,
                     type: 'market_rejected',
                     metadata: { date: existing.date }
                 }).save();
+                console.log(`[Market] Sent rejection notification to ${existing.assignedMemberId}`);
             }
 
             return res.json({ message: 'Request removed/rejected' });
         }
 
+        console.log(`[Market] 400 Invalid status: ${status}`);
         res.status(400).json({ message: 'Invalid status' });
     } catch (err) {
+        console.error(`[Market] Error processing PUT /id/${req.params.id}:`, err);
         res.status(400).json({ message: err.message });
     }
 });
