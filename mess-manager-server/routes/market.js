@@ -3,6 +3,7 @@ const router = express.Router();
 const MarketRequest = require('../models/MarketRequest');
 const MonthlySummary = require('../models/MonthlySummary');
 const User = require('../models/User'); // For member list
+const Trash = require('../models/Trash'); // Added for rejection history
 const { auth, requireAdmin } = require('../middleware/auth');
 
 // --- Manual Market Duty Routes ---
