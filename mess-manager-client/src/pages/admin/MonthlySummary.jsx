@@ -420,6 +420,9 @@ const MonthlySummary = () => {
 
         const offR = data?.sharedExpense?.results || {};
         const offI = data?.sharedExpense?.mealInputs || {};
+        const balances = data?.sharedExpense?.memberBalances || [];
+
+        const adjustedTotalM = balances.reduce((sum, mb) => sum + Math.max(minLimit, mb.meals || 0), 0);
 
         if (data.sharedExpense) {
             return {
@@ -430,6 +433,7 @@ const MonthlySummary = () => {
                 rice: offI.rice || 0,
                 gstM: offI.guest || 0,
                 totalM: offI.totalMeal || 0,
+                adjustedTotalM,
                 mCount,
                 minLimit
             };
@@ -437,7 +441,7 @@ const MonthlySummary = () => {
 
         // RESTRICTED MODE: If no finalized sharedExpense is found, show zero/null stats
         return { 
-            rate: 0, head: 0, shared: 0, mkt: 0, rice: 0, gstM: 0, totalM: 0, 
+            rate: 0, head: 0, shared: 0, mkt: 0, rice: 0, gstM: 0, totalM: 0, adjustedTotalM: 0,
             mCount, 
             minLimit: minLimit 
         };
@@ -586,12 +590,17 @@ const MonthlySummary = () => {
                                 { label: 'Total Market', val: stats.mkt > 0 ? `₹${stats.mkt.toLocaleString()}` : '₹00', color: 'text-blue-600' },
                                 { label: 'Rice Cost', val: stats.rice > 0 ? `₹${stats.rice.toLocaleString()}` : '₹00', color: 'text-amber-600' },
                                 { label: 'Guest Meals', val: stats.gstM > 0 ? stats.gstM : '00', color: 'text-rose-600' },
-                                { label: 'Total Meals', val: stats.totalM > 0 ? stats.totalM : '00', color: 'text-indigo-600' },
+                                { label: 'Total Meals', val: stats.totalM > 0 ? stats.totalM : '00', subVal: stats.adjustedTotalM > 0 ? stats.adjustedTotalM : null, color: 'text-indigo-600' },
                                 { label: 'Meal Cost', val: stats.rate > 0 ? `₹${Number(stats.rate).toFixed(2)}` : '₹00', color: 'text-emerald-600' }
                             ].map((stat, i) => (
                                 <div key={i} className="p-4 sm:p-6 text-center hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-colors">
                                     <div className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-widest mb-1">{stat.label}</div>
-                                    <div className={`text-xl rb-header !normal-case ${stat.color}`}>{stat.val}</div>
+                                    <div className="flex items-end justify-center gap-1.5">
+                                        <div className={`text-xl rb-header !normal-case ${stat.subVal && stat.subVal !== stat.val ? '!text-rose-500' : stat.color}`}>{stat.val}</div>
+                                        {stat.subVal && stat.subVal !== stat.val && (
+                                            <div className="text-lg rb-header !normal-case !text-emerald-500" title="Total Adjusted Meals (Min meals applied)">{stat.subVal}</div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>

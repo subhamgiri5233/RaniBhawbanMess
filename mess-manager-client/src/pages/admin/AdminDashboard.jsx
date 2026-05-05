@@ -9,10 +9,17 @@ import { cn } from '../../lib/utils';
 import Skeleton from '../../components/ui/Skeleton';
 import BirthdayWidget from '../../components/BirthdayWidget';
 import NoticeBoard from '../../components/NoticeBoard';
+import { MESS_CONFIG } from '../../config';
 
 const AdminDashboard = () => {
-    const { members, expenses, meals, globalMonth, loadingDaily } = useData();
+    const { members, expenses, meals, globalMonth, loadingDaily, settings } = useData();
     const navigate = useNavigate();
+
+    const getSettingValue = useCallback((key, fallback) => {
+        if (!settings || !Array.isArray(settings)) return fallback;
+        const s = settings.find(s => s.key === key);
+        return s ? s.value : fallback;
+    }, [settings]);
 
     const memberSummary = useMemo(() => {
         if (!Array.isArray(members) || !Array.isArray(meals) || !Array.isArray(expenses)) return [];
@@ -46,6 +53,19 @@ const AdminDashboard = () => {
         return meals.length;
     }, [meals]);
 
+    const MIN_MEALS = getSettingValue('min_meals_month', MESS_CONFIG.MIN_MEALS_PER_MONTH);
+
+    const totalAdjustedMeals = useMemo(() => {
+        if (!Array.isArray(members) || !Array.isArray(meals)) return 0;
+        return members.filter(m => m.role === 'member').reduce((sum, member) => {
+            const memberId = member._id || member.id;
+            const mealCount = meals.filter(m =>
+                m.memberId === memberId || m.memberId === member?.userId
+            ).length;
+            return sum + Math.max(MIN_MEALS, mealCount);
+        }, 0);
+    }, [members, meals, MIN_MEALS]);
+
     // Calculate expenses by category - Only count APPROVED expenses
     const marketExpenses = useMemo(() => {
         if (!Array.isArray(expenses)) return 0;
@@ -69,8 +89,8 @@ const AdminDashboard = () => {
 
     const stats = useMemo(() => [
         { title: 'Total Members', value: members.length, icon: Users, color: 'text-indigo-700', bg: 'bg-indigo-300/40 dark:bg-blue-950/20' },
-        { title: 'Total Meals', value: totalMeals, icon: UtensilsCrossed, color: 'text-orange-700', bg: 'bg-orange-300/40 dark:bg-orange-950/20' },
-    ], [members.length, totalMeals]);
+        { title: 'Total Meals', value: totalMeals, subValue: totalAdjustedMeals, icon: UtensilsCrossed, color: 'text-orange-700', bg: 'bg-orange-300/40 dark:bg-orange-950/20' },
+    ], [members.length, totalMeals, totalAdjustedMeals]);
 
     const expenseBreakdown = useMemo(() => [
         { title: 'Market', value: `₹${marketExpenses}`, icon: ShoppingCart, color: 'text-indigo-700 dark:text-indigo-400', bg: 'bg-indigo-300/40 dark:bg-indigo-950/20' },
@@ -121,20 +141,27 @@ const AdminDashboard = () => {
                                     <stat.icon size={120} />
                                 </div>
 
-                                <div className="relative z-10 flex items-start justify-between">
-                                    <div>
+                                <div className="relative z-10 flex flex-col justify-between h-full min-h-[120px]">
+                                    <div className="flex items-start justify-between w-full">
                                         <div className="flex items-center gap-2 mb-3">
                                             <div className={cn("p-2.5 rounded-xl bg-indigo-300/40 dark:bg-slate-900/60 backdrop-blur-md shadow-sm", stat.color)}>
                                                 <stat.icon size={20} />
                                             </div>
                                             <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 font-black uppercase tracking-widest">{stat.title}</p>
                                         </div>
-                                        <h3 className={cn("text-4xl sm:text-6xl rb-header mt-1", stat.color)}>
+                                        <div className="p-2 bg-indigo-300/40 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-indigo-300/30 dark:border-white/5 shadow-sm">
+                                            <ArrowUpRight size={16} className="text-indigo-500" />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-end justify-between w-full mt-auto">
+                                        <h3 className={cn("text-4xl sm:text-6xl rb-header mt-1", stat.subValue !== undefined ? '!text-rose-500' : stat.color)}>
                                             {stat.value}
                                         </h3>
-                                    </div>
-                                    <div className="p-2 bg-indigo-300/40 dark:bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-indigo-300/30 dark:border-white/5 shadow-sm">
-                                        <ArrowUpRight size={16} className="text-indigo-500" />
+                                        {stat.subValue !== undefined && stat.subValue !== stat.value && (
+                                            <h3 className="text-4xl sm:text-5xl rb-header mt-1 !text-emerald-500 mb-1" title="Total Adjusted Meals (Min meals applied)">
+                                                {stat.subValue}
+                                            </h3>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
