@@ -328,7 +328,11 @@ router.get('/:month', auth, async (req, res) => {
             sharedExpense: sharedExpense || null,
             members: req.user.role === 'admin'
                 ? memberSummaries
-                : memberSummaries.filter(m => m.memberId === req.user.id || m.userId === req.user.userId || m.userId === req.user.id)
+                : memberSummaries.filter(m => 
+                    m.memberId === String(req.user.id) || 
+                    m.userId === req.user.userId || 
+                    m.userId === String(req.user.id)
+                )
         };
 
         res.json(responseData);
