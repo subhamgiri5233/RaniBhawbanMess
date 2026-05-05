@@ -445,7 +445,7 @@ const MonthlySummary = () => {
 
     const categoryProviders = useMemo(() => {
         if (!data || !data.members) return {};
-        const allCategories = ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others', 'market', 'rice', 'deposit'];
+        const allCategories = ['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others', 'market', 'rice', 'deposit', 'fund'];
         const providers = {};
         allCategories.forEach(cat => {
             const payers = data.members
@@ -602,7 +602,7 @@ const MonthlySummary = () => {
                             <div className="flex items-center gap-3"><div className="p-2 bg-indigo-300/40 dark:bg-white/5 text-slate-500 rounded-lg"><HomeIcon size={18} /></div><h2 className="text-[11px] sm:text-xs rb-header opacity-70">Fixed Operational Bills</h2></div>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 sm:p-6">
-                            {['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'others'].map(key => {
+                            {['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'fund', 'others'].map(key => {
                                 const val = (data?.sharedExpense?.bills || {})[key] || 0;
                                 const config = {
                                     wifi: { icon: Wifi, label: 'WiFi', color: 'text-blue-500' },
@@ -612,6 +612,7 @@ const MonthlySummary = () => {
                                     didi: { icon: UserRound, label: 'Didi', color: 'text-purple-500' },
                                     houseRent: { icon: HomeIcon, label: 'House Rent', color: 'text-indigo-500' },
                                     spices: { icon: Coffee, label: 'Spices', color: 'text-amber-600' },
+                                    fund: { icon: Coins, label: 'Fund', color: 'text-teal-500' },
                                     others: { icon: FileText, label: 'Others', color: 'text-slate-500' }
                                 };
                                 const item = config[key];

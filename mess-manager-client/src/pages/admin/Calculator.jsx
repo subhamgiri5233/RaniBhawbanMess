@@ -48,6 +48,7 @@ const Calculator = () => {
         spices: 0,
         houseRent: 0,
         electric: 0,
+        fund: 0,
         others: 0,
     });
 
@@ -92,7 +93,7 @@ const Calculator = () => {
         // Reset to default/zero before fetching
         const resetBills = {
             gas: 0, paper: 0, wifi: 0, didi: 0,
-            spices: 0, houseRent: 0, electric: 0, others: 0
+            spices: 0, houseRent: 0, electric: 0, fund: 0, others: 0
         };
         const resetMealInputs = {
             totalMarket: 0, rice: 0, guest: 0, totalMeal: 1
@@ -116,6 +117,7 @@ const Calculator = () => {
         const didiTotal = sumCat('didi');
         const houseRentTotal = sumCat('houseRent');
         const electricTotal = sumCat('electric');
+        const fundTotal = sumCat('fund');
 
         // Calculate total meals
         // Calculate total meals (Adjusted with minimum)
@@ -146,6 +148,7 @@ const Calculator = () => {
             wifi: wifiTotal,
             electric: electricTotal,
             spices: spicesTotal,
+            fund: fundTotal,
             others: othersTotal,
             ...(paperTotal > 0 && { paper: paperTotal }),
             ...(didiTotal > 0 && { didi: didiTotal }),
@@ -456,6 +459,7 @@ const Calculator = () => {
                     ['Spices', (bills.spices || 0).toFixed(2)],
                     ['House Rent', (bills.houseRent || 0).toFixed(2)],
                     ['Electric', (bills.electric || 0).toFixed(2)],
+                    ['Fund', (bills.fund || 0).toFixed(2)],
                     ['Others', (bills.others || 0).toFixed(2)],
                     ['', ''],
                     ['TOTAL', perHeadResult.totalAmount.toFixed(2)],
@@ -608,7 +612,8 @@ const Calculator = () => {
                 ['Gas', `₹${bills.gas}`], ['Paper', `₹${bills.paper}`],
                 ['WiFi', `₹${bills.wifi}`], ['Didi', `₹${bills.didi}`],
                 ['Spices', `₹${bills.spices}`], ['House Rent', `₹${bills.houseRent}`],
-                ['Electric', `₹${bills.electric}`], ['Others', `₹${bills.others}`],
+                ['Electric', `₹${bills.electric}`], ['Fund', `₹${bills.fund}`], 
+                ['Others', `₹${bills.others}`],
                 ['Total', `₹${perHeadResult.totalAmount.toFixed(2)}`],
                 ['Per Head', `₹${perHeadResult.perHeadAmount.toFixed(2)}`]
             ];

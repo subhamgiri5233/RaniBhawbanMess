@@ -10,6 +10,7 @@ const monthlySharedExpenseSchema = new mongoose.Schema({
         spices: { type: Number, default: 0 },
         houseRent: { type: Number, default: 0 },
         electric: { type: Number, default: 0 },
+        fund: { type: Number, default: 0 },
         others: { type: Number, default: 0 }
     },
     mealInputs: {

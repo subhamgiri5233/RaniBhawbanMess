@@ -234,11 +234,51 @@ export const DataProvider = ({ children }) => {
 
     // Market Actions
     const allocateMarketDay = useCallback(async (date, assignedMemberId, requestType = 'request', managerId = null) => {
+        // Optimistic UI update
+        const tempId = `temp-${Date.now()}`;
+        const month = date.substring(0, 7);
+        const optimisticReq = {
+            _id: tempId,
+            id: tempId,
+            date,
+            assignedMemberId,
+            requestType,
+            status: requestType === 'request' ? 'pending' : 'approved',
+            managerId
+        };
+
+        setMarketSchedule(prev => {
+            const updated = { ...prev };
+            if (!updated[month]) updated[month] = [];
+            
+            // Remove any existing pending request from the same member for the same date
+            updated[month] = updated[month].filter(req => !(req.date === date && req.assignedMemberId === assignedMemberId));
+            
+            // If it's an approved or manual_assign request, auto-reject other pending requests in UI
+            if (optimisticReq.status === 'approved') {
+                updated[month] = updated[month].map(req => 
+                    (req.date === date && req.status === 'pending') ? { ...req, status: 'rejected' } : req
+                );
+            }
+            
+            updated[month].push(optimisticReq);
+            return updated;
+        });
+
         try {
             await api.post('/market', { date, assignedMemberId, requestType, managerId });
             await refreshMarket();
         } catch (error) {
             console.error('Allocate market day failed', error);
+            // Rollback optimistic update on failure
+            setMarketSchedule(prev => {
+                const updated = { ...prev };
+                if (updated[month]) {
+                    updated[month] = updated[month].filter(req => req._id !== tempId);
+                }
+                return updated;
+            });
+            await refreshMarket();
         }
     }, [refreshMarket]);
 

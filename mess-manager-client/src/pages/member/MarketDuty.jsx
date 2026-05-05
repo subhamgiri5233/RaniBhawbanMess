@@ -242,9 +242,9 @@ const MarketDuty = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 md:gap-3 shrink-0">
                                             <button
-                                                className="text-slate-400 hover:text-rose-600 p-2.5 rounded-xl hover:bg-rose-300/40 dark:hover:bg-rose-500/10 transition-all active:scale-90 disabled:opacity-40"
+                                                className="text-slate-400 hover:text-rose-600 p-3 md:p-2.5 rounded-xl bg-rose-500/5 md:bg-transparent hover:bg-rose-300/40 dark:bg-rose-500/10 dark:md:bg-transparent dark:hover:bg-rose-500/20 transition-all active:scale-90 disabled:opacity-40 flex items-center justify-center"
                                                 disabled={pendingActionIds.has(req._id || req.id)}
                                                 onClick={async () => {
                                                     const id = req._id || req.id;
@@ -253,10 +253,10 @@ const MarketDuty = () => {
                                                     setPendingActionIds(prev => { const n = new Set(prev); n.delete(id); return n; });
                                                 }}
                                             >
-                                                <X size={20} />
+                                                <X size={22} className="md:w-5 md:h-5" />
                                             </button>
                                             <button
-                                                className="text-slate-400 hover:text-emerald-600 p-2.5 rounded-xl hover:bg-emerald-300/40 dark:hover:bg-emerald-500/10 transition-all active:scale-90 disabled:opacity-40"
+                                                className="text-slate-400 hover:text-emerald-600 p-3 md:p-2.5 rounded-xl bg-emerald-500/5 md:bg-transparent hover:bg-emerald-300/40 dark:bg-emerald-500/10 dark:md:bg-transparent dark:hover:bg-emerald-500/20 transition-all active:scale-90 disabled:opacity-40 flex items-center justify-center"
                                                 disabled={pendingActionIds.has(req._id || req.id)}
                                                 onClick={async () => {
                                                     const id = req._id || req.id;
@@ -265,7 +265,7 @@ const MarketDuty = () => {
                                                     setPendingActionIds(prev => { const n = new Set(prev); n.delete(id); return n; });
                                                 }}
                                             >
-                                                <Check size={20} />
+                                                <Check size={22} className="md:w-5 md:h-5" />
                                             </button>
                                         </div>
                                     </div>

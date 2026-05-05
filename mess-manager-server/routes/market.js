@@ -180,15 +180,19 @@ router.put('/id/:id', auth, async (req, res) => {
             }
 
             // Move to Trash before deleting
-            const trashedItem = new Trash({
-                originalId: req.params.id,
-                type: 'MarketRequest',
-                data: existing.toObject(),
-                deletedBy: req.user.id || req.user.userId,
-                deletedByName: req.user.name || 'Unknown'
-            });
-            await trashedItem.save();
-            console.log(`[Market] Saved rejected request to Trash`);
+            try {
+                const trashedItem = new Trash({
+                    originalId: req.params.id,
+                    type: 'MarketRequest',
+                    data: existing.toObject(),
+                    deletedBy: req.user.id || req.user.userId,
+                    deletedByName: req.user.name || 'Unknown'
+                });
+                await trashedItem.save();
+                console.log(`[Market] Saved rejected request to Trash`);
+            } catch (trashErr) {
+                console.error(`[Market] Error saving to Trash:`, trashErr);
+            }
 
             // For rejection, we usually just delete to keep calendar clean for requests
             await MarketRequest.findByIdAndDelete(req.params.id);
@@ -196,13 +200,17 @@ router.put('/id/:id', auth, async (req, res) => {
 
             // If admin or manager rejected it (and it wasn't a self-cancel), notify
             if ((isAdmin || isManager) && existing.assignedMemberId !== req.user.id && existing.assignedMemberId !== req.user.userId) {
-                await new Notification({
-                    userId: existing.assignedMemberId,
-                    message: `Your market request for ${existing.date} was REJECTED.`,
-                    type: 'market_rejected',
-                    metadata: { date: existing.date }
-                }).save();
-                console.log(`[Market] Sent rejection notification to ${existing.assignedMemberId}`);
+                try {
+                    await new Notification({
+                        userId: existing.assignedMemberId,
+                        message: `Your market request for ${existing.date} was REJECTED.`,
+                        type: 'market_rejected',
+                        metadata: { date: existing.date }
+                    }).save();
+                    console.log(`[Market] Sent rejection notification to ${existing.assignedMemberId}`);
+                } catch (notifErr) {
+                    console.error(`[Market] Error sending rejection notification:`, notifErr);
+                }
             }
 
             return res.json({ message: 'Request removed/rejected' });
