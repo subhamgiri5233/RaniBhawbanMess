@@ -13,7 +13,8 @@ import {
     LogOut,
     ChevronRight,
     Search,
-    UserCircle
+    UserCircle,
+    Wallet
 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -74,6 +75,10 @@ export default function AdminDashboard({ navigation }) {
 
     const spicesExpenses = useMemo(() => 
         expenses.filter(e => e.category === 'spices').reduce((sum, e) => sum + (e.amount || 0), 0)
+    , [expenses]);
+
+    const depositExpenses = useMemo(() => 
+        expenses.filter(e => e.category === 'deposit').reduce((sum, e) => sum + (e.amount || 0), 0)
     , [expenses]);
 
     const memberSummary = useMemo(() => {
@@ -152,6 +157,8 @@ export default function AdminDashboard({ navigation }) {
                         <ExpenseItem label="Spices & Gas" value={spicesExpenses} icon={Flame} color="#f97316" />
                         <View className="h-[1px] bg-slate-50 my-4" />
                         <ExpenseItem label="Rice Inventory" value={0} icon={Wheat} color="#10b981" />
+                        <View className="h-[1px] bg-slate-50 my-4" />
+                        <ExpenseItem label="General Deposit" value={depositExpenses} icon={Wallet} color="#10b981" />
                     </View>
                 </View>
 

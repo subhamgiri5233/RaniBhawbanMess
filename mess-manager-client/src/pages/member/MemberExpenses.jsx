@@ -64,6 +64,7 @@ const Expenses = () => {
     const marketExpenses = expenses.filter(e => e.category === 'market' && e.paidBy !== 'admin' && matchesMonth(e.date));
     const spicesExpenses = expenses.filter(e => e.category === 'spices' && matchesMonth(e.date));
     const riceExpenses = expenses.filter(e => e.category === 'rice' && matchesMonth(e.date));
+    const depositExpenses = expenses.filter(e => e.category === 'deposit' && matchesMonth(e.date));
     const othersExpenses = expenses.filter(e => e.category === 'others' && matchesMonth(e.date));
 
     const categoryStats = [
@@ -93,6 +94,16 @@ const Expenses = () => {
             count: riceExpenses.length,
             total: riceExpenses.reduce((acc, e) => acc + e.amount, 0),
             icon: Wheat,
+            color: 'text-emerald-600 dark:text-emerald-400',
+            bg: 'bg-emerald-300/40 dark:bg-emerald-950/20',
+            border: 'border-emerald-300/30 dark:border-emerald-800/30'
+        },
+        {
+            name: 'General Deposit',
+            key: 'deposit',
+            count: depositExpenses.length,
+            total: depositExpenses.reduce((acc, e) => acc + (e.amount || 0), 0),
+            icon: Wallet,
             color: 'text-emerald-600 dark:text-emerald-400',
             bg: 'bg-emerald-300/40 dark:bg-emerald-950/20',
             border: 'border-emerald-300/30 dark:border-emerald-800/30'
@@ -152,7 +163,7 @@ const Expenses = () => {
             </div>
 
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
                 {categoryStats.filter(s => s.total > 0).map((stat) => {
                     const Icon = stat.icon;
                     return (
