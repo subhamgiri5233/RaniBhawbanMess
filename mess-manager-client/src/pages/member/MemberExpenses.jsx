@@ -164,7 +164,7 @@ const Expenses = () => {
 
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
-                {categoryStats.filter(s => s.total > 0).map((stat) => {
+                {categoryStats.filter(s => s.key === 'deposit' || s.total > 0).map((stat) => {
                     const Icon = stat.icon;
                     return (
                         <Card
