@@ -19,24 +19,32 @@ app.use(helmet()); // Security headers
 // CORS Configuration
 const allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
     'https://rani-bhawban-mess.vercel.app'
 ];
 
 app.use(cors({
     origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps or curl requests)
+        // allow requests with no origin (like mobile apps, curl, Postman)
         if (!origin) return callback(null, true);
         
-        // Allow main domain and ANY Vercel preview/subdomain
-        if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+        // Allow listed origins, all vercel subdomains, all localhost/127.0.0.1 ports, and local IP networks
+        if (
+            allowedOrigins.indexOf(origin) !== -1 || 
+            origin.endsWith('.vercel.app') ||
+            /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+            /^https?:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin)
+        ) {
             return callback(null, true);
         }
         
-        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-        return callback(new Error(msg), false);
+        return callback(null, false);
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
