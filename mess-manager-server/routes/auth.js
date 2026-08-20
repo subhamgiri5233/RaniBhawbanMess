@@ -20,7 +20,13 @@ const generateToken = (user) => {
 // SIMPLE LOGIN - No complicated logic
 router.post('/login', async (req, res) => {
     try {
-        const { userId, password, role } = req.body;
+        const { userId, password, role } = req.body || {};
+        const cleanUserId = (userId || '').toString().trim();
+        const cleanPassword = (password || '').toString().trim();
+
+        if (!cleanUserId || !cleanPassword) {
+            return res.status(400).json({ success: false, message: 'User ID and Password are required' });
+        }
 
         if (role === 'admin') {
             // Admin login - always verify against database
@@ -30,8 +36,8 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ success: false, message: 'Admin account not found. Please contact the system administrator.' });
             }
 
-            // Always verify credentials against the database
-            if (admin.username.toLowerCase() === userId.toLowerCase() && admin.password === password) {
+            // Always verify credentials against the database (case-insensitive username)
+            if (admin.username.toLowerCase() === cleanUserId.toLowerCase() && admin.password === cleanPassword) {
                 const token = generateToken({
                     id: admin._id,
                     username: admin.username,
@@ -51,13 +57,13 @@ router.post('/login', async (req, res) => {
                 });
             }
 
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            return res.status(401).json({ success: false, message: 'Invalid User ID or Password' });
 
         } else {
             // Member login
             let user;
             try {
-                user = await User.findOne({ userId: userId });
+                user = await User.findOne({ userId: { $regex: new RegExp(`^${cleanUserId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } });
             } catch (dbError) {
                 console.error('❌ Database query error:', dbError);
                 return res.status(500).json({ success: false, message: 'Database error: ' + dbError.message });
@@ -67,7 +73,7 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ success: false, message: 'User not found' });
             }
 
-            if (user.password === password) {
+            if (user.password === cleanPassword) {
                 const token = generateToken({
                     id: user._id,
                     userId: user.userId,

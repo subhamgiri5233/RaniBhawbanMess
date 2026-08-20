@@ -21,15 +21,15 @@ const LoginForm = ({ onSuccess }) => {
         setIsLoading(true);
 
         try {
-            const success = await login(userId, password, role);
-            if (success) {
+            const res = await login(userId, password, role);
+            if (res.success) {
                 if (onSuccess) onSuccess();
                 navigate('/dashboard');
             } else {
-                setError('Invalid User ID or Password');
+                setError(res.message || 'Invalid User ID or Password');
             }
         } catch (err) {
-            setError('An error occurred. Please try again.');
+            setError(err.message || 'An error occurred. Please try again.');
         } finally {
             setIsLoading(false);
         }

@@ -62,16 +62,27 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (userId, password, role) => {
         try {
-            const res = await api.post('/auth/login', { userId, password, role });
+            const res = await api.post('/auth/login', { 
+                userId: userId?.trim(), 
+                password: password?.trim(), 
+                role 
+            });
             if (res.data.success && res.data.token) {
                 setToken(res.data.token);
                 setUser(res.data.user);
-                return true;
+                return { success: true };
             }
-            return false;
+            return { 
+                success: false, 
+                message: res.data?.message || 'Invalid User ID or Password' 
+            };
         } catch (error) {
             console.error('Login Error:', error.response?.data?.message || error.message);
-            return false;
+            const message = error.response?.data?.message 
+                || (error.code === 'ERR_NETWORK' || !error.response 
+                    ? 'Cannot connect to backend server. Please make sure the backend server is running on port 5000.' 
+                    : error.message);
+            return { success: false, message };
         }
     };
 
