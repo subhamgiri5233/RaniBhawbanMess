@@ -251,14 +251,12 @@ export const DataProvider = ({ children }) => {
             const updated = { ...prev };
             if (!updated[month]) updated[month] = [];
             
-            // Remove any existing pending request from the same member for the same date
-            updated[month] = updated[month].filter(req => !(req.date === date && req.assignedMemberId === assignedMemberId));
-            
-            // If it's an approved or manual_assign request, auto-reject other pending requests in UI
+            // If manual assign/approved, remove any existing records for this date
             if (optimisticReq.status === 'approved') {
-                updated[month] = updated[month].map(req => 
-                    (req.date === date && req.status === 'pending') ? { ...req, status: 'rejected' } : req
-                );
+                updated[month] = updated[month].filter(req => req.date !== date);
+            } else {
+                // Remove any existing pending request from the same member for the same date
+                updated[month] = updated[month].filter(req => !(req.date === date && req.assignedMemberId === assignedMemberId));
             }
             
             updated[month].push(optimisticReq);
@@ -266,7 +264,16 @@ export const DataProvider = ({ children }) => {
         });
 
         try {
-            await api.post('/market', { date, assignedMemberId, requestType, managerId });
+            const res = await api.post('/market', { date, assignedMemberId, requestType, managerId });
+            if (res.data && res.data._id) {
+                setMarketSchedule(prev => {
+                    const updated = { ...prev };
+                    if (updated[month]) {
+                        updated[month] = updated[month].map(req => req._id === tempId ? res.data : req);
+                    }
+                    return updated;
+                });
+            }
             await refreshMarket();
         } catch (error) {
             console.error('Allocate market day failed', error);
@@ -304,6 +311,7 @@ export const DataProvider = ({ children }) => {
     }, [refreshMarket]);
 
     const rejectMarketRequest = useCallback(async (requestId) => {
+        if (!requestId) return;
         // Optimistic UI Update
         setMarketSchedule(prev => {
             const updated = { ...prev };
@@ -314,11 +322,34 @@ export const DataProvider = ({ children }) => {
         });
 
         try {
-            await api.put(`/market/id/${requestId}`, { status: 'rejected' });
+            if (!requestId.startsWith('temp-')) {
+                await api.put(`/market/id/${requestId}`, { status: 'rejected' });
+            }
             await refreshMarket();
         } catch (error) {
             console.error('Reject market request failed', error);
             await refreshMarket(); // Rollback on error
+        }
+    }, [refreshMarket]);
+
+    const clearMarketDate = useCallback(async (date) => {
+        if (!date) return;
+        const month = date.substring(0, 7);
+        // Optimistic UI Update
+        setMarketSchedule(prev => {
+            const updated = { ...prev };
+            if (updated[month]) {
+                updated[month] = updated[month].filter(req => req.date !== date);
+            }
+            return updated;
+        });
+
+        try {
+            await api.delete(`/market/date/${date}`);
+            await refreshMarket();
+        } catch (error) {
+            console.error('Clear market date failed', error);
+            await refreshMarket();
         }
     }, [refreshMarket]);
 
@@ -551,6 +582,7 @@ export const DataProvider = ({ children }) => {
         allocateMarketDay,
         approveMarketRequest,
         rejectMarketRequest,
+        clearMarketDate,
         setManagerForMonth,
         markCookingFinished,
         getCookingDuty,
@@ -572,7 +604,7 @@ export const DataProvider = ({ children }) => {
         addMember, removeMember, updateMember, addMeal, removeMeal, addGuestMeal,
         removeGuestMeal, addExpense, updateExpense, deleteExpense,
         allocateMarketDay, approveMarketRequest,
-        rejectMarketRequest, setManagerForMonth, markCookingFinished, getCookingDuty,
+        rejectMarketRequest, clearMarketDate, setManagerForMonth, markCookingFinished, getCookingDuty,
         updateSystemSetting, loadingDaily,
     ]);
 

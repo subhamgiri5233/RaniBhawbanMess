@@ -85,9 +85,9 @@ const MemberDashboard = () => {
     // Calculate market history - get approved market days for this member SPECIFIC to globalMonth
     const myMarketDays = useMemo(() => {
         return (marketSchedule[globalMonth] || []).filter(
-            day => day.assignedMemberId === user?.id && day.status === 'approved'
+            day => (day.assignedMemberId === user?.id || day.assignedMemberId === user?.userId || day.assignedMemberId === user?._id) && day.status === 'approved'
         );
-    }, [marketSchedule, user?.id, globalMonth]);
+    }, [marketSchedule, user?.id, user?.userId, user?._id, globalMonth]);
 
     const monthLabel = useMemo(() => {
         if (!globalMonth || typeof globalMonth !== 'string' || !globalMonth.includes('-')) {
