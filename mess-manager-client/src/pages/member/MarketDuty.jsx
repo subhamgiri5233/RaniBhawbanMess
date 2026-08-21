@@ -560,7 +560,9 @@ const MarketDuty = () => {
                                     onClick={async () => {
                                         if (window.confirm(`Remove ${isOffDay ? 'Mess Holiday' : `allocation for ${assignedName}`} on this date?`)) {
                                             const idToRemove = approvedInfo._id || approvedInfo.id;
-                                            await rejectMarketRequest(idToRemove);
+                                            const dateStr = format(selectedModalDate, 'yyyy-MM-dd');
+                                            await rejectMarketRequest(idToRemove, dateStr);
+                                            await clearMarketDate(dateStr);
                                             setIsModalOpen(false);
                                         }
                                     }}
@@ -589,17 +591,19 @@ const MarketDuty = () => {
                                 {(() => {
                                     const dayInfos = selectedModalDate ? getDaysInfo(selectedModalDate) : [];
                                     const offDayRecord = dayInfos.find(d => d.assignedMemberId === 'OFF_DAY');
+                                    const dateStr = selectedModalDate ? format(selectedModalDate, 'yyyy-MM-dd') : '';
                                     return (
                                         <button
                                             onClick={async () => {
                                                 if (offDayRecord) {
                                                     if (window.confirm('Remove Mess Holiday for this date?')) {
-                                                        await rejectMarketRequest(offDayRecord._id || offDayRecord.id);
+                                                        await rejectMarketRequest(offDayRecord._id || offDayRecord.id, dateStr);
+                                                        await clearMarketDate(dateStr);
                                                         setIsModalOpen(false);
                                                     }
                                                 } else {
                                                     if (window.confirm('Mark this day as Mess Holiday? This will clear any other assignment for this date.')) {
-                                                        await allocateMarketDay(format(selectedModalDate, 'yyyy-MM-dd'), 'OFF_DAY', 'manual_assign');
+                                                        await allocateMarketDay(dateStr, 'OFF_DAY', 'manual_assign');
                                                         setIsModalOpen(false);
                                                     }
                                                 }
@@ -648,11 +652,9 @@ const MarketDuty = () => {
                                         // If already approved, clicking again removes the assignment
                                         if (window.confirm(`Remove assignment for ${member.name}?`)) {
                                             const idToReject = approvedInfo?._id || approvedInfo?.id || memberRequest?._id || memberRequest?.id;
-                                            if (idToReject) {
-                                                await rejectMarketRequest(idToReject);
-                                            } else if (selectedModalDate) {
-                                                await clearMarketDate(format(selectedModalDate, 'yyyy-MM-dd'));
-                                            }
+                                            const dateStr = format(selectedModalDate, 'yyyy-MM-dd');
+                                            await rejectMarketRequest(idToReject, dateStr);
+                                            await clearMarketDate(dateStr);
                                             setIsModalOpen(false);
                                         }
                                     } else if (hasMaxDuties) {

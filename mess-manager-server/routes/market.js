@@ -14,9 +14,15 @@ const checkIsManager = async (user, dateOrMonth) => {
     if (!dateOrMonth) return false;
     
     try {
-        const Manager = require('../models/Manager');
+        const ManagerRecord = require('../models/ManagerRecord');
         const month = dateOrMonth.length === 7 ? dateOrMonth : dateOrMonth.substring(0, 7);
-        const managerDoc = await Manager.findOne({ month });
+        const monthRegex = new RegExp('^' + month);
+        const managerDoc = await ManagerRecord.findOne({
+            $or: [
+                { date: { $regex: monthRegex } },
+                { date: month }
+            ]
+        });
         if (managerDoc && (
             managerDoc.memberId === user.id || 
             managerDoc.memberId === user.userId ||

@@ -310,25 +310,38 @@ export const DataProvider = ({ children }) => {
         }
     }, [refreshMarket]);
 
-    const rejectMarketRequest = useCallback(async (requestId) => {
-        if (!requestId) return;
+    const rejectMarketRequest = useCallback(async (requestId, date = null) => {
+        if (!requestId && !date) return;
         // Optimistic UI Update
         setMarketSchedule(prev => {
             const updated = { ...prev };
             Object.keys(updated).forEach(month => {
-                updated[month] = updated[month].filter(req => req._id !== requestId && req.id !== requestId);
+                if (date && date.startsWith(month)) {
+                    updated[month] = updated[month].filter(req => req.date !== date && req._id !== requestId && req.id !== requestId);
+                } else {
+                    updated[month] = updated[month].filter(req => req._id !== requestId && req.id !== requestId);
+                }
             });
             return updated;
         });
 
         try {
-            if (!requestId.startsWith('temp-')) {
+            if (requestId && !requestId.startsWith('temp-')) {
                 await api.put(`/market/id/${requestId}`, { status: 'rejected' });
+            } else if (date) {
+                await api.delete(`/market/date/${date}`);
             }
             await refreshMarket();
         } catch (error) {
             console.error('Reject market request failed', error);
-            await refreshMarket(); // Rollback on error
+            if (date) {
+                try {
+                    await api.delete(`/market/date/${date}`);
+                } catch (fallbackErr) {
+                    console.error('Fallback date delete failed', fallbackErr);
+                }
+            }
+            await refreshMarket();
         }
     }, [refreshMarket]);
 
