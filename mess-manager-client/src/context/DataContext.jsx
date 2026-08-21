@@ -312,24 +312,25 @@ export const DataProvider = ({ children }) => {
 
     const rejectMarketRequest = useCallback(async (requestId, date = null) => {
         if (!requestId && !date) return;
-        // Optimistic UI Update
+        // Optimistic UI Update - immediately strip from local schedule state
         setMarketSchedule(prev => {
             const updated = { ...prev };
             Object.keys(updated).forEach(month => {
                 if (date && date.startsWith(month)) {
                     updated[month] = updated[month].filter(req => req.date !== date && req._id !== requestId && req.id !== requestId);
                 } else {
-                    updated[month] = updated[month].filter(req => req._id !== requestId && req.id !== requestId);
+                    updated[month] = updated[month].filter(req => req._id !== requestId && req.id !== requestId && (!date || req.date !== date));
                 }
             });
             return updated;
         });
 
         try {
+            if (date) {
+                await api.delete(`/market/date/${date}`);
+            }
             if (requestId && !requestId.startsWith('temp-')) {
                 await api.put(`/market/id/${requestId}`, { status: 'rejected' });
-            } else if (date) {
-                await api.delete(`/market/date/${date}`);
             }
             await refreshMarket();
         } catch (error) {

@@ -281,7 +281,7 @@ const MarketDuty = () => {
                                             onClick={async () => {
                                                 const id = req._id || req.id;
                                                 setPendingActionIds(prev => new Set([...prev, id]));
-                                                await rejectMarketRequest(id);
+                                                await rejectMarketRequest(id, req.date);
                                                 setPendingActionIds(prev => { const n = new Set(prev); n.delete(id); return n; });
                                             }}
                                         >
