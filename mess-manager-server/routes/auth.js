@@ -5,12 +5,20 @@ const User = require('../models/User');
 const Admin = require('../models/Admin');
 const webpush = require('web-push');
 
-// Configure web-push
-webpush.setVapidDetails(
-    process.env.VAPID_MAILTO || 'mailto:adarshagiri@gmail.com',
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-);
+// Configure web-push safely
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    try {
+        webpush.setVapidDetails(
+            process.env.VAPID_MAILTO || 'mailto:adarshagiri@gmail.com',
+            process.env.VAPID_PUBLIC_KEY,
+            process.env.VAPID_PRIVATE_KEY
+        );
+    } catch (e) {
+        console.warn('[WebPush] Warning: Could not configure VAPID details:', e.message);
+    }
+} else {
+    console.warn('[WebPush] VAPID keys not configured. Web push notifications disabled.');
+}
 
 // Simple JWT token generator
 const generateToken = (user) => {
