@@ -9,5 +9,8 @@ const marketRequestSchema = new mongoose.Schema({
 
 // Ensure a member can't request the same date twice, but different members can request same date
 marketRequestSchema.index({ date: 1, assignedMemberId: 1 }, { unique: true });
+marketRequestSchema.index({ date: 1 });
+marketRequestSchema.index({ status: 1 });
+marketRequestSchema.index({ date: 1, status: 1 });
 
 module.exports = mongoose.model('MarketRequest', marketRequestSchema);

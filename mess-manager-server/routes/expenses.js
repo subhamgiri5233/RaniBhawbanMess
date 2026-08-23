@@ -171,18 +171,17 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(403).json({ message: 'Only admin can delete this expense' });
         }
 
-        // Move to Trash instead of deleting
-        const trashedItem = new Trash({
+        // Move to Trash in background
+        new Trash({
             originalId: id,
             type: 'Expense',
             data: expense.toObject(),
             deletedBy: req.user.id || req.user.userId,
             deletedByName: req.user.name
-        });
-        await trashedItem.save();
+        }).save().catch(trashErr => console.error('[Expense] Trash save error:', trashErr));
 
         await Expense.findByIdAndDelete(id);
-        res.json({ message: 'Expense moved to bin', deletedExpense: expense });
+        res.json({ message: 'Expense moved to bin', deletedExpense: expense, success: true });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

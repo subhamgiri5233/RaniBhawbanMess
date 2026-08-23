@@ -12,5 +12,7 @@ const guestMealSchema = new mongoose.Schema({
 
 // Allow multiple guest meals per member per day
 guestMealSchema.index({ date: 1, memberId: 1, guestMealType: 1, mealTime: 1 });
+guestMealSchema.index({ date: 1 });
+guestMealSchema.index({ memberId: 1, date: 1 });
 
 module.exports = mongoose.model('GuestMeal', guestMealSchema);

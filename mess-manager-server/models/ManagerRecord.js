@@ -8,4 +8,7 @@ const managerRecordSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+managerRecordSchema.index({ date: 1 });
+managerRecordSchema.index({ date: 1, memberId: 1 });
+
 module.exports = mongoose.model('ManagerRecord', managerRecordSchema);

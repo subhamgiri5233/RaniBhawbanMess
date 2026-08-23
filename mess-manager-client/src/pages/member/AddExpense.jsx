@@ -105,10 +105,6 @@ const AddExpense = () => {
         });
 
         if (res.success) {
-            setIsRefreshing(true);
-            await refreshExpenses();
-            setIsRefreshing(false);
-
             setDepositAmount('');
 
             // Check if month mismatch

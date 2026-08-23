@@ -29,7 +29,7 @@ router.get('/', auth, async (req, res) => {
                 query.date = { $regex: escapedMonth };
             }
         }
-        const meals = await Meal.find(query);
+        const meals = await Meal.find(query).lean();
         res.json(meals);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -49,7 +49,7 @@ router.post('/', auth, async (req, res) => {
         // Fetch member name from User collection
         const user = await User.findOne({
             $or: [{ _id: memberId }, { userId: memberId }]
-        });
+        }).lean().select('name');
 
         if (!user) {
             return res.status(404).json({ error: 'Member not found' });
@@ -105,7 +105,7 @@ router.post('/bulk', auth, async (req, res) => {
                 { _id: { $in: memberIds } },
                 { userId: { $in: memberIds } }
             ]
-        });
+        }).lean().select('_id userId name');
 
         const mealsToInsert = memberIds.map(memberId => {
             const user = members.find(m => String(m._id) === String(memberId) || m.userId === String(memberId));
@@ -124,7 +124,6 @@ router.post('/bulk', auth, async (req, res) => {
     } catch (err) {
         // If some succeeded and some failed due to duplicates, we might get a partial success or error
         if (err.code === 11000 || err.name === 'BulkWriteError') {
-            // Some records were inserted, some were skipped
             return res.status(201).json({ 
                 message: 'Bulk insert completed with some duplicates skipped',
                 insertedCount: err.result?.nInserted || 0 
@@ -164,17 +163,16 @@ router.delete('/', auth, async (req, res) => {
             return res.status(404).json({ error: 'Meal not found' });
         }
 
-        // Move to Trash
-        const trashedItem = new Trash({
+        // Move to Trash in background
+        new Trash({
             originalId: result._id,
             type: 'Meal',
             data: result.toObject(),
             deletedBy: req.user.id || req.user.userId,
             deletedByName: req.user.name
-        });
-        await trashedItem.save();
+        }).save().catch(trashErr => console.error('[Meal] Trash save error:', trashErr));
 
-        res.json({ message: 'Meal moved to bin' });
+        res.json({ message: 'Meal moved to bin', success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

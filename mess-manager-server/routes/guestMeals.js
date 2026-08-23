@@ -19,7 +19,7 @@ router.get('/', auth, async (req, res) => {
             query.date = { $regex: `^${month}` };
         }
 
-        const guestMeals = await GuestMeal.find(query).sort({ createdAt: -1 });
+        const guestMeals = await GuestMeal.find(query).sort({ createdAt: -1 }).lean();
         res.json(guestMeals);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -44,7 +44,7 @@ router.post('/', auth, async (req, res) => {
         // Fetch member name from User collection
         const user = await User.findOne({
             $or: [{ _id: memberId }, { userId: memberId }]
-        });
+        }).lean().select('name');
 
         if (!user) {
             return res.status(404).json({ error: 'Member not found' });
@@ -84,17 +84,16 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(404).json({ error: 'Guest meal not found' });
         }
 
-        // Move to Trash
-        const trashedItem = new Trash({
+        // Move to Trash in background
+        new Trash({
             originalId: id,
             type: 'GuestMeal',
             data: result.toObject(),
             deletedBy: req.user.id || req.user.userId,
             deletedByName: req.user.name
-        });
-        await trashedItem.save();
+        }).save().catch(trashErr => console.error('[GuestMeal] Trash save error:', trashErr));
 
-        res.json({ message: 'Guest meal moved to bin' });
+        res.json({ message: 'Guest meal moved to bin', success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

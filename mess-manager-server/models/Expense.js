@@ -12,7 +12,9 @@ const expenseSchema = new mongoose.Schema({
 
 // Speed up date-based filtering (by month) and status queries
 expenseSchema.index({ date: 1 });
+expenseSchema.index({ date: -1 });
 expenseSchema.index({ date: 1, status: 1 });
+expenseSchema.index({ category: 1, date: 1 });
 expenseSchema.index({ paidBy: 1, date: 1 });
 
 module.exports = mongoose.model('Expense', expenseSchema);

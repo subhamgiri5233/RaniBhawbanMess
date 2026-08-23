@@ -163,19 +163,18 @@ router.delete('/:id', auth, requireAdmin, async (req, res) => {
             return res.status(404).json({ message: 'Member not found' });
         }
 
-        // Move to Trash
-        const trashedItem = new Trash({
+        // Move to Trash in background
+        new Trash({
             originalId: req.params.id,
             type: 'Member',
             data: member.toObject(),
             deletedBy: req.user.id || req.user.userId,
             deletedByName: req.user.name
-        });
-        await trashedItem.save();
+        }).save().catch(trashErr => console.error('[Member] Trash save error:', trashErr));
 
         await User.findByIdAndDelete(req.params.id);
         invalidateMembersCache();
-        res.json({ message: 'Member moved to bin' });
+        res.json({ message: 'Member moved to bin', success: true });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

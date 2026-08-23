@@ -164,27 +164,51 @@ export const DataProvider = ({ children }) => {
     const addMember = useCallback(async (member) => {
         try {
             const response = await api.post('/members', member);
-            setMembers(prev => [...prev, response.data]);
-            localStorage.setItem('mess_members', JSON.stringify([...members, response.data]));
-        } catch (error) {
-            console.error('Add Member failed:', error);
-        }
-    }, [members]);
-
-    const removeMember = useCallback(async (id) => {
-        try {
-            await api.delete(`/members/${id}`);
             setMembers(prev => {
-                const updated = prev.filter(m => m._id !== id && m.id !== id);
+                const updated = [...prev, response.data];
                 localStorage.setItem('mess_members', JSON.stringify(updated));
                 return updated;
             });
+            return { success: true, data: response.data };
+        } catch (error) {
+            console.error('Add Member failed:', error);
+            return { success: false, error: error.response?.data?.message || error.message };
+        }
+    }, []);
+
+    const removeMember = useCallback(async (id) => {
+        // Optimistic UI removal
+        let removedItem = null;
+        setMembers(prev => {
+            removedItem = prev.find(m => m._id === id || m.id === id);
+            const updated = prev.filter(m => m._id !== id && m.id !== id);
+            localStorage.setItem('mess_members', JSON.stringify(updated));
+            return updated;
+        });
+
+        try {
+            await api.delete(`/members/${id}`);
         } catch (error) {
             console.error('Remove member failed', error);
+            // Rollback on error
+            if (removedItem) {
+                setMembers(prev => {
+                    const rollback = [...prev, removedItem];
+                    localStorage.setItem('mess_members', JSON.stringify(rollback));
+                    return rollback;
+                });
+            }
         }
     }, []);
 
     const updateMember = useCallback(async (id, updates) => {
+        // Optimistic update
+        setMembers(prev => {
+            const updated = prev.map(m => (m._id === id || m.id === id) ? { ...m, ...updates } : m);
+            localStorage.setItem('mess_members', JSON.stringify(updated));
+            return updated;
+        });
+
         try {
             const response = await api.put(`/members/${id}`, updates);
             setMembers(prev => {
@@ -192,42 +216,72 @@ export const DataProvider = ({ children }) => {
                 localStorage.setItem('mess_members', JSON.stringify(updated));
                 return updated;
             });
+            return { success: true };
         } catch (error) {
             console.error('Update Member failed:', error);
+            refreshMembers(); // Sync on error
+            return { success: false, error: error.response?.data?.message || error.message };
         }
-    }, []);
+    }, [refreshMembers]);
 
     // Expense Actions
     const addExpense = useCallback(async (expense) => {
+        // Optimistic UI update
+        const tempId = `temp-exp-${Date.now()}`;
+        const tempExpense = {
+            _id: tempId,
+            id: tempId,
+            ...expense,
+            amount: Number(expense.amount),
+            loading: true
+        };
+        setExpenses(prev => [...prev, tempExpense]);
+
         try {
             const response = await api.post('/expenses', expense);
-            setExpenses(prev => [...prev, response.data]);
+            setExpenses(prev => prev.map(e => e._id === tempId ? response.data : e));
             return { success: true, data: response.data };
         } catch (error) {
             console.error('Add Expense failed', error);
+            // Rollback
+            setExpenses(prev => prev.filter(e => e._id !== tempId));
             const errorMessage = error.response?.data?.message || error.message || 'Failed to add expense';
             return { success: false, error: errorMessage };
         }
     }, []);
 
     const updateExpense = useCallback(async (id, updates) => {
+        // Optimistic update
+        setExpenses(prev => prev.map(e => (e._id === id || e.id === id) ? { ...e, ...updates } : e));
+
         try {
             const response = await api.put(`/expenses/${id}`, updates);
             setExpenses(prev => prev.map(e => (e._id === id || e.id === id) ? response.data : e));
             return { success: true };
         } catch (error) {
             console.error('Update Expense failed', error);
+            refreshExpenses();
             return { success: false, error: error.response?.data?.message || 'Failed to update expense' };
         }
-    }, []);
+    }, [refreshExpenses]);
 
     const deleteExpense = useCallback(async (id) => {
+        // Optimistic deletion - instant removal from UI
+        let removedItem = null;
+        setExpenses(prev => {
+            removedItem = prev.find(e => e._id === id || e.id === id);
+            return prev.filter(e => e._id !== id && e.id !== id);
+        });
+
         try {
             await api.delete(`/expenses/${id}`);
-            setExpenses(prev => prev.filter(e => e._id !== id && e.id !== id));
             return { success: true };
         } catch (error) {
             console.error('Delete Expense failed', error);
+            // Rollback on error
+            if (removedItem) {
+                setExpenses(prev => [...prev, removedItem]);
+            }
             return { success: false, error: error.response?.data?.message || 'Failed to delete expense' };
         }
     }, []);
@@ -274,7 +328,7 @@ export const DataProvider = ({ children }) => {
                     return updated;
                 });
             }
-            await refreshMarket();
+            refreshMarket(); // Non-blocking background sync
         } catch (error) {
             console.error('Allocate market day failed', error);
             // Rollback optimistic update on failure
@@ -285,28 +339,36 @@ export const DataProvider = ({ children }) => {
                 }
                 return updated;
             });
-            await refreshMarket();
+            refreshMarket();
         }
     }, [refreshMarket]);
 
     const approveMarketRequest = useCallback(async (requestId) => {
         // Optimistic UI Update
+        let approvedDate = null;
         setMarketSchedule(prev => {
             const updated = { ...prev };
             Object.keys(updated).forEach(month => {
-                updated[month] = updated[month].map(req => 
-                    (req._id === requestId || req.id === requestId) ? { ...req, status: 'approved' } : req
+                const req = updated[month].find(r => r._id === requestId || r.id === requestId);
+                if (req) approvedDate = req.date;
+                
+                updated[month] = updated[month].map(r => 
+                    (r._id === requestId || r.id === requestId) ? { ...r, status: 'approved' } : r
                 );
+                // Clear any other records on the same date
+                if (approvedDate) {
+                    updated[month] = updated[month].filter(r => r.date !== approvedDate || r._id === requestId || r.id === requestId);
+                }
             });
             return updated;
         });
 
         try {
             await api.put(`/market/id/${requestId}`, { status: 'approved' });
-            await refreshMarket();
+            refreshMarket(); // Non-blocking sync
         } catch (error) {
             console.error('Approve market request failed', error);
-            await refreshMarket(); // Rollback on error
+            refreshMarket(); // Rollback on error
         }
     }, [refreshMarket]);
 
@@ -328,21 +390,13 @@ export const DataProvider = ({ children }) => {
         try {
             if (date) {
                 await api.delete(`/market/date/${date}`);
-            }
-            if (requestId && !requestId.startsWith('temp-')) {
+            } else if (requestId && !requestId.startsWith('temp-')) {
                 await api.put(`/market/id/${requestId}`, { status: 'rejected' });
             }
-            await refreshMarket();
+            refreshMarket(); // Non-blocking sync
         } catch (error) {
             console.error('Reject market request failed', error);
-            if (date) {
-                try {
-                    await api.delete(`/market/date/${date}`);
-                } catch (fallbackErr) {
-                    console.error('Fallback date delete failed', fallbackErr);
-                }
-            }
-            await refreshMarket();
+            refreshMarket();
         }
     }, [refreshMarket]);
 
@@ -360,18 +414,18 @@ export const DataProvider = ({ children }) => {
 
         try {
             await api.delete(`/market/date/${date}`);
-            await refreshMarket();
+            refreshMarket(); // Non-blocking sync
         } catch (error) {
             console.error('Clear market date failed', error);
-            await refreshMarket();
+            refreshMarket();
         }
     }, [refreshMarket]);
 
     // Manager Allocation
     const setManagerForMonth = useCallback(async (month, memberId) => {
+        setManagerAllocation(prev => ({ ...prev, [month]: memberId }));
         try {
             await api.post('/managers', { month, memberId });
-            setManagerAllocation(prev => ({ ...prev, [month]: memberId }));
         } catch (error) {
             console.error('Set manager failed', error);
         }
@@ -379,9 +433,9 @@ export const DataProvider = ({ children }) => {
 
     // Cooking Duties
     const markCookingFinished = useCallback(async (date, memberId) => {
+        setCookingDuties(prev => [...prev, { date, memberId, finished: true }]);
         try {
             await api.post('/cooking/finish', { date, memberId });
-            setCookingDuties(prev => [...prev, { date, memberId, finished: true }]);
         } catch (error) {
             console.error('Mark cooking finished failed', error);
         }
@@ -416,6 +470,7 @@ export const DataProvider = ({ children }) => {
             
             // Replace temp item with real one
             setGuestMeals(prev => prev.map(gm => gm._id === tempId ? response.data : gm));
+            return { success: true, data: response.data };
         } catch (error) {
             console.error('Add guest meal failed', error);
             // Rollback
@@ -426,37 +481,45 @@ export const DataProvider = ({ children }) => {
 
     // Meal Actions
     const addMeal = useCallback(async (date, memberIds, type, isGuest = false, guestMealType = null, mealTime = null) => {
-        // If it's a guest meal, we use the regular post for now (or bulk if we want later)
-        // But for multiple members, we definitely want bulk.
         if (isGuest) {
-            // Re-use logic or call addGuestMeal
             return addGuestMeal(date, memberIds[0], guestMealType, mealTime);
         }
 
-        // Optimistic UI: Add temporary items to state
-        const tempMeals = memberIds.map(id => ({
-            _id: `temp-${Date.now()}-${id}`,
-            date,
-            memberId: id,
-            type,
-            isGuest: false,
-            loading: true
-        }));
+        // Optimistic UI: Add temporary items to state immediately
+        const tempMeals = memberIds.map(id => {
+            const memberObj = members.find(m => m._id === id || m.id === id || m.userId === id);
+            return {
+                _id: `temp-${Date.now()}-${id}`,
+                date,
+                memberId: id,
+                memberName: memberObj ? memberObj.name : 'Unknown',
+                type,
+                isGuest: false,
+                loading: false
+            };
+        });
         setMeals(prev => [...prev, ...tempMeals]);
 
         try {
-            // Single bulk API call instead of multiple individual ones
+            // Single bulk API call
             const response = await api.post('/meals/bulk', { date, memberIds, type });
             
-            // Re-fetch only this month's meals to get fresh state (most reliable)
-            await refreshMeals();
+            if (Array.isArray(response.data)) {
+                // Replace temp meals with saved documents seamlessly
+                setMeals(prev => {
+                    const withoutTemps = prev.filter(m => !tempMeals.some(tm => tm._id === m._id));
+                    return [...withoutTemps, ...response.data];
+                });
+            }
+            // Non-blocking background sync if needed
+            refreshMeals();
         } catch (error) {
             console.error('Add bulk meal failed', error);
             // Rollback optimistic update
             setMeals(prev => prev.filter(m => !tempMeals.some(tm => tm._id === m._id)));
             alert('Failed to add meals. Please try again.');
         }
-    }, [refreshMeals, addGuestMeal]);
+    }, [members, refreshMeals, addGuestMeal]);
 
     const removeMeal = useCallback(async (date, memberId, type, mealId = null) => {
         // Optimistic UI: Remove item from local state immediately
@@ -466,7 +529,7 @@ export const DataProvider = ({ children }) => {
                 removedItem = prev.find(m => m._id === mealId || m.id === mealId);
                 return prev.filter(m => m._id !== mealId && m.id !== mealId);
             }
-            const idx = prev.findIndex(m => m.date === date && m.memberId === memberId && m.type === type);
+            const idx = prev.findIndex(m => m.date === date && (m.memberId === memberId || m.memberId === String(memberId)) && m.type === type);
             if (idx === -1) return prev;
             removedItem = prev[idx];
             return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
@@ -485,13 +548,22 @@ export const DataProvider = ({ children }) => {
     }, []);
 
     const removeGuestMeal = useCallback(async (guestMealId) => {
+        // Optimistic UI removal
+        let removedItem = null;
+        setGuestMeals(prev => {
+            removedItem = prev.find(m => m._id === guestMealId || m.id === guestMealId);
+            return prev.filter(m => m._id !== guestMealId && m.id !== guestMealId);
+        });
+
         try {
             await api.delete(`/guest-meals/${guestMealId}`);
-            await refreshGuestMeals();
         } catch (error) {
             console.error('Remove guest meal failed', error);
+            if (removedItem) {
+                setGuestMeals(prev => [...prev, removedItem]);
+            }
         }
-    }, [refreshGuestMeals]);
+    }, []);
 
     const clearMonthlyData = useCallback(async (month, password, category = null) => {
         try {

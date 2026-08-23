@@ -13,7 +13,9 @@ const mealSchema = new mongoose.Schema({
 
 // Optimization: Index memberId for faster grouping/summary counts
 mealSchema.index({ memberId: 1 });
-// For regular meals: unique per member per type (lunch/dinner) per day
+mealSchema.index({ date: 1 });
+mealSchema.index({ date: 1, isGuest: 1 });
 mealSchema.index({ date: 1, memberId: 1, type: 1, isGuest: 1 });
+mealSchema.index({ memberId: 1, date: 1 });
 
 module.exports = mongoose.model('Meal', mealSchema);

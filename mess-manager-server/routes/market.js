@@ -90,7 +90,7 @@ router.put('/duty/:month', auth, requireAdmin, async (req, res) => {
 // Get Schedule (by month or all) - filter out rejected
 router.get('/', auth, async (req, res) => {
     try {
-        const schedule = await MarketRequest.find({ status: { $ne: 'rejected' } });
+        const schedule = await MarketRequest.find({ status: { $ne: 'rejected' } }).lean();
         res.json(schedule);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -128,26 +128,27 @@ router.post('/', auth, async (req, res) => {
 
         // If newly approved (or manual_assign), delete/clear ANY other records for this date
         if (updated.status === 'approved') {
-            await MarketRequest.deleteMany({
+            MarketRequest.deleteMany({
                 date,
                 _id: { $ne: updated._id }
-            });
+            }).catch(err => console.error('[Market] Cleanup error:', err));
+            
             // Cleanup notifications for this date
-            await Notification.deleteMany({
+            Notification.deleteMany({
                 type: 'market_request',
                 'metadata.date': date
-            });
+            }).catch(err => console.error('[Market] Notification cleanup error:', err));
         }
 
         if (requestType === 'request') {
-            // Notify Manager
+            // Notify Manager in background
             const targetManager = managerId || 'admin-1';
-            await new Notification({
+            new Notification({
                 userId: targetManager,
                 message: `New Market Request for ${date}`,
                 type: 'market_request',
                 metadata: { date, requesterId: assignedMemberId }
-            }).save();
+            }).save().catch(err => console.error('[Market] Notification save error:', err));
         }
 
         res.json(updated);
@@ -160,7 +161,6 @@ router.post('/', auth, async (req, res) => {
 // Update status by ID (Approve / Reject / Remove)
 router.put('/id/:id', auth, async (req, res) => {
     const { status } = req.body;
-    console.log(`[Market] Received PUT /id/${req.params.id} with status: ${status} from user: ${req.user.name} (${req.user.role})`);
     try {
         let existing = await MarketRequest.findById(req.params.id);
         if (!existing) {
@@ -169,7 +169,6 @@ router.put('/id/:id', auth, async (req, res) => {
         }
 
         if (!existing) {
-            console.log(`[Market] Request ${req.params.id} not found, checking if date cleanup is needed`);
             if (status === 'rejected') {
                 return res.json({ message: 'Request already removed', success: true });
             }
@@ -180,7 +179,6 @@ router.put('/id/:id', auth, async (req, res) => {
         const isManager = await checkIsManager(req.user, existing.date);
 
         if (!isAdmin && !isManager && status === 'approved') {
-            console.log(`[Market] 403 Forbidden: Only admins or managers can approve`);
             return res.status(403).json({ message: 'Only admins or the assigned manager can approve requests' });
         }
 
@@ -188,73 +186,60 @@ router.put('/id/:id', auth, async (req, res) => {
             existing.status = 'approved';
             await existing.save();
 
-            // Auto-delete all other records for the same date so only 1 approved record exists
-            await MarketRequest.deleteMany({
+            // Auto-delete all other records for the same date in background
+            MarketRequest.deleteMany({
                 date: existing.date,
                 _id: { $ne: existing._id }
-            });
+            }).catch(err => console.error('[Market] Conflict delete error:', err));
 
-            // Cleanup notifications
-            await Notification.deleteMany({
+            // Cleanup notifications in background
+            Notification.deleteMany({
                 type: 'market_request',
                 'metadata.date': existing.date
-            });
+            }).catch(err => console.error('[Market] Notification delete error:', err));
 
-            // Notify User (if not OFF_DAY)
+            // Notify User (if not OFF_DAY) in background
             if (existing.assignedMemberId !== 'OFF_DAY') {
-                await new Notification({
+                new Notification({
                     userId: existing.assignedMemberId,
                     message: `Your market request for ${existing.date} is APPROVED.`,
                     type: 'market_approved',
                     metadata: { date: existing.date }
-                }).save();
+                }).save().catch(err => console.error('[Market] Notif error:', err));
             }
 
-            console.log(`[Market] Successfully approved request ${existing._id}`);
             return res.json(existing);
         }
 
         if (status === 'rejected') {
-            // Move to Trash before deleting
-            try {
-                const trashedItem = new Trash({
-                    originalId: req.params.id,
-                    type: 'MarketRequest',
-                    data: existing.toObject(),
-                    deletedBy: req.user.id || req.user.userId || 'system',
-                    deletedByName: req.user.name || 'Unknown'
-                });
-                await trashedItem.save();
-                console.log(`[Market] Saved rejected request to Trash`);
-            } catch (trashErr) {
-                console.error(`[Market] Error saving to Trash:`, trashErr);
-            }
+            // Move to Trash in background
+            new Trash({
+                originalId: req.params.id,
+                type: 'MarketRequest',
+                data: existing.toObject(),
+                deletedBy: req.user.id || req.user.userId || 'system',
+                deletedByName: req.user.name || 'Unknown'
+            }).save().catch(trashErr => console.error('[Market] Trash save error:', trashErr));
 
             // Delete the request and all records on that date
             await MarketRequest.findByIdAndDelete(existing._id);
             if (existing.date) {
-                await MarketRequest.deleteMany({ date: existing.date });
+                MarketRequest.deleteMany({ date: existing.date }).catch(err => console.error('[Market] deleteMany error:', err));
             }
-            console.log(`[Market] Deleted request and all entries for date ${existing.date}`);
 
-            // If admin or manager rejected a member's request (not OFF_DAY and not self-cancel), notify
+            // Background rejection notification
             if (existing.assignedMemberId !== 'OFF_DAY' && existing.assignedMemberId !== req.user.id && existing.assignedMemberId !== req.user.userId) {
-                try {
-                    await new Notification({
-                        userId: existing.assignedMemberId,
-                        message: `Your market duty for ${existing.date} was removed/cancelled.`,
-                        type: 'market_rejected',
-                        metadata: { date: existing.date }
-                    }).save();
-                } catch (notifErr) {
-                    console.error(`[Market] Error sending rejection notification:`, notifErr);
-                }
+                new Notification({
+                    userId: existing.assignedMemberId,
+                    message: `Your market duty for ${existing.date} was removed/cancelled.`,
+                    type: 'market_rejected',
+                    metadata: { date: existing.date }
+                }).save().catch(notifErr => console.error('[Market] Notif error:', notifErr));
             }
 
             return res.json({ message: 'Request removed/rejected', success: true });
         }
 
-        console.log(`[Market] 400 Invalid status: ${status}`);
         res.status(400).json({ message: 'Invalid status' });
     } catch (err) {
         console.error(`[Market] Error processing PUT /id/${req.params.id}:`, err);
@@ -271,25 +256,19 @@ router.delete('/id/:id', auth, async (req, res) => {
         }
 
         if (existing) {
-            try {
-                const trashedItem = new Trash({
-                    originalId: req.params.id,
-                    type: 'MarketRequest',
-                    data: existing.toObject(),
-                    deletedBy: req.user.id || req.user.userId || 'system',
-                    deletedByName: req.user.name || 'Unknown'
-                });
-                await trashedItem.save();
-            } catch (trashErr) {
-                console.error(`[Market] Trash error:`, trashErr);
-            }
+            new Trash({
+                originalId: req.params.id,
+                type: 'MarketRequest',
+                data: existing.toObject(),
+                deletedBy: req.user.id || req.user.userId || 'system',
+                deletedByName: req.user.name || 'Unknown'
+            }).save().catch(trashErr => console.error(`[Market] Trash error:`, trashErr));
 
             await MarketRequest.findByIdAndDelete(existing._id);
             if (existing.date) {
-                await MarketRequest.deleteMany({ date: existing.date });
+                MarketRequest.deleteMany({ date: existing.date }).catch(err => console.error(err));
             }
         } else {
-            // Also try deleting by date
             await MarketRequest.deleteMany({ date: req.params.id });
         }
 
@@ -303,20 +282,17 @@ router.delete('/id/:id', auth, async (req, res) => {
 router.delete('/date/:date', auth, async (req, res) => {
     try {
         const { date } = req.params;
-        const existingRecords = await MarketRequest.find({ date });
-        for (const record of existingRecords) {
-            try {
-                const trashedItem = new Trash({
-                    originalId: record._id.toString(),
-                    type: 'MarketRequest',
-                    data: record.toObject(),
-                    deletedBy: req.user.id || req.user.userId || 'system',
-                    deletedByName: req.user.name || 'Unknown'
-                });
-                await trashedItem.save();
-            } catch (trashErr) {
-                console.error(`[Market] Trash error:`, trashErr);
-            }
+        const existingRecords = await MarketRequest.find({ date }).lean();
+        
+        if (existingRecords.length > 0) {
+            const trashEntries = existingRecords.map(record => ({
+                originalId: record._id.toString(),
+                type: 'MarketRequest',
+                data: record,
+                deletedBy: req.user.id || req.user.userId || 'system',
+                deletedByName: req.user.name || 'Unknown'
+            }));
+            Trash.insertMany(trashEntries).catch(trashErr => console.error(`[Market] Trash bulk error:`, trashErr));
         }
 
         await MarketRequest.deleteMany({ date });

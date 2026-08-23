@@ -32,31 +32,37 @@ const Bin = () => {
 
     const handleRestore = async (id) => {
         if (!confirm('Restore this item to its original section?')) return;
+        const previousItems = [...items];
+        setItems(prev => prev.filter(item => item._id !== id));
         try {
             await api.post(`/trash/restore/${id}`);
-            setItems(items.filter(item => item._id !== id));
             alert('Item restored successfully!');
         } catch (err) {
+            setItems(previousItems); // Rollback on error
             alert('Failed to restore item: ' + (err.response?.data?.message || err.message));
         }
     };
 
     const handleDelete = async (id) => {
         if (!confirm('Permanently delete this item? This action cannot be undone.')) return;
+        const previousItems = [...items];
+        setItems(prev => prev.filter(item => item._id !== id));
         try {
             await api.delete(`/trash/${id}`);
-            setItems(items.filter(item => item._id !== id));
         } catch (err) {
+            setItems(previousItems); // Rollback on error
             alert('Failed to delete item');
         }
     };
 
     const handleClearAll = async () => {
         if (!confirm('Are you sure you want to PERMANENTLY clear the entire bin?')) return;
+        const previousItems = [...items];
+        setItems([]);
         try {
             await api.delete('/trash/clear/all');
-            setItems([]);
         } catch (err) {
+            setItems(previousItems); // Rollback on error
             alert('Failed to clear bin');
         }
     };
