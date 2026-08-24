@@ -71,14 +71,14 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
             isEditable ? "hover:bg-indigo-300/30 dark:hover:bg-white/5" : "opacity-40 grayscale-[0.3]"
         )}>
             <td className={cn(
-                "p-4 min-w-[170px] border-r border-indigo-400/30 dark:border-white/5 font-black sticky left-0 z-20 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-colors",
+                "p-2 sm:p-4 min-w-[120px] sm:min-w-[170px] border-r border-indigo-400/30 dark:border-white/5 font-black sticky left-0 z-20 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-colors text-xs sm:text-sm",
                 isEditable 
                     ? "bg-indigo-300/60 dark:bg-slate-950 text-slate-900 dark:text-slate-100" 
                     : "bg-indigo-300/40 dark:bg-slate-900/40 text-slate-500 dark:text-slate-500 cursor-not-allowed"
             )}>
                 <div className="flex flex-col">
-                    <span className="font-black">{member.name}</span>
-                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">L & D Registry</span>
+                    <span className="font-black truncate">{member.name}</span>
+                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">L & D Registry</span>
                 </div>
             </td>
             {days.map(day => (

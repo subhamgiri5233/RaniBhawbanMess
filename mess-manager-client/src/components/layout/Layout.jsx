@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import BottomNav from './BottomNav';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
@@ -8,7 +9,7 @@ import AnimatedRoutes from '../transitions/AnimatedRoutes';
 import GlobalMonthSelector from '../ui/GlobalMonthSelector';
 
 import { useState } from 'react';
-import { Menu, Sun, Moon, PanelLeftClose, PanelLeftOpen, RefreshCw } from 'lucide-react';
+import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import NotificationWidget from '../NotificationWidget';
 
@@ -42,21 +43,25 @@ const Layout = () => {
                 isCollapsed={isDesktopCollapsed}
             />
 
-            {/* Mobile Header - Premium Floating Glassmorphism */}
-            <div className="md:hidden sticky top-0 z-[40] px-4 py-3 bg-indigo-950/40 dark:bg-slate-950/80 backdrop-blur-xl border-b border-indigo-900/50 dark:border-white/10 flex items-center justify-between transition-all shadow-sm shadow-indigo-950/5">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-white/10 dark:bg-white/5 flex items-center justify-center shadow-lg border border-white/10 overflow-hidden">
-                        <img src="/icons/home.png" alt="Logo" className="w-6 h-6 object-contain" />
+            {/* Mobile Header - Compact Premium Floating Glassmorphism */}
+            <div className="md:hidden sticky top-0 z-[40] px-3.5 py-2.5 bg-indigo-950/70 dark:bg-slate-950/80 backdrop-blur-xl border-b border-indigo-900/40 dark:border-white/10 flex items-center justify-between transition-all shadow-sm">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-white/10 dark:bg-white/5 flex items-center justify-center shadow-md border border-white/10 overflow-hidden">
+                        <img src="/icons/home.png" alt="Logo" className="w-5 h-5 object-contain" />
                     </div>
-                    <h2 className="text-sm font-black text-indigo-100 dark:text-slate-100 uppercase tracking-tighter">Rani Bhawban Mess</h2>
+                    <div className="flex flex-col">
+                        <h2 className="text-xs font-black text-indigo-100 dark:text-slate-100 uppercase tracking-tight leading-none">Rani Bhawban</h2>
+                        <span className="text-[9px] font-bold text-indigo-300/80 dark:text-slate-400 leading-tight">Mess Manager</span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <ThemeToggle />
                     <button
                         onClick={() => setIsSidebarOpen(true)}
-                        className="p-2.5 ml-1 bg-indigo-900/60 dark:bg-indigo-500/10 text-indigo-100 dark:text-indigo-400 rounded-xl transition-all shadow-inner active:scale-90 border border-indigo-800/30 dark:border-indigo-500/20"
+                        className="p-2 bg-indigo-900/60 dark:bg-indigo-500/10 text-indigo-100 dark:text-indigo-400 rounded-xl transition-all active:scale-90 border border-indigo-800/30 dark:border-indigo-500/20"
+                        title="Open Menu"
                     >
-                        <Menu size={22} />
+                        <Menu size={18} />
                     </button>
                 </div>
             </div>
@@ -76,10 +81,10 @@ const Layout = () => {
             </div>
 
             <main
-                className={`min-h-screen p-4 md:p-8 transition-all duration-300 ${isDesktopCollapsed ? 'md:ml-16' : 'md:ml-64'}`}
+                className={`min-h-screen p-2.5 sm:p-4 md:p-8 pb-24 md:pb-8 transition-all duration-300 ${isDesktopCollapsed ? 'md:ml-16' : 'md:ml-64'}`}
             >
-                <div className="max-w-6xl mx-auto space-y-8">
-                    <div className="sticky top-[57px] md:top-0 z-30 -mx-4 px-4 py-2 md:-mx-8 md:px-8 md:py-4 bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-md border-b border-indigo-100 dark:border-white/5 transition-all">
+                <div className="max-w-6xl mx-auto space-y-4 md:space-y-8">
+                    <div className="sticky top-[49px] md:top-0 z-30 -mx-2.5 px-2.5 py-1.5 sm:-mx-4 sm:px-4 sm:py-2 md:-mx-8 md:px-8 md:py-4 bg-slate-50/70 dark:bg-slate-950/70 backdrop-blur-md border-b border-indigo-100/60 dark:border-white/5 transition-all">
                         <GlobalMonthSelector />
                     </div>
                     
@@ -91,7 +96,8 @@ const Layout = () => {
                 </div>
             </main>
 
-
+            {/* Mobile Bottom Navigation Bar */}
+            <BottomNav onOpenSidebar={() => setIsSidebarOpen(true)} />
         </div>
     );
 };
