@@ -122,6 +122,21 @@ const Management = () => {
         }
     }, []);
 
+    // Weekly Meat Day state & handler
+    const rawMeatSetting = settings?.find(s => s.key === 'weekly_meat_day')?.value || 'Sunday';
+    const [localMeatDays, setLocalMeatDays] = useState(null);
+
+    const selectedMeatDays = (localMeatDays !== null ? localMeatDays : rawMeatSetting)
+        .split(',')
+        .map(d => d.trim().toLowerCase())
+        .filter(Boolean);
+
+    const handleToggleMeatDay = async (dayName) => {
+        const val = dayName;
+        setLocalMeatDays(val);
+        await updateSystemSetting('weekly_meat_day', val);
+    };
+
     // Fetch market duty counts
     const fetchMarketDuties = useCallback(async () => {
         if (!activeMonth) return;
@@ -422,7 +437,7 @@ const Management = () => {
                                             >
                                                 <option value="">-- Select Member --</option>
                                                 {members.map(m => (
-                                                    <option key={m._id} value={m._id} className="dark:bg-slate-900">{m.name}</option>
+                                                    <option key={m._id || m.id} value={m._id || m.id} className="dark:bg-slate-900">{m.name}</option>
                                                 ))}
                                             </select>
                                             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
@@ -592,7 +607,7 @@ const Management = () => {
                                             >
                                                 <option value="">-- Select Member --</option>
                                                 {members.map(m => (
-                                                    <option key={m._id} value={m._id} className="dark:bg-slate-900">{m.name}</option>
+                                                    <option key={m._id || m.id} value={m._id || m.id} className="dark:bg-slate-900">{m.name}</option>
                                                 ))}
                                             </select>
                                             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
@@ -783,6 +798,58 @@ const Management = () => {
                                         <SettingItem label="🥚 Egg" settingKey="guest_price_egg" />
                                     </div>
                                     <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-relaxed italic">Changes will apply once you click the sync button on each item.</p>
+                                </div>
+
+                                {/* Weekly Meat Day Schedule */}
+                                <div className="md:col-span-2 lg:col-span-3 space-y-3 p-5 sm:p-6 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/80 dark:border-white/5">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                                            <span className="p-1.5 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/20">🍗</span>
+                                            Weekly Meat Day (Special Meal Day)
+                                        </h3>
+                                        <span className="text-[9.5px] font-black text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20 uppercase tracking-wider self-start sm:self-auto">
+                                            Highlighted in Orange on Meal Calendar
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 pt-1">
+                                        {[
+                                            { id: 'Sunday', label: 'Sunday', short: 'Sun' },
+                                            { id: 'Monday', label: 'Monday', short: 'Mon' },
+                                            { id: 'Tuesday', label: 'Tuesday', short: 'Tue' },
+                                            { id: 'Wednesday', label: 'Wednesday', short: 'Wed' },
+                                            { id: 'Thursday', label: 'Thursday', short: 'Thu' },
+                                            { id: 'Friday', label: 'Friday', short: 'Fri' },
+                                            { id: 'Saturday', label: 'Saturday', short: 'Sat' }
+                                        ].map((day) => {
+                                            const isSelected = selectedMeatDays.includes(day.id.toLowerCase()) || selectedMeatDays.includes(day.short.toLowerCase());
+                                            return (
+                                                <button
+                                                    key={day.id}
+                                                    type="button"
+                                                    onClick={() => handleToggleMeatDay(day.id)}
+                                                    className={cn(
+                                                        "p-3.5 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 group relative overflow-hidden",
+                                                        isSelected
+                                                            ? "bg-gradient-to-b from-orange-500 to-amber-600 text-white border-orange-500 shadow-md shadow-orange-500/25 ring-2 ring-orange-400/40"
+                                                            : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-orange-400"
+                                                    )}
+                                                >
+                                                    <span className="text-xl transition-transform group-hover:scale-110">🍗</span>
+                                                    <span className="text-xs font-black uppercase tracking-wider">{day.short}</span>
+                                                    <span className={cn(
+                                                        "text-[8.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight",
+                                                        isSelected ? "bg-white/25 text-white" : "text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800"
+                                                    )}>
+                                                        {isSelected ? 'MEAT DAY' : 'REGULAR'}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 leading-relaxed italic">
+                                        Select which day(s) meat is served in the mess. These days will automatically be highlighted in vibrant orange in the monthly meal attendance sheet.
+                                    </p>
                                 </div>
                             </div>
                         </div>

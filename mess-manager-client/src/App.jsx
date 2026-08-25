@@ -1,33 +1,33 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/layout/Layout';
 import ScrollToTop from './components/layout/ScrollToTop';
 
-// Lazy load pages
-const Login = lazy(() => import('./pages/Login'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const LandingPage = lazy(() => import('./pages/LandingPage'));
+// Direct page imports for instantaneous navigation
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import LandingPage from './pages/LandingPage';
 
 // Admin Pages
-const Members = lazy(() => import('./pages/admin/Members'));
-const Meals = lazy(() => import('./pages/admin/Meals'));
-const Expenses = lazy(() => import('./pages/admin/Expenses'));
-const Calculator = lazy(() => import('./pages/admin/Calculator'));
-const Settings = lazy(() => import('./pages/admin/Settings'));
-const Management = lazy(() => import('./pages/admin/Management'));
-const MonthlySummary = lazy(() => import('./pages/admin/MonthlySummary'));
-const Bin = lazy(() => import('./pages/admin/Bin'));
+import Members from './pages/admin/Members';
+import Meals from './pages/admin/Meals';
+import Expenses from './pages/admin/Expenses';
+import Calculator from './pages/admin/Calculator';
+import Settings from './pages/admin/Settings';
+import Management from './pages/admin/Management';
+import MonthlySummary from './pages/admin/MonthlySummary';
+import Bin from './pages/admin/Bin';
 
 // Member Pages
-const Market = lazy(() => import('./pages/member/MarketDuty'));
-const AddExpense = lazy(() => import('./pages/member/AddExpense'));
-const MemberExpenses = lazy(() => import('./pages/member/MemberExpenses'));
-const Payments = lazy(() => import('./pages/member/Payments'));
-const Reports = lazy(() => import('./pages/member/Reports'));
-const MemberMeals = lazy(() => import('./pages/member/MemberMeals'));
+import Market from './pages/member/MarketDuty';
+import AddExpense from './pages/member/AddExpense';
+import MemberExpenses from './pages/member/MemberExpenses';
+import Payments from './pages/member/Payments';
+import Reports from './pages/member/Reports';
+import MemberMeals from './pages/member/MemberMeals';
 
 const LoadingScreen = () => (
   <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">

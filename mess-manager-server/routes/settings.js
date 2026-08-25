@@ -72,6 +72,7 @@ const initializeDefaultSettings = async () => {
         { key: 'guest_price_egg', value: '40', category: 'system' },
         { key: 'guest_price_veg', value: '35', category: 'system' },
         { key: 'guest_price_meat', value: '50', category: 'system' },
+        { key: 'weekly_meat_day', value: 'Sunday', category: 'system' },
         { key: 'gita_start_date', value: '2026-04-01', category: 'system' },
         { key: 'gita_shlokas_completed', value: '0', category: 'system' }
     ];

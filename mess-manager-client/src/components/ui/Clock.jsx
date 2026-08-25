@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo, useRef, memo } from 'react';
-import Card from './Card';
 import { formatBengaliDate } from '../../utils/bengaliCalendar';
-import { useData } from '../../context/DataContext';
 import AnalogClock from './AnalogClock';
-import { Calendar as CalendarIcon, Sparkles } from 'lucide-react';
+import { Calendar as CalendarIcon, Sparkles, Clock as ClockIcon } from 'lucide-react';
 
 const Clock = () => {
     const [time, setTime] = useState(new Date());
@@ -62,22 +60,26 @@ const Clock = () => {
     const bengaliDate = useMemo(() => formatBengaliDate(today), [today]);
 
     const analogTheme = {
-        border: 'border-indigo-500/20 dark:border-indigo-400/20',
-        centerDot: 'bg-indigo-600 dark:bg-indigo-400',
-        mainMarker: 'bg-indigo-600 dark:bg-indigo-400',
-        secondaryMarker: 'bg-slate-300 dark:bg-slate-700',
-        hourHand: 'bg-slate-800 dark:bg-slate-200',
-        minuteHand: 'bg-indigo-600 dark:bg-indigo-400',
-        secondHand: 'bg-rose-500 dark:bg-rose-400'
+        border: 'border-indigo-400/30',
+        centerDot: 'bg-indigo-400',
+        mainMarker: 'bg-indigo-400',
+        secondaryMarker: 'bg-slate-500',
+        hourHand: 'bg-white',
+        minuteHand: 'bg-indigo-400',
+        secondHand: 'bg-rose-400'
     };
 
     return (
-        <Card className="p-4 sm:p-6 bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/5 backdrop-blur-xl shadow-sm rounded-2xl md:rounded-[1.5rem]">
-            <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800/80 dark:border-white/10 shadow-lg shadow-indigo-950/20 text-white p-4 sm:p-6 transition-all">
+            {/* Ambient Background Glows */}
+            <div className="absolute -top-12 -left-12 w-48 h-48 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6">
                 
-                {/* Live Digital Clock Section - Centered */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left">
-                    <div className="shrink-0">
+                {/* Left: Time & Analog Dial */}
+                <div className="flex items-center gap-4 sm:gap-5 w-full md:w-auto justify-center md:justify-start">
+                    <div className="hidden xs:block shrink-0 ring-4 ring-white/5 rounded-full">
                         <AnalogClock
                             hourAngle={timeValues.hourAngle}
                             minuteAngle={timeValues.minuteAngle}
@@ -85,68 +87,73 @@ const Clock = () => {
                             theme={analogTheme}
                         />
                     </div>
-                    
-                    <div className="flex flex-col items-center sm:items-start">
-                        <div className="flex items-center gap-1.5 mb-1 justify-center sm:justify-start">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-[9.5px] font-extrabold uppercase tracking-widest text-slate-400">Live Time</span>
+
+                    <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-300/80">Live Mess Time</span>
                         </div>
-                        <div className="flex items-baseline justify-center sm:justify-start gap-1">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight">
+
+                        <div className="flex items-baseline gap-1 font-mono">
+                            <span className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
                                 {digitalTime.hour}
                             </span>
-                            <span className="text-xl sm:text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 animate-pulse">:</span>
-                            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight">
+                            <span className="text-2xl sm:text-3xl font-black text-indigo-400 animate-pulse">:</span>
+                            <span className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
                                 {digitalTime.minute}
                             </span>
-                            <span className="text-xl sm:text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 animate-pulse">:</span>
-                            <span className="text-lg sm:text-xl font-extrabold text-rose-600 dark:text-rose-400 tabular-nums">
+                            <span className="text-2xl sm:text-3xl font-black text-indigo-400 animate-pulse">:</span>
+                            <span className="text-xl sm:text-2xl font-black text-rose-400">
                                 {digitalTime.second}
                             </span>
-                            <span className="ml-1.5 px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold uppercase border border-indigo-500/20">
+                            <span className="ml-2 px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-200 text-[10px] font-black uppercase tracking-wider border border-indigo-400/30">
                                 {digitalTime.ampm}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div className="hidden lg:block h-12 w-px bg-slate-200/80 dark:bg-white/10" />
+                {/* Subtle Vertical Divider on Large Screens */}
+                <div className="hidden md:block h-12 w-px bg-white/10" />
 
-                {/* Dual Calendars: English & Bengali in sleek centered badges */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto lg:max-w-xl">
-                    {/* Gregorian Calendar */}
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 flex items-center justify-center sm:justify-start gap-3">
-                        <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-500/20 shrink-0">
+                {/* Right: Dual Calendar Badges (English & Bengali) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 w-full md:w-auto md:min-w-[340px]">
+                    {/* Gregorian Date */}
+                    <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-white/[0.06] hover:bg-white/[0.09] border border-white/10 backdrop-blur-md transition-all">
+                        <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-400/20 shrink-0">
                             <CalendarIcon size={16} />
                         </div>
-                        <div className="min-w-0 text-left">
-                            <div className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                        <div className="min-w-0">
+                            <div className="text-[9.5px] font-black text-indigo-300 uppercase tracking-widest leading-none mb-1">
                                 {dateInfo.day}
                             </div>
-                            <p className="text-xs font-extrabold text-slate-700 dark:text-slate-300 tracking-tight truncate">
+                            <div className="text-xs font-black text-slate-100 tracking-tight truncate">
                                 {dateInfo.month} {dateInfo.date}, {dateInfo.year}
-                            </p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Bengali Calendar */}
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 flex items-center justify-center sm:justify-start gap-3">
-                        <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-500/20 shrink-0">
+                    {/* Bengali Calendar Date */}
+                    <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-white/[0.06] hover:bg-white/[0.09] border border-white/10 backdrop-blur-md transition-all">
+                        <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-400/20 shrink-0">
                             <Sparkles size={16} />
                         </div>
-                        <div className="min-w-0 text-left">
-                            <div className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                        <div className="min-w-0">
+                            <div className="text-[9.5px] font-black text-amber-300 uppercase tracking-widest leading-none mb-1">
                                 {bengaliDate.day}
                             </div>
-                            <p className="text-xs font-extrabold text-slate-700 dark:text-slate-300 tracking-tight truncate">
+                            <div className="text-xs font-black text-slate-100 tracking-tight truncate">
                                 {bengaliDate.date} {bengaliDate.month}, {bengaliDate.year}
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
             </div>
-        </Card>
+        </div>
     );
 };
 

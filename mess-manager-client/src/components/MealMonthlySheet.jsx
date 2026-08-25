@@ -1,11 +1,24 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { getDaysInMonth, format, parseISO } from 'date-fns';
-import { Check, X, Info, TrendingUp, Sparkles } from 'lucide-react';
+import { Check, X, Info, TrendingUp, Sparkles, Drumstick } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useData } from '../context/DataContext';
 
-const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMouseEnter, onMouseLeave, isHoveredRowDay, isEditable }) => {
-    const lunchStatus = getStatus(memberId, day.dateStr, 'lunch');
-    const dinnerStatus = getStatus(memberId, day.dateStr, 'dinner');
+const MealCell = React.memo(({
+    day,
+    memberId,
+    todayStr,
+    onClick,
+    onMouseEnter,
+    onMouseLeave,
+    isHoveredRowDay,
+    isEditable,
+    isMeatDay,
+    lunchStatus,
+    lunchNum,
+    dinnerStatus,
+    dinnerNum
+}) => {
     const isToday = day.dateStr === todayStr;
 
     const handleAction = (e, type) => {
@@ -16,54 +29,81 @@ const MealCell = React.memo(({ day, memberId, getStatus, todayStr, onClick, onMo
     return (
         <td
             className={cn(
-                "p-1.5 border-r border-indigo-300/20 dark:border-white/5 text-center transition-all relative group/cell",
+                "p-1 border-r border-indigo-300/20 dark:border-white/5 text-center transition-all relative group/cell",
                 isEditable ? "cursor-pointer" : "cursor-not-allowed opacity-40",
                 isToday && "bg-primary-500/10 dark:bg-primary-500/5",
                 !isToday && isHoveredRowDay && "bg-indigo-300/30 dark:bg-slate-800/20",
-                !isToday && format(parseISO(day.dateStr), 'i') === '7' && "bg-rose-500/[0.03] dark:bg-rose-500/[0.02]"
+                !isToday && isMeatDay && "bg-orange-500/[0.04] dark:bg-orange-500/[0.03]",
+                !isToday && !isMeatDay && format(parseISO(day.dateStr), 'i') === '7' && "bg-rose-500/[0.03] dark:bg-rose-500/[0.02]"
             )}
             onMouseEnter={() => onMouseEnter({ dateStr: day.dateStr, dayNum: day.dayNum, memberId })}
             onMouseLeave={onMouseLeave}
         >
-            <div className="flex flex-col gap-1.5 items-center justify-center">
-                {/* Lunch Indicator */}
+            <div className="flex flex-col gap-1 items-center justify-center">
+                {/* Lunch Indicator with Cumulative Running Number */}
                 <div
                     onClick={(e) => handleAction(e, 'lunch')}
                     className={cn(
-                        "w-5 h-5 rounded-[0.4rem] flex items-center justify-center transition-all duration-300 relative z-10",
+                        "w-5 h-5 rounded-md flex items-center justify-center text-[9.5px] font-black transition-all",
                         lunchStatus
-                            ? "bg-emerald-400/30 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"
+                            ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/25"
                             : (!lunchStatus && day.dateStr <= todayStr)
-                                ? "bg-rose-400/30 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400"
-                                : "bg-indigo-400/20 dark:bg-slate-900/50 text-indigo-500/60 dark:text-slate-600 hover:scale-125 hover:bg-indigo-400/30"
+                                ? "bg-rose-500 text-white shadow-sm shadow-rose-500/20"
+                                : "bg-slate-200/50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700"
                     )}
-                    title="Lunch"
+                    title={`Lunch: ${lunchStatus ? `Meal #${lunchNum}` : 'Off'}`}
                 >
-                    {lunchStatus ? <Check size={10} strokeWidth={3} /> : <X size={8} strokeWidth={3} />}
+                    {lunchStatus ? lunchNum : '✕'}
                 </div>
-                {/* Dinner Indicator */}
+
+                {/* Dinner Indicator with Cumulative Running Number */}
                 <div
                     onClick={(e) => handleAction(e, 'dinner')}
                     className={cn(
-                        "w-5 h-5 rounded-[0.4rem] flex items-center justify-center transition-all duration-300 relative z-10",
+                        "w-5 h-5 rounded-md flex items-center justify-center text-[9.5px] font-black transition-all",
                         dinnerStatus
-                            ? "bg-indigo-400/30 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400"
+                            ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/25"
                             : (!dinnerStatus && day.dateStr <= todayStr)
-                                ? "bg-rose-400/30 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400"
-                                : "bg-indigo-400/20 dark:bg-slate-900/50 text-indigo-500/60 dark:text-slate-600 hover:scale-125 hover:bg-indigo-400/30"
+                                ? "bg-rose-500 text-white shadow-sm shadow-rose-500/20"
+                                : "bg-slate-200/50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700"
                     )}
-                    title="Dinner"
+                    title={`Dinner: ${dinnerStatus ? `Meal #${dinnerNum}` : 'Off'}`}
                 >
-                    {dinnerStatus ? <Check size={10} strokeWidth={3} /> : <X size={8} strokeWidth={3} />}
+                    {dinnerStatus ? dinnerNum : '✕'}
                 </div>
             </div>
         </td>
     );
 });
 
-const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellClick, onCellMouseEnter, onCellMouseLeave, hoveredCell, editableMemberId }) => {
+const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellClick, onCellMouseEnter, onCellMouseLeave, hoveredCell, editableMemberId, meatDaysSet }) => {
     const mId = member._id || member.id;
     const isEditable = !editableMemberId || String(editableMemberId) === String(mId);
+
+    // Compute cumulative running meal numbers for this member across the month
+    let runningCount = 0;
+    const dayMealData = days.map(day => {
+        const lunchStatus = getStatus(mId, day.dateStr, 'lunch');
+        let lunchNum = null;
+        if (lunchStatus) {
+            runningCount++;
+            lunchNum = runningCount;
+        }
+
+        const dinnerStatus = getStatus(mId, day.dateStr, 'dinner');
+        let dinnerNum = null;
+        if (dinnerStatus) {
+            runningCount++;
+            dinnerNum = runningCount;
+        }
+
+        return {
+            lunchStatus,
+            lunchNum,
+            dinnerStatus,
+            dinnerNum
+        };
+    });
 
     return (
         <tr className={cn(
@@ -78,23 +118,35 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
             )}>
                 <div className="flex flex-col">
                     <span className="font-black truncate">{member.name}</span>
-                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">L & D Registry</span>
+                    <span className="text-[7px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Cumulative Meals</span>
                 </div>
             </td>
-            {days.map(day => (
-                <MealCell
-                    key={`${mId}-${day.dayNum}`}
-                    day={day}
-                    memberId={mId}
-                    getStatus={getStatus}
-                    todayStr={todayStr}
-                    onClick={onCellClick}
-                    onMouseEnter={onCellMouseEnter}
-                    onMouseLeave={onCellMouseLeave}
-                    isHoveredRowDay={hoveredCell?.dayNum === day.dayNum}
-                    isEditable={isEditable}
-                />
-            ))}
+            {days.map((day, idx) => {
+                const parsedDate = parseISO(day.dateStr);
+                const dayNameFull = format(parsedDate, 'EEEE').toLowerCase();
+                const dayNameShort = format(parsedDate, 'EEE').toLowerCase();
+                const isMeatDay = meatDaysSet.has(dayNameFull) || meatDaysSet.has(dayNameShort);
+                const mealData = dayMealData[idx];
+
+                return (
+                    <MealCell
+                        key={`${mId}-${day.dayNum}`}
+                        day={day}
+                        memberId={mId}
+                        todayStr={todayStr}
+                        onClick={onCellClick}
+                        onMouseEnter={onCellMouseEnter}
+                        onMouseLeave={onCellMouseLeave}
+                        isHoveredRowDay={hoveredCell?.dayNum === day.dayNum}
+                        isEditable={isEditable}
+                        isMeatDay={isMeatDay}
+                        lunchStatus={mealData.lunchStatus}
+                        lunchNum={mealData.lunchNum}
+                        dinnerStatus={mealData.dinnerStatus}
+                        dinnerNum={mealData.dinnerNum}
+                    />
+                );
+            })}
             <td className="p-4 text-center font-black backdrop-blur-sm bg-indigo-300/30 dark:bg-indigo-500/5">
                 <div className="text-sm text-indigo-600 dark:text-indigo-400">{total}</div>
                 <div className="text-[7px] font-black text-slate-400 uppercase tracking-tight mt-0.5">Total meals</div>
@@ -104,6 +156,17 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
 });
 
 const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editableMemberId }) => {
+    const { settings } = useData();
+
+    // Get weekly meat day from system settings (default: Sunday)
+    const meatDaysSet = useMemo(() => {
+        if (!settings || !Array.isArray(settings)) return new Set(['sunday', 'sun']);
+        const s = settings.find(item => item.key === 'weekly_meat_day');
+        const raw = s?.value || 'Sunday';
+        const list = raw.split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
+        return new Set(list.length > 0 ? list : ['sunday', 'sun']);
+    }, [settings]);
+
     // 1. Get days in the month
     const currentDate = useMemo(() => parseISO(selectedDate), [selectedDate]);
     const year = currentDate.getFullYear();
@@ -122,7 +185,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
     // Today's date string for highlighting - Memoized
     const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
 
-    // 3. Optimized Meal Lookup using a Map (O(1) instead of O(N))
+    // 3. Optimized Meal Lookup using a Map
     const mealsMap = useMemo(() => {
         const map = new Map();
         (meals || []).forEach(m => {
@@ -138,7 +201,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
         return mealsMap.has(`${memberId}|${dateStr}|${type}`);
     };
 
-    // 4. Calculate All Member Totals in ONE PASS (O(N + M))
+    // 4. Calculate All Member Totals in ONE PASS
     const currentMonthStr = useMemo(() => format(currentDate, 'yyyy-MM'), [currentDate]);
     
     const { memberTotals, monthlyGrandTotal } = useMemo(() => {
@@ -146,10 +209,8 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
         let grandTotal = 0;
         const currentMemberIds = new Set((members || []).map(m => m._id || m.id));
         
-        // Initialize totals
         currentMemberIds.forEach(id => totals[id] = 0);
         
-        // Single pass on meals
         (meals || []).forEach(m => {
             if (m && m.memberId && m.date && m.date.startsWith(currentMonthStr)) {
                 if (totals[m.memberId] !== undefined) {
@@ -167,7 +228,6 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
     const [hoveredCell, setHoveredCell] = useState(null);
     const popoverRef = useRef(null);
 
-    // Close popover when clicking outside
     useEffect(() => {
         if (!activeCell) return;
         const handleClickOutside = (event) => {
@@ -178,25 +238,29 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
         const timerId = setTimeout(() => {
             document.addEventListener('mousedown', handleClickOutside);
         }, 100);
+
         return () => {
             clearTimeout(timerId);
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [activeCell]);
 
-    const handleCellClick = (e, memberId, dateStr, type) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setActiveCell({ memberId, date: dateStr, type });
+    const handleCellClick = (e, memberId, date, type) => {
+        setActiveCell({
+            memberId,
+            date,
+            type,
+            currentStatus: getStatus(memberId, date, type)
+        });
     };
 
-    const handleSelectStatus = (status) => {
+    const handleSelectStatus = async (status) => {
         if (!activeCell) return;
-        onToggleMeal(activeCell.memberId, activeCell.date, activeCell.type, status);
+        const { memberId, date, type } = activeCell;
         setActiveCell(null);
+        await onToggleMeal(memberId, date, type, status);
     };
 
-    // Sort members: editableMemberId first
     const sortedMembers = useMemo(() => {
         if (!editableMemberId || !members) return members;
         return [...members].sort((a, b) => {
@@ -208,17 +272,21 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
         });
     }, [members, editableMemberId]);
 
-    // 5. MEMOIZED GRID - THIS IS THE CRITICAL UI PERFORMANCE FIX
-    // We isolate the grid so it only re-renders when data (meals/members) changes,
-    // not when the 'activeCell' (popup) state changes.
+    // Memoized Grid
     const MealGrid = useMemo(() => {
         return (
             <table className="w-full text-[10px] md:text-xs border-collapse bg-transparent transition-colors">
                 <thead>
                     <tr className="bg-indigo-300/40 dark:bg-slate-900/80 backdrop-blur-md border-b border-indigo-300/30 dark:border-white/5 sticky top-0 z-20">
-                        <th className="p-4 border-r border-indigo-400/30 dark:border-white/5 text-left min-w-[180px] sticky left-0 bg-indigo-300/60 dark:bg-slate-900 z-30 font-black uppercase tracking-widest text-indigo-800/60 dark:text-slate-400">Inventory Registry</th>
+                        <th className="p-4 border-r border-indigo-400/30 dark:border-white/5 text-left min-w-[180px] sticky left-0 bg-indigo-300/60 dark:bg-slate-900 z-30 font-black uppercase tracking-widest text-indigo-800/60 dark:text-slate-400">Member Attendance</th>
                         {days.map(day => {
                             const isToday = day.dateStr === todayStr;
+                            const parsedDate = parseISO(day.dateStr);
+                            const dayNameFull = format(parsedDate, 'EEEE').toLowerCase();
+                            const dayNameShort = format(parsedDate, 'EEE').toLowerCase();
+                            const isMeatDay = meatDaysSet.has(dayNameFull) || meatDaysSet.has(dayNameShort);
+                            const isSunday = format(parsedDate, 'i') === '7';
+
                             return (
                                 <th
                                     key={day.dayNum}
@@ -228,19 +296,26 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
                                             ? 'bg-primary-600 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
                                             : hoveredCell?.dayNum === day.dayNum
                                                 ? 'bg-primary-500 text-white'
-                                                : 'text-indigo-600/60 dark:text-slate-500 bg-indigo-300/30 dark:bg-slate-950/40'
+                                                : isMeatDay
+                                                    ? 'bg-orange-500/10 dark:bg-orange-500/5 text-orange-600 dark:text-orange-400'
+                                                    : 'text-indigo-600/60 dark:text-slate-500 bg-indigo-300/30 dark:bg-slate-950/40'
                                     )}
                                 >
                                     <div className="flex flex-col items-center gap-0">
                                         <span className={cn(
                                             "text-[6px] uppercase font-black tracking-tighter mb-[2px]",
-                                            format(parseISO(day.dateStr), 'i') === '7' ? "text-rose-500 dark:text-rose-400 opacity-100" : "opacity-60"
+                                            isMeatDay 
+                                                ? "text-orange-500 dark:text-orange-400 opacity-100 font-extrabold" 
+                                                : isSunday 
+                                                    ? "text-rose-500 dark:text-rose-400 opacity-100" 
+                                                    : "opacity-60"
                                         )}>
-                                            {format(parseISO(day.dateStr), 'EEE')}
+                                            {format(parsedDate, 'EEE')}
                                         </span>
                                         <span className={cn(
-                                            "flex items-center justify-center w-5 h-5 rounded-full transition-all",
-                                            format(parseISO(day.dateStr), 'i') === '7' && !isToday && "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                                            "flex items-center justify-center w-5 h-5 rounded-full transition-all text-[9.5px]",
+                                            isMeatDay && !isToday && "bg-orange-500 text-white shadow-lg shadow-orange-500/30 ring-1 ring-orange-400/40",
+                                            !isMeatDay && isSunday && !isToday && "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
                                         )}>
                                             {day.dayNum}
                                         </span>
@@ -273,14 +348,15 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
                             onCellMouseLeave={() => setHoveredCell(null)}
                             hoveredCell={hoveredCell}
                             editableMemberId={editableMemberId}
+                            meatDaysSet={meatDaysSet}
                         />
                     ))}
                 </tbody>
             </table>
         );
-    }, [sortedMembers, days, getStatus, todayStr, memberTotals, handleCellClick, hoveredCell, editableMemberId]);
+    }, [sortedMembers, days, getStatus, todayStr, memberTotals, handleCellClick, hoveredCell, editableMemberId, meatDaysSet]);
 
-    // Pre-calculate popup labels - extremely fast
+    // Pre-calculate popup labels
     const popupLabel = useMemo(() => {
         if (!activeCell) return null;
         const member = (members || []).find(m => (m._id || m.id) === activeCell.memberId);
@@ -297,96 +373,103 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
                 {MealGrid}
             </div>
 
-            <div className="p-6 bg-indigo-300/30 dark:bg-slate-900/80 backdrop-blur-md border-t border-indigo-300/40 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 rounded-b-[2rem] z-20 relative">
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-400/30 dark:bg-emerald-500/10 flex items-center justify-center">
-                            <Check size={14} className="text-emerald-700 dark:text-emerald-400" />
+            <div className="p-5 sm:p-6 bg-indigo-300/30 dark:bg-slate-900/80 backdrop-blur-md border-t border-indigo-300/40 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 rounded-b-[2rem] z-20 relative">
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-black text-[10px]">
+                            1
                         </div>
-                        <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Active Presence</span>
+                        <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider">Lunch (#Count)</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-indigo-400/30 dark:bg-white/5 flex items-center justify-center">
-                            <X size={14} className="text-indigo-600/60" />
+
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-[10px]">
+                            2
                         </div>
-                        <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Absence Registry</span>
+                        <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider">Dinner (#Count)</span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center font-black text-[11px]">
+                            ✕
+                        </div>
+                        <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider">Meal Off</span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md shadow-orange-500/25">
+                            <Drumstick size={13} />
+                        </div>
+                        <span className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-wider">Weekly Meat Day</span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-8 bg-indigo-300/40 dark:bg-slate-950 p-2 pl-6 pr-2 rounded-2xl border border-indigo-300/40 dark:border-white/5 shadow-sm">
+                <div className="flex items-center gap-6 bg-indigo-300/40 dark:bg-slate-950 p-2 pl-5 pr-2 rounded-2xl border border-indigo-300/40 dark:border-white/5 shadow-sm">
                     <div>
-                        <p className="text-[8px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-[0.2em] text-right">My Meals This Month</p>
-                        <p className="text-lg font-black text-slate-900 dark:text-slate-100 tracking-tighter text-right">{monthlyGrandTotal} <span className="text-[10px] font-bold text-slate-500 ml-1 tracking-normal">MEALS</span></p>
+                        <p className="text-[8px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-[0.2em] text-right">Total Meals This Month</p>
+                        <p className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100 tracking-tighter text-right">{monthlyGrandTotal} <span className="text-[10px] font-bold text-slate-500 ml-1 tracking-normal">MEALS</span></p>
                     </div>
-                    <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-                        <TrendingUp size={20} className="text-white" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30 shrink-0">
+                        <TrendingUp size={18} className="text-white" />
                     </div>
                 </div>
             </div>
 
-                {activeCell && popupLabel && (
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
-                        <div
-                            onClick={() => setActiveCell(null)}
-                            className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
-                        />
-                        <div
-                            ref={popoverRef}
-                            className="relative w-full max-w-sm"
-                        >
-                            <div className="bg-indigo-50 dark:bg-slate-900 shadow-2xl rounded-[1.5rem] border border-indigo-200 dark:border-white/10 p-8 overflow-hidden relative group">
-                                <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
-                                    <TrendingUp size={120} className="text-primary-500" />
-                                </div>
+            {activeCell && popupLabel && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
+                    <div
+                        onClick={() => setActiveCell(null)}
+                        className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+                    />
+                    <div
+                        ref={popoverRef}
+                        className="relative w-full max-w-sm"
+                    >
+                        <div className="bg-indigo-50 dark:bg-slate-900 shadow-2xl rounded-[1.5rem] border border-indigo-200 dark:border-white/10 p-8 overflow-hidden relative group">
+                            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                                <TrendingUp size={120} className="text-primary-500" />
+                            </div>
 
-                                <div className="text-center mb-8">
-                                    <div className="flex items-center justify-center gap-2 mb-2">
-                                        <Sparkles size={16} className="text-primary-500" />
-                                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-[0.3em]">Logistics Update</span>
+                            <div className="text-center mb-8">
+                                <div className="flex items-center justify-center gap-2 mb-2">
+                                    <Sparkles size={16} className="text-primary-500" />
+                                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-[0.3em]">Attendance Update</span>
+                                </div>
+                                <h3 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
+                                    {popupLabel.name}'s {popupLabel.type}
+                                </h3>
+                                <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
+                                    Recording for {popupLabel.date}
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => handleSelectStatus(true)}
+                                    className="flex flex-col items-center justify-center gap-4 p-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all active:scale-95 shadow-xl shadow-emerald-500/20 group/btn"
+                                >
+                                    <div className="p-3 bg-indigo-900/40 rounded-2xl group-hover/btn:scale-110 transition-transform">
+                                        <Check size={28} strokeWidth={3} />
                                     </div>
-                                    <h3 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
-                                        {popupLabel.name}'s {popupLabel.type}
-                                    </h3>
-                                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
-                                        Recording for {popupLabel.date}
-                                    </p>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <button
-                                        onClick={() => handleSelectStatus(true)}
-                                        className="flex flex-col items-center justify-center gap-4 p-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all active:scale-95 shadow-xl shadow-emerald-500/20 group/btn"
-                                    >
-                                        <div className="p-3 bg-indigo-900/40 rounded-2xl group-hover/btn:scale-110 transition-transform">
-                                            <Check size={28} strokeWidth={3} />
-                                        </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Record Presence</span>
-                                    </button>
-                                    <button
-                                        onClick={() => handleSelectStatus(false)}
-                                        className="flex flex-col items-center justify-center gap-4 p-6 bg-rose-500 hover:bg-rose-600 text-white rounded-3xl transition-all active:scale-95 shadow-xl shadow-rose-500/20 group/btn"
-                                    >
-                                        <div className="p-3 bg-white/20 rounded-2xl group-hover/btn:scale-110 transition-transform">
-                                            <X size={28} strokeWidth={3} />
-                                        </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Record Absence</span>
-                                    </button>
-                                </div>
+                                    <span className="font-extrabold text-sm uppercase tracking-wider">Meal Taken</span>
+                                </button>
 
                                 <button
-                                    onClick={() => setActiveCell(null)}
-                                    className="w-full mt-6 py-4 bg-indigo-200/50 dark:bg-slate-800 text-indigo-700 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-indigo-300/50 dark:hover:bg-slate-700 transition-all active:scale-95"
+                                    onClick={() => handleSelectStatus(false)}
+                                    className="flex flex-col items-center justify-center gap-4 p-6 bg-rose-500 hover:bg-rose-600 text-white rounded-3xl transition-all active:scale-95 shadow-xl shadow-rose-500/20 group/btn"
                                 >
-                                    Dismiss
+                                    <div className="p-3 bg-indigo-900/40 rounded-2xl group-hover/btn:scale-110 transition-transform">
+                                        <X size={28} strokeWidth={3} />
+                                    </div>
+                                    <span className="font-extrabold text-sm uppercase tracking-wider">Meal Off</span>
                                 </button>
                             </div>
                         </div>
                     </div>
-                )}
+                </div>
+            )}
         </div>
     );
 };
 
 export default MealMonthlySheet;
-
-

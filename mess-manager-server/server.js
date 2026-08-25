@@ -1,4 +1,4 @@
-// Server last updated: 2026-04-26T18:47
+// Server last updated: 2026-08-25T19:41 - Atlas Live Sync
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');

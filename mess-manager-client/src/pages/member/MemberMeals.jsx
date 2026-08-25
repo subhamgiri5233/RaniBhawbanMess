@@ -292,104 +292,121 @@ const MemberMeals = () => {
                             className="relative w-full max-w-xl group my-auto"
                         >
                             <Card 
-                                className="p-6 md:p-8 shadow-2xl bg-white dark:bg-slate-900 overflow-hidden relative rounded-2xl max-h-[85vh] flex flex-col border border-slate-200/80 dark:border-white/10"
+                                className="p-5 sm:p-7 shadow-2xl border border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl overflow-hidden relative rounded-3xl max-h-[90vh] flex flex-col"
                                 innerClassName="flex flex-col h-full min-h-0"
                             >
-                                <div className="flex justify-between items-start mb-4 md:mb-6 flex-shrink-0">
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400" />
-                                            <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Guest Registration</span>
+                                {/* Modal Header */}
+                                <div className="flex justify-between items-start mb-5 flex-shrink-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl border border-indigo-500/20 shrink-0">
+                                            <Sparkles size={20} />
                                         </div>
-                                        <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Add Guest Record</h3>
-                                        <p className="text-xs font-bold text-slate-400 mt-0.5 uppercase tracking-wide">Real-time dynamic pricing applied</p>
+                                        <div>
+                                            <h3 className="text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Add Guest Meal</h3>
+                                            <p className="text-xs font-bold text-slate-400 mt-0.5">Book an extra meal for visiting friends or family</p>
+                                        </div>
                                     </div>
                                     <button
                                         onClick={() => setShowGuestDialog(false)}
-                                        className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl transition-all active:scale-90"
+                                        className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 rounded-full transition-all active:scale-95"
                                     >
                                         <X size={18} />
                                     </button>
                                 </div>
 
-                                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-5 pr-1 min-h-0">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-1 mb-1.5 block">Target Date</label>
+                                {/* Modal Body */}
+                                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-1 min-h-0">
+                                    <div className="space-y-3.5">
+                                        {/* Date */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10.5px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-0.5">Meal Date</label>
                                             <div className="relative">
-                                                <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                                 <input
                                                     type="date"
                                                     value={guestDate}
                                                     onChange={(e) => setGuestDate(e.target.value)}
-                                                    className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 dark:text-slate-100 font-bold uppercase tracking-tight text-xs transition-all"
+                                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 dark:text-slate-100 font-extrabold text-xs"
                                                 />
                                             </div>
                                         </div>
 
-                                        <div>
-                                            <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-1 mb-1.5 block">Meal Timing</label>
+                                        {/* Meal Timing */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10.5px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-0.5">Meal Time</label>
                                             <div className="grid grid-cols-2 gap-3">
-                                                {['lunch', 'dinner'].map(time => (
+                                                {[
+                                                    { time: 'lunch', label: 'Lunch', icon: '☀️' },
+                                                    { time: 'dinner', label: 'Dinner', icon: '🌙' }
+                                                ].map(({ time, label, icon }) => (
                                                     <button
                                                         key={time}
                                                         type="button"
                                                         onClick={() => setGuestMealTime(time)}
                                                         className={cn(
-                                                            "p-3 rounded-xl border transition-all font-extrabold uppercase tracking-wider text-xs flex items-center justify-center gap-2",
+                                                            "p-2.5 rounded-2xl border transition-all font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2",
                                                             guestMealTime === time
-                                                                ? "border-indigo-600 bg-indigo-600 text-white shadow-md shadow-indigo-500/25"
-                                                                : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 hover:border-indigo-400"
+                                                                ? "border-indigo-500 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/30 shadow-sm"
+                                                                : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 hover:border-indigo-400"
                                                         )}
                                                     >
-                                                        <span>{time === 'lunch' ? '☀️' : '🌙'}</span>
-                                                        <span className="capitalize">{time}</span>
+                                                        <span className="text-base">{icon}</span>
+                                                        <span>{label}</span>
                                                     </button>
                                                 ))}
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-1 mb-1.5 block">Selection Menu</label>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    {/* Menu Selection */}
+                                    <div className="space-y-2 pt-1">
+                                        <label className="text-[10.5px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-0.5">Menu Choice</label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                                             {Object.entries(guestMealLabels)
                                                 .filter(([key]) => ['fish', 'egg', 'veg', 'meat'].includes(key))
-                                                .map(([key, label]) => (
-                                                    <button
-                                                        key={key}
-                                                        onClick={() => setSelectedMealType(key)}
-                                                        className={cn(
-                                                            "p-3.5 rounded-xl border transition-all flex flex-col items-center justify-center gap-1",
-                                                            selectedMealType === key
-                                                                ? "border-indigo-600 bg-indigo-600 text-white shadow-md shadow-indigo-500/25"
-                                                                : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-200 hover:border-indigo-400"
-                                                        )}
-                                                    >
-                                                        <div className="text-2xl mb-0.5">{guestMealIcons[key]}</div>
-                                                        <div className="font-extrabold text-[10px] uppercase tracking-wider">{label}</div>
-                                                        <div className={cn(
-                                                            "text-xs font-extrabold mt-0.5",
-                                                            selectedMealType === key ? "text-indigo-100" : "text-indigo-600 dark:text-indigo-400"
-                                                        )}>₹{guestMealPrices[key]}</div>
-                                                    </button>
-                                                ))}
+                                                .map(([key, label]) => {
+                                                    const isSelected = selectedMealType === key;
+                                                    return (
+                                                        <button
+                                                            key={key}
+                                                            type="button"
+                                                            onClick={() => setSelectedMealType(key)}
+                                                            className={cn(
+                                                                "p-3 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1 group relative overflow-hidden",
+                                                                isSelected
+                                                                    ? "border-indigo-500 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/30 shadow-sm"
+                                                                    : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 hover:border-indigo-300"
+                                                            )}
+                                                        >
+                                                            <div className="text-2xl transition-transform group-hover:scale-110">{guestMealIcons[key]}</div>
+                                                            <div className="font-extrabold text-[11px] uppercase tracking-wide">{label}</div>
+                                                            <div className={cn(
+                                                                "text-xs font-black px-2 py-0.5 rounded-full mt-0.5",
+                                                                isSelected ? "bg-indigo-600 text-white" : "bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
+                                                            )}>₹{guestMealPrices[key]}</div>
+                                                        </button>
+                                                    );
+                                                })}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-3 mt-auto pt-4 border-t border-slate-100 dark:border-white/5 flex-shrink-0">
+                                {/* Modal Footer */}
+                                <div className="flex items-center gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-white/10 flex-shrink-0">
                                     <button
+                                        type="button"
                                         onClick={() => setShowGuestDialog(false)}
-                                        className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider text-xs rounded-xl hover:bg-slate-200 transition-all"
+                                        className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold text-xs uppercase tracking-wider rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95"
                                     >
-                                        Discard
+                                        Cancel
                                     </button>
                                     <button
+                                        type="button"
                                         onClick={handleAddGuest}
-                                        className="flex-[2] py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2"
+                                        className="flex-[2] py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 active:scale-95"
                                     >
-                                        Confirm Registration <ArrowRight size={16} />
+                                        <span>Save Guest Meal</span>
+                                        <ArrowRight size={15} />
                                     </button>
                                 </div>
                             </Card>

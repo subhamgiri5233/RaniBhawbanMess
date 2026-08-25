@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
 import Card from '../../components/ui/Card';
-import { TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, Wallet, Zap, Wifi } from 'lucide-react';
+import { TrendingUp, Filter, Trash2, ShoppingCart, Flame, Wheat, Package, RefreshCw, Wallet, Zap, Wifi, Landmark } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 const Expenses = () => {
@@ -30,7 +30,11 @@ const Expenses = () => {
     const filteredExpenses = useMemo(() => expenses
         .filter(expense => {
             if (expense.category === 'market' && String(expense.paidBy).toLowerCase() === 'admin') return false;
-            const categoryMatch = activeCategory === 'all' || expense.category === activeCategory;
+            const categoryMatch = activeCategory === 'all' 
+                ? true 
+                : activeCategory === 'admin_balance'
+                    ? (expense.paidBy === 'admin' || expense.category === 'deposit' || expense.category === 'rice' || expense.category === 'spices' || expense.category === 'others')
+                    : expense.category === activeCategory;
             const selMember = (members || []).find(m => (m._id || m.id) === selectedMember);
             const memberMatch = selectedMember === 'all' ||
                 String(expense.paidBy).toLowerCase() === String(selectedMember).toLowerCase() ||
@@ -57,6 +61,16 @@ const Expenses = () => {
     const riceExpenses = expenses.filter(e => e.category === 'rice' && matchesMonth(e.date));
     const depositExpenses = expenses.filter(e => e.category === 'deposit' && matchesMonth(e.date));
     const othersExpenses = expenses.filter(e => e.category === 'others' && matchesMonth(e.date));
+
+    // Admin Balance calculation: General Deposit - (Spices/Oil + Rice + Others)
+    const totalDeposits = depositExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+    const spicesTotal = spicesExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+    const riceTotal = riceExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+    const othersTotal = othersExpenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+
+    const totalAdminSpends = spicesTotal + riceTotal + othersTotal;
+    const adminBalance = totalDeposits - totalAdminSpends;
+    const isAdminPositive = adminBalance >= 0;
 
     const categoryStats = [
         {
@@ -93,7 +107,7 @@ const Expenses = () => {
             name: 'General Deposit',
             key: 'deposit',
             count: depositExpenses.length,
-            total: depositExpenses.reduce((acc, e) => acc + (e.amount || 0), 0),
+            total: totalDeposits,
             icon: Wallet,
             color: 'text-emerald-600 dark:text-emerald-400',
             bg: 'bg-emerald-500/10',
@@ -109,6 +123,18 @@ const Expenses = () => {
             bg: 'bg-slate-500/10',
             border: 'border-slate-500/20'
         },
+        {
+            name: 'Admin Balance',
+            key: 'admin_balance',
+            count: 'Net',
+            total: adminBalance,
+            displayTotal: `${isAdminPositive ? '+' : '-'}₹${Math.abs(adminBalance).toLocaleString()}`,
+            icon: Landmark,
+            color: isAdminPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400',
+            bg: isAdminPositive ? 'bg-emerald-500/10' : 'bg-rose-500/10',
+            border: isAdminPositive ? 'border-emerald-500/20' : 'border-rose-500/20',
+            isSpecial: true
+        }
     ];
 
     // Members who haven't submitted ANY market expense this month
@@ -141,8 +167,8 @@ const Expenses = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
-                {categoryStats.filter(s => s.key === 'deposit' || s.total > 0).map((stat) => {
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
+                {categoryStats.filter(s => s.key === 'deposit' || s.key === 'admin_balance' || s.total > 0).map((stat) => {
                     const Icon = stat.icon;
                     return (
                         <Card
@@ -150,7 +176,7 @@ const Expenses = () => {
                             className={cn(
                                 "p-4 sm:p-5 transition-all duration-200 hover:shadow-md cursor-pointer relative overflow-hidden",
                                 activeCategory === stat.key
-                                    ? "ring-2 ring-indigo-500 border-indigo-500 bg-white dark:bg-slate-900"
+                                    ? "ring-2 ring-indigo-500 border-indigo-500 bg-white dark:bg-slate-900 shadow-md"
                                     : "border-slate-200/80 dark:border-white/5"
                             )}
                             onClick={() => setActiveCategory(activeCategory === stat.key ? 'all' : stat.key)}
@@ -163,12 +189,17 @@ const Expenses = () => {
                                         </div>
                                         <p className="text-[10px] sm:text-xs text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider">{stat.name}</p>
                                     </div>
-                                    <span className="text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full font-extrabold tracking-wider uppercase border border-slate-200 dark:border-white/5">
+                                    <span className={cn(
+                                        "text-[9px] px-2 py-0.5 rounded-full font-extrabold tracking-wider uppercase border whitespace-nowrap shrink-0",
+                                        stat.isSpecial
+                                            ? `${stat.bg} ${stat.color} ${stat.border}`
+                                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-white/5"
+                                    )}>
                                         {stat.count}
                                     </span>
                                 </div>
                                 <h3 className={cn("text-xl sm:text-2xl font-extrabold tracking-tight mt-1", stat.color)}>
-                                    ₹{stat.total}
+                                    {stat.displayTotal || `₹${stat.total.toLocaleString()}`}
                                 </h3>
                             </div>
                         </Card>
@@ -302,7 +333,7 @@ const Expenses = () => {
                     >
                         All
                     </button>
-                    {categoryStats.map(cat => (
+                    {categoryStats.filter(cat => cat.key !== 'admin_balance').map(cat => (
                         <button
                             key={cat.key}
                             onClick={() => setActiveCategory(cat.key)}

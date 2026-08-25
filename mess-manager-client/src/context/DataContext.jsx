@@ -580,7 +580,11 @@ export const DataProvider = ({ children }) => {
         try {
             await api.put(`/settings/${key}`, { value });
             setSettings(prev => {
-                const updated = prev.map(s => s.key === key ? { ...s, value } : s);
+                const prevArr = Array.isArray(prev) ? prev : [];
+                const exists = prevArr.some(s => s.key === key);
+                const updated = exists
+                    ? prevArr.map(s => s.key === key ? { ...s, value } : s)
+                    : [...prevArr, { key, value }];
                 localStorage.setItem('mess_settings', JSON.stringify(updated));
                 return updated;
             });
