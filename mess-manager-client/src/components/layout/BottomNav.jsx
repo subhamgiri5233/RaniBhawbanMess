@@ -58,7 +58,7 @@ const BottomNav = ({ onOpenSidebar }) => {
         { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
         { to: '/expenses', label: 'Expenses', icon: Receipt },
         // Center button handled separately
-        { to: '/monthly-summary', label: 'Monthly Summary', icon: ClipboardList },
+        { to: '/management', label: 'Management', icon: UserCheck },
     ];
 
     // Member primary bottom tabs
@@ -66,7 +66,7 @@ const BottomNav = ({ onOpenSidebar }) => {
         { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
         { to: '/member-expenses', label: 'Expenses', icon: Receipt },
         // Center button handled separately
-        { to: '/reports', label: 'Monthly Summary', icon: ClipboardList },
+        { to: '/reports', label: 'Management', icon: UserCheck },
     ];
 
     const mainLinks = isAdmin ? adminMainLinks : memberMainLinks;
@@ -168,7 +168,7 @@ const BottomNav = ({ onOpenSidebar }) => {
                             )}
                         </NavLink>
 
-                        {/* Tab 2: Expenses (Exchanged from Meals) */}
+                        {/* Tab 2: Expenses */}
                         <NavLink
                             to={mainLinks[1].to}
                             className={({ isActive }) => cn(
@@ -210,7 +210,7 @@ const BottomNav = ({ onOpenSidebar }) => {
                             </span>
                         </div>
 
-                        {/* Tab 3: Monthly Summary (Replaces Meals in Exchanged Position) */}
+                        {/* Tab 3: Management */}
                         <NavLink
                             to={mainLinks[2].to}
                             className={({ isActive }) => cn(
@@ -226,9 +226,9 @@ const BottomNav = ({ onOpenSidebar }) => {
                                         "p-1 rounded-lg transition-all",
                                         isActive && "bg-indigo-500/20 shadow-sm"
                                     )}>
-                                        <ClipboardList size={16} />
+                                        <UserCheck size={16} />
                                     </div>
-                                    <span className="text-[7.5px] uppercase tracking-tight font-bold whitespace-nowrap text-center">{mainLinks[2].label}</span>
+                                    <span className="text-[8px] uppercase tracking-tight font-bold whitespace-nowrap text-center">{mainLinks[2].label}</span>
                                 </>
                             )}
                         </NavLink>
