@@ -56,17 +56,17 @@ const BottomNav = ({ onOpenSidebar }) => {
     // Admin primary bottom tabs
     const adminMainLinks = [
         { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
-        { to: '/meals', label: 'Meals', icon: Utensils },
-        // Center button handled separately
         { to: '/expenses', label: 'Expenses', icon: Receipt },
+        // Center button handled separately
+        { to: '/monthly-summary', label: 'Monthly Summary', icon: ClipboardList },
     ];
 
     // Member primary bottom tabs
     const memberMainLinks = [
         { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
-        { to: '/member-meals', label: 'Meals', icon: Utensils },
-        // Center button handled separately
         { to: '/member-expenses', label: 'Expenses', icon: Receipt },
+        // Center button handled separately
+        { to: '/reports', label: 'Monthly Summary', icon: ClipboardList },
     ];
 
     const mainLinks = isAdmin ? adminMainLinks : memberMainLinks;
@@ -90,29 +90,29 @@ const BottomNav = ({ onOpenSidebar }) => {
         <>
             {/* Quick Action Bottom Sheet Modal */}
             {showQuickSheet && (
-                <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300 flex items-end justify-center p-3 pb-24 animate-fade-in">
+                <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300 flex items-end justify-center p-3 pb-20 animate-fade-in">
                     <div
                         ref={sheetRef}
-                        className="w-full max-w-md bg-white dark:bg-slate-900 border border-indigo-100 dark:border-white/10 rounded-3xl p-5 shadow-2xl space-y-4"
+                        className="w-full max-w-md bg-white dark:bg-slate-900 border border-indigo-100 dark:border-white/10 rounded-3xl p-4 shadow-2xl space-y-3.5"
                     >
-                        <div className="flex items-center justify-between pb-3 border-b border-indigo-50 dark:border-white/5">
+                        <div className="flex items-center justify-between pb-2.5 border-b border-indigo-50 dark:border-white/5">
                             <div>
-                                <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                                <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
                                     Quick Action
                                 </h3>
-                                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                                     Fast entry & direct navigation
                                 </p>
                             </div>
                             <button
                                 onClick={() => setShowQuickSheet(false)}
-                                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white"
                             >
-                                <X size={16} />
+                                <X size={15} />
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-2.5">
+                        <div className="grid grid-cols-1 gap-2">
                             {quickActions.map((action) => (
                                 <button
                                     key={action.to}
@@ -120,10 +120,10 @@ const BottomNav = ({ onOpenSidebar }) => {
                                         navigate(action.to);
                                         setShowQuickSheet(false);
                                     }}
-                                    className="flex items-center gap-3.5 p-3 rounded-2xl bg-indigo-50/40 dark:bg-slate-800/60 hover:bg-indigo-100/60 dark:hover:bg-slate-800 border border-indigo-100/50 dark:border-white/5 transition-all text-left group active:scale-[0.98]"
+                                    className="flex items-center gap-3 p-2.5 rounded-2xl bg-indigo-50/40 dark:bg-slate-800/60 hover:bg-indigo-100/60 dark:hover:bg-slate-800 border border-indigo-100/50 dark:border-white/5 transition-all text-left group active:scale-[0.98]"
                                 >
-                                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border", action.color)}>
-                                        <action.icon size={18} />
+                                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border", action.color)}>
+                                        <action.icon size={16} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
@@ -133,7 +133,7 @@ const BottomNav = ({ onOpenSidebar }) => {
                                             {action.desc}
                                         </div>
                                     </div>
-                                    <ArrowUpRight size={15} className="text-slate-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 shrink-0" />
+                                    <ArrowUpRight size={14} className="text-slate-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 shrink-0" />
                                 </button>
                             ))}
                         </div>
@@ -141,15 +141,15 @@ const BottomNav = ({ onOpenSidebar }) => {
                 </div>
             )}
 
-            {/* Floating Glassmorphic Mobile Navigation Bar */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1 pointer-events-none">
+            {/* Floating Glassmorphic Mobile Navigation Bar - Compact */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-2.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-0.5 pointer-events-none">
                 <div className="max-w-md mx-auto pointer-events-auto">
-                    <nav className="bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-xl border border-white/10 dark:border-white/15 rounded-[1.75rem] px-3 py-2 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.5),0_0_20px_rgba(79,70,229,0.15)] flex items-center justify-around relative">
+                    <nav className="bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-xl border border-white/10 dark:border-white/15 rounded-2xl px-2 py-1 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.5),0_0_16px_rgba(79,70,229,0.12)] flex items-center justify-around relative">
                         {/* Tab 1: Home */}
                         <NavLink
                             to={mainLinks[0].to}
                             className={({ isActive }) => cn(
-                                "flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-2xl transition-all duration-200 select-none",
+                                "flex flex-col items-center justify-center gap-0.5 py-0.5 px-2 rounded-xl transition-all duration-200 select-none min-w-[50px]",
                                 isActive
                                     ? "text-indigo-400 dark:text-indigo-300 scale-105 font-black"
                                     : "text-slate-400 hover:text-slate-200 font-bold opacity-80"
@@ -158,21 +158,21 @@ const BottomNav = ({ onOpenSidebar }) => {
                             {({ isActive }) => (
                                 <>
                                     <div className={cn(
-                                        "p-1.5 rounded-xl transition-all",
+                                        "p-1 rounded-lg transition-all",
                                         isActive && "bg-indigo-500/20 shadow-sm"
                                     )}>
-                                        <LayoutDashboard size={18} />
+                                        <LayoutDashboard size={16} />
                                     </div>
-                                    <span className="text-[9px] uppercase tracking-wider">{mainLinks[0].label}</span>
+                                    <span className="text-[8px] uppercase tracking-wider">{mainLinks[0].label}</span>
                                 </>
                             )}
                         </NavLink>
 
-                        {/* Tab 2: Meals */}
+                        {/* Tab 2: Expenses (Exchanged from Meals) */}
                         <NavLink
                             to={mainLinks[1].to}
                             className={({ isActive }) => cn(
-                                "flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-2xl transition-all duration-200 select-none",
+                                "flex flex-col items-center justify-center gap-0.5 py-0.5 px-2 rounded-xl transition-all duration-200 select-none min-w-[50px]",
                                 isActive
                                     ? "text-indigo-400 dark:text-indigo-300 scale-105 font-black"
                                     : "text-slate-400 hover:text-slate-200 font-bold opacity-80"
@@ -181,40 +181,40 @@ const BottomNav = ({ onOpenSidebar }) => {
                             {({ isActive }) => (
                                 <>
                                     <div className={cn(
-                                        "p-1.5 rounded-xl transition-all",
+                                        "p-1 rounded-lg transition-all",
                                         isActive && "bg-indigo-500/20 shadow-sm"
                                     )}>
-                                        <Utensils size={18} />
+                                        <Receipt size={16} />
                                     </div>
-                                    <span className="text-[9px] uppercase tracking-wider">{mainLinks[1].label}</span>
+                                    <span className="text-[8px] uppercase tracking-wider">{mainLinks[1].label}</span>
                                 </>
                             )}
                         </NavLink>
 
                         {/* Center Action Button: Quick Add Action */}
-                        <div className="relative -top-4 flex flex-col items-center">
+                        <div className="relative -top-3 flex flex-col items-center">
                             <button
                                 onClick={() => setShowQuickSheet(prev => !prev)}
                                 aria-label="Quick Action"
                                 className={cn(
-                                    "w-12 h-12 rounded-full flex items-center justify-center text-white shadow-xl transition-all duration-300 active:scale-90 border-2 border-slate-900 dark:border-slate-950 ring-4 ring-indigo-500/20",
+                                    "w-9 h-9 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 active:scale-90 border-2 border-slate-900 dark:border-slate-950 ring-2 ring-indigo-500/20",
                                     showQuickSheet || isCenterActive
                                         ? "bg-gradient-to-tr from-violet-600 to-indigo-500 rotate-45 scale-105"
                                         : "bg-gradient-to-tr from-indigo-600 to-violet-500 hover:scale-105"
                                 )}
                             >
-                                <Plus size={22} strokeWidth={2.8} />
+                                <Plus size={18} strokeWidth={2.6} />
                             </button>
-                            <span className="text-[8px] font-black uppercase tracking-widest text-indigo-300 mt-0.5">
+                            <span className="text-[7.5px] font-black uppercase tracking-wider text-indigo-300 mt-0.5">
                                 Add
                             </span>
                         </div>
 
-                        {/* Tab 3: Expenses */}
+                        {/* Tab 3: Monthly Summary (Replaces Meals in Exchanged Position) */}
                         <NavLink
                             to={mainLinks[2].to}
                             className={({ isActive }) => cn(
-                                "flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-2xl transition-all duration-200 select-none",
+                                "flex flex-col items-center justify-center gap-0.5 py-0.5 px-1.5 rounded-xl transition-all duration-200 select-none min-w-[62px]",
                                 isActive
                                     ? "text-indigo-400 dark:text-indigo-300 scale-105 font-black"
                                     : "text-slate-400 hover:text-slate-200 font-bold opacity-80"
@@ -223,12 +223,12 @@ const BottomNav = ({ onOpenSidebar }) => {
                             {({ isActive }) => (
                                 <>
                                     <div className={cn(
-                                        "p-1.5 rounded-xl transition-all",
+                                        "p-1 rounded-lg transition-all",
                                         isActive && "bg-indigo-500/20 shadow-sm"
                                     )}>
-                                        <Receipt size={18} />
+                                        <ClipboardList size={16} />
                                     </div>
-                                    <span className="text-[9px] uppercase tracking-wider">{mainLinks[2].label}</span>
+                                    <span className="text-[7.5px] uppercase tracking-tight font-bold whitespace-nowrap text-center">{mainLinks[2].label}</span>
                                 </>
                             )}
                         </NavLink>
@@ -237,12 +237,12 @@ const BottomNav = ({ onOpenSidebar }) => {
                         <button
                             onClick={onOpenSidebar}
                             aria-label="Open Navigation Menu"
-                            className="flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-2xl text-slate-400 hover:text-slate-200 active:scale-95 transition-all select-none opacity-80"
+                            className="flex flex-col items-center justify-center gap-0.5 py-0.5 px-2 rounded-xl text-slate-400 hover:text-slate-200 active:scale-95 transition-all select-none opacity-80 min-w-[50px]"
                         >
-                            <div className="p-1.5 rounded-xl">
-                                <Menu size={18} />
+                            <div className="p-1 rounded-lg">
+                                <Menu size={16} />
                             </div>
-                            <span className="text-[9px] font-bold uppercase tracking-wider">Menu</span>
+                            <span className="text-[8px] font-bold uppercase tracking-wider">Menu</span>
                         </button>
                     </nav>
                 </div>
