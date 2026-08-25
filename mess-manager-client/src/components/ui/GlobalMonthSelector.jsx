@@ -88,9 +88,9 @@ const GlobalMonthSelector = () => {
                 </button>
             </div>
 
-            {/* Today/Current Jumper */}
-            <div className="flex items-center shrink-0">
-                {!isCurrentMonth ? (
+            {/* Today Jumper when browsing other months */}
+            {!isCurrentMonth && (
+                <div className="flex items-center shrink-0">
                     <button
                         onClick={handleCurrentMonth}
                         className="flex items-center justify-center gap-1 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider shadow-md shadow-indigo-600/20 active:scale-95 transition-all"
@@ -98,13 +98,8 @@ const GlobalMonthSelector = () => {
                         <CalendarCheck size={12} className="sm:w-3.5 sm:h-3.5" />
                         <span>Today</span>
                     </button>
-                ) : (
-                    <div className="flex items-center justify-center gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider font-mono">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="hidden xs:inline">CURRENT</span>
-                    </div>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 };

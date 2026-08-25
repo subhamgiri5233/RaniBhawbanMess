@@ -1,14 +1,11 @@
 import { useState, useEffect, useMemo, useRef, memo } from 'react';
 import Card from './Card';
-import { formatBengaliDate, toBengaliNumber } from '../../utils/bengaliCalendar';
+import { formatBengaliDate } from '../../utils/bengaliCalendar';
 import { useData } from '../../context/DataContext';
-import { useAuth } from '../../context/AuthContext';
 import AnalogClock from './AnalogClock';
-import { Clock as ClockIcon, Calendar as CalendarIcon, Sparkles } from 'lucide-react';
+import { Calendar as CalendarIcon, Sparkles } from 'lucide-react';
 
-const Clock = ({ showGita = false }) => {
-    const { dailyInfo } = useData();
-    const { user } = useAuth();
+const Clock = () => {
     const [time, setTime] = useState(new Date());
     const [today, setToday] = useState(new Date());
     const timerRef = useRef(null);
@@ -75,12 +72,12 @@ const Clock = ({ showGita = false }) => {
     };
 
     return (
-        <Card className="p-4 sm:p-5 bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/5 backdrop-blur-xl shadow-sm rounded-2xl md:rounded-[1.5rem]">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
+        <Card className="p-4 sm:p-6 bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/5 backdrop-blur-xl shadow-sm rounded-2xl md:rounded-[1.5rem]">
+            <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8">
                 
-                {/* Live Digital Clock Section */}
-                <div className="flex items-center gap-3.5 sm:gap-4 w-full lg:w-auto justify-between lg:justify-start">
-                    <div className="hidden sm:block">
+                {/* Live Digital Clock Section - Centered */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left">
+                    <div className="shrink-0">
                         <AnalogClock
                             hourAngle={timeValues.hourAngle}
                             minuteAngle={timeValues.minuteAngle}
@@ -89,12 +86,12 @@ const Clock = ({ showGita = false }) => {
                         />
                     </div>
                     
-                    <div>
-                        <div className="flex items-center gap-1.5 mb-1">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                            <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Live Station Time</span>
+                    <div className="flex flex-col items-center sm:items-start">
+                        <div className="flex items-center gap-1.5 mb-1 justify-center sm:justify-start">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[9.5px] font-extrabold uppercase tracking-widest text-slate-400">Live Time</span>
                         </div>
-                        <div className="flex items-baseline gap-1">
+                        <div className="flex items-baseline justify-center sm:justify-start gap-1">
                             <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight">
                                 {digitalTime.hour}
                             </span>
@@ -113,16 +110,16 @@ const Clock = ({ showGita = false }) => {
                     </div>
                 </div>
 
-                <div className="h-px w-full lg:h-12 lg:w-px bg-slate-200/80 dark:bg-white/10" />
+                <div className="hidden lg:block h-12 w-px bg-slate-200/80 dark:bg-white/10" />
 
-                {/* Dual Calendars: English & Bengali in sleek responsive badges */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto lg:flex-1 lg:max-w-2xl">
+                {/* Dual Calendars: English & Bengali in sleek centered badges */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto lg:max-w-xl">
                     {/* Gregorian Calendar */}
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 flex items-center gap-3">
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 flex items-center justify-center sm:justify-start gap-3">
                         <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-500/20 shrink-0">
                             <CalendarIcon size={16} />
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 text-left">
                             <div className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
                                 {dateInfo.day}
                             </div>
@@ -133,11 +130,11 @@ const Clock = ({ showGita = false }) => {
                     </div>
 
                     {/* Bengali Calendar */}
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 flex items-center gap-3">
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 flex items-center justify-center sm:justify-start gap-3">
                         <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-500/20 shrink-0">
                             <Sparkles size={16} />
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 text-left">
                             <div className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
                                 {bengaliDate.day}
                             </div>
@@ -153,4 +150,4 @@ const Clock = ({ showGita = false }) => {
     );
 };
 
-export default Clock;
+export default memo(Clock);
