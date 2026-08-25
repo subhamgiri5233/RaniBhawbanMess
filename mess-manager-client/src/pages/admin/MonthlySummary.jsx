@@ -393,7 +393,7 @@ const MonthlySummary = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [editingMember, setEditingMember] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedMemberId, setSelectedMemberId] = useState('');
 
     const monthStr = useMemo(() => globalMonth || new Date().toISOString().slice(0, 7), [globalMonth]);
 
@@ -475,11 +475,15 @@ const MonthlySummary = () => {
         return providers;
     }, [data]);
 
-    const filteredMembers = useMemo(() => {
+    const allMembers = useMemo(() => {
         if (!data || !data.members) return [];
-        const mems = data.members || [];
-        return searchQuery.trim() ? mems.filter(m => m.memberName?.toLowerCase().includes(searchQuery.toLowerCase())) : mems;
-    }, [data, searchQuery]);
+        return data.members;
+    }, [data]);
+
+    const selectedMember = useMemo(() => {
+        if (!selectedMemberId) return null;
+        return allMembers.find(m => (m._id || m.memberId) === selectedMemberId) || null;
+    }, [allMembers, selectedMemberId]);
 
     const counts = useMemo(() => {
         const mems = data?.members || [];
@@ -662,28 +666,200 @@ const MonthlySummary = () => {
                     </Card>
 
                     <div className="space-y-4">
+                        {/* Section Header */}
                         <div className="flex items-center justify-between px-1">
                             <div className="flex items-center gap-2">
                                 <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20"><Users size={16} /></div>
-                                <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">Monthly Invoice List</h3>
+                                <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">Monthly Invoice</h3>
+                            </div>
+                            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg border border-slate-200 dark:border-white/10">
+                                {allMembers.length} Members
+                            </span>
+                        </div>
+
+                        {/* Member Dropdown Selector */}
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
+                                <UserRound size={16} className="text-indigo-500" />
+                            </div>
+                            <select
+                                value={selectedMemberId}
+                                onChange={e => setSelectedMemberId(e.target.value)}
+                                className="w-full pl-10 pr-10 py-3.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 rounded-2xl text-sm font-extrabold text-slate-700 dark:text-slate-200 appearance-none outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-500"
+                            >
+                                <option value="" className="font-bold text-slate-400">— Select a member to view invoice —</option>
+                                <option value="__all__">📋 All Members — Audit View</option>
+                                {allMembers.map(m => {
+                                    const mid = m._id || m.memberId;
+                                    const statusEmoji = m.paymentStatus === 'clear' ? '✅' : m.paymentStatus === 'partial' ? '🟡' : '🔴';
+                                    return (
+                                        <option key={mid} value={mid} className="font-bold">
+                                            {statusEmoji} {m.memberName}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                                <ChevronDown size={16} className="text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-4">
-                            {filteredMembers.map(m => {
-                                const offM = (data?.sharedExpense?.memberBalances || []).find(mb => mb.memberId === (m._id || m.memberId)) || {};
-                                return (
-                                    <MemberCard 
-                                        key={m._id || m.memberId} 
-                                        m={m} offM={offM} 
-                                        dRate={stats.rate} dHead={stats.head} dMinLimit={stats.minLimit} 
-                                        setEditingMember={setEditingMember} mCount={stats.mCount}
-                                        bills={data?.sharedExpense?.bills || data?.liveBills}
-                                        categoryProviders={categoryProviders}
-                                    />
-                                );
-                            })}
-                        </div>
+                        {/* All Members Audit View / Single Member Card / Empty State */}
+                        {selectedMemberId === '__all__' ? (
+                            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm">
+                                {/* Audit Header */}
+                                <div className="px-5 py-3.5 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <FileText size={14} className="text-indigo-500" />
+                                        <span className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-widest">Audit Sheet — {monthStr}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"/>Meal</span>
+                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/>Shared</span>
+                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500 inline-block"/>Contrib</span>
+                                    </div>
+                                </div>
+
+                                {/* Audit Rows */}
+                                <div className="divide-y divide-slate-100 dark:divide-white/5">
+                                    {allMembers.map((m, idx) => {
+                                        const offM = (data?.sharedExpense?.memberBalances || []).find(mb => mb.memberId === (m._id || m.memberId)) || {};
+                                        const chargedRegMeals = m.chargedMeals || Math.max(stats.minLimit, Number(m.regularMeals) || 0);
+                                        const lMCost = chargedRegMeals * stats.rate;
+                                        const lGCost = (Number(m.guestMeals) || 0) * stats.rate;
+                                        const totalContrib = Object.values(m.expenses || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+                                        const dMCost = Number(offM.mealCost ?? lMCost) || 0;
+                                        const dGCost = Number(offM.guestMealCost ?? offM.guestCost ?? lGCost) || 0;
+                                        const finalContrib = Number(offM.totalContribution ?? totalContrib);
+                                        const rawOffBal = Number(offM.balance) || 0;
+                                        const signedOffBal = offM.type === 'Get' ? -rawOffBal : rawOffBal;
+                                        const dBal = signedOffBal || ((dMCost + dGCost + Number(stats.head)) - finalContrib);
+                                        const rem = Math.round(dBal) - (Number(m.submittedAmount) || 0);
+                                        const isGet = rem < 0;
+                                        const isSettled = rem === 0;
+
+                                        const CAT_META = [
+                                            { k: 'market',    l: 'Market',   color: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20' },
+                                            { k: 'deposit',   l: 'Deposit',  color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20' },
+                                            { k: 'gas',       l: 'Gas',      color: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20' },
+                                            { k: 'wifi',      l: 'WiFi',     color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20' },
+                                            { k: 'electric',  l: 'Electric', color: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20' },
+                                            { k: 'spices',    l: 'Spices',   color: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20' },
+                                            { k: 'rice',      l: 'Rice',     color: 'bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20' },
+                                            { k: 'paper',     l: 'Paper',    color: 'bg-slate-500/10 text-slate-600 dark:text-slate-300 border-slate-400/20' },
+                                            { k: 'didi',      l: 'Didi',     color: 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20' },
+                                            { k: 'houseRent', l: 'Rent',     color: 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/20' },
+                                            { k: 'fund',      l: 'Fund',     color: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/20' },
+                                            { k: 'others',    l: 'Others',   color: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-400/20' },
+                                        ];
+                                        const activeCats = CAT_META.filter(c => Number(m.expenses?.[c.k]) > 0);
+
+                                        return (
+                                            <div key={m._id || m.memberId} className={cn(
+                                                "px-4 sm:px-5 py-3.5 flex flex-col gap-2.5 transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.02]",
+                                                idx % 2 === 0 ? '' : 'bg-slate-50/40 dark:bg-white/[0.01]'
+                                            )}>
+                                                {/* Row 1: Index + Name + Formula + Status */}
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                                                    {/* Index + Name */}
+                                                    <div className="flex items-center gap-2.5 min-w-[170px]">
+                                                        <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 w-4 text-right tabular-nums">{idx + 1}.</span>
+                                                        <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[10px] font-black shrink-0">
+                                                            {(m.memberName || '?').charAt(0)}
+                                                        </div>
+                                                        <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100 tracking-tight leading-tight">{m.memberName}</span>
+                                                    </div>
+
+                                                    {/* Formula */}
+                                                    <div className="flex-1 flex flex-wrap items-center gap-1 font-mono text-[11px] leading-none pl-9 sm:pl-0">
+                                                        <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{chargedRegMeals}</span>
+                                                        <span className="text-slate-300 dark:text-slate-600">×</span>
+                                                        <span className="text-indigo-500 dark:text-indigo-300 font-bold">{stats.rate.toFixed(2)}</span>
+                                                        <span className="text-slate-400 font-bold">+</span>
+                                                        <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{Math.round(stats.head)}</span>
+                                                        {dGCost > 0 && (
+                                                            <>
+                                                                <span className="text-slate-400 font-bold">+</span>
+                                                                <span className="text-amber-600 dark:text-amber-400 font-extrabold">{Math.round(dGCost)}</span>
+                                                            </>
+                                                        )}
+                                                        <span className="text-slate-400 font-bold">−</span>
+                                                        <span className="text-rose-600 dark:text-rose-400 font-extrabold">{Math.round(finalContrib)}</span>
+                                                        <span className="text-slate-300 dark:text-slate-600">=</span>
+                                                        <span className={cn(
+                                                            "font-black text-sm",
+                                                            isGet ? 'text-emerald-600 dark:text-emerald-400' : isSettled ? 'text-slate-400' : 'text-rose-600 dark:text-rose-400'
+                                                        )}>₹{Math.abs(rem)}</span>
+                                                    </div>
+
+                                                    {/* Status pill */}
+                                                    <div className="pl-9 sm:pl-0 shrink-0">
+                                                        <span className={cn(
+                                                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-extrabold uppercase tracking-wider border",
+                                                            isGet ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20' :
+                                                            isSettled ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-white/10' :
+                                                            'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
+                                                        )}>
+                                                            {isGet ? <TrendingUp size={9}/> : isSettled ? <CheckCircle2 size={9}/> : <TrendingDown size={9}/>}
+                                                            {isGet ? 'Get' : isSettled ? 'Clear' : 'Pay'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Row 2: Per-category contribution pills */}
+                                                {activeCats.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-1.5 pl-9 sm:pl-[2.75rem]">
+                                                        {activeCats.map(cat => (
+                                                            <span key={cat.k} className={cn(
+                                                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-extrabold uppercase tracking-wider",
+                                                                cat.color
+                                                            )}>
+                                                                {cat.l}: ₹{Number(m.expenses[cat.k]).toLocaleString()}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="pl-9 sm:pl-[2.75rem]">
+                                                        <span className="text-[9px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-wider italic">No contributions recorded</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Audit Footer */}
+                                <div className="px-5 py-3 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-white/5 flex items-center gap-4 flex-wrap">
+                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Rate: <span className="text-indigo-500">₹{stats.rate.toFixed(2)}/meal</span></span>
+                                    <span className="w-px h-3 bg-slate-200 dark:bg-slate-700" />
+                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Per Head: <span className="text-emerald-500">₹{Math.round(stats.head)}</span></span>
+                                    <span className="w-px h-3 bg-slate-200 dark:bg-slate-700" />
+                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Min Meals: <span className="text-amber-500">{stats.minLimit}</span></span>
+                                </div>
+                            </div>
+                        ) : selectedMember ? (
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                <MemberCard
+                                    key={selectedMember._id || selectedMember.memberId}
+                                    m={selectedMember}
+                                    offM={(data?.sharedExpense?.memberBalances || []).find(mb => mb.memberId === (selectedMember._id || selectedMember.memberId)) || {}}
+                                    dRate={stats.rate} dHead={stats.head} dMinLimit={stats.minLimit}
+                                    setEditingMember={setEditingMember} mCount={stats.mCount}
+                                    bills={data?.sharedExpense?.bills || data?.liveBills}
+                                    categoryProviders={categoryProviders}
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-14 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-dashed border-slate-200 dark:border-white/10 rounded-2xl gap-3 text-slate-400">
+                                <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+                                    <Users size={28} className="text-indigo-400" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-sm font-extrabold text-slate-600 dark:text-slate-300 tracking-tight">No member selected</p>
+                                    <p className="text-[11px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">Pick a member from the dropdown above</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </>
             )}
