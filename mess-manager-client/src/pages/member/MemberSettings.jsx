@@ -75,7 +75,7 @@ const MemberSettings = () => {
                         <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
                         <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Account & Security</span>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Settings Terminal</h1>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Account Settings</h1>
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
                         Manage your profile avatar, password credentials & theme preferences
                     </p>

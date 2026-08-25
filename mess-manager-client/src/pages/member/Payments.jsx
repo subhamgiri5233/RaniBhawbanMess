@@ -191,9 +191,9 @@ const Payments = () => {
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Financial Ledger & Spends</span>
+                        <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">My Deposits & Spends</span>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Financial Terminal</h1>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Payments & Deposits</h1>
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-2">
                         Activity for <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/20 font-extrabold">{globalMonth}</span>
                     </p>
@@ -204,12 +204,12 @@ const Payments = () => {
                 </div>
             </div>
 
-            {/* Executive 2-Card Metric Matrix */}
+            {/* 2-Card Metric Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* 1. Monthly Deposit */}
                 <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-white/5 shadow-sm relative overflow-hidden group">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider truncate">Vault Deposit</span>
+                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider truncate">Monthly Deposit</span>
                         <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                             <Wallet size={14} />
                         </div>
@@ -219,14 +219,14 @@ const Payments = () => {
                     </div>
                     <div className="flex items-center gap-1 mt-1 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400">
                         <ArrowUpRight size={12} />
-                        <span>Verified Deposit Balance</span>
+                        <span>Submitted To Mess</span>
                     </div>
                 </div>
 
                 {/* 2. Market Spends */}
                 <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-white/5 shadow-sm relative overflow-hidden group">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider truncate">Market Spend</span>
+                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider truncate">Bazaar Spend</span>
                         <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
                             <ShoppingCart size={14} />
                         </div>
@@ -236,7 +236,7 @@ const Payments = () => {
                     </div>
                     <div className="flex items-center gap-1 mt-1 text-[10px] font-extrabold text-amber-600 dark:text-amber-400">
                         <ArrowUpRight size={12} />
-                        <span>Duty Market Purchases</span>
+                        <span>Bazaar Duty Shopping</span>
                     </div>
                 </div>
             </div>
@@ -249,8 +249,8 @@ const Payments = () => {
                             <History size={18} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Verified Financial Ledger</h3>
-                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Itemized deposits, market spends & bills</p>
+                            <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Payment & Expense History</h3>
+                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Itemized deposits, bazaar spends & bills</p>
                         </div>
                     </div>
 

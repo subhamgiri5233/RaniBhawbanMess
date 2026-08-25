@@ -9,66 +9,66 @@ const Features = () => {
     const keyHighlights = [
         {
             icon: Utensils,
-            title: 'Daily Meal Roster & Shift Accounting',
-            desc: 'Instant meal logging with guest meal multipliers, daily toggles, and live kitchen counts.',
-            tag: 'Real-Time Sync'
+            title: 'Daily Meal Tracking',
+            desc: 'Turn lunch and dinner meals on/off anytime with easy guest meal options and instant kitchen counts.',
+            tag: 'Daily Meals'
         },
         {
             icon: Calculator,
-            title: 'Autonomous Audit & Meal Rate Engine',
-            desc: 'Real-time computation of dynamic meal rates, market contribution offsets, and exact dues.',
-            tag: 'Zero Margin Error'
+            title: 'Automatic Meal Rate Calculation',
+            desc: 'Real-time computation of dynamic meal rates, bazaar shopping contributions, and remaining balances.',
+            tag: 'Zero Math Errors'
         },
         {
             icon: ShoppingCart,
-            title: 'Market Duty Procurement & Collision Logic',
-            desc: 'Automated date request approval system preventing duty clashes and tracking grocery funds.',
-            tag: 'Smart Duty Engine'
+            title: 'Bazaar Duty Schedule',
+            desc: 'Fair rotation system for daily grocery and bazaar shopping with date requests and expense tracking.',
+            tag: 'Market Schedule'
         },
         {
             icon: FileText,
-            title: 'Official Bengali Statement & PDF Exports',
-            desc: 'Download institutional monthly balance sheets formatted in Bengali fonts for all mess residents.',
-            tag: 'Instant Export'
+            title: 'Bengali PDF Monthly Bills',
+            desc: 'Download clean, printable monthly summary statements formatted in Bengali fonts for all mess members.',
+            tag: 'PDF Statements'
         }
     ];
 
     const featureMatrix = [
         {
             icon: Users,
-            title: 'Resident Management',
-            description: 'Maintain secure member profiles, room records, contact logs, and single-device security credentials.',
-            badge: 'Admin & Member'
+            title: 'Member Profiles',
+            desc: 'Keep track of all active residents, room numbers, contact phone numbers, and login credentials.',
+            badge: 'Members'
         },
         {
             icon: Receipt,
-            title: 'Categorized Expense Audit',
-            description: 'Itemized tracking for Market, Rice, Spices, Gas cylinders, WiFi bills, Electricity, and House Rent.',
-            badge: 'Verified Ledger'
+            title: 'Clear Expense Categories',
+            desc: 'Organized logs for Bazaar, Rice, Cooking Spices, Gas cylinder, WiFi bill, Electricity, and Room rent.',
+            badge: 'Expenses'
         },
         {
             icon: CreditCard,
-            title: 'Liquidity & Deposit Vault',
-            description: 'Track member monthly advances, duty shopping contributions, and verified payment histories.',
-            badge: 'Financial Terminal'
+            title: 'Member Deposits & Payments',
+            desc: 'Track advance deposits, bazaar shopping spends, and verified monthly payment receipts.',
+            badge: 'Payments'
         },
         {
             icon: Calendar,
-            title: 'Manager & Cooking Records',
-            description: 'Monthly rotation of mess managers, chef records, and audit history logs with full traceability.',
-            badge: 'Governance'
+            title: 'Manager & Cook Roster',
+            desc: 'Keep records of monthly appointed mess managers, cooking staff, and mess notices.',
+            badge: 'Management'
         },
         {
             icon: Shield,
-            title: 'Single-Device Verification',
-            description: 'Institutional-grade session authentication ensuring only verified residents interact with their ledger.',
-            badge: 'Security v4'
+            title: 'Secure Device Login',
+            desc: 'Safe single-device authentication keeping your mess account and balance secure.',
+            badge: 'Security'
         },
         {
             icon: BarChart2,
-            title: 'Historical Ledger Snapshots',
-            description: 'Monthly immutable snapshots preventing retrospective calculation drift across past billing cycles.',
-            badge: 'Audit Snapshots'
+            title: 'Monthly History Archives',
+            desc: 'Access past months’ meal sheets, bills, and expense reports with historical accuracy.',
+            badge: 'History'
         }
     ];
 
@@ -78,107 +78,99 @@ const Features = () => {
             <div className="text-center max-w-3xl mx-auto mb-16">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-extrabold uppercase tracking-[0.2em] mb-4">
                     <Sparkles size={12} className="text-emerald-400 animate-pulse" />
-                    Built For Institutional Precision
+                    Built for Rani Bhawban Mess
                 </div>
                 <h2 className="text-3xl sm:text-5xl font-[950] text-white uppercase tracking-tight leading-tight">
-                    Comprehensive Suite for <br />
+                    Everything you need to <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-indigo-400 to-purple-400">
-                        Modern Mess Operations
+                        Run Your Mess Smoothly
                     </span>
                 </h2>
                 <p className="text-slate-400 text-sm sm:text-base mt-4 font-medium leading-relaxed">
-                    Designed specifically for student hostels and communal mess establishments to eliminate calculation discrepancies and streamline daily administrative tasks.
+                    Designed specifically for student and bachelor messes to eliminate calculation disputes, track grocery spends, and keep everyone on the same page.
                 </p>
             </div>
 
-            {/* Visual Feature Spotlight: Split Showcase */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12 items-stretch">
-                {/* Left: Interactive Spotlight Cards (5 cols) */}
-                <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-                    {keyHighlights.map((item, idx) => {
-                        const Icon = item.icon;
-                        return (
-                            <div 
-                                key={idx}
-                                className="p-5 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-indigo-500/40 backdrop-blur-xl transition-all hover:translate-x-1 group shadow-sm"
-                            >
-                                <div className="flex items-start gap-4">
-                                    <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all shrink-0">
-                                        <Icon size={20} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="text-sm font-black text-white tracking-tight">{item.title}</h4>
-                                        </div>
-                                        <p className="text-xs text-slate-400 font-medium leading-relaxed">{item.desc}</p>
-                                        <span className="inline-block mt-2 text-[9px] font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                                            {item.tag}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+            {/* Split Visual Showcase */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-16 p-6 sm:p-10 rounded-3xl bg-slate-900/60 border border-white/10 backdrop-blur-xl">
+                <div className="lg:col-span-6 space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-extrabold uppercase tracking-widest">
+                        Daily Cooking & Bazaar Rotation
+                    </div>
+                    <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                        Fair market duty assignment & transparent grocery receipts.
+                    </h3>
+                    <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                        Every rupee spent in the local market is logged with category tags. Members can request convenient shopping dates while admins ensure equal duty distribution across the month.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <div className="text-indigo-400 font-extrabold text-xs uppercase tracking-wider">Zero Disputes</div>
+                            <div className="text-xs text-slate-300 font-medium">Bazaar expenses directly credit to the member's account.</div>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <div className="text-emerald-400 font-extrabold text-xs uppercase tracking-wider">Live Counts</div>
+                            <div className="text-xs text-slate-300 font-medium">Cook knows exact meal count before preparing food.</div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Right: Rich Showcase Artwork (7 cols) */}
-                <div className="lg:col-span-7 rounded-3xl p-3 bg-gradient-to-b from-white/10 to-white/5 border border-white/15 shadow-2xl backdrop-blur-2xl flex flex-col justify-between overflow-hidden relative group">
-                    <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-950">
+                <div className="lg:col-span-6 relative">
+                    <div className="relative rounded-2xl overflow-hidden border border-white/15 shadow-2xl bg-slate-950 aspect-[16/11]">
                         <img 
                             src="/images/culinary-duty.jpg" 
-                            alt="Culinary Procurement and Market Duty Management" 
-                            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                            alt="Cooking and Bazaar Duty Management" 
+                            className="w-full h-full object-cover object-center"
                         />
-                        
-                        {/* Overlay Glass Card */}
-                        <div className="absolute inset-x-4 bottom-4 p-4 rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/15 shadow-xl flex items-center justify-between gap-4">
-                            <div>
-                                <div className="text-[10px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 mb-0.5">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                                    Culinary Logistics Module
-                                </div>
-                                <h4 className="text-sm font-black text-white">Smart Market Duty & Grocery Auditing</h4>
-                                <p className="text-[11px] text-slate-400 font-medium">Automatic expense allocation linked with member shopping duty</p>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                        <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-slate-900/90 backdrop-blur-md border border-white/10 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="text-xs font-extrabold text-white">Daily Kitchen & Market Sync</span>
                             </div>
-                            <div className="hidden sm:block px-3 py-1.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-black shrink-0">
-                                Automated
-                            </div>
+                            <span className="text-[10px] font-bold text-slate-400">Rani Bhawban</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* 6-Grid Core Capabilities Matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {featureMatrix.map((feat, i) => {
-                    const FeatIcon = feat.icon;
-                    return (
-                        <div 
-                            key={i}
-                            className="p-6 rounded-2xl bg-slate-900/60 border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all hover:-translate-y-1 group shadow-sm flex flex-col justify-between"
-                        >
-                            <div>
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-emerald-400 flex items-center justify-center group-hover:scale-110 group-hover:border-emerald-500/40 transition-all">
-                                        <FeatIcon size={20} />
-                                    </div>
-                                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-                                        {feat.badge}
-                                    </span>
-                                </div>
-                                <h3 className="text-base font-extrabold text-white tracking-tight mb-2">
-                                    {feat.title}
-                                </h3>
-                                <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                                    {feat.description}
-                                </p>
+            {/* 4 Feature Highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                {keyHighlights.map((feat) => (
+                    <div key={feat.title} className="p-6 sm:p-7 rounded-3xl bg-slate-900/70 border border-white/10 hover:border-indigo-500/30 backdrop-blur-xl transition-all group flex flex-col justify-between">
+                        <div>
+                            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <feat.icon size={22} />
                             </div>
-                            <div className="pt-4 mt-4 border-t border-white/5 flex items-center text-[10px] font-black uppercase tracking-wider text-emerald-400 group-hover:text-emerald-300">
-                                Included in v4.0 <CheckCircle2 size={12} className="ml-1" />
-                            </div>
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 mb-3 inline-block">
+                                {feat.tag}
+                            </span>
+                            <h3 className="text-lg font-extrabold text-white tracking-tight mb-2">{feat.title}</h3>
+                            <p className="text-xs text-slate-400 font-medium leading-relaxed mb-4">
+                                {feat.desc}
+                            </p>
                         </div>
-                    );
-                })}
+                    </div>
+                ))}
+            </div>
+
+            {/* 6 Capabilities Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featureMatrix.map((item) => (
+                    <div key={item.title} className="p-6 rounded-2xl bg-slate-900/40 border border-white/5 hover:border-white/15 backdrop-blur-md transition-all">
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="p-2.5 rounded-xl bg-white/5 text-slate-300">
+                                <item.icon size={18} />
+                            </div>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                                {item.badge}
+                            </span>
+                        </div>
+                        <h4 className="text-sm font-extrabold text-white mb-1.5">{item.title}</h4>
+                        <p className="text-xs text-slate-400 font-medium leading-relaxed">{item.desc}</p>
+                    </div>
+                ))}
             </div>
         </section>
     );

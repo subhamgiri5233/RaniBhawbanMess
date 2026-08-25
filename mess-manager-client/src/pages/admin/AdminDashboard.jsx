@@ -110,7 +110,7 @@ const AdminDashboard = () => {
         {
             title: 'Market Spends',
             value: `₹${marketExpenses}`,
-            subtext: 'Bazaar Procurement',
+            subtext: 'Daily Bazaar',
             icon: ShoppingCart,
             color: 'text-indigo-600 dark:text-indigo-400',
             bg: 'bg-indigo-500/10',
@@ -119,7 +119,7 @@ const AdminDashboard = () => {
         {
             title: 'Spices & Oil',
             value: `₹${spicesExpenses}`,
-            subtext: 'Pantry Seasoning',
+            subtext: 'Spices & Oil',
             icon: Flame,
             color: 'text-amber-600 dark:text-amber-400',
             bg: 'bg-amber-500/10',
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
         {
             title: 'Rice & Grains',
             value: `₹${riceExpenses}`,
-            subtext: 'Staple Inventories',
+            subtext: 'Rice & Grains',
             icon: Wheat,
             color: 'text-emerald-600 dark:text-emerald-400',
             bg: 'bg-emerald-500/10',
@@ -137,7 +137,7 @@ const AdminDashboard = () => {
         {
             title: 'Other Expenses',
             value: `₹${othersExpenses}`,
-            subtext: 'Mess Maintenance',
+            subtext: 'Bills & Gas',
             icon: Package,
             color: 'text-slate-600 dark:text-slate-400',
             bg: 'bg-slate-500/10',
@@ -150,7 +150,7 @@ const AdminDashboard = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Dashboard</h1>
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Authorized Mess Controller Interface</p>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Rani Bhawban Mess Overview</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full shadow-sm">

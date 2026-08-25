@@ -1,31 +1,30 @@
-import { Globe, CreditCard, Mail, Sparkles, Database, CheckCircle2 } from 'lucide-react';
+import { Globe, CreditCard, Mail, Sparkles } from 'lucide-react';
 import { memo } from 'react';
-import Card from '../ui/Card';
 
 const roadmapItems = [
     {
         icon: Globe,
-        title: 'Multi-Lingual Localization',
-        status: 'In Development',
-        description: 'Comprehensive support for Bengali and regional dialects alongside English for all meal logs and reports.',
+        title: 'Complete Bengali Language Support',
+        status: 'In Progress',
+        description: 'Full Bengali interface options for all buttons, menus, and monthly reports alongside English.',
         pct: 75,
         color: 'text-indigo-400',
         bg: 'bg-indigo-500/10'
     },
     {
         icon: CreditCard,
-        title: 'UPI & Instant QR Settlements',
-        status: 'Active Testing',
-        description: 'Integrated dynamic UPI QR code generator for direct deposit reconciliation and instant receipt verification.',
+        title: 'UPI & Instant QR Payments',
+        status: 'Testing',
+        description: 'Scan UPI QR codes to pay monthly deposits directly with instant payment receipt generation.',
         pct: 60,
         color: 'text-emerald-400',
         bg: 'bg-emerald-500/10'
     },
     {
         icon: Mail,
-        title: 'Automated WhatsApp & Email Summaries',
-        status: 'Deployment Phase',
-        description: 'End-of-month instant balance statement distribution directly to each resident’s personal messaging app.',
+        title: 'WhatsApp Monthly Bill Delivery',
+        status: 'Coming Soon',
+        description: 'Automatic monthly mess bill summary delivered straight to each member’s personal WhatsApp.',
         pct: 85,
         color: 'text-purple-400',
         bg: 'bg-purple-500/10'
@@ -39,13 +38,16 @@ const Roadmap = () => {
             <div className="text-center mb-16">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-extrabold uppercase tracking-widest mb-4">
                     <Sparkles size={12} className="animate-pulse" />
-                    Continuous Evolution
+                    Future Upgrades
                 </div>
                 <h2 className="text-3xl sm:text-5xl font-[950] text-white uppercase tracking-tight mb-4">
-                    Product Roadmap & <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">Future Pipeline</span>
+                    What’s Coming Next to{' '}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">
+                        Rani Bhawban Mess
+                    </span>
                 </h2>
                 <p className="text-slate-400 text-xs sm:text-sm font-medium max-w-xl mx-auto">
-                    Upcoming features designed to make Rani Bhawban Mess management effortless, automated, and reliable.
+                    New features designed to make mess accounts, payments, and bill sharing faster and easier for every resident.
                 </p>
             </div>
 
@@ -72,7 +74,7 @@ const Roadmap = () => {
                             {/* Progress bar */}
                             <div className="pt-4 border-t border-white/5">
                                 <div className="flex justify-between items-center mb-1.5">
-                                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Pipeline Completion</span>
+                                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Progress</span>
                                     <span className="text-[10px] font-mono font-bold text-indigo-400">{item.pct}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">

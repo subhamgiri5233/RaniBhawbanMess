@@ -152,30 +152,30 @@ const AddExpense = () => {
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
-                        <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Financial Audit Ledger</span>
+                        <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Mess Expenses & Deposits</span>
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
-                        {isAdmin ? 'Financial Terminal' : 'Market Terminal'}
+                        {isAdmin ? 'Add Mess Expense & Deposit' : 'Add Bazaar Expense'}
                     </h1>
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2 mt-1">
-                            {isAdmin ? 'Manage Mess Vault & Member Records' : 'Log Daily Procurement Logs'}
-                        </p>
-                    </div>
+                        {isAdmin ? 'Record mess expenses and member deposits' : 'Submit your bazaar shopping bill'}
+                    </p>
+                </div>
 
-                    {isAdmin && (
-                        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/5 rounded-2xl backdrop-blur-sm self-start lg:self-center">
-                            <button
-                                className={cn(
-                                    "px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-200 flex items-center gap-2",
-                                    activeTab === 'expense'
-                                        ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/80 dark:border-white/10"
-                                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
-                                )}
-                                onClick={() => setActiveTab('expense')}
-                            >
-                                <PlusCircle size={15} className={activeTab === 'expense' ? "text-indigo-600 dark:text-indigo-400" : "opacity-40"} />
-                                Expense Entry
-                            </button>
+                {isAdmin && (
+                    <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/5 rounded-2xl backdrop-blur-sm self-start lg:self-center">
+                        <button
+                            className={cn(
+                                "px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-200 flex items-center gap-2",
+                                activeTab === 'expense'
+                                    ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/80 dark:border-white/10"
+                                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
+                            )}
+                            onClick={() => setActiveTab('expense')}
+                        >
+                            <PlusCircle size={15} className={activeTab === 'expense' ? "text-indigo-600 dark:text-indigo-400" : "opacity-40"} />
+                            Add Expense
+                        </button>
                             <button
                                 className={cn(
                                     "px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-200 flex items-center gap-2",

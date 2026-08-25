@@ -122,7 +122,7 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="flex text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest items-center gap-1.5">
-                                <Calendar size={12} className="text-indigo-500" /> {m.marketDays || 0} Procurement Units
+                                <Calendar size={12} className="text-indigo-500" /> {m.marketDays || 0} Market Days
                             </div>
                             {m.marketDates?.length > 0 && (
                                 <div className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-[8px] font-mono text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
@@ -136,7 +136,7 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
                     <StatusBadge status={m.paymentStatus} />
                     {m.role === 'admin' && (
                         <span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[8px] font-extrabold uppercase tracking-wider rounded-lg border border-indigo-500/20">
-                            Governance Administrator
+                            Mess Admin
                         </span>
                     )}
                 </div>

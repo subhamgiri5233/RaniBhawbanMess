@@ -7,16 +7,16 @@ const Contact = ({ onLoginClick }) => {
             <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-extrabold uppercase tracking-widest mb-4">
                     <Sparkles size={12} className="text-emerald-400" /> 
-                    Resident Portal Access
+                    Mess Resident Portal
                 </div>
                 <h2 className="text-3xl sm:text-5xl font-[950] text-white tracking-tight uppercase mb-3">
                     Ready to access{' '}
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-400">
-                        Rani Bhawban Terminal?
+                        Rani Bhawban Mess?
                     </span>
                 </h2>
                 <p className="text-slate-400 text-xs sm:text-sm font-medium max-w-lg mx-auto">
-                    Sign in to your resident terminal to view your meal ledger, check upcoming market shifts, or download monthly audit statements.
+                    Sign in to your member account to turn your meals on or off, check your bazaar duty date, or download this month's PDF bill.
                 </p>
             </div>
 
@@ -39,15 +39,15 @@ const Contact = ({ onLoginClick }) => {
                                 <MessageCircle size={20} className="text-indigo-400" />
                             </div>
                             <div>
-                                <p className="text-white font-extrabold text-sm mb-0.5">Admin & Support</p>
-                                <p className="text-slate-400 text-xs font-medium">Contact Mess Manager for resident onboarding credentials.</p>
+                                <p className="text-white font-extrabold text-sm mb-0.5">Manager & Support</p>
+                                <p className="text-slate-400 text-xs font-medium">Contact the Mess Manager for login credentials or new room onboarding.</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="pt-4 border-t border-white/5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
                         <ShieldCheck size={14} />
-                        Authorized Hostel Resident Terminal
+                        Authorized Hostel Member Portal
                     </div>
                 </div>
 
@@ -56,9 +56,9 @@ const Contact = ({ onLoginClick }) => {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none" />
                     
                     <div className="relative z-10">
-                        <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Active Resident Login</h3>
+                        <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Member Login</h3>
                         <p className="text-slate-400 text-xs font-medium leading-relaxed">
-                            Access real-time daily meal toggles, transparent grocery accounts, and single-click monthly report downloads.
+                            Log in to view daily meal counts, track your personal grocery spending, and download your monthly mess bill with one click.
                         </p>
                     </div>
 
@@ -66,7 +66,7 @@ const Contact = ({ onLoginClick }) => {
                         onClick={onLoginClick}
                         className="relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-500/25 active:scale-95 transition-all"
                     >
-                        Sign In To Terminal <ArrowRight size={16} />
+                        Login To Account <ArrowRight size={16} />
                     </Button>
                 </div>
             </div>

@@ -346,22 +346,22 @@ const Management = () => {
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
-                        <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Duty Operations & Rotations</span>
+                        <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Mess Roles & Schedules</span>
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
-                        Management Terminal
+                        Mess Management
                     </h1>
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2 mt-1">
-                        Oversee Duty Cycles, Rotations & Configurations
+                        Manage Cooking Staff, Mess Managers & Bazaar Duty
                     </p>
                 </div>
 
                 <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/5 rounded-2xl backdrop-blur-sm self-start lg:self-center flex-nowrap overflow-x-auto max-w-full custom-scrollbar shrink-0">
                     {[
-                        { id: 'cooking', label: 'Cooking Management', icon: ChefHat },
-                        { id: 'manager', label: 'Manager Management', icon: UserCheck },
-                        { id: 'market', label: 'Market Duty', icon: ShoppingCart },
-                        { id: 'config', label: 'Configuration', icon: Rocket }
+                        { id: 'cooking', label: 'Cooking Duties', icon: ChefHat },
+                        { id: 'manager', label: 'Mess Managers', icon: UserCheck },
+                        { id: 'market', label: 'Bazaar Duty', icon: ShoppingCart },
+                        { id: 'config', label: 'Settings', icon: Rocket }
                     ].map(tab => {
                         const Icon = tab.icon;
                         return (

@@ -79,9 +79,9 @@ const Navbar = ({ onLoginClick }) => {
                 <div className="flex items-center gap-3">
                     <Button
                         onClick={onLoginClick}
-                        className="rounded-2xl px-8 py-2.5 font-black uppercase tracking-[0.15em] text-xs shadow-xl shadow-indigo-400/20 dark:shadow-none hover:shadow-indigo-500/30 transition-all bg-indigo-600 text-white border-0"
+                        className="rounded-2xl px-7 py-2.5 font-bold uppercase tracking-wider text-xs shadow-xl shadow-indigo-400/20 dark:shadow-none hover:shadow-indigo-500/30 transition-all bg-indigo-600 text-white border-0"
                     >
-                        Terminal Login
+                        Member Login
                     </Button>
                     <button
                         className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-300/40 dark:bg-white/5 border border-indigo-400/30 dark:border-white/10 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-all"
