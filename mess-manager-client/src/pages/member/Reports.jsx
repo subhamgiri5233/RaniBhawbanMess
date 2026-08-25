@@ -204,7 +204,7 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
             </div>
 
             <div className="mt-4 pt-6 border-t border-slate-100 dark:border-white/5">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Auditable Contributions</p>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Member Expenses & Deposits</p>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {(() => {
                         const isAdmin = m.role === 'admin';
@@ -345,7 +345,7 @@ const Reports = () => {
                             </span>
                         </h1>
                         <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
-                            Comprehensive financial ledger and dietary consumption trace
+                            Detailed monthly meal records and expense calculations
                         </p>
                     </div>
                 </div>
@@ -369,7 +369,7 @@ const Reports = () => {
                             <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/5 bg-slate-50/60 dark:bg-slate-900/50 flex items-center justify-between">
                                 <div className="flex items-center gap-2.5">
                                     <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20"><Coins size={16} /></div>
-                                    <h2 className="text-xs font-extrabold text-slate-800 dark:text-emerald-300 uppercase tracking-wider">Financial Audit Trace</h2>
+                                    <h2 className="text-xs font-extrabold text-slate-800 dark:text-emerald-300 uppercase tracking-wider">Monthly Financial Breakdown</h2>
                                 </div>
                                 <span className="text-[9px] font-extrabold text-indigo-600 dark:text-slate-400 uppercase tracking-wider bg-indigo-500/10 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-indigo-500/20 dark:border-white/10">Min {stats.minLimit} Meals</span>
                             </div>

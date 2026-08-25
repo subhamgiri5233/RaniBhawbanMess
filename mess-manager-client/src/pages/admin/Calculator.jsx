@@ -836,7 +836,7 @@ const Calculator = () => {
                 <div className="mt-8 space-y-4">
                     <div className="flex items-center gap-2 px-1">
                         <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20"><Users size={16} /></div>
-                        <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">Institutional Audit Ledger</h3>
+                        <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">Member-wise Final Balance Sheet</h3>
                     </div>
 
                     <Card className="p-0 overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/5">
@@ -844,13 +844,13 @@ const Calculator = () => {
                             <table className="w-full border-collapse min-w-[900px] text-left">
                                 <thead>
                                     <tr className="bg-slate-50 dark:bg-slate-900/80 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-200/80 dark:border-white/5">
-                                        <th className="p-3.5 pl-5 sticky left-0 bg-slate-50 dark:bg-slate-900 z-20">Identity</th>
-                                        <th className="p-3.5 text-center">Meal Units</th>
-                                        <th className="p-3.5 text-center">Market Allocation</th>
-                                        <th className="p-3.5 text-center">Guest Units</th>
-                                        <th className="p-3.5 text-center">Shared Liability</th>
-                                        <th className="p-3.5 text-center">Capital Deposit</th>
-                                        <th className="p-3.5 text-right pr-6">Month End Status</th>
+                                        <th className="p-3.5 pl-5 sticky left-0 bg-slate-50 dark:bg-slate-900 z-20">Member</th>
+                                        <th className="p-3.5 text-center">Total Meals</th>
+                                        <th className="p-3.5 text-center">Bazaar Spends</th>
+                                        <th className="p-3.5 text-center">Guest Meals</th>
+                                        <th className="p-3.5 text-center">Fixed Costs</th>
+                                        <th className="p-3.5 text-center">Deposits</th>
+                                        <th className="p-3.5 text-right pr-6">Due / Refund</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">

@@ -596,7 +596,7 @@ const MonthlySummary = () => {
                         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20"><Coins size={16} /></div>
-                                <h2 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Financial Audit Trace</h2>
+                                <h2 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Monthly Financial Breakdown</h2>
                             </div>
                             <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/10">Min {stats.minLimit} Meals</span>
                         </div>

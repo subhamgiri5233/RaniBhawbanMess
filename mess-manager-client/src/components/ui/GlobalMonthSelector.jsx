@@ -46,8 +46,8 @@ const GlobalMonthSelector = () => {
                     <Calendar size={18} />
                 </div>
                 <div className="flex flex-col">
-                    <h3 className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest leading-none">Global Timeline</h3>
-                    <p className="text-[8px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 font-bold mt-1">Application Scope</p>
+                    <h3 className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest leading-none">Active Month</h3>
+                    <p className="text-[8px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 font-bold mt-1">Mess Records</p>
                 </div>
             </div>
 

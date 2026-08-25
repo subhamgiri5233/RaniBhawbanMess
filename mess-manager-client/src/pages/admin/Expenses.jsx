@@ -125,7 +125,7 @@ const Expenses = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 border-l-4 border-l-indigo-600 shadow-sm p-6 sm:p-8 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 backdrop-blur-xl transition-colors">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Expense Management</h1>
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Oversee categorized mess expenditures and audits</p>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">View and manage all mess expenses</p>
                 </div>
                 <button
                     onClick={async () => {
@@ -272,8 +272,8 @@ const Expenses = () => {
                             <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-3 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                                 <Filter size={20} />
                             </div>
-                            <h4 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">Mission Control</h4>
-                            <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 font-bold max-w-xs">Select a member below to analyze individual contributions and category audit.</p>
+                            <h4 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">Member Spends Overview</h4>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 font-bold max-w-xs">Select a member to view their individual expenses and bazaar shopping.</p>
                         </div>
                     )}
                 </div>

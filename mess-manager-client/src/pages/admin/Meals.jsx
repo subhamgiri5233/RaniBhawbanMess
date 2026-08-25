@@ -253,7 +253,7 @@ const Meals = () => {
                     {/* Guest Meals List */}
                     <Card className="lg:col-span-2 p-0 overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/5">
                         <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
-                            <h3 className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Transaction Ledger</h3>
+                            <h3 className="text-xs font-extrabold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Guest Meals List</h3>
                         </div>
                         <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 custom-scrollbar">
                             {filteredGuestMeals.length === 0 ? (
@@ -261,7 +261,7 @@ const Meals = () => {
                                     <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-3 text-slate-400">
                                         <Info size={20} />
                                     </div>
-                                    <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Zero active records</p>
+                                    <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">No guest meal records for this month</p>
                                 </div>
                             ) : (
                                 filteredGuestMeals.map((guest) => (
@@ -315,15 +315,15 @@ const Meals = () => {
                         <div className="p-6 border-b border-white/10 bg-black/10">
                             <div className="flex items-center gap-2 mb-0.5">
                                 <TrendingUp size={14} className="text-indigo-200" />
-                                <h3 className="text-white/60 text-[9px] font-extrabold uppercase tracking-widest">Financial Matrix</h3>
+                                <h3 className="text-white/60 text-[9px] font-extrabold uppercase tracking-widest">Guest Summary</h3>
                             </div>
-                            <h2 className="text-xl font-extrabold text-white">Revenue Intel</h2>
+                            <h2 className="text-xl font-extrabold text-white">Guest Meal Charges</h2>
                         </div>
 
                         <div className="p-6 space-y-3">
                             {memberGuestTotals.length === 0 ? (
                                 <div className="text-center py-4">
-                                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-white/50">Zero contribution detected</p>
+                                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-white/50">No guest meals recorded</p>
                                 </div>
                             ) : (
                                 <>

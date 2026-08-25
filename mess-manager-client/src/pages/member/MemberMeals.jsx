@@ -184,7 +184,7 @@ const MemberMeals = () => {
                     {/* Guest Meals List */}
                     <Card className="lg:col-span-2 p-0 overflow-hidden shadow-sm">
                         <div className="p-5 border-b border-slate-200/80 dark:border-white/5 bg-slate-50/60 dark:bg-slate-900/50 flex justify-between items-center">
-                            <h3 className="font-extrabold text-slate-800 dark:text-slate-200 uppercase text-[10px] tracking-widest">Personal Guest Ledger</h3>
+                            <h3 className="font-extrabold text-slate-800 dark:text-slate-200 uppercase text-[10px] tracking-widest">My Guest Meal History</h3>
                         </div>
                         <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 custom-scrollbar p-2">
                             {myGuestMeals.length === 0 ? (

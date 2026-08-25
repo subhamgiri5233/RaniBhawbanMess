@@ -300,8 +300,8 @@ const Expenses = () => {
                             <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-3 border border-indigo-500/20">
                                 <Filter className="text-indigo-600 dark:text-indigo-400" size={24} />
                             </div>
-                            <h4 className="text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">Mission Control</h4>
-                            <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 font-bold max-w-[280px] leading-relaxed">Select a member below to analyze their individual mess contributions and category audit.</p>
+                            <h4 className="text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">Member Spends Overview</h4>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 font-bold max-w-[280px] leading-relaxed">Select a member below to view their individual expenses and bazaar shopping.</p>
                         </div>
                     )}
                 </div>
