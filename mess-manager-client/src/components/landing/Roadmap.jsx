@@ -1,113 +1,90 @@
-import { Globe, CreditCard, Mail, Zap, Terminal, Cpu, Database } from 'lucide-react';
+import { Globe, CreditCard, Mail, Sparkles, Database, CheckCircle2 } from 'lucide-react';
 import { memo } from 'react';
 import Card from '../ui/Card';
 
 const roadmapItems = [
     {
         icon: Globe,
-        title: 'Global Ready',
+        title: 'Multi-Lingual Localization',
         status: 'In Development',
-        description: 'Multi-region localization support with dynamic currency conversion for international mess management.',
-        pct: 65,
-        color: 'text-blue-500',
-        bg: 'bg-blue-500/10'
+        description: 'Comprehensive support for Bengali and regional dialects alongside English for all meal logs and reports.',
+        pct: 75,
+        color: 'text-indigo-400',
+        bg: 'bg-indigo-500/10'
     },
     {
         icon: CreditCard,
-        title: 'Seamless Payments',
-        status: 'Architecture Phase',
-        description: 'Integrated payment gateways (Stripe/PayPal) for automated dutes collection and digital receipts.',
-        pct: 40,
-        color: 'text-amber-500',
-        bg: 'bg-amber-500/10'
+        title: 'UPI & Instant QR Settlements',
+        status: 'Active Testing',
+        description: 'Integrated dynamic UPI QR code generator for direct deposit reconciliation and instant receipt verification.',
+        pct: 60,
+        color: 'text-emerald-400',
+        bg: 'bg-emerald-500/10'
     },
     {
         icon: Mail,
-        title: 'Email Notifications',
-        status: 'Beta Testing',
-        description: 'Automated email alerts for market duties, monthly balance resets, and transaction confirmations.',
+        title: 'Automated WhatsApp & Email Summaries',
+        status: 'Deployment Phase',
+        description: 'End-of-month instant balance statement distribution directly to each resident’s personal messaging app.',
         pct: 85,
-        color: 'text-emerald-500',
-        bg: 'bg-emerald-500/10'
+        color: 'text-purple-400',
+        bg: 'bg-purple-500/10'
     }
 ];
 
 const Roadmap = () => {
     return (
-        <section id="roadmap" className="container mx-auto px-6 mb-32">
+        <section id="roadmap" className="max-w-[1600px] mx-auto px-4 sm:px-6 mb-28">
             {/* Header */}
-            <div
-                className="text-center mb-16"
-            >
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                    <Terminal size={14} className="animate-pulse" /> Deployment Pipeline
+            <div className="text-center mb-16">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-extrabold uppercase tracking-widest mb-4">
+                    <Sparkles size={12} className="animate-pulse" />
+                    Continuous Evolution
                 </div>
-                <h2 className="text-4xl md:text-5xl font-[950] text-slate-900 dark:text-white uppercase tracking-tighter mb-4">
-                    V5.0 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-primary-500">Roadmap.</span>
+                <h2 className="text-3xl sm:text-5xl font-[950] text-white uppercase tracking-tight mb-4">
+                    Product Roadmap & <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">Future Pipeline</span>
                 </h2>
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-xs opacity-60">The future of Rani Bhawban Mess management.</p>
+                <p className="text-slate-400 text-xs sm:text-sm font-medium max-w-xl mx-auto">
+                    Upcoming features designed to make Rani Bhawban Mess management effortless, automated, and reliable.
+                </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {roadmapItems.map((item, i) => (
-                    <div
-                        key={item.title}
-                    >
-                        <Card className="p-8 h-full flex flex-col border-indigo-500/10 bg-indigo-200/40 dark:bg-slate-900/40 group relative overflow-hidden">
-                            {/* Background decoration */}
-                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <Cpu size={120} />
-                            </div>
-
-                            <div className="flex justify-between items-start mb-8 relative z-10">
-                                <div className={`w-14 h-14 rounded-2xl ${item.bg} flex items-center justify-center border border-indigo-500/10`}>
-                                    <item.icon className={item.color} size={28} />
+                {roadmapItems.map((item) => (
+                    <div key={item.title}>
+                        <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/70 border border-white/10 hover:border-indigo-500/30 backdrop-blur-xl h-full flex flex-col justify-between group transition-all">
+                            <div>
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className={`w-12 h-12 rounded-2xl ${item.bg} flex items-center justify-center border border-white/10`}>
+                                        <item.icon className={item.color} size={22} />
+                                    </div>
+                                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">
+                                        {item.status}
+                                    </span>
                                 </div>
-                                <div className="text-right">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 block mb-1">Status</span>
-                                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tighter">{item.status}</span>
-                                </div>
-                            </div>
 
-                            <div className="relative z-10 flex-grow">
-                                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-4">{item.title}</h3>
-                                <p className="text-slate-600 dark:text-slate-500 text-[11px] font-bold uppercase tracking-widest leading-relaxed mb-8 opacity-80 min-h-[4rem]">
+                                <h3 className="text-base font-extrabold text-white tracking-tight mb-2">{item.title}</h3>
+                                <p className="text-xs text-slate-400 font-medium leading-relaxed mb-6">
                                     {item.description}
                                 </p>
                             </div>
 
                             {/* Progress bar */}
-                            <div className="relative z-10 mt-auto pt-6 border-t border-indigo-500/10">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Initialization</span>
-                                    <span className="text-[10px] font-mono text-indigo-400">{item.pct}%</span>
+                            <div className="pt-4 border-t border-white/5">
+                                <div className="flex justify-between items-center mb-1.5">
+                                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Pipeline Completion</span>
+                                    <span className="text-[10px] font-mono font-bold text-indigo-400">{item.pct}%</span>
                                 </div>
-                                <div className="h-1.5 w-full bg-indigo-500/10 rounded-full overflow-hidden">
+                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                                     <div
                                         style={{ width: `${item.pct}%` }}
-                                        className="h-full bg-indigo-500 transition-all duration-1000 ease-out"
+                                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
                                     />
                                 </div>
                             </div>
-                        </Card>
+                        </div>
                     </div>
                 ))}
-            </div>
-
-            {/* Bottom Footer Callout */}
-            <div
-                className="mt-12 p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 flex flex-col md:flex-row items-center justify-between gap-6"
-            >
-                <div className="flex items-center gap-4">
-                    <Database size={20} className="text-indigo-500" />
-                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Backend Infrastructure Synced with V5 Protocols</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div 
-                        className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
-                    />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Core Engine Stable</span>
-                </div>
             </div>
         </section>
     );

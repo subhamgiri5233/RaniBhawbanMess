@@ -117,13 +117,13 @@ function App() {
                   <Route path="/meals" element={<AdminRoute><Meals /></AdminRoute>} />
                   <Route path="/expenses" element={<AdminRoute><Expenses /></AdminRoute>} />
                   <Route path="/calculator" element={<AdminRoute><Calculator /></AdminRoute>} />
-                  <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
                   <Route path="/management" element={<AdminRoute><Management /></AdminRoute>} />
                   <Route path="/monthly-summary" element={<AdminRoute><MonthlySummary /></AdminRoute>} />
                   <Route path="/bin" element={<AdminRoute><Bin /></AdminRoute>} />
 
-                  {/* Shared Routes - both admin and members can add expenses */}
+                  {/* Shared Routes - accessible to both admin and members */}
                   <Route path="/add-expense" element={<AddExpense />} />
+                  <Route path="/settings" element={<Settings />} />
 
                   {/* Member Routes - accessible to all */}
                   <Route path="/market" element={<Market />} />

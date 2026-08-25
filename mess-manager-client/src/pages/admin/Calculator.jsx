@@ -677,51 +677,41 @@ const Calculator = () => {
     };
 
     return (
-        <div className="space-y-6 pb-12">
-            {/* Power Banner */}
-            <div className="relative overflow-hidden rb-card p-5 md:p-8 group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
-                <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-                </div>
-
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Sparkles size={14} className="text-primary-500 animate-pulse" />
-                            <span className="text-[9px] md:text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">Institutional Revenue Audit</span>
-                        </div>
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl rb-header flex flex-wrap items-center gap-2 md:gap-3">
-                            Monthly Calculator
-                            <span className="inline-flex items-center px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-indigo-300/40 dark:bg-primary-950/50 text-[9px] md:text-[10px] font-black text-indigo-700 dark:text-primary-400 border border-indigo-300 dark:border-primary-900/50 uppercase tracking-widest whitespace-nowrap">
-                                {globalMonth}
-                            </span>
-                        </h1>
-                        <p className="text-xs md:text-sm font-bold text-slate-700 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
-                            Finalize shared expenses and generate individual member accounting
-                        </p>
+        <div className="space-y-6 sm:space-y-8 pb-12">
+            {/* Header Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 border-l-4 border-l-indigo-600 shadow-sm p-6 sm:p-8 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 backdrop-blur-xl transition-colors">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
+                        <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Revenue & Expense Reconciliation</span>
                     </div>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight flex flex-wrap items-center gap-3">
+                        Monthly Calculator
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 uppercase tracking-wider">
+                            {globalMonth}
+                        </span>
+                    </h1>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
+                        Finalize shared expenses and generate individual member accounting
+                    </p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Per Head Metrics */}
-                <Card className="rb-card rb-shadow-blue p-5 md:p-8 relative overflow-hidden group/card">
-                    <div className="absolute -right-10 -top-10 opacity-[0.03] dark:opacity-[0.05] group-hover/card:rotate-12 transition-transform duration-700 pointer-events-none">
-                        <CalculatorIcon size={200} />
-                    </div>
-
-                    <h2 className="text-xl rb-header mb-8 flex items-center gap-3 text-slate-900 dark:text-slate-50">
-                        <div className="p-2.5 bg-indigo-300/40 dark:bg-primary-950/50 rounded-2xl text-indigo-700 dark:text-primary-400 shadow-inner"><CalculatorIcon size={20} /></div>
+                <Card className="p-5 md:p-6 shadow-sm border border-slate-200/80 dark:border-white/5">
+                    <h2 className="text-lg font-extrabold mb-6 flex items-center gap-3 text-slate-900 dark:text-slate-50">
+                        <div className="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-600 dark:text-indigo-400"><CalculatorIcon size={18} /></div>
                         Shared Subscriptions
                     </h2>
                     
-                    <div className="grid grid-cols-2 gap-x-4 md:gap-x-6 gap-y-6 md:gap-y-8 mb-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 mb-6">
                         {Object.keys(bills).map(key => {
                             const isAutoFetched = ['gas', 'wifi', 'electric', 'spices', 'others'].includes(key);
                             return (
-                                <div key={key} className="space-y-1.5">
-                                    <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">{key.replace(/([A-Z])/g, ' $1').trim()}</label>
-                                    <div className="relative group">
+                                <div key={key} className="space-y-1">
+                                    <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-0.5">{key.replace(/([A-Z])/g, ' $1').trim()}</label>
+                                    <div className="relative">
                                         <input
                                             type="number"
                                             name={key}
@@ -730,101 +720,93 @@ const Calculator = () => {
                                             onFocus={(e) => e.target.select()}
                                             readOnly={isAutoFetched}
                                             className={cn(
-                                                "w-full bg-indigo-300/40 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black transition-all ring-1 focus:ring-2",
+                                                "w-full bg-slate-50 dark:bg-slate-800/60 border rounded-xl px-3.5 py-2 text-xs font-extrabold transition-all outline-none",
                                                 isAutoFetched 
-                                                    ? "ring-emerald-400/30 dark:ring-emerald-900/20 text-emerald-700 dark:text-emerald-400" 
-                                                    : "ring-indigo-300/30 dark:ring-white/5 focus:ring-primary-500/50 text-slate-900 dark:text-white"
+                                                    ? "border-emerald-500/30 text-emerald-700 dark:text-emerald-400" 
+                                                    : "border-slate-200 dark:border-white/10 focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white"
                                             )}
                                         />
-                                        {isAutoFetched && <div className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" title="Auto-fetched from vault" />}
+                                        {isAutoFetched && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500" title="Auto-fetched" />}
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
 
-                    <div className="flex items-center justify-between p-6 bg-indigo-300/40 dark:bg-slate-900/50 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 shadow-inner">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 mb-4">
                         <div>
-                            <p className="text-[8px] font-black text-slate-700 dark:text-slate-500 uppercase tracking-widest mb-1">Active Population</p>
-                            <p className="text-xl font-black text-slate-900 dark:text-slate-50">{members.length} Members</p>
+                            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Active Population</p>
+                            <p className="text-base font-extrabold text-slate-900 dark:text-slate-50">{members.length} Members</p>
                         </div>
                         <Button 
                             onClick={calculatePerHead}
-                            className="bg-primary-600 hover:bg-primary-500 text-white rounded-2xl h-12 px-8 font-black uppercase text-xs tracking-widest shadow-xl shadow-primary-500/10"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-10 px-5 font-extrabold uppercase text-xs tracking-wider shadow-sm"
                         >
                             Process All
                         </Button>
                     </div>
 
                     {perHeadResult && (
-                        <div 
-                            className="mt-6 p-6 rounded-[1.5rem] bg-gradient-to-br from-primary-600 to-indigo-700 text-white shadow-2xl shadow-primary-500/20 relative overflow-hidden"
-                        >
-                            <div className="relative z-10 text-center">
-                                <p className="text-[9px] font-black text-primary-100/60 uppercase tracking-widest mb-2">Aggregate Per Head Liability</p>
-                                <p className="text-4xl font-black tracking-tighter">₹{perHeadResult.perHeadAmount.toFixed(2)}</p>
-                                <p className="text-[10px] font-bold text-white/50 mt-1">Total Vault Withdrawal: ₹{perHeadResult.totalAmount.toFixed(0)}</p>
-                            </div>
+                        <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white shadow-md text-center">
+                            <p className="text-[9px] font-extrabold text-indigo-200 uppercase tracking-wider mb-1">Aggregate Per Head Liability</p>
+                            <p className="text-2xl sm:text-3xl font-extrabold tracking-tight">₹{perHeadResult.perHeadAmount.toFixed(2)}</p>
+                            <p className="text-[10px] font-bold text-indigo-200/70 mt-0.5">Total Shared: ₹{perHeadResult.totalAmount.toFixed(0)}</p>
                         </div>
                     )}
                 </Card>
 
                 {/* Meal Charge Section */}
-                <Card className="rb-card rb-shadow-orange p-5 md:p-8 relative overflow-hidden group/meal">
-                    <div className="absolute -right-10 -top-10 opacity-[0.03] dark:opacity-[0.05] group-hover/meal:rotate-12 transition-transform duration-700 pointer-events-none text-amber-500">
-                        <TrendingUp size={200} />
-                    </div>
-
-                    <h2 className="text-xl rb-header mb-8 flex items-center gap-3 text-slate-900 dark:text-slate-50">
-                        <div className="p-2.5 bg-amber-200 dark:bg-amber-950/50 rounded-2xl text-amber-700 dark:text-amber-400 shadow-inner"><TrendingUp size={20} /></div>
+                <Card className="p-5 md:p-6 shadow-sm border border-slate-200/80 dark:border-white/5">
+                    <h2 className="text-lg font-extrabold mb-6 flex items-center gap-3 text-slate-900 dark:text-slate-50">
+                        <div className="p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400"><TrendingUp size={18} /></div>
                         Meal Unit Value
                     </h2>
 
-                    <div className="space-y-6 mb-8">
-                        <div className="grid grid-cols-2 gap-4 md:gap-6">
-                            <div className="space-y-1.5 col-span-2">
-                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Aggregate Market (₹)</label>
+                    <div className="space-y-3.5 mb-6">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1 col-span-2">
+                                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-0.5">Aggregate Market (₹)</label>
                                 <div className="relative">
                                     <input
                                         type="number"
                                         value={mealInputs.totalMarket}
                                         readOnly
-                                        className="w-full bg-emerald-300/40 dark:bg-emerald-950/20 border-none rounded-2xl px-5 py-4 text-sm font-black text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-400/30 dark:ring-emerald-900/30"
+                                        className="w-full bg-slate-50 dark:bg-slate-800/60 border border-emerald-500/30 rounded-xl px-3.5 py-2 text-xs font-extrabold text-emerald-700 dark:text-emerald-400"
                                     />
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                 </div>
                             </div>
                             
-                            <div className="space-y-1.5">
-                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Rice (₹)</label>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-0.5">Rice (₹)</label>
                                 <input
                                     type="number"
                                     value={mealInputs.rice}
                                     readOnly
-                                    className="w-full bg-indigo-300/40 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black text-slate-900 dark:text-white ring-1 ring-indigo-400/30 dark:ring-white/5"
+                                    className="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-extrabold text-slate-900 dark:text-white"
                                 />
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Guest Adj. (₹)</label>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-0.5">Guest Adj. (₹)</label>
                                 <input
                                     type="number"
                                     value={mealInputs.guest}
                                     readOnly
-                                    className="w-full bg-indigo-300/40 dark:bg-slate-800/30 border-none rounded-2xl px-5 py-3.5 text-sm font-black text-slate-900 dark:text-white ring-1 ring-indigo-400/30 dark:ring-white/5"
+                                    className="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-extrabold text-slate-900 dark:text-white"
                                 />
                             </div>
 
-                            <div className="space-y-1.5 col-span-2">
-                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Standardized Meal Units</label>
+                            <div className="space-y-1 col-span-2">
+                                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-0.5">Standardized Meal Units</label>
                                 <div className="relative">
                                     <input
                                         type="number"
                                         value={mealInputs.totalMeal}
                                         readOnly
-                                        className="w-full bg-amber-300/40 dark:bg-amber-950/20 border-none rounded-2xl px-5 py-4 text-sm font-black text-amber-700 dark:text-amber-400 ring-1 ring-amber-400/30 dark:ring-amber-900/30"
+                                        className="w-full bg-slate-50 dark:bg-slate-800/60 border border-amber-500/30 rounded-xl px-3.5 py-2 text-xs font-extrabold text-amber-700 dark:text-amber-400"
                                     />
-                                    <p className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest">
+                                    <p className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-amber-600 dark:text-amber-500 uppercase tracking-wider">
                                         Includes {MIN_MEALS}+ Min
                                     </p>
                                 </div>
@@ -832,45 +814,43 @@ const Calculator = () => {
                         </div>
                     </div>
 
-                    <div className="flex justify-end mb-6">
+                    <div className="flex justify-end mb-4">
                         <Button 
                             onClick={calculateMealCharge}
-                            className="bg-amber-600 hover:bg-amber-500 text-white rounded-2xl h-12 px-10 font-black uppercase text-xs tracking-widest shadow-xl shadow-amber-500/10"
+                            className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl h-10 px-6 font-extrabold uppercase text-xs tracking-wider shadow-sm"
                         >
                             Sync Units
                         </Button>
                     </div>
 
                     {mealChargeResult && (
-                        <div 
-                            className="p-6 rounded-[1.5rem] bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-2xl shadow-amber-500/20 text-center relative overflow-hidden"
-                        >
-                            <p className="text-[9px] font-black text-white/60 uppercase tracking-widest mb-1">Standard Meal Charge</p>
-                            <p className="text-4xl font-black">₹{mealChargeResult.mealCharge.toFixed(2)}</p>
+                        <div className="p-4 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 text-white shadow-md text-center">
+                            <p className="text-[9px] font-extrabold text-white/70 uppercase tracking-wider mb-1">Standard Meal Charge</p>
+                            <p className="text-2xl sm:text-3xl font-extrabold">₹{mealChargeResult.mealCharge.toFixed(2)}</p>
                         </div>
                     )}
                 </Card>
             </div>
 
-                {(perHeadResult && mealChargeResult) && (
-                    <div className="mt-12 space-y-6">
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="p-2 bg-indigo-300/40 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl"><Users size={18} /></div>
-                        <h3 className="text-lg rb-header">Institutional Audit Ledger</h3>
+            {(perHeadResult && mealChargeResult) && (
+                <div className="mt-8 space-y-4">
+                    <div className="flex items-center gap-2 px-1">
+                        <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20"><Users size={16} /></div>
+                        <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">Institutional Audit Ledger</h3>
                     </div>
 
-                    <Card className="rb-card p-0 overflow-hidden mb-12 shadow-2xl">
+                    <Card className="p-0 overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/5">
                         <div className="overflow-x-auto custom-scrollbar">
-                            <table className="w-full border-collapse min-w-[1000px]">
+                            <table className="w-full border-collapse min-w-[900px] text-left">
                                 <thead>
-                                    <tr className="bg-slate-900 dark:bg-black text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                                        <th className="p-5 text-left sticky left-0 bg-slate-900 dark:bg-black z-20 shadow-xl">Identity</th>
-                                        <th className="p-5 text-center">Meal Units</th>
-                                        <th className="p-5 text-center">Market Allocation</th>
-                                        <th className="p-5 text-center">Guest Units</th>
-                                        <th className="p-5 text-center">Shared Liability</th>
-                                        <th className="p-5 text-center">Capital Deposit</th>
-                                        <th className="p-5 text-right pr-8">Month End Status</th>
+                                    <tr className="bg-slate-50 dark:bg-slate-900/80 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-200/80 dark:border-white/5">
+                                        <th className="p-3.5 pl-5 sticky left-0 bg-slate-50 dark:bg-slate-900 z-20">Identity</th>
+                                        <th className="p-3.5 text-center">Meal Units</th>
+                                        <th className="p-3.5 text-center">Market Allocation</th>
+                                        <th className="p-3.5 text-center">Guest Units</th>
+                                        <th className="p-3.5 text-center">Shared Liability</th>
+                                        <th className="p-3.5 text-center">Capital Deposit</th>
+                                        <th className="p-3.5 text-right pr-6">Month End Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -879,65 +859,61 @@ const Calculator = () => {
                                         if (!memberId) return null;
                                         
                                         return (
-                                            <tr key={memberId} className="group hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-colors duration-200 border-b border-indigo-200/30 last:border-0">
-                                                <td className="p-5 sticky left-0 bg-indigo-300/40 dark:bg-slate-900 group-hover:bg-indigo-300/60 transition-colors z-10 shadow-lg">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-800 flex items-center justify-center text-white text-xs font-black shadow-lg">
+                                            <tr key={memberId} className="group hover:bg-slate-50/80 dark:hover:bg-white/5 transition-colors">
+                                                <td className="p-3.5 pl-5 sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 transition-colors z-10">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-white/5 flex items-center justify-center text-slate-700 dark:text-slate-200 text-xs font-extrabold">
                                                             {(item?.name || item?.memberName || '?').charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div className="text-xs font-black text-slate-900 dark:text-white leading-none mb-1">{item?.name || item?.memberName}</div>
-                                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item?.role || 'Member'}</div>
+                                                            <div className="text-xs font-extrabold text-slate-900 dark:text-white leading-none mb-0.5">{item?.name || item?.memberName}</div>
+                                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{item?.role || 'Member'}</div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="p-5 text-center">
+                                                <td className="p-3.5 text-center">
                                                     <div className={cn(
-                                                        "px-4 py-2 rounded-xl border inline-block min-w-[80px]",
+                                                        "px-2.5 py-1 rounded-lg border inline-block",
                                                         item?.isBelowMinimum 
-                                                            ? "bg-rose-300/40 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 shadow-rose-500/10 border border-rose-200 dark:border-rose-900/20" 
-                                                            : "bg-emerald-300/40 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-200 dark:border-emerald-900/20"
+                                                            ? "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20" 
+                                                            : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
                                                     )}>
                                                         <div className="flex flex-col">
-                                                            <span className="text-xs font-black">{(Number(item?.meals) || 0)} Units</span>
-                                                            <span className="text-[8px] font-bold opacity-60 uppercase tracking-tighter">Min: {MIN_MEALS}</span>
+                                                            <span className="text-xs font-extrabold">{(Number(item?.meals) || 0)} Units</span>
+                                                            <span className="text-[8px] font-bold opacity-60 uppercase">Min: {MIN_MEALS}</span>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="p-5">
-                                                    <div className="px-4 py-2 bg-indigo-200/40 dark:bg-black/30 rounded-xl border border-indigo-200/50 dark:border-white/5 text-center">
-                                                        <span className="text-xs font-black text-slate-800 dark:text-slate-300">₹{(Number(item?.marketExpense) || 0).toLocaleString()}</span>
-                                                    </div>
+                                                <td className="p-3.5 text-center">
+                                                    <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">₹{(Number(item?.marketExpense) || 0).toLocaleString()}</span>
                                                 </td>
-                                                <td className="p-5 text-center">
-                                                    <div className="px-4 py-2 bg-indigo-200/40 dark:bg-black/30 rounded-xl border border-indigo-200/50 dark:border-white/5 inline-block min-w-[60px]">
-                                                        <span className="text-xs font-black text-slate-800 dark:text-slate-300">{Number(item?.guest) || 0}</span>
-                                                    </div>
+                                                <td className="p-3.5 text-center">
+                                                    <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">{Number(item?.guest) || 0}</span>
                                                 </td>
-                                                <td className="p-5 text-center text-xs font-black text-slate-600 dark:text-slate-400">
+                                                <td className="p-3.5 text-center text-xs font-extrabold text-slate-600 dark:text-slate-400">
                                                     ₹{(Number(perHeadResult?.perHeadAmount) || 0).toFixed(0)}
                                                 </td>
-                                                <td className="p-5">
-                                                    <div className="flex flex-col gap-1.5 items-center">
+                                                <td className="p-3.5">
+                                                    <div className="flex flex-col gap-1 items-center">
                                                         <input
                                                             type="number"
                                                             value={item?.deposit === 0 ? '' : (item?.deposit || '')}
                                                             onChange={(e) => handleIndividualChange(memberId, 'deposit', e.target.value)}
-                                                            className="w-[100px] bg-indigo-300/40 dark:bg-slate-800 border-2 border-indigo-300/30 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-black text-center focus:border-primary-500 outline-none transition-all shadow-sm"
+                                                            className="w-20 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1 text-xs font-extrabold text-center focus:ring-2 focus:ring-indigo-500 outline-none"
                                                             placeholder="0"
                                                         />
-                                                        <span className="text-[8px] font-black text-primary-600 uppercase tracking-tighter opacity-60">GEN: ₹{Number(item?.genDeposit) || 0}</span>
+                                                        <span className="text-[8px] font-extrabold text-slate-400 uppercase tracking-wider">GEN: ₹{Number(item?.genDeposit) || 0}</span>
                                                     </div>
                                                 </td>
-                                                <td className="p-5 text-right pr-8">
+                                                <td className="p-3.5 text-right pr-6">
                                                     <div className={cn(
-                                                        "inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-xs shadow-lg",
+                                                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-xl font-extrabold text-xs border",
                                                         (Number(item?.balance) || 0) > 0 
-                                                            ? "bg-rose-300/40 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 shadow-rose-500/10 border border-rose-200 dark:border-rose-900/20" 
-                                                            : "bg-emerald-300/40 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-emerald-500/10 border border-emerald-200 dark:border-emerald-900/20"
+                                                            ? "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20" 
+                                                            : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
                                                     )}>
                                                         ₹{Math.abs(Math.round(Number(item?.balance) || 0))}
-                                                        <span className="text-[8px] font-bold uppercase opacity-60">{(Number(item?.balance) || 0) > 0 ? 'PAY' : 'GET'}</span>
+                                                        <span className="text-[8px] font-bold uppercase opacity-70">{(Number(item?.balance) || 0) > 0 ? 'PAY' : 'GET'}</span>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -951,22 +927,22 @@ const Calculator = () => {
             )}
 
             {/* Bottom Actions Section */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 mb-8 p-8 bg-indigo-300/20 dark:bg-slate-900/40 rounded-[2rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 p-6 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200/80 dark:border-white/5">
                 <Button 
                     onClick={generatePDF} 
                     disabled={!perHeadResult || !mealChargeResult} 
-                    className="w-full sm:w-auto h-14 px-8 rounded-2xl shadow-lg bg-indigo-300/40 dark:bg-slate-800 text-indigo-900 dark:text-white border border-indigo-300/30 dark:border-white/10 font-black text-xs uppercase tracking-widest hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-all active:scale-95 flex items-center justify-center gap-3"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 font-extrabold text-xs uppercase tracking-wider hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
-                    <Download size={20} />
+                    <Download size={16} />
                     Download Analysis PDF
                 </Button>
 
                 <Button
                     onClick={handleSubmitToMonthlyReport}
                     disabled={submittingReport || !perHeadResult || !mealChargeResult}
-                    className="w-full sm:w-auto h-14 px-10 rounded-2xl shadow-2xl shadow-emerald-500/20 active:scale-95 transition-all bg-emerald-600 hover:bg-emerald-500 border-none text-white font-black text-xs uppercase tracking-[0.1em] flex items-center justify-center gap-3"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-md shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
-                    <Save size={20} />
+                    <Save size={16} />
                     {submittingReport ? 'Finalizing...' : 'Submit to Monthly Report'}
                 </Button>
             </div>

@@ -204,58 +204,51 @@ const BirthdayWidget = () => {
                 
                 return (
                     <div key={memberId} className="relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 animate-gradient-xy opacity-10 dark:opacity-30 rounded-[2.5rem]"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 animate-gradient-xy opacity-10 dark:opacity-20 rounded-2xl md:rounded-[1.5rem]"></div>
                         <Card className={cn(
-                            "rb-card p-0 border-none bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl relative overflow-hidden",
-                            isMe && "ring-4 ring-pink-500/30 shadow-2xl shadow-pink-500/20"
+                            "p-0 border-none bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl relative overflow-hidden rounded-2xl md:rounded-[1.5rem] shadow-sm",
+                            isMe && "ring-2 ring-pink-500/40 shadow-xl shadow-pink-500/10"
                         )}>
                             <SparkleParticles />
                             
                             {/* Decorative background icons */}
                             <div className="absolute -right-10 -top-10 text-pink-500/5 group-hover:rotate-12 transition-transform duration-1000">
-                                <Cake size={250} />
-                            </div>
-                            <div className="absolute left-1/4 bottom-0 text-purple-500/5 animate-float-reverse">
-                                <Gift size={150} />
+                                <Cake size={200} />
                             </div>
 
-                            <div className="p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-12 relative z-10">
+                            <div className="p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 md:gap-8 relative z-10">
                                 <div className="relative">
                                     <div className={cn(
-                                        "absolute inset-0 blur-2xl opacity-40 animate-pulse-glow rounded-full",
-                                        isMe ? "bg-pink-500" : "bg-indigo-500"
-                                    )}></div>
-                                    <div className={cn(
-                                        "w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] md:rounded-[3rem] flex items-center justify-center text-white text-5xl md:text-6xl font-black shadow-2xl border-4 border-white dark:border-slate-800 rotate-3 group-hover:rotate-0 transition-all duration-700 relative z-10 animate-float",
-                                        isMe ? "bg-gradient-to-br from-pink-500 to-rose-600 shadow-pink-500/40" : "bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/40"
+                                        "w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center text-white text-3xl md:text-4xl font-extrabold shadow-lg border-2 border-white dark:border-slate-800 relative z-10",
+                                        isMe ? "bg-gradient-to-br from-pink-500 to-rose-600" : "bg-gradient-to-br from-indigo-500 to-purple-600"
                                     )}>
                                         {member.name.charAt(0)}
                                     </div>
-                                    <div className="absolute -bottom-2 -right-2 bg-amber-400 p-3 rounded-2xl shadow-xl z-20 animate-bounce">
-                                        <Cake size={20} className="text-amber-900" />
+                                    <div className="absolute -bottom-1.5 -right-1.5 bg-amber-400 p-2 rounded-xl shadow-md z-20">
+                                        <Cake size={16} className="text-amber-950" />
                                     </div>
                                 </div>
                                 
                                 <div className="text-center md:text-left flex-1">
-                                    <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                                    <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
                                         <span className={cn(
-                                            "px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg animate-pulse",
-                                            isMe ? "bg-pink-600 shadow-pink-600/20" : "bg-indigo-600 shadow-indigo-600/20"
+                                            "px-3 py-1 text-white text-[9px] font-extrabold uppercase tracking-wider rounded-lg shadow-sm",
+                                            isMe ? "bg-pink-600" : "bg-indigo-600"
                                         )}>
                                             {isMe ? "Today is your day! 🎂" : "Special Celebration! 🎉"}
                                         </span>
                                     </div>
-                                    <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-slate-50 tracking-tighter leading-[0.9] mb-4">
+                                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
                                         {isMe ? (
-                                            <>Happy Birthday, <br/><span className="text-pink-600 dark:text-pink-400">{user.name}!</span></>
+                                            <>Happy Birthday, <span className="text-pink-600 dark:text-pink-400">{user.name}!</span></>
                                         ) : (
-                                            <>It’s <span className="text-indigo-600 dark:text-indigo-400">{member.name}’s</span> <br/>birthday!</>
+                                            <>It’s <span className="text-indigo-600 dark:text-indigo-400">{member.name}’s</span> birthday!</>
                                         )}
                                     </h2>
-                                    <p className="text-base md:text-xl font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] max-w-xl mb-8">
+                                    <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 max-w-xl mb-4">
                                         {isMe 
-                                            ? "Wishing you an extraordinary year of growth and happiness! 🎉" 
-                                            : "May their special day be filled with endless joy and premium moments! 🎂"
+                                            ? "Wishing you an extraordinary year of growth, good health, and happiness! 🎉" 
+                                            : "May their special day be filled with joy, prosperity, and memorable moments! 🎂"
                                         }
                                     </p>
 
@@ -264,29 +257,19 @@ const BirthdayWidget = () => {
                                             onClick={() => handleWish(member)}
                                             disabled={hasWished}
                                             className={cn(
-                                                "px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-3 active:scale-95",
+                                                "px-5 py-2 rounded-xl font-extrabold uppercase tracking-wider text-xs transition-all flex items-center gap-2 active:scale-95",
                                                 hasWished 
-                                                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 cursor-default"
-                                                    : "bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-xl shadow-pink-500/20 hover:shadow-pink-500/40 hover:scale-105"
+                                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 cursor-default"
+                                                    : "bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-sm hover:opacity-95"
                                             )}
                                         >
                                             {hasWished ? (
                                                 <>Wish Sent! ❤️</>
                                             ) : (
-                                                <>Send Best Wishes <PartyPopper size={16} /></>
+                                                <>Send Best Wishes <PartyPopper size={14} /></>
                                             )}
                                         </button>
                                     )}
-                                </div>
-
-                                <div className="hidden lg:block pr-8">
-                                    <div className="relative group/gift">
-                                        <div className="absolute inset-0 bg-pink-500 blur-[40px] opacity-0 group-hover/gift:opacity-30 transition-opacity duration-700"></div>
-                                        <Gift size={100} className={cn(
-                                            "relative z-10 transition-transform duration-700 group-hover/gift:scale-125 group-hover/gift:rotate-12",
-                                            isMe ? "text-pink-500" : "text-indigo-500"
-                                        )} />
-                                    </div>
                                 </div>
                             </div>
                         </Card>
@@ -296,39 +279,29 @@ const BirthdayWidget = () => {
 
             {/* Upcoming Birthdays List */}
             {birthdayData.upcoming.length > 0 && (
-                <Card className="rb-card p-8 border-indigo-300/30 dark:border-white/5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md overflow-hidden relative">
-                    {/* Background decoration */}
-                    <div className="absolute right-0 bottom-0 opacity-[0.03] text-indigo-500 pointer-events-none translate-x-1/4 translate-y-1/4">
-                        <Calendar size={300} />
-                    </div>
-
-                    <div className="flex items-center gap-4 mb-10 relative z-10">
-                        <div className="p-3.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl border border-indigo-300/20 shadow-inner">
-                            <Calendar size={24} />
+                <Card className="p-6 border border-slate-200/80 dark:border-white/5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm rounded-2xl md:rounded-[1.5rem]">
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20">
+                            <Calendar size={18} />
                         </div>
                         <div>
-                            <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-[0.3em]">Upcoming Celebrations</h3>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Institutional procurement of joy this week</p>
+                            <h3 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-wider">Upcoming Birthdays</h3>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Celebrations coming up in the mess</p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                         {birthdayData.upcoming.map(member => (
                             <div 
                                 key={member._id || member.id}
-                                className="flex items-center gap-5 p-5 bg-white dark:bg-slate-800/60 rounded-[1.8rem] border border-indigo-300/20 dark:border-white/5 hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all group/item cursor-default"
+                                className="flex items-center gap-3 p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 hover:border-indigo-500/30 transition-all cursor-default"
                             >
-                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black text-sm group-hover/item:scale-110 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-all duration-500 shadow-sm border border-indigo-200/50 dark:border-white/5">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-extrabold text-sm border border-indigo-500/20">
                                     {member.name.charAt(0)}
                                 </div>
-                                <div>
-                                    <p className="text-sm font-black text-slate-900 dark:text-slate-100 leading-none group-hover/item:text-indigo-600 transition-colors">{member.name}</p>
-                                    <div className="flex items-center gap-2 mt-2.5">
-                                        <Cake size={10} className="text-pink-500 opacity-70" />
-                                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.1em]">
-                                            {format(member.birthdayDate, 'EEEE, MMM do')}
-                                        </p>
-                                    </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">{member.name}</h4>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{format(member.birthdayDate, 'EEEE, MMM do')}</p>
                                 </div>
                             </div>
                         ))}

@@ -7,8 +7,14 @@ import Input from '../../components/ui/Input';
 import { Settings as SettingsIcon, Lock, Shield, Key, RefreshCw, Eye, EyeOff, Database, Trash2, Calendar, AlertTriangle } from 'lucide-react';
 import api from '../../lib/api';
 
+import MemberSettings from '../member/MemberSettings';
+
 const Settings = () => {
     const { user } = useAuth();
+    if (user && user.role !== 'admin') {
+        return <MemberSettings />;
+    }
+
     const [settings, setSettings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingKey, setEditingKey] = useState(null);
@@ -205,41 +211,49 @@ const Settings = () => {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl sm:text-5xl rb-header flex items-center gap-3">
-                    <SettingsIcon size={32} className="text-primary-600 dark:text-primary-400" />
-                    Admin Settings
-                </h1>
+        <div className="space-y-6 sm:space-y-8 pb-12">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 border-l-4 border-l-indigo-600 shadow-sm p-6 sm:p-8 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 backdrop-blur-xl transition-colors">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
+                        <SettingsIcon size={26} className="text-indigo-600 dark:text-indigo-400" />
+                        Admin Settings
+                    </h1>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
+                        Security preferences, administrator credentials, and monthly resets
+                    </p>
+                </div>
             </div>
 
             {/* Account Information */}
-            <Card className="rb-card rb-shadow-blue p-8 border-l-8 border-l-primary-500">
-                <h2 className="text-xl rb-header mb-6 flex items-center gap-2">
-                    <Shield size={20} className="text-primary-600 dark:text-primary-400" />
+            <Card className="p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-white/5 border-l-4 border-l-indigo-600">
+                <h2 className="text-lg font-extrabold mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-50">
+                    <Shield size={18} className="text-indigo-600 dark:text-indigo-400" />
                     Account Information
                 </h2>
-                <div className="space-y-2 text-sm font-bold">
-                    <p><span className="text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-widest block mb-1">Logged in as</span> <span className="text-slate-900 dark:text-slate-100">{user?.name || 'Admin'}</span></p>
-                    <p><span className="text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-widest block mb-1">Username</span> <span className="text-slate-700 dark:text-slate-300 font-mono text-xs">{user?.username || 'Admin'}</span></p>
-                    <p className="text-[10px] text-primary-600 dark:text-primary-400 mt-6 uppercase tracking-widest font-black">
-                        ⚠️ Keep your passwords secure and change them regularly
-                    </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-bold">
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5">
+                        <span className="text-slate-400 uppercase text-[9px] font-extrabold tracking-wider block mb-1">Logged in as</span> 
+                        <span className="text-slate-900 dark:text-slate-100 font-extrabold text-sm">{user?.name || 'Admin'}</span>
+                    </div>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5">
+                        <span className="text-slate-400 uppercase text-[9px] font-extrabold tracking-wider block mb-1">Username</span> 
+                        <span className="text-slate-700 dark:text-slate-300 font-mono text-xs">{user?.username || 'Admin'}</span>
+                    </div>
                 </div>
             </Card>
 
             {/* Change Admin Login Credentials */}
-            <Card className="rb-card rb-shadow-emerald p-8 border-l-8 border-l-emerald-500">
-                <h2 className="text-xl rb-header mb-6 flex items-center gap-2">
-                    <Key size={20} className="text-emerald-600 dark:text-emerald-400" />
+            <Card className="p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-white/5 border-l-4 border-l-emerald-600">
+                <h2 className="text-lg font-extrabold mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-50">
+                    <Key size={18} className="text-emerald-600 dark:text-emerald-400" />
                     Change Admin Login Credentials
                 </h2>
                 <div className="space-y-4">
-                    <p className="text-sm font-bold text-slate-600 dark:text-emerald-400 mb-6">
-                        Update your admin login username and password. You will need these credentials to log in.
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Update your administrator username and password for authentication.
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                             label="Current Password"
                             type="password"
@@ -272,11 +286,11 @@ const Settings = () => {
                         />
                     </div>
 
-                    <div className="flex gap-3 mt-4">
+                    <div className="flex gap-3 pt-2">
                         <Button
                             onClick={handleAdminPasswordChange}
                             disabled={adminUpdating}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-sm"
                         >
                             {adminUpdating ? 'Updating...' : 'Update Admin Credentials'}
                         </Button>
@@ -288,40 +302,41 @@ const Settings = () => {
                                 setAdminConfirmPassword('');
                             }}
                             variant="secondary"
+                            className="px-4 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider"
                         >
                             Clear Form
                         </Button>
                     </div>
 
-                     <div className="mt-6 p-4 bg-emerald-200/50 dark:bg-emerald-950/30 border border-emerald-300/30 dark:border-emerald-800/50 rounded-xl shadow-sm">
-                        <p className="text-[10px] text-emerald-900 dark:text-emerald-300 font-black uppercase tracking-widest flex items-center gap-2">
-                            ⚠️ <strong>Warning:</strong> After changing credentials, you will need to use the new username and password to log in next time.
+                     <div className="mt-4 p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                        <p className="text-[10px] text-emerald-800 dark:text-emerald-300 font-extrabold uppercase tracking-wider flex items-center gap-2">
+                            ⚠️ Note: After changing credentials, you will need to log in again using the updated password.
                         </p>
                     </div>
                 </div>
             </Card>
 
             {/* Monthly Data Management */}
-            <Card className="rb-card rb-shadow-orange p-8 border-l-8 border-l-rose-500">
-                <h2 className="text-xl rb-header mb-6 flex items-center gap-2">
-                    <Database size={20} className="text-rose-600 dark:text-rose-400" />
+            <Card className="p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-white/5 border-l-4 border-l-rose-600">
+                <h2 className="text-lg font-extrabold mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-50">
+                    <Database size={18} className="text-rose-600 dark:text-rose-400" />
                     Monthly Data Management
                 </h2>
                 <div className="space-y-4">
-                    <p className="text-sm font-bold text-slate-600 dark:text-rose-400 mb-6 font-mono border-b border-rose-100/30 pb-2">
-                        Use this feature to clear all records for a specific business month. This is useful for monthly resets or data cleanup.
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Select a specific month to preview and purge records if required.
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                        <div className="space-y-4">
-                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Select Target Month</label>
-                            <div className="relative group">
-                                <Calendar size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                 <input
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Select Target Month</label>
+                            <div className="relative">
+                                <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                <input
                                     type="month"
                                     value={deleteMonth}
                                     onChange={(e) => setDeleteMonth(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-indigo-200/40 dark:bg-slate-950 border border-indigo-300/30 dark:border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-rose-500/10 transition-all shadow-sm"
+                                    className="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-extrabold uppercase tracking-wider outline-none focus:ring-2 focus:ring-rose-500 text-slate-900 dark:text-white"
                                 />
                             </div>
                         </div>
@@ -336,34 +351,34 @@ const Settings = () => {
                     </div>
 
                     {/* Preview Stats */}
-                     {deleteMonth && (
-                        <div className="mt-6 p-6 bg-indigo-200/30 dark:bg-slate-950/50 rounded-2xl border border-indigo-300/30 dark:border-white/5 overflow-hidden relative">
+                    {deleteMonth && (
+                        <div className="mt-4 p-5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 relative">
                             {loadingPreview && (
-                                <div className="absolute inset-0 bg-indigo-300/20 dark:bg-black/50 backdrop-blur-[1px] flex items-center justify-center z-10">
-                                    <RefreshCw className="animate-spin text-primary-500" size={20} />
+                                <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                    <RefreshCw className="animate-spin text-indigo-600" size={18} />
                                 </div>
                             )}
 
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Month Snapshot: {deleteMonth}</h3>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Month Snapshot: {deleteMonth}</h3>
                                 <div className="flex items-center gap-4">
                                     <div className="text-right">
-                                        <div className="text-[10px] font-black text-rose-500 uppercase tracking-widest leading-none mb-1">Items Found</div>
-                                        <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{previewStats?.totalItems || 0}</div>
+                                        <div className="text-[9px] font-extrabold text-rose-500 uppercase tracking-wider leading-none mb-0.5">Items Found</div>
+                                        <div className="text-lg font-extrabold text-slate-900 dark:text-white leading-none">{previewStats?.totalItems || 0}</div>
                                     </div>
-                                    <div className="h-8 w-[1px] bg-indigo-300/30 dark:bg-white/10" />
+                                    <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
                                     <div className="text-right">
-                                        <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Space to Free</div>
-                                        <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{previewStats?.totalSizeFormatted || '0 KB'}</div>
+                                        <div className="text-[9px] font-extrabold text-emerald-500 uppercase tracking-wider leading-none mb-0.5">Space to Free</div>
+                                        <div className="text-lg font-extrabold text-slate-900 dark:text-white leading-none">{previewStats?.totalSizeFormatted || '0 KB'}</div>
                                     </div>
                                 </div>
                             </div>
 
-                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {previewStats?.stats.map((stat) => (
-                                    <div key={stat.name} className="group p-4 bg-indigo-100/50 dark:bg-slate-900 rounded-2xl border border-indigo-200/30 dark:border-white/5 shadow-sm hover:shadow-md transition-all">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest truncate">
+                                    <div key={stat.name} className="group p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-white/5 shadow-sm">
+                                        <div className="flex items-start justify-between mb-1">
+                                            <div className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider truncate">
                                                 {stat.name.replace(/([A-Z])/g, ' $1').trim()}
                                             </div>
                                             {stat.count > 0 && (
@@ -394,16 +409,16 @@ const Settings = () => {
                                                             handleClearCategoryData();
                                                         }
                                                     }}
-                                                    className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                                    className="p-1 text-slate-400 hover:text-rose-500 rounded transition-colors opacity-0 group-hover:opacity-100"
                                                     title={`Delete ${stat.name}`}
                                                 >
-                                                    <Trash2 size={14} />
+                                                    <Trash2 size={13} />
                                                 </button>
                                             )}
                                         </div>
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-lg font-black text-slate-700 dark:text-slate-200">{stat.count}</span>
-                                            <span className="text-[10px] font-bold text-slate-400">records</span>
+                                            <span className="text-base font-extrabold text-slate-900 dark:text-slate-100">{stat.count}</span>
+                                            <span className="text-[9px] font-bold text-slate-400">records</span>
                                         </div>
                                     </div>
                                 ))}
@@ -411,7 +426,7 @@ const Settings = () => {
                         </div>
                     )}
 
-                    <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                    <div className="mt-6 flex flex-col sm:flex-row gap-3">
                         {!showDeleteConfirm ? (
                             <Button
                                 onClick={() => {
@@ -421,26 +436,26 @@ const Settings = () => {
                                     }
                                     setShowDeleteConfirm(true);
                                 }}
-                                className="bg-rose-600 hover:bg-rose-700 font-black uppercase tracking-widest text-[10px] py-4 shadow-xl shadow-rose-500/20 flex items-center justify-center gap-2 px-8"
+                                className="bg-rose-600 hover:bg-rose-700 text-white font-extrabold uppercase tracking-wider text-xs py-2.5 px-6 rounded-xl shadow-sm flex items-center justify-center gap-2"
                             >
-                                <Trash2 size={16} />
+                                <Trash2 size={14} />
                                 Initialize Month Cleanup
                             </Button>
                         ) : (
-                            <div className="flex flex-col sm:flex-row gap-3 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div className="flex flex-col sm:flex-row gap-2.5 w-full">
                                 <Button
                                     onClick={handleClearMonthData}
                                     disabled={deleting}
-                                    className="bg-red-700 hover:bg-red-800 font-black uppercase tracking-widest text-[10px] py-4 shadow-xl shadow-red-500/40 flex items-center justify-center gap-2 flex-[2]"
+                                    className="bg-rose-700 hover:bg-rose-800 text-white font-extrabold uppercase tracking-wider text-xs py-2.5 px-6 rounded-xl shadow-sm flex items-center justify-center gap-2 flex-[2]"
                                 >
                                     {deleting ? (
                                         <>
-                                            <RefreshCw size={16} className="animate-spin" />
+                                            <RefreshCw size={14} className="animate-spin" />
                                             Wiping Data...
                                         </>
                                     ) : (
                                         <>
-                                            <AlertTriangle size={16} />
+                                            <AlertTriangle size={14} />
                                             CONFIRM PERMANENT DELETE FOR {deleteMonth}
                                         </>
                                     )}
@@ -448,7 +463,7 @@ const Settings = () => {
                                 <Button
                                     onClick={() => setShowDeleteConfirm(false)}
                                     variant="secondary"
-                                    className="flex-1 font-black uppercase tracking-widest text-[10px] py-4"
+                                    className="flex-1 font-extrabold uppercase tracking-wider text-xs py-2.5 rounded-xl"
                                 >
                                     Cancel
                                 </Button>
@@ -456,30 +471,27 @@ const Settings = () => {
                         )}
                     </div>
 
-                     <div className="mt-6 p-4 bg-rose-200/50 dark:bg-rose-950/30 border border-rose-300/30 dark:border-rose-800/50 rounded-xl">
-                        <p className="text-[11px] text-rose-900 dark:text-rose-300 font-bold leading-relaxed flex gap-3 italic">
-                            <AlertTriangle size={24} className="shrink-0 text-rose-600" />
+                    <div className="mt-4 p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+                        <p className="text-[10px] text-rose-800 dark:text-rose-300 font-bold leading-relaxed flex gap-2">
+                            <AlertTriangle size={18} className="shrink-0 text-rose-600" />
                             <span>
-                                <strong>Safety Warning:</strong> This operation will clear all meals, guest records, market assignments, cooking duties, and expenses for the selected month. The members themselves and their profiles will NOT be deleted.
+                                <strong>Safety Warning:</strong> This operation clears logs, meals, market entries, and expenses for the target month. Member identities remain intact.
                             </span>
                         </p>
                     </div>
                 </div>
             </Card>
 
-            {/* Sensitive Information Vault - REMOVED for safety */}
-
-             {/* Info Card */}
-            <Card className="rb-card rb-shadow-indigo p-8 !bg-indigo-200/40 dark:!bg-indigo-950/20 mb-8 border-indigo-300/30">
-                <h3 className="rb-header !text-indigo-950 dark:!text-indigo-100 mb-6 flex items-center gap-3 tracking-tight">
-                    <Lock size={18} className="text-primary-600 dark:text-amber-400" />
+            {/* Security Best Practices */}
+            <Card className="p-6 shadow-sm border border-slate-200/80 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50">
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+                    <Lock size={16} className="text-amber-500" />
                     Security Best Practices
                 </h3>
-                <ul className="text-sm font-bold text-amber-800 dark:text-amber-300/80 space-y-2">
-                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-amber-400 rounded-full" /> Use strong, unique passwords for each feature</li>
-                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-amber-400 rounded-full" /> Change passwords regularly to maintain security</li>
-                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-amber-400 rounded-full" /> Never share your administrator passwords with others</li>
-                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-amber-400 rounded-full" /> Keep a secure, encrypted backup of all system keys</li>
+                <ul className="text-xs font-bold text-slate-600 dark:text-slate-400 space-y-1.5">
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full" /> Use strong, unique passwords for administrator access</li>
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full" /> Change passwords regularly to maintain data integrity</li>
+                    <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-indigo-500 rounded-full" /> Never share administrator credentials with unauthorized users</li>
                 </ul>
             </Card>
         </div>

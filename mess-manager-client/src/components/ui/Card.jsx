@@ -31,8 +31,8 @@ const Card = memo(({ children, className, innerClassName, style, ...props }) => 
             onMouseLeave={handleMouseLeave}
             style={style}
             className={cn(
-                'group relative bg-indigo-300/40 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl md:rounded-[2rem] border border-indigo-400/30 dark:border-white/5 shadow-premium transition-all duration-500 overflow-hidden',
-                'hover:shadow-[0_20px_50px_rgba(79,70,229,0.15)] dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]',
+                'group relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl md:rounded-[2rem] border border-slate-200/80 dark:border-white/[0.08] shadow-premium transition-all duration-300 overflow-hidden',
+                'hover:shadow-premium-hover hover:border-indigo-300/50 dark:hover:border-white/20',
                 className
             )}
             {...props}

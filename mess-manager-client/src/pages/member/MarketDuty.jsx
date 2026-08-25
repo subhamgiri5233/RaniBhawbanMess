@@ -207,36 +207,36 @@ const MarketDuty = () => {
     };
 
     return (
-        <div className="space-y-8 pb-12">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-indigo-300/40 dark:bg-slate-900 border-l-8 border-l-indigo-600 shadow-sm p-5 md:p-8 rounded-[1.5rem] md:rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl transition-colors">
+        <div className="space-y-6 sm:space-y-8 pb-12">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-white/80 dark:bg-slate-900/80 border-l-4 border-l-indigo-600 shadow-sm p-6 md:p-8 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 backdrop-blur-xl transition-colors">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-50 tracking-tight">Market Duty</h1>
-                    <p className="text-[10px] md:text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Market Duty</h1>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
                         {canManageSchedule ? 'Manage and assign mess market duties' : 'Reserve your dates for mess collection'}
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                     {canManageSchedule && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-                            <Sparkles size={16} className="text-indigo-600 dark:text-indigo-400" />
-                            <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
+                        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+                            <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400" />
+                            <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider">
                                 {isAdmin ? 'Admin Mode' : 'Manager Mode'}
                             </span>
                         </div>
                     )}
                     {!canManageSchedule && (
                         <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Monthly Quota</span>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-                                <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{myRequestsThisMonth} / {myLimit} Slots Used</span>
+                            <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Monthly Quota</span>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                                <span className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{myRequestsThisMonth} / {myLimit} Slots Used</span>
                             </div>
                         </div>
                     )}
                     {!canManageSchedule && (
                         <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Confirmed Days</span>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-                                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">{myDaysCount} Finalized</span>
+                            <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Confirmed Days</span>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{myDaysCount} Finalized</span>
                             </div>
                         </div>
                     )}
@@ -246,36 +246,36 @@ const MarketDuty = () => {
             {/* Manager Request Handler */}
             {isManager && pendingRequests.length > 0 && (
                 <div className="overflow-hidden">
-                    <Card className="p-8 border-l-8 border-amber-500 bg-amber-300/40 dark:bg-amber-900/10 shadow-xl shadow-amber-500/5 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Card className="p-6 md:p-8 border-l-4 border-amber-500 bg-amber-500/5 dark:bg-amber-900/10 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
                             <Inbox size={120} className="text-amber-500" />
                         </div>
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-amber-200 dark:bg-amber-900/40 rounded-xl">
-                                <Sparkles size={20} className="text-amber-600 dark:text-amber-400" />
+                        <div className="flex items-center gap-2.5 mb-5">
+                            <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                                <Sparkles size={18} className="text-amber-600 dark:text-amber-400" />
                             </div>
-                            <h3 className="font-black text-amber-900 dark:text-amber-500 uppercase tracking-[0.2em] text-xs">Awaiting Approval ({pendingRequests.length})</h3>
+                            <h3 className="font-extrabold text-amber-900 dark:text-amber-400 uppercase tracking-wider text-xs">Awaiting Approval ({pendingRequests.length})</h3>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {pendingRequests.map(req => (
                                 <div
                                     key={req._id || req.id}
-                                    className="flex items-center justify-between bg-indigo-300/40 dark:bg-slate-900 p-5 rounded-3xl shadow-premium border border-amber-300/40 dark:border-amber-500/10 group/item hover:scale-[1.02] transition-all"
+                                    className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200/80 dark:border-white/5 group/item transition-all"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300/40 to-amber-300/20 dark:from-amber-900 dark:to-amber-950 flex items-center justify-center text-amber-600 dark:text-amber-400 font-black text-lg shadow-sm border border-amber-300/30 dark:border-amber-500/20">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-extrabold text-base border border-amber-500/20">
                                             {getMemberName(req.assignedMemberId)?.charAt(0)}
                                         </div>
                                         <div>
-                                            <span className="font-black block text-slate-800 dark:text-slate-100 text-sm tracking-tight">{getMemberName(req.assignedMemberId)}</span>
-                                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+                                            <span className="font-extrabold block text-slate-800 dark:text-slate-100 text-sm tracking-tight">{getMemberName(req.assignedMemberId)}</span>
+                                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-extrabold uppercase tracking-wider flex items-center gap-1.5 mt-0.5">
                                                 <CalendarIcon size={10} /> {format(new Date(req.date), 'dd MMM yyyy')}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2 md:gap-3 shrink-0">
+                                    <div className="flex gap-1.5 shrink-0">
                                         <button
-                                            className="text-slate-400 hover:text-rose-600 p-3 md:p-2.5 rounded-xl bg-rose-500/5 md:bg-transparent hover:bg-rose-300/40 dark:bg-rose-500/10 dark:md:bg-transparent dark:hover:bg-rose-500/20 transition-all active:scale-90 disabled:opacity-40 flex items-center justify-center"
+                                            className="text-slate-400 hover:text-rose-600 p-2 rounded-xl hover:bg-rose-500/10 transition-all active:scale-90 disabled:opacity-40"
                                             disabled={pendingActionIds.has(req._id || req.id)}
                                             title="Reject request"
                                             onClick={async () => {
@@ -285,10 +285,10 @@ const MarketDuty = () => {
                                                 setPendingActionIds(prev => { const n = new Set(prev); n.delete(id); return n; });
                                             }}
                                         >
-                                            <X size={22} className="md:w-5 md:h-5" />
+                                            <X size={18} />
                                         </button>
                                         <button
-                                            className="text-slate-400 hover:text-emerald-600 p-3 md:p-2.5 rounded-xl bg-emerald-500/5 md:bg-transparent hover:bg-emerald-300/40 dark:bg-emerald-500/10 dark:md:bg-transparent dark:hover:bg-emerald-500/20 transition-all active:scale-90 disabled:opacity-40 flex items-center justify-center"
+                                            className="text-slate-400 hover:text-emerald-600 p-2 rounded-xl hover:bg-emerald-500/10 transition-all active:scale-90 disabled:opacity-40"
                                             disabled={pendingActionIds.has(req._id || req.id)}
                                             title="Approve request"
                                             onClick={async () => {
@@ -298,7 +298,7 @@ const MarketDuty = () => {
                                                 setPendingActionIds(prev => { const n = new Set(prev); n.delete(id); return n; });
                                             }}
                                         >
-                                            <Check size={22} className="md:w-5 md:h-5" />
+                                            <Check size={18} />
                                         </button>
                                     </div>
                                 </div>
@@ -308,26 +308,26 @@ const MarketDuty = () => {
                 </div>
             )}
 
-            <Card className="p-4 md:p-8 border border-indigo-300/30 dark:border-white/5 dark:bg-slate-900/50 shadow-sm bg-indigo-300/40">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                        <div className="flex items-center bg-indigo-300/40 dark:bg-slate-800 p-1 rounded-xl md:p-1.5 md:rounded-2xl border border-indigo-300/30 dark:border-slate-700 w-full sm:w-auto justify-between sm:justify-start">
+            <Card className="p-4 md:p-6 shadow-sm">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                        <div className="flex items-center bg-slate-100 dark:bg-slate-800/60 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700 w-full sm:w-auto justify-between sm:justify-start">
                             <button
                                 onClick={goToPreviousMonth}
-                                className="p-1.5 md:p-2 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-indigo-300/40 dark:hover:bg-slate-700 rounded-lg md:rounded-xl transition-all shadow-sm hover:shadow-md"
+                                className="p-1.5 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all"
                             >
                                 <ChevronLeft size={18} />
                             </button>
-                            <div className="px-3 md:px-6 flex items-center gap-2">
-                                <CalendarIcon className="text-primary-500 hidden sm:block" size={18} />
-                                <h2 className="text-sm md:text-xl font-black text-slate-900 dark:text-slate-50 tracking-tight whitespace-nowrap">
+                            <div className="px-3 sm:px-5 flex items-center gap-2">
+                                <CalendarIcon className="text-indigo-600 dark:text-indigo-400 hidden sm:block" size={16} />
+                                <h2 className="text-sm md:text-lg font-extrabold text-slate-900 dark:text-slate-50 tracking-tight whitespace-nowrap">
                                     {format(monthStart, 'MMMM yyyy')}
                                 </h2>
-                                {isPastMonth && <Lock size={14} className="text-slate-400 -mt-1" />}
+                                {isPastMonth && <Lock size={13} className="text-slate-400" />}
                             </div>
                             <button
                                 onClick={goToNextMonth}
-                                className="p-1.5 md:p-2 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-indigo-200 dark:hover:bg-slate-700 rounded-lg md:rounded-xl transition-all shadow-sm hover:shadow-md"
+                                className="p-1.5 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all"
                             >
                                 <ChevronRight size={18} />
                             </button>
@@ -335,36 +335,36 @@ const MarketDuty = () => {
                         {!isCurrentMonth && (
                             <button
                                 onClick={goToCurrentMonth}
-                                className="w-full sm:w-auto px-4 py-2 bg-indigo-300/40 dark:bg-primary-500/10 text-indigo-700 dark:text-primary-400 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl hover:bg-indigo-300 dark:hover:bg-primary-500/20 transition-all border border-indigo-400/30 dark:border-primary-500/30"
+                                className="w-full sm:w-auto px-3.5 py-2 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-xs font-extrabold uppercase tracking-wider rounded-xl hover:bg-indigo-500/20 transition-all border border-indigo-500/20"
                             >
                                 Current
                             </button>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-center md:justify-end">
+                    <div className="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
                         {!canManageSchedule && (
-                            <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 px-3 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl border border-amber-200 dark:border-amber-500/30">
-                                Requests: <span className="text-sm md:text-lg leading-none align-middle ml-1">{myRequestsThisMonth}</span>/{myLimit}
+                            <div className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-xl border border-amber-500/20">
+                                Requests: <span className="text-sm leading-none align-middle ml-1 font-black">{myRequestsThisMonth}</span>/{myLimit}
                             </div>
                         )}
                         {!canManageSchedule && (
-                            <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl border border-emerald-200 dark:border-emerald-500/30">
-                                Duties: <span className="text-sm md:text-lg leading-none align-middle ml-1">{myDaysCount}</span>
+                            <div className="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+                                Duties: <span className="text-sm leading-none align-middle ml-1 font-black">{myDaysCount}</span>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {isPastMonth && (
-                    <div className="mb-4 bg-indigo-300/40 dark:bg-slate-800 border border-indigo-300/30 dark:border-gray-700 rounded-lg p-3 flex items-center gap-2">
-                        <Lock size={16} className="text-indigo-500" />
-                        <span className="text-sm text-indigo-600 dark:text-gray-400 font-medium">Read-only: Past month view</span>
+                    <div className="mb-4 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-gray-700 rounded-xl p-3 flex items-center gap-2">
+                        <Lock size={15} className="text-slate-500" />
+                        <span className="text-xs text-slate-600 dark:text-gray-400 font-bold uppercase tracking-wider">Read-only: Past month view</span>
                     </div>
                 )}
 
-                <div className="grid grid-cols-7 gap-1 md:gap-4 text-center mb-6">
+                <div className="grid grid-cols-7 gap-1 md:gap-3 text-center mb-4">
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-                        <div key={day} className={`text-[9px] md:text-[11px] font-black uppercase tracking-widest pb-3 border-b border-indigo-300/30 dark:border-white/5 ${i === 0 || i === 6 ? 'text-rose-400 dark:text-rose-500/40' : 'text-slate-300 dark:text-slate-600'}`}>
+                        <div key={day} className={`text-[10px] md:text-[11px] font-extrabold uppercase tracking-wider pb-2 border-b border-slate-200/80 dark:border-white/5 ${i === 0 || i === 6 ? 'text-rose-500' : 'text-slate-400'}`}>
                             <span className="hidden md:inline">
                                 {i === 0 ? 'Sun' : i === 1 ? 'Mon' : i === 2 ? 'Tue' : i === 3 ? 'Wed' : i === 4 ? 'Thu' : i === 5 ? 'Fri' : 'Sat'}
                             </span>
@@ -373,9 +373,9 @@ const MarketDuty = () => {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 md:gap-3">
+                <div className="grid grid-cols-7 gap-1 md:gap-2.5">
                     {emptySlots.map((_, idx) => (
-                        <div key={`empty-${idx}`} className="h-20 md:h-32 bg-indigo-300/40 dark:bg-slate-900/20 rounded-xl md:rounded-2xl border border-indigo-300/30 dark:border-slate-800/30"></div>
+                        <div key={`empty-${idx}`} className="h-16 md:h-28 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl border border-slate-200/40 dark:border-slate-800/30"></div>
                     ))}
                     {days.map((day) => {
                         const dateStr = format(day, 'yyyy-MM-dd');
@@ -397,33 +397,39 @@ const MarketDuty = () => {
                                 onClick={() => handleDayClick(day)}
                                 disabled={isPastMonth || (!canManageSchedule && approvedInfo && !isMine)}
                                 className={cn(
-                                    "h-20 md:h-32 p-2 md:p-4 rounded-xl md:rounded-3xl border-2 flex flex-col items-start justify-between transition-all relative overflow-hidden group/day text-left",
-                                    isToday(day) && "ring-2 md:ring-4 ring-primary-500/20 border-primary-500/50 shadow-lg md:shadow-xl shadow-primary-500/10",
+                                    "h-16 md:h-28 p-2 md:p-3 rounded-xl md:rounded-2xl border transition-all flex flex-col items-start justify-between relative overflow-hidden group/day text-left",
+                                    isToday(day) && "ring-2 ring-indigo-500/30 border-indigo-500 shadow-sm",
                                     // ME APPROVED
-                                    isMineApproved && "bg-gradient-to-br from-indigo-600 to-purple-700 text-white border-transparent shadow-xl md:shadow-2xl shadow-indigo-500/30 active:scale-95",
+                                    isMineApproved && "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white border-transparent shadow-md shadow-indigo-500/25 active:scale-95",
                                     // ME PENDING
-                                    isMinePending && "bg-amber-300/40 dark:bg-amber-500/10 text-amber-900 dark:text-amber-400 border-amber-300 dark:border-amber-500/30 border-dashed animate-pulse-subtle",
+                                    isMinePending && "bg-amber-500/10 text-amber-900 dark:text-amber-300 border-amber-500/30 border-dashed animate-pulse-subtle",
                                     // OTHERS (manager/admin sees as editable/reassignable)
-                                    isApproved && !isMineApproved && !canManageSchedule && "bg-indigo-100/30 dark:bg-slate-950/40 text-indigo-400/50 dark:text-slate-700 cursor-not-allowed border-indigo-200/30 dark:border-white/5",
-                                    isApproved && !isMineApproved && canManageSchedule && "bg-indigo-100/30 dark:bg-slate-950/40 text-indigo-400/50 dark:text-slate-700 border-indigo-200/30 dark:border-white/5 hover:border-primary-400 hover:shadow-xl hover:-translate-y-1 cursor-pointer active:scale-95",
-                                    isRequested && !isMinePending && !isApproved && "bg-amber-50/30 dark:bg-slate-950/10 text-amber-400/50 dark:text-slate-600 border-amber-200/30 dark:border-white/5 border-dashed",
+                                    isApproved && !isMineApproved && !canManageSchedule && "bg-slate-50 dark:bg-slate-950/40 text-slate-400 cursor-not-allowed border-slate-200/60 dark:border-white/5",
+                                    isApproved && !isMineApproved && canManageSchedule && "bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-white/5 hover:border-indigo-400 cursor-pointer active:scale-95",
+                                    isRequested && !isMinePending && !isApproved && "bg-amber-500/5 dark:bg-slate-950/10 text-amber-600/70 dark:text-slate-500 border-amber-500/20 dark:border-white/5 border-dashed",
                                     // EMPTY
-                                    !isApproved && !isRequested && !isPastMonth && "bg-slate-50 dark:bg-slate-800/20 border-slate-200 dark:border-slate-800/80 hover:border-primary-400 dark:hover:border-primary-600 hover:shadow-xl md:hover:shadow-2xl hover:-translate-y-1 md:hover:-translate-y-1.5 cursor-pointer active:scale-95",
+                                    !isApproved && !isRequested && !isPastMonth && "bg-white dark:bg-slate-800/30 border-slate-200/80 dark:border-slate-800/80 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-sm cursor-pointer active:scale-95",
                                     // PAST MONTH
-                                    !isApproved && !isRequested && isPastMonth && "bg-slate-100/50 dark:bg-slate-950/60 text-slate-300 dark:text-slate-800 cursor-not-allowed border-slate-200/50 dark:border-slate-900/40"
+                                    !isApproved && !isRequested && isPastMonth && "bg-slate-50/50 dark:bg-slate-950/60 text-slate-300 dark:text-slate-800 cursor-not-allowed border-slate-200/40 dark:border-slate-900/40"
                                 )}
                             >
-                                <div className="flex w-full justify-between items-start">
+                                <div className="flex w-full justify-between items-center">
                                     <span className={cn(
-                                        "text-sm font-black transition-colors",
-                                        (isMine && isApproved) ? "text-white" : isToday(day) ? "text-primary-600 dark:text-primary-400" : "text-slate-700 dark:text-slate-400 group-hover/day:text-primary-500"
+                                        "text-xs md:text-sm font-extrabold transition-colors leading-none",
+                                        (isMine && isApproved) ? "text-white" : isToday(day) ? "text-indigo-600 dark:text-indigo-400 font-black" : "text-slate-700 dark:text-slate-400 group-hover/day:text-indigo-600"
                                     )}>
                                         {format(day, 'd')}
                                     </span>
                                     {isToday(day) && (
-                                        <div className="bg-primary-500 text-[8px] font-black text-white px-2 py-0.5 rounded-full uppercase tracking-widest shadow-lg shadow-primary-500/50">
-                                            Today
-                                        </div>
+                                        <span className="flex items-center shrink-0">
+                                            <span className="hidden md:inline-block bg-indigo-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                                                Today
+                                            </span>
+                                            <span className="md:hidden flex h-2 w-2 relative">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600 dark:bg-indigo-400 shadow-sm"></span>
+                                            </span>
+                                        </span>
                                     )}
                                 </div>
 
@@ -437,34 +443,34 @@ const MarketDuty = () => {
 
                                         return (
                                             <div className="w-full">
-                                                <div className="flex items-center gap-1.5 md:gap-2 mt-1 min-w-0">
+                                                <div className="flex items-center gap-1.5 mt-1 min-w-0">
                                                     <div className={cn(
-                                                        "w-6 h-6 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center text-[8px] md:text-[10px] font-black shadow-sm group-hover/day:scale-110 transition-transform duration-500 shrink-0",
+                                                        "w-5 h-5 md:w-7 md:h-7 rounded-lg flex items-center justify-center text-[8px] md:text-[10px] font-extrabold shadow-sm shrink-0",
                                                         (isDisplayMine && isDisplayApproved) ? "bg-white/20 text-white border border-white/30 backdrop-blur-md" : 
                                                         isOffDay ? "bg-rose-50 dark:bg-rose-500/10 text-rose-600 border border-rose-200 dark:border-rose-500/20" :
                                                         `${memberColor.bg} ${memberColor.text} border ${memberColor.border}`
                                                     )}>
-                                                        {isOffDay ? <X size={window.innerWidth < 640 ? 10 : 14} className="text-rose-600" /> : getMemberName(displayInfo.assignedMemberId)?.charAt(0).toUpperCase()}
+                                                        {isOffDay ? <X size={12} className="text-rose-600" /> : getMemberName(displayInfo.assignedMemberId)?.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
                                                         <span className={cn(
-                                                            "text-[8px] md:text-[10px] font-black truncate transition-colors tracking-tight hidden sm:block",
+                                                            "text-[8px] md:text-[10px] font-extrabold truncate tracking-tight hidden sm:block",
                                                             (isDisplayMine && isDisplayApproved) ? "text-white" : "text-slate-900 dark:text-slate-100"
                                                         )}>
                                                             {getMemberName(displayInfo.assignedMemberId)}
                                                         </span>
                                                         {!isApproved && isRequested && (
                                                             <span className={cn(
-                                                                "text-[6px] md:text-[7px] font-black uppercase tracking-widest px-1 md:px-1.5 py-0.5 rounded-md w-fit mt-0.5",
-                                                                isDisplayMine ? "bg-amber-400 text-amber-950 shadow-sm animate-pulse" : "bg-indigo-300/40 dark:bg-slate-800 text-slate-500 dark:text-slate-500"
+                                                                "text-[6px] md:text-[7px] font-extrabold uppercase tracking-wider px-1 py-0.5 rounded-md w-fit mt-0.5",
+                                                                isDisplayMine ? "bg-amber-400 text-amber-950 shadow-sm" : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                                                             )}>
                                                                 {isDisplayMine ? (window.innerWidth < 640 ? 'Mine' : 'Your Req') : `Reqs (${pendingInfos.length})`}
                                                             </span>
                                                         )}
                                                         {isApproved && (!isDisplayMine || canManageSchedule) && (
                                                             <span className={cn(
-                                                                "text-[6px] md:text-[7px] font-black uppercase tracking-widest mt-0.5 hidden sm:block",
-                                                                approvedInfo.assignedMemberId === 'OFF_DAY' ? 'text-rose-500' : 'text-slate-400 dark:text-slate-600'
+                                                                "text-[6px] md:text-[7px] font-extrabold uppercase tracking-wider mt-0.5 hidden sm:block",
+                                                                approvedInfo.assignedMemberId === 'OFF_DAY' ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500'
                                                             )}>
                                                                 {approvedInfo.assignedMemberId === 'OFF_DAY' ? 'Holiday' : 'Allocated'}
                                                             </span>
@@ -475,11 +481,11 @@ const MarketDuty = () => {
                                         );
                                     })()
                                 ) : (
-                                    <div className="w-full self-center mt-2 opacity-0 group-hover/day:opacity-100 transition-all duration-300 flex flex-col items-center gap-1 scale-75 group-hover/day:scale-100">
-                                        <div className="p-2 bg-indigo-300/40 dark:bg-primary-950/40 rounded-xl border border-indigo-400/20">
-                                            <ShoppingCart size={16} className="text-indigo-600" />
+                                    <div className="w-full self-center mt-1 opacity-0 group-hover/day:opacity-100 transition-all duration-200 flex flex-col items-center gap-0.5">
+                                        <div className="p-1 bg-indigo-500/10 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                            <ShoppingCart size={14} />
                                         </div>
-                                        <span className="text-[8px] font-black text-indigo-700 dark:text-primary-400 uppercase tracking-widest">
+                                        <span className="text-[7px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
                                             {canManageSchedule ? 'Assign' : 'Reserve'}
                                         </span>
                                     </div>
@@ -487,8 +493,8 @@ const MarketDuty = () => {
 
                                 {isMineApproved && (
                                     <div className="absolute -top-1 -right-1">
-                                        <div className="bg-indigo-400 p-2 rounded-bl-3xl shadow-lg border-b border-l border-white/20">
-                                            <Check size={14} className="text-white font-black" />
+                                        <div className="bg-indigo-400 p-1.5 rounded-bl-2xl shadow-sm">
+                                            <Check size={12} className="text-white font-extrabold" />
                                         </div>
                                     </div>
                                 )}
@@ -499,27 +505,25 @@ const MarketDuty = () => {
             </Card>
 
             <div
-                className="bg-indigo-300/40 dark:bg-slate-900/50 rounded-[1.5rem] md:rounded-[1.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-sm border border-indigo-300/30 dark:border-white/10 relative overflow-hidden group border-l-8 border-l-indigo-600"
+                className="bg-white/80 dark:bg-slate-900/80 rounded-2xl md:rounded-[1.5rem] p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 shadow-sm border border-slate-200/80 dark:border-white/5 relative overflow-hidden group border-l-4 border-l-indigo-600"
             >
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-150 transition-all duration-1000"></div>
-
-                <div className="w-24 h-24 rounded-3xl bg-indigo-300/40 dark:bg-white/5 backdrop-blur-md flex items-center justify-center shadow-sm relative z-10 border border-indigo-400/30 dark:border-white/20">
-                    <Utensils className="text-indigo-700 dark:text-white/80" size={42} />
+                <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-sm relative z-10 border border-indigo-500/20 shrink-0">
+                    <Utensils size={28} />
                 </div>
 
                 <div className="relative z-10 text-center md:text-left flex-1">
-                    <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                        <TrendingUp size={16} className="text-indigo-600 dark:text-indigo-400" />
-                        <h3 className="font-black text-indigo-900 dark:text-white uppercase tracking-[0.3em] text-[10px]">Mess Protocol</h3>
+                    <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                        <TrendingUp size={14} className="text-indigo-600 dark:text-indigo-400" />
+                        <h3 className="font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest text-[9px]">Mess Protocol</h3>
                     </div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Market Duty Management</h2>
-                    <p className="text-sm text-slate-500 dark:text-indigo-100/70 font-bold leading-relaxed max-w-lg">
-                        Ensure all market duty requests are coordinated with the monthly <span className="text-indigo-600 dark:text-white underline decoration-indigo-400 decoration-2 underline-offset-4">Mess Manager</span>. Click on any date to assign, reassign, or remove allocated persons.
+                    <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-1">Market Duty Management</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold leading-relaxed max-w-lg">
+                        Ensure all market duty requests are coordinated with the monthly <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">Mess Manager</span>. Click on any date to assign, reassign, or remove allocated persons.
                     </p>
                 </div>
 
                 <div className="flex flex-col items-end gap-3 self-center md:self-end">
-                    <div className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-500/30 hover:-translate-y-1 transition-all cursor-default">
+                    <div className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-md shadow-indigo-500/20 cursor-default">
                         System Active
                     </div>
                 </div>
@@ -542,16 +546,16 @@ const MarketDuty = () => {
                         const assignedName = getMemberName(approvedInfo.assignedMemberId);
 
                         return (
-                            <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border-2 border-indigo-200 dark:border-indigo-500/30 flex items-center justify-between gap-3 shadow-sm">
+                            <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between gap-3 shadow-sm">
                                 <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black shrink-0">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold shrink-0">
                                         {isOffDay ? <ShoppingCart size={18} /> : assignedName?.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="min-w-0">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 block truncate">
+                                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block truncate">
                                             {isOffDay ? 'Mess Holiday Active' : 'Currently Allocated'}
                                         </span>
-                                        <span className="text-sm font-black text-slate-900 dark:text-white truncate block">
+                                        <span className="text-sm font-extrabold text-slate-900 dark:text-white truncate block">
                                             {assignedName}
                                         </span>
                                     </div>
@@ -566,9 +570,9 @@ const MarketDuty = () => {
                                             setIsModalOpen(false);
                                         }
                                     }}
-                                    className="px-4 py-2.5 bg-rose-500 hover:bg-rose-600 active:scale-95 text-white text-xs font-black uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-md shadow-rose-500/20 transition-all shrink-0"
+                                    className="px-3.5 py-2 bg-rose-500 hover:bg-rose-600 active:scale-95 text-white text-xs font-extrabold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-sm transition-all shrink-0"
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={15} />
                                     <span>Remove</span>
                                 </button>
                             </div>
@@ -577,15 +581,15 @@ const MarketDuty = () => {
 
                     {/* Mess Holiday Toggle (Admin / Manager) */}
                     {canManageSchedule && (
-                        <div className="p-4 rounded-[1.5rem] bg-indigo-300/40 dark:bg-slate-900/50 border border-indigo-300/30 dark:border-white/5">
+                        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/5">
                             <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                                        <ShoppingCart size={20} />
+                                    <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500">
+                                        <ShoppingCart size={18} />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-black text-slate-900 dark:text-white">Mess Holiday</p>
-                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">No market duty on this day</p>
+                                        <p className="text-sm font-extrabold text-slate-900 dark:text-white">Mess Holiday</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">No market duty on this day</p>
                                     </div>
                                 </div>
                                 {(() => {
@@ -609,10 +613,10 @@ const MarketDuty = () => {
                                                 }
                                             }}
                                             className={cn(
-                                                "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border-2 shadow-sm",
+                                                "px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all active:scale-95 border",
                                                 offDayRecord 
-                                                    ? "bg-rose-500 text-white border-transparent shadow-rose-500/20" 
-                                                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-primary-500"
+                                                    ? "bg-rose-500 text-white border-transparent" 
+                                                    : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-500"
                                             )}
                                         >
                                             {offDayRecord ? 'Remove Holiday' : 'Set as Holiday'}
@@ -670,35 +674,35 @@ const MarketDuty = () => {
                                     }
                                 }}
                                 className={cn(
-                                    "w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all hover:scale-[1.02] active:scale-95 group",
-                                    isApprovedForThisDate ? "bg-indigo-600 border-transparent shadow-lg shadow-indigo-500/20" :
-                                        isPending ? "bg-amber-200 dark:bg-amber-900/10 border-amber-300 dark:border-amber-500/20" :
-                                            hasMaxDuties ? "bg-indigo-300/40 dark:bg-slate-800/50 border-indigo-400 dark:border-slate-700 opacity-70" :
-                                                "bg-indigo-300/40 dark:bg-slate-900 border-indigo-300/30 dark:border-white/5"
+                                    "w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all active:scale-95 group",
+                                    isApprovedForThisDate ? "bg-indigo-600 border-transparent shadow-md shadow-indigo-500/20" :
+                                        isPending ? "bg-amber-500/10 border-amber-500/20" :
+                                            hasMaxDuties ? "bg-slate-100 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 opacity-60" :
+                                                "bg-slate-50 dark:bg-slate-900/60 border-slate-200/80 dark:border-white/5 hover:bg-slate-100"
                                 )}
                             >
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3">
                                     <div className={cn(
-                                        "w-10 h-10 rounded-xl flex items-center justify-center font-black",
+                                        "w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-sm",
                                         isApprovedForThisDate ? "bg-white/20 text-white" : `${memberColor.bg} ${memberColor.text}`
                                     )}>
                                         {member.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="text-left">
-                                        <p className={cn("font-black text-sm", isApprovedForThisDate ? "text-white" : "text-slate-900 dark:text-white")}>{member.name}</p>
+                                        <p className={cn("font-extrabold text-sm", isApprovedForThisDate ? "text-white" : "text-slate-900 dark:text-white")}>{member.name}</p>
                                         {isPending && <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Has Pending Request</p>}
                                         {isApprovedForThisDate && <p className="text-[10px] font-bold text-indigo-100 uppercase tracking-widest">Currently Assigned (Click to Remove)</p>}
                                         {hasMaxDuties && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">{memberLimit} Days Duty — Limit Reached</p>}
                                     </div>
                                 </div>
                                 <div className={cn(
-                                    "p-2 rounded-lg transition-colors",
+                                    "p-1.5 rounded-lg transition-colors",
                                     isApprovedForThisDate ? "bg-white/20 text-white" :
-                                        hasMaxDuties ? "bg-rose-300/40 dark:bg-rose-900/20 text-rose-500" :
-                                            "bg-indigo-300/40 dark:bg-slate-800 text-indigo-400 group-hover:text-primary-500"
+                                        hasMaxDuties ? "bg-rose-500/10 text-rose-500" :
+                                            "bg-slate-200/60 dark:bg-slate-800 text-slate-500 group-hover:text-indigo-600"
                                     )}
                                 >
-                                    {isApprovedForThisDate ? <Check size={18} /> : isPending ? <Sparkles size={18} /> : hasMaxDuties ? <X size={18} /> : <User size={18} />}
+                                    {isApprovedForThisDate ? <Check size={16} /> : isPending ? <Sparkles size={16} /> : hasMaxDuties ? <X size={16} /> : <User size={16} />}
                                 </div>
                             </button>
                         );

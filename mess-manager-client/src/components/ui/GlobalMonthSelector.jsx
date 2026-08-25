@@ -38,11 +38,11 @@ const GlobalMonthSelector = () => {
 
     return (
         <div
-            className="bg-indigo-300/30 dark:bg-slate-900/60 backdrop-blur-md border border-indigo-400/30 dark:border-white/10 rounded-2xl sm:rounded-[1.5rem] p-1.5 sm:p-2.5 flex items-center justify-between gap-2 shadow-sm"
+            className="bg-white/85 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 rounded-2xl sm:rounded-[1.5rem] p-1.5 sm:p-2.5 flex items-center justify-between gap-2 shadow-sm"
         >
             {/* Legend / Icon - Hidden on Mobile */}
             <div className="hidden lg:flex items-center gap-3 pl-2">
-                <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">
+                <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/15">
                     <Calendar size={18} />
                 </div>
                 <div className="flex flex-col">
@@ -55,7 +55,7 @@ const GlobalMonthSelector = () => {
             <div className="flex items-center gap-1.5 flex-1 sm:flex-none justify-start">
                 <button
                     onClick={handlePreviousMonth}
-                    className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-indigo-300/40 dark:bg-slate-800 border border-indigo-400/30 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:dark:text-indigo-400 transition-all active:scale-90 shadow-sm shrink-0"
+                    className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:dark:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 transition-all active:scale-90 shadow-sm shrink-0"
                     title="Previous Month"
                 >
                     <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
@@ -63,7 +63,7 @@ const GlobalMonthSelector = () => {
 
                 {/* The Premium Pill */}
                 <div className="relative group flex-1 sm:flex-none max-w-[220px]">
-                    <div className="flex items-center justify-center gap-1.5 sm:gap-3 bg-slate-900 dark:bg-black/60 border border-white/10 px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full shadow-lg hover:bg-slate-800 dark:hover:bg-slate-900 transition-all cursor-pointer ring-1 ring-white/5 backdrop-blur-xl">
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-3 bg-slate-900 dark:bg-slate-950 border border-slate-800 dark:border-white/10 px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-full shadow-md hover:bg-slate-800 dark:hover:bg-slate-900 transition-all cursor-pointer ring-1 ring-white/10 backdrop-blur-xl">
                         <Calendar size={13} className="text-primary-400 hidden xs:block shrink-0" />
                         <span className="text-[10px] sm:text-[11px] font-black text-white dark:text-slate-100 uppercase tracking-wider whitespace-nowrap truncate">
                             {formattedCurrentMonth}
@@ -81,7 +81,7 @@ const GlobalMonthSelector = () => {
 
                 <button
                     onClick={handleNextMonth}
-                    className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-indigo-300/40 dark:bg-slate-800 border border-indigo-400/30 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:dark:text-indigo-400 transition-all active:scale-90 shadow-sm shrink-0"
+                    className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:dark:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 transition-all active:scale-90 shadow-sm shrink-0"
                     title="Next Month"
                 >
                     <ChevronRight size={16} className="sm:w-5 sm:h-5" />

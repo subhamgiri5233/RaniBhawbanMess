@@ -93,9 +93,9 @@ const BottomNav = ({ onOpenSidebar }) => {
                 <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm transition-opacity duration-300 flex items-end justify-center p-3 pb-20 animate-fade-in">
                     <div
                         ref={sheetRef}
-                        className="w-full max-w-md bg-white dark:bg-slate-900 border border-indigo-100 dark:border-white/10 rounded-3xl p-4 shadow-2xl space-y-3.5"
+                        className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-3xl p-4 shadow-2xl space-y-3.5"
                     >
-                        <div className="flex items-center justify-between pb-2.5 border-b border-indigo-50 dark:border-white/5">
+                        <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/5">
                             <div>
                                 <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
                                     Quick Action
@@ -120,9 +120,9 @@ const BottomNav = ({ onOpenSidebar }) => {
                                         navigate(action.to);
                                         setShowQuickSheet(false);
                                     }}
-                                    className="flex items-center gap-3 p-2.5 rounded-2xl bg-indigo-50/40 dark:bg-slate-800/60 hover:bg-indigo-100/60 dark:hover:bg-slate-800 border border-indigo-100/50 dark:border-white/5 transition-all text-left group active:scale-[0.98]"
+                                    className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-white/5 transition-all text-left group active:scale-[0.98]"
                                 >
-                                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border", action.color)}>
+                                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border shadow-sm", action.color)}>
                                         <action.icon size={16} />
                                     </div>
                                     <div className="flex-1 min-w-0">

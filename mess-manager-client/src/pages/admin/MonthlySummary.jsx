@@ -28,17 +28,17 @@ const STATUS_CONFIG = {
     clear: {
         label: 'Clear',
         icon: CheckCircle2,
-        cls: 'bg-emerald-300/40 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-500/20',
+        cls: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
     },
     partial: {
         label: 'Partial',
         icon: AlertCircle,
-        cls: 'bg-amber-300/40 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-500/20',
+        cls: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20',
     },
     pending: {
         label: 'Pending',
         icon: Clock,
-        cls: 'bg-rose-300/40 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-500/20',
+        cls: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20',
     },
 };
 
@@ -49,7 +49,10 @@ const StatusBadge = ({ status, onClick }) => {
         <button
             onClick={onClick}
             title="Click to update payment status"
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-black uppercase tracking-wide transition-all hover:scale-105 active:scale-95 ${cfg.cls}`}
+            className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-extrabold uppercase tracking-wider transition-all hover:scale-105 active:scale-95",
+                cfg.cls
+            )}
         >
             <Icon size={12} />
             {cfg.label}
@@ -86,20 +89,17 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
     const rem = Math.round(dBal) - (Number(m.submittedAmount) || 0);
 
     return (
-        <div className={cn(
-            "rb-card p-4 sm:p-6 transition-all group relative overflow-hidden",
-            m.paymentStatus === 'clear' ? 'rb-shadow-emerald' : m.paymentStatus === 'partial' ? 'rb-shadow-orange' : 'rb-shadow-rose'
-        )}>
+        <div className="bg-white/80 dark:bg-slate-900/80 p-5 sm:p-6 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 shadow-sm transition-all group relative overflow-hidden backdrop-blur-xl">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-primary-600 dark:bg-primary-500/80 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-primary-500/20">{(m.memberName || '?').charAt(0)}</div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">{(m.memberName || '?').charAt(0)}</div>
                     <div>
-                    <div className="text-base rb-header !normal-case mb-1">{m.memberName}</div>
+                        <div className="text-base font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">{m.memberName}</div>
                         <div className="flex flex-col gap-1">
-                            <div className="flex text-[9px] font-black text-blue-500 dark:text-blue-400 uppercase tracking-widest items-center gap-1.5 leading-none">
+                            <div className="flex text-[9px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider items-center gap-1.5 leading-none">
                                 <Calendar size={10} /> {m.marketDays || 0} Market Days
                                 {m.marketDates?.length > 0 && (
-                                    <span className="text-[8px] opacity-60 normal-case font-mono">({m.marketDates.map(d => d.split('-')[2]).join(', ')})</span>
+                                    <span className="text-[8px] opacity-60 font-mono">({m.marketDates.map(d => d.split('-')[2]).join(', ')})</span>
                                 )}
                             </div>
                         </div>
@@ -107,63 +107,71 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
                 </div>
                 <StatusBadge status={m.paymentStatus} onClick={() => setEditingMember({ ...m, finalBalance: Math.round(dBal), snapshotType: offM.type || (dBal > 0 ? 'Pay' : 'Get') })} />
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                <div className="p-3 bg-indigo-300/40 dark:bg-black/40 border border-indigo-300/30 dark:border-indigo-500/10 rounded-2xl">
-                    <div className="text-[8px] font-black text-indigo-400 mb-0.5 uppercase tracking-widest">Meal Cost</div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 rounded-xl">
+                    <div className="text-[8px] font-extrabold text-slate-400 mb-0.5 uppercase tracking-wider">Meal Cost</div>
                     <div className="flex items-baseline gap-1.5 flex-wrap">
-                        <span className="text-[11px] font-black text-indigo-500/60 leading-none">{chargedRegMeals} × {dRate.toFixed(2)}</span>
-                        <div className="text-base font-black text-indigo-700 dark:text-indigo-300 leading-none">₹{Math.round(dMCost)}</div>
+                        <span className="text-[10px] font-extrabold text-slate-400 leading-none">{chargedRegMeals} × {dRate.toFixed(2)}</span>
+                        <div className="text-base font-extrabold text-indigo-600 dark:text-indigo-400 leading-none">₹{Math.round(dMCost)}</div>
                     </div>
                 </div>
-                <div className="p-3 bg-amber-300/40 dark:bg-black/40 border border-amber-300/30 dark:border-amber-500/10 rounded-2xl"><div className="text-[8px] font-black text-amber-500 mb-0.5 uppercase tracking-widest">Guest</div><div className="text-base font-black text-amber-700 dark:text-amber-400">₹{Math.round(dGCost)}</div></div>
-                <div className="p-3 bg-emerald-300/40 dark:bg-black/40 border border-emerald-300/30 dark:border-emerald-500/10 rounded-2xl"><div className="text-[8px] font-black text-emerald-500 mb-0.5 uppercase tracking-widest">Shared Cost</div><div className="text-base font-black text-emerald-700 dark:text-emerald-300">₹{Math.round(dHead)}</div></div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 rounded-xl">
+                    <div className="text-[8px] font-extrabold text-slate-400 mb-0.5 uppercase tracking-wider">Guest</div>
+                    <div className="text-base font-extrabold text-amber-600 dark:text-amber-400">₹{Math.round(dGCost)}</div>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 rounded-xl">
+                    <div className="text-[8px] font-extrabold text-slate-400 mb-0.5 uppercase tracking-wider">Shared Cost</div>
+                    <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">₹{Math.round(dHead)}</div>
+                </div>
                 <div className={cn(
-                    "p-3 rounded-2xl border transition-all",
-                    rem > 0 ? "bg-rose-300/40 dark:bg-black/40 border-rose-300/30 dark:border-rose-500/10" :
-                        rem < 0 ? "bg-emerald-300/40 dark:bg-black/40 border-emerald-300/30 dark:border-emerald-500/10" :
-                            "bg-indigo-300/40 dark:bg-black/40 border-indigo-300/30 dark:border-white/5"
+                    "p-3 rounded-xl border transition-all",
+                    rem > 0 ? "bg-rose-500/10 border-rose-500/20" :
+                        rem < 0 ? "bg-emerald-500/10 border-emerald-500/20" :
+                            "bg-slate-50 dark:bg-slate-800/40 border-slate-200/80 dark:border-white/5"
                 )}>
                     <div className={cn(
-                        "text-[8px] font-black uppercase mb-0.5 tracking-widest",
-                        rem > 0 ? "text-rose-400" : rem < 0 ? "text-emerald-400" : "text-slate-400"
+                        "text-[8px] font-extrabold uppercase mb-0.5 tracking-wider",
+                        rem > 0 ? "text-rose-500" : rem < 0 ? "text-emerald-500" : "text-slate-400"
                     )}>Balance</div>
                     <div className={cn(
-                        "text-base font-black",
-                        rem > 0 ? "text-rose-600" : rem < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
+                        "text-base font-extrabold",
+                        rem > 0 ? "text-rose-600 dark:text-rose-400" : rem < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
                     )}>₹{rem === 0 ? '0' : Math.abs(rem)}</div>
                 </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-y-3 py-3 border-t border-indigo-300/30 dark:border-white/5">
+            <div className="flex flex-wrap items-center justify-between gap-y-2 py-2.5 border-t border-slate-100 dark:border-white/5">
                 <div className="flex items-center gap-2">
                     <div className="relative group/meal">
                         <div className={cn(
-                            "px-2 py-1 border rounded-lg flex items-center gap-1.5 transition-all text-[10px] font-black uppercase tracking-tight",
+                            "px-2 py-0.5 border rounded-lg flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-tight",
                             isMinApplied
-                                ? "bg-rose-300/40 dark:bg-rose-500/10 border-rose-300 dark:border-rose-500/20 text-rose-700 dark:text-rose-400"
-                                : "bg-indigo-300/40 dark:bg-indigo-500/10 border-indigo-300 dark:border-indigo-500/20 text-indigo-800 dark:text-indigo-300"
+                                ? "bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400"
+                                : "bg-indigo-500/10 border-indigo-500/20 text-indigo-700 dark:text-indigo-300"
                         )}>
                             <ClipboardList size={10} className={isMinApplied ? "text-rose-500" : "text-indigo-500"} />
                             <span>{m.regularMeals} REG</span>
                         </div>
 
                         {isMinApplied && (
-                            <div className="absolute -top-2.5 -right-2.5 bg-rose-600 text-white text-[8px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-indigo-300/30 dark:border-slate-900 shadow-lg shadow-rose-500/30 scale-110">
+                            <div className="absolute -top-2 -right-2 bg-rose-600 text-white text-[8px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-sm">
                                 {dMinLimit}+
                             </div>
                         )}
                     </div>
 
-                    <div className="px-2 py-1 bg-amber-300/40 dark:bg-amber-500/10 border border-amber-300/30 dark:border-amber-500/20 rounded-lg flex items-center gap-1.5">
+                    <div className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-center gap-1.5">
                         <Users size={10} className="text-amber-500" />
-                        <span className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-tight">{m.guestMeals} GUEST</span>
+                        <span className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300 uppercase tracking-tight">{m.guestMeals} GUEST</span>
                     </div>
-                    <div className="flex items-center gap-1.5"><TrendingUp size={12} className="text-emerald-500" /> <span className="opacity-70 text-[9px] font-black uppercase text-slate-400 dark:text-slate-500">Audit Ready</span></div>
+                    <div className="flex items-center gap-1"><TrendingUp size={11} className="text-emerald-500" /> <span className="opacity-70 text-[9px] font-extrabold uppercase text-slate-400">Audit Ready</span></div>
                 </div>
             </div>
-            {/* Your Contributions Grid (Necessary Items) */}
-            <div className="mt-4 pt-4 border-t border-indigo-300/30 dark:border-white/5">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Your Contributions</p>
+
+            {/* Contributions Grid */}
+            <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-white/5">
+                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Your Contributions</p>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     {(() => {
                         const cats = [
@@ -181,10 +189,10 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
                                 <div key={cat.k} className={cn(
                                     "p-2 rounded-xl border transition-all",
                                     val > 0
-                                        ? "bg-indigo-300/40 dark:bg-black/40 border-indigo-300/30 dark:border-white/10 shadow-sm"
-                                        : "bg-indigo-300/20 dark:bg-white/[0.02] border-transparent opacity-40"
-                                )}>
-                                    <div className="flex items-center gap-1.5 mb-1">
+                                        ? "bg-slate-50 dark:bg-slate-800/40 border-slate-200/80 dark:border-white/10"
+                                        : "bg-slate-50/50 dark:bg-white/[0.02] border-transparent opacity-40"
+                                    )}>
+                                    <div className="flex items-center gap-1 mb-0.5">
                                         <cat.i size={10} className={cn(
                                             cat.c === 'indigo' && "text-indigo-500",
                                             cat.c === 'emerald' && "text-emerald-500",
@@ -192,9 +200,9 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
                                             cat.c === 'blue' && "text-blue-500",
                                             cat.c === 'rose' && "text-rose-500"
                                         )} />
-                                        <span className="text-[7px] font-black uppercase tracking-tighter text-slate-400">{cat.l}</span>
+                                        <span className="text-[7px] font-extrabold uppercase tracking-tight text-slate-400">{cat.l}</span>
                                     </div>
-                                    <div className="text-[11px] font-black text-slate-900 dark:text-slate-100 leading-none">₹{val}</div>
+                                    <div className="text-[11px] font-extrabold text-slate-900 dark:text-slate-100 leading-none">₹{val}</div>
                                 </div>
                             );
                         });
@@ -202,25 +210,22 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
                 </div>
             </div>
 
-            {/* Summary Footer (The Math Behind the Balance) */}
-            <div className="mt-4 pt-4 border-t-2 border-indigo-300/30 dark:border-white/10 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-col gap-3 flex-grow max-w-[240px]">
-                    <div className="flex items-center justify-between group/exp hover:translate-x-1 transition-transform">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]" />
-                            <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-wider whitespace-nowrap">Total Expenses</span>
+            {/* Summary Footer */}
+            <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-white/10 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-col gap-2 flex-grow max-w-[240px]">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                            <span className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Total Expenses</span>
                         </div>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-sm font-black text-rose-600 dark:text-rose-400">₹{Math.round(dMCost + dGCost + dHead)}</span>
-                            <span className="text-[8px] text-slate-400 font-bold opacity-50">({Math.round(dMCost)}+{Math.round(dGCost)}+{Math.round(dHead)})</span>
-                        </div>
+                        <span className="text-xs font-extrabold text-rose-600 dark:text-rose-400">₹{Math.round(dMCost + dGCost + dHead)}</span>
                     </div>
-                    <div className="flex items-center justify-between group/con hover:translate-x-1 transition-transform">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider whitespace-nowrap">Total Contribution</span>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Contribution</span>
                         </div>
-                        <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">₹{Math.round(effectiveContribution)}</span>
+                        <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">₹{Math.round(effectiveContribution)}</span>
                     </div>
                 </div>
 
@@ -237,27 +242,27 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
                             deposit: m.submittedAmount || 0,
                             balance: rem
                         }, { month: bills?.month || 'Current Month' })}
-                        className="p-2.5 bg-indigo-300/40 dark:bg-white/5 text-indigo-600 dark:text-slate-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-90 flex items-center gap-2 border border-indigo-300/30 dark:border-white/10 group/pdf"
+                        className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-600 hover:text-white rounded-xl transition-all flex items-center gap-1.5 border border-slate-200/80 dark:border-white/10"
                         title="Download PDF Bill"
                     >
-                        <FileDown size={14} className="group-hover/pdf:scale-110 transition-transform" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">PDF Bill</span>
+                        <FileDown size={13} />
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider">PDF Bill</span>
                     </button>
-                    <div className="flex items-center gap-3 bg-indigo-300/40 dark:bg-black/40 p-2 rounded-2xl border border-indigo-300/30 dark:border-white/5 shadow-sm transition-all hover:scale-105">
+                    <div className="flex items-center gap-2.5 bg-slate-50 dark:bg-slate-800/60 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/5">
                         <div className="text-right flex flex-col items-end">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
-                                {rem > 0 ? 'Payable Balance' : rem < 0 ? 'Receivable Balance' : 'Clear Status'}
+                            <span className="text-[8px] font-extrabold text-slate-400 uppercase tracking-wider">
+                                {rem > 0 ? 'Payable' : rem < 0 ? 'Receivable' : 'Settled'}
                             </span>
                             <span className={cn(
-                                "text-lg font-black leading-none",
-                                rem > 0 ? "text-rose-600" : rem < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"
+                                "text-sm font-extrabold leading-none",
+                                rem > 0 ? "text-rose-600" : rem < 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
                             )}>₹{Math.abs(rem)}</span>
                         </div>
                         <div className={cn(
-                            "w-8 h-8 rounded-xl flex items-center justify-center shadow-lg transition-transform",
-                            rem > 0 ? "bg-rose-500 shadow-rose-500/20" : rem < 0 ? "bg-emerald-500 shadow-emerald-500/20" : "bg-indigo-300/40 dark:bg-slate-700 shadow-none"
+                            "w-6 h-6 rounded-lg flex items-center justify-center",
+                            rem > 0 ? "bg-rose-500 text-white" : rem < 0 ? "bg-emerald-500 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-400"
                         )}>
-                            {rem > 0 ? <TrendingDown size={16} className="text-white" /> : rem < 0 ? <TrendingUp size={16} className="text-white" /> : <CheckCircle2 size={16} className="text-slate-500" />}
+                            {rem > 0 ? <TrendingDown size={13} /> : rem < 0 ? <TrendingUp size={13} /> : <CheckCircle2 size={13} />}
                         </div>
                     </div>
                 </div>
@@ -265,7 +270,6 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, setEditingMember, m
         </div>
     );
 }, (prev, next) => {
-    // Optimized comparison to avoid expensive JSON.stringify
     return (
         prev.m === next.m && 
         prev.dRate === next.dRate &&
@@ -322,46 +326,58 @@ const PaymentModal = ({ member, month, onClose, onSaved }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-950/80 backdrop-blur-sm px-4" onClick={onClose}>
-            <div className="bg-indigo-300/40 dark:bg-slate-900 border border-indigo-400/30 dark:border-white/10 rounded-[1.5rem] p-5 md:p-8 w-full max-w-md shadow-3xl shadow-indigo-900/50 relative overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6 flex-shrink-0">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm px-4" onClick={onClose}>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between mb-5 flex-shrink-0">
                     <div>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Update Payment</h3>
+                        <h3 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Update Payment</h3>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">{member.memberName}</span>
-                            <span className="px-1.5 py-0.5 rounded-lg bg-emerald-300/40 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[9px] font-black uppercase tracking-wide border border-emerald-300/30 dark:border-emerald-500/20">Gen: ₹{Math.round(member.expenses?.deposit || 0)}</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">{member.memberName}</span>
+                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[9px] font-extrabold uppercase border border-emerald-500/20">Gen: ₹{Math.round(member.expenses?.deposit || 0)}</span>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-indigo-400/40 dark:hover:bg-white/10 rounded-xl transition-colors">
-                        <X size={18} className="text-slate-500" />
+                    <button onClick={onClose} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400">
+                        <X size={18} />
                     </button>
                 </div>
-                <div className="flex-1 overflow-y-auto pr-4 -mr-4 space-y-6 scrollbar-hide">
+                <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-1">
                     <div>
-                        <label className={`text-[10px] font-black uppercase tracking-widest ${member.snapshotType === 'Get' ? 'text-emerald-500' : 'text-slate-500 dark:text-slate-400'} mb-1 block`}>{member.snapshotType === 'Get' ? 'Amount to Return (₹)' : 'Amount to Pay (₹)'}</label>
-                        <input type="number" value={depositBalance === '0' ? '' : depositBalance} onChange={e => setDepositBalance(e.target.value.replace(/^0+(?!$)/, ''))} className="w-full px-4 py-2.5 bg-indigo-300/40 dark:bg-black/40 border border-indigo-300/30 dark:border-white/10 rounded-xl text-sm font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500/20" />
+                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 block">
+                            {member.snapshotType === 'Get' ? 'Amount to Return (₹)' : 'Amount to Pay (₹)'}
+                        </label>
+                        <input type="number" value={depositBalance === '0' ? '' : depositBalance} onChange={e => setDepositBalance(e.target.value.replace(/^0+(?!$)/, ''))} className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-extrabold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500" />
                     </div>
                     <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 block">Payment Date</label>
-                        <input type="date" value={depositDate} onChange={e => setDepositDate(e.target.value)} className="w-full px-4 py-2.5 bg-indigo-300/40 dark:bg-black/40 border border-indigo-300/30 dark:border-white/10 rounded-xl text-sm font-bold text-slate-900 dark:text-white outline-none" />
+                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 block">Payment Date</label>
+                        <input type="date" value={depositDate} onChange={e => setDepositDate(e.target.value)} className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-extrabold text-slate-900 dark:text-white outline-none" />
                     </div>
                     <div>
-                        <label className={`text-[10px] font-black uppercase tracking-widest ${member.snapshotType === 'Get' ? 'text-emerald-500' : 'text-blue-500'} mb-1 block`}>{member.snapshotType === 'Get' ? 'Total Returned (₹)' : 'Total Paid (₹)'}</label>
-                        <input type="number" value={submittedAmount === '0' ? '' : submittedAmount} onChange={e => setSubmittedAmount(e.target.value.replace(/^0+(?!$)/, ''))} className={`w-full px-4 py-2.5 border rounded-xl text-sm font-bold outline-none transition-all ${member.snapshotType === 'Get' ? 'bg-emerald-300/40 dark:bg-emerald-500/10 border-emerald-300/30 dark:border-emerald-500/20' : 'bg-blue-300/40 dark:bg-blue-500/10 border-blue-300/30 dark:border-blue-500/20'}`} />
+                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1 block">
+                            {member.snapshotType === 'Get' ? 'Total Returned (₹)' : 'Total Paid (₹)'}
+                        </label>
+                        <input type="number" value={submittedAmount === '0' ? '' : submittedAmount} onChange={e => setSubmittedAmount(e.target.value.replace(/^0+(?!$)/, ''))} className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-extrabold outline-none text-slate-900 dark:text-white" />
                     </div>
-                    {balance > 0 && <div className={`px-3 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 ${autoStatus === 'clear' ? 'bg-emerald-300/40 dark:bg-emerald-500/10 text-emerald-700' : autoStatus === 'partial' ? 'bg-amber-300/40 dark:bg-amber-500/10 text-amber-700' : 'bg-rose-300/40 dark:bg-rose-500/10 text-rose-700'}`}>{autoStatus === 'clear' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}{autoStatus === 'clear' ? 'Balanced' : `₹${remaining} Pending`}</div>}
+                    {balance > 0 && (
+                        <div className={cn(
+                            "px-3 py-2 rounded-xl text-[10px] font-extrabold flex items-center gap-2 border",
+                            autoStatus === 'clear' ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20' : autoStatus === 'partial' ? 'bg-amber-500/10 text-amber-700 border-amber-500/20' : 'bg-rose-500/10 text-rose-700 border-rose-500/20'
+                        )}>
+                            {autoStatus === 'clear' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                            {autoStatus === 'clear' ? 'Balanced' : `₹${remaining} Pending`}
+                        </div>
+                    )}
                     <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 block">Status Override</label>
+                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2 block">Status Override</label>
                         <div className="grid grid-cols-3 gap-2">
                             {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                                <button key={key} onClick={() => setStatus(key)} className={`p-2 rounded-xl border-2 text-[10px] font-black uppercase transition-all ${status === key ? cfg.cls + ' border-current' : 'border-indigo-300/30 dark:border-slate-800 text-slate-400'}`}>{cfg.label}</button>
+                                <button key={key} onClick={() => setStatus(key)} className={cn("p-2 rounded-xl border text-[10px] font-extrabold uppercase transition-all", status === key ? cfg.cls + ' ring-2 ring-indigo-500' : 'border-slate-200 dark:border-slate-800 text-slate-400')}>{cfg.label}</button>
                             ))}
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-3 mt-6 pt-5 border-t border-indigo-300/30 dark:border-white/10 flex-shrink-0">
-                    <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-indigo-300/30 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-black text-xs hover:bg-rose-300/40 transition-colors">Cancel</button>
-                    <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-black text-xs disabled:opacity-60 shadow-lg shadow-primary-500/20">{saving ? 'Saving...' : 'Save Changes'}</button>
+                <div className="flex gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-white/10 flex-shrink-0">
+                    <button onClick={onClose} className="flex-1 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-extrabold text-xs hover:bg-slate-100 transition-colors">Cancel</button>
+                    <button onClick={handleSave} disabled={saving} className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs disabled:opacity-60 shadow-sm">{saving ? 'Saving...' : 'Save Changes'}</button>
                 </div>
             </div>
         </div>
@@ -439,7 +455,6 @@ const MonthlySummary = () => {
             };
         }
 
-        // RESTRICTED MODE: If no finalized sharedExpense is found, show zero/null stats
         return { 
             rate: 0, head: 0, shared: 0, mkt: 0, rice: 0, gstM: 0, totalM: 0, adjustedTotalM: 0,
             mCount, 
@@ -476,13 +491,15 @@ const MonthlySummary = () => {
     }, [data]);
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-lg shadow-primary-500/20"><ClipboardList className="text-white" size={24} /></div>
+        <div className="space-y-6 sm:space-y-8 pb-12">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 border-l-4 border-l-indigo-600 shadow-sm p-6 sm:p-8 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 backdrop-blur-xl transition-colors">
+                <div className="flex items-center gap-3.5">
+                    <div className="p-2.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20">
+                        <ClipboardList size={22} />
+                    </div>
                     <div>
-                        <h1 className="text-xl sm:text-2xl rb-header">Summary Dashboard</h1>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-2 leading-none">Trace for {monthStr}</p>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Summary Dashboard</h1>
+                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5 uppercase tracking-widest">Financial trace for {monthStr}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -513,92 +530,90 @@ const MonthlySummary = () => {
                                         deposit: m.submittedAmount || 0,
                                         balance: rem
                                     }, { month: data?.sharedExpense?.bills?.month || 'Current Month' });
-                                }, index * 800); // 800ms delay between each download to prevent browser block
+                                }, index * 800);
                             });
                         }}
-                        className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all"
+                        className="hidden sm:flex items-center gap-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider shadow-sm transition-all"
                         title="Download All Member Bills as PDF"
                     >
                         <Download size={14} />
-                        Download All Invoices
+                        Download Invoices
                     </button>
-                    <button onClick={fetchSummary} className="p-3 bg-indigo-300/40 dark:bg-slate-900 border border-indigo-300/30 dark:border-white/10 rounded-2xl text-indigo-500 shadow-sm active:scale-95 transition-all hover:rotate-180"><RefreshCw size={18} className={loading ? 'animate-spin' : ''} /></button>
+                    <button onClick={fetchSummary} className="p-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-white/10 rounded-xl text-slate-700 dark:text-slate-300 hover:text-indigo-600 transition-all"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /></button>
                 </div>
             </div>
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                    <Loader2 size={36} className="animate-spin mb-4 text-primary-500" />
-                    <p className="font-bold text-sm tracking-tight uppercase">Syncing Database...</p>
+                    <Loader2 size={32} className="animate-spin mb-3 text-indigo-600" />
+                    <p className="font-bold text-xs uppercase tracking-wider">Syncing Database...</p>
                 </div>
             ) : error ? (
-                <div className="p-8 rounded-[1.5rem] bg-rose-300/40 dark:bg-rose-950/20 text-center flex flex-col items-center gap-4 border border-rose-300 dark:border-rose-900/30">
-                    <AlertCircle className="text-rose-500" size={32} />
-                    <h3 className="font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Sync Failed</h3>
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">{error}</p>
+                <div className="p-6 rounded-2xl bg-rose-500/10 text-center flex flex-col items-center gap-3 border border-rose-500/20">
+                    <AlertCircle className="text-rose-500" size={28} />
+                    <h3 className="font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-wider text-sm">Sync Failed</h3>
+                    <p className="text-xs font-bold text-slate-500">{error}</p>
                 </div>
             ) : data && (
                 <>
                     {!data.sharedExpense && (
-                        <div className="mb-2">
-                                <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-1.5 bg-rose-500 rounded-lg"><AlertCircle size={14} className="text-white" /></div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Summary Not Finalized</p>
-                                            <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 tracking-tighter uppercase">Trace restricted to finalized records only.</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 rounded-xl border border-rose-500/20 text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">
-                                        No Record
-                                    </div>
+                        <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-1.5 bg-rose-500 rounded-lg text-white"><AlertCircle size={14} /></div>
+                                <div>
+                                    <p className="text-xs font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Summary Not Finalized</p>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Run and submit the calculator to lock monthly snapshot.</p>
                                 </div>
                             </div>
-                        )}
+                            <div className="px-2.5 py-1 bg-rose-500/10 rounded-lg text-[10px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                                Unfinalized
+                            </div>
+                        </div>
+                    )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
-                            { label: 'Cleared Accounts', val: counts.clear, icon: CheckCircle2, color: 'emerald', bg: 'bg-emerald-300/40', border: 'border-emerald-300/20', text: 'text-emerald-700' },
-                            { label: 'Pending Payments', val: counts.pending, icon: Clock, color: 'rose', bg: 'bg-rose-300/40', border: 'border-rose-300/20', text: 'text-rose-700' },
-                            { label: 'Partial Payments', val: counts.partial, icon: Activity, color: 'amber', bg: 'bg-amber-300/40', border: 'border-amber-300/20', text: 'text-amber-700' }
+                            { label: 'Cleared Accounts', val: counts.clear, icon: CheckCircle2, bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-700 dark:text-emerald-400', iconColor: 'text-emerald-600' },
+                            { label: 'Pending Payments', val: counts.pending, icon: Clock, bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-700 dark:text-rose-400', iconColor: 'text-rose-600' },
+                            { label: 'Partial Payments', val: counts.partial, icon: Activity, bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-700 dark:text-amber-400', iconColor: 'text-amber-600' }
                         ].map((card, i) => (
-                            <div key={i} className={cn("rb-card p-4 flex items-center justify-between", card.bg === 'bg-emerald-500/10' ? 'rb-shadow-emerald' : card.label.includes('Pending') ? 'rb-shadow-rose' : 'rb-shadow-orange')}>
+                            <div key={i} className="bg-white/80 dark:bg-slate-900/80 p-4 rounded-2xl border border-slate-200/80 dark:border-white/5 shadow-sm flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className={cn("p-2 rounded-xl text-white shadow-lg", i === 0 ? 'bg-emerald-500' : i === 1 ? 'bg-rose-500' : 'bg-amber-500')}>
+                                    <div className={cn("p-2 rounded-xl border", card.bg, card.border, card.iconColor)}>
                                         <card.icon size={18} />
                                     </div>
                                     <div>
-                                        <p className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-widest">{card.label}</p>
-                                        <p className={cn("text-xl rb-header !normal-case mt-1", card.text)}>{card.val}</p>
+                                        <p className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 tracking-wider">{card.label}</p>
+                                        <p className={cn("text-xl font-extrabold mt-0.5", card.text)}>{card.val}</p>
                                     </div>
                                 </div>
-                                <div className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter">Members</div>
+                                <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Members</div>
                             </div>
                         ))}
                     </div>
 
-                    <Card className="p-0 overflow-hidden rb-card rb-shadow-emerald mt-4">
-                        <div className="p-4 sm:p-5 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-black/30 flex items-center justify-between">
+                    <Card className="p-0 overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/5">
+                        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-emerald-300/40 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl shadow-inner"><Coins size={18} /></div>
-                                <div><h2 className="text-[11px] sm:text-xs rb-header opacity-70">Financial Audit Trace</h2></div>
+                                <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20"><Coins size={16} /></div>
+                                <h2 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Financial Audit Trace</h2>
                             </div>
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest bg-indigo-300/40 dark:bg-black/60 px-2 py-1 rounded border border-indigo-300 dark:border-white/10">Min {stats.minLimit} Meals</span>
+                            <span className="text-[9px] font-extrabold text-slate-500 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/10">Min {stats.minLimit} Meals</span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-0 divide-x divide-indigo-300/30 dark:divide-white/5">
+                        <div className="grid grid-cols-2 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-white/5">
                             {[
-                                { label: 'Total Market', val: stats.mkt > 0 ? `₹${stats.mkt.toLocaleString()}` : '₹00', color: 'text-blue-600' },
-                                { label: 'Rice Cost', val: stats.rice > 0 ? `₹${stats.rice.toLocaleString()}` : '₹00', color: 'text-amber-600' },
-                                { label: 'Guest Meals', val: stats.gstM > 0 ? stats.gstM : '00', color: 'text-rose-600' },
-                                { label: 'Total Meals', val: stats.totalM > 0 ? stats.totalM : '00', subVal: stats.adjustedTotalM > 0 ? stats.adjustedTotalM : null, color: 'text-indigo-600' },
-                                { label: 'Meal Cost', val: stats.rate > 0 ? `₹${Number(stats.rate).toFixed(2)}` : '₹00', color: 'text-emerald-600' }
+                                { label: 'Total Market', val: stats.mkt > 0 ? `₹${stats.mkt.toLocaleString()}` : '₹0', color: 'text-indigo-600 dark:text-indigo-400' },
+                                { label: 'Rice Cost', val: stats.rice > 0 ? `₹${stats.rice.toLocaleString()}` : '₹0', color: 'text-amber-600 dark:text-amber-400' },
+                                { label: 'Guest Meals', val: stats.gstM > 0 ? stats.gstM : '0', color: 'text-rose-600 dark:text-rose-400' },
+                                { label: 'Total Meals', val: stats.totalM > 0 ? stats.totalM : '0', subVal: stats.adjustedTotalM > 0 ? stats.adjustedTotalM : null, color: 'text-indigo-600 dark:text-indigo-400' },
+                                { label: 'Meal Cost', val: stats.rate > 0 ? `₹${Number(stats.rate).toFixed(2)}` : '₹0', color: 'text-emerald-600 dark:text-emerald-400' }
                             ].map((stat, i) => (
-                                <div key={i} className="p-4 sm:p-6 text-center hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-colors">
-                                    <div className="text-[9px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-widest mb-1">{stat.label}</div>
+                                <div key={i} className="p-4 text-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    <div className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 tracking-wider mb-1">{stat.label}</div>
                                     <div className="flex items-end justify-center gap-1.5">
-                                        <div className={`text-xl rb-header !normal-case ${stat.subVal && stat.subVal !== stat.val ? '!text-rose-500' : stat.color}`}>{stat.val}</div>
+                                        <div className={cn("text-lg font-extrabold", stat.subVal && stat.subVal !== stat.val ? 'text-rose-600' : stat.color)}>{stat.val}</div>
                                         {stat.subVal && stat.subVal !== stat.val && (
-                                            <div className="text-lg rb-header !normal-case !text-emerald-500" title="Total Adjusted Meals (Min meals applied)">{stat.subVal}</div>
+                                            <div className="text-base font-extrabold text-emerald-600" title="Total Adjusted Meals">{stat.subVal}</div>
                                         )}
                                     </div>
                                 </div>
@@ -606,11 +621,14 @@ const MonthlySummary = () => {
                         </div>
                     </Card>
 
-                    <Card className="p-0 overflow-hidden rb-card rb-shadow-indigo mt-8">
-                        <div className="p-4 sm:p-5 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-black/30 flex items-center justify-between">
-                            <div className="flex items-center gap-3"><div className="p-2 bg-indigo-300/40 dark:bg-white/5 text-slate-500 rounded-lg"><HomeIcon size={18} /></div><h2 className="text-[11px] sm:text-xs rb-header opacity-70">Fixed Operational Bills</h2></div>
+                    <Card className="p-0 overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/5">
+                        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20"><HomeIcon size={16} /></div>
+                                <h2 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Fixed Operational Bills</h2>
+                            </div>
                         </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 sm:p-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-4 sm:p-5">
                             {['gas', 'wifi', 'electric', 'paper', 'didi', 'houseRent', 'spices', 'fund', 'others'].map(key => {
                                 const val = (data?.sharedExpense?.bills || {})[key] || 0;
                                 const config = {
@@ -626,28 +644,32 @@ const MonthlySummary = () => {
                                 };
                                 const item = config[key];
                                 return (
-                                    <div key={key} className="bg-indigo-300/40 dark:bg-black/40 p-4 rounded-2xl border border-indigo-300/30 dark:border-white/10 group hover:shadow-lg transition-all">
-                                        <div className="flex items-center justify-between mb-1"><item.icon size={16} className={item.color} /><span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{item.label}</span></div>
-                                        <div className="text-lg rb-header !normal-case opacity-80 group-hover:opacity-100">₹{val > 0 ? Number(val).toLocaleString() : '00'}</div>
+                                    <div key={key} className="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200/80 dark:border-white/5">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <item.icon size={15} className={item.color} />
+                                            <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">{item.label}</span>
+                                        </div>
+                                        <div className="text-base font-extrabold text-slate-900 dark:text-slate-100">₹{val > 0 ? Number(val).toLocaleString() : '0'}</div>
                                     </div>
                                 );
                             })}
                         </div>
-                        <div className="p-4 bg-indigo-300/40 dark:bg-black/40 border-t border-indigo-300/30 dark:border-white/10 flex items-center justify-center gap-8">
-                            <div className="flex items-center gap-2"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Per Head:</span><span className="text-base font-black text-emerald-600">₹{Math.round(stats.head)}</span></div>
-                            <div className="w-px h-6 bg-indigo-400/30" /><div className="flex items-center gap-2"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Shared:</span><span className="text-base font-black text-indigo-600">₹{Math.round(stats.shared)}</span></div>
+                        <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-white/10 flex items-center justify-center gap-6">
+                            <div className="flex items-center gap-1.5"><span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Per Head:</span><span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">₹{Math.round(stats.head)}</span></div>
+                            <div className="w-px h-4 bg-slate-200 dark:bg-slate-700" />
+                            <div className="flex items-center gap-1.5"><span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Shared:</span><span className="text-sm font-extrabold text-indigo-600 dark:text-indigo-400">₹{Math.round(stats.shared)}</span></div>
                         </div>
                     </Card>
 
-                    <div className="mt-8 space-y-6">
-                        <div className="flex items-center justify-between px-2">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-300/40 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl"><Users size={18} /></div>
-                                <h3 className="text-lg rb-header">Monthly Invoice List</h3>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between px-1">
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20"><Users size={16} /></div>
+                                <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-50">Monthly Invoice List</h3>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6">
+                        <div className="grid grid-cols-1 gap-4">
                             {filteredMembers.map(m => {
                                 const offM = (data?.sharedExpense?.memberBalances || []).find(mb => mb.memberId === (m._id || m.memberId)) || {};
                                 return (

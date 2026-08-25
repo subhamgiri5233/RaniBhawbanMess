@@ -1,315 +1,156 @@
-
-import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
+import { useState, useEffect, useMemo, useRef, memo } from 'react';
 import Card from './Card';
-import { formatBengaliDate } from '../../utils/bengaliCalendar';
+import { formatBengaliDate, toBengaliNumber } from '../../utils/bengaliCalendar';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import AnalogClock from './AnalogClock';
-import DigitalClock from './DigitalClock';
+import { Clock as ClockIcon, Calendar as CalendarIcon, Sparkles } from 'lucide-react';
 
-
-
-// ==================== STYLES ====================
-const styles = {
-    particleFall: `
-        @keyframes particleFall {
-            0% { 
-                transform: translateY(-80px) translateX(0px) rotate(0deg); 
-                opacity: 0; 
-            }
-            5% { 
-                opacity: 1; 
-            }
-            95% { 
-                opacity: 1; 
-            }
-            100% { 
-                transform: translateY(100vh) translateX(var(--swing)) rotate(720deg); 
-                opacity: 0; 
-            }
-        }
-    `
-};
-
-// ==================== SUB-COMPONENTS ====================
-
-// ClockCard component (Generic wrapper for Analog/Digital variants)
-const ClockCard = memo(({ variant = 'english', timeValues, digitalTime, dateInfo, bengaliDate }) => {
-    const isEnglish = variant === 'english';
-    const theme = {
-        container: isEnglish
-            ? 'from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 border-indigo-100 dark:border-white/5 shadow-premium'
-            : 'from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-500/10 dark:via-amber-500/10 dark:to-yellow-500/10 border-orange-100 dark:border-white/5 shadow-premium',
-        text: isEnglish ? 'text-indigo-700 dark:text-indigo-400' : 'text-orange-700 dark:text-orange-400',
-        border: isEnglish ? 'border-indigo-200 dark:border-indigo-500/30' : 'border-orange-200 dark:border-orange-500/30',
-        centerDot: isEnglish ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-orange-600 dark:bg-orange-400',
-        mainMarker: isEnglish ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-orange-600 dark:bg-orange-400',
-        secondaryMarker: isEnglish ? 'bg-indigo-200 dark:bg-indigo-500/20' : 'border-orange-200 dark:bg-orange-500/20',
-        hourHand: isEnglish ? 'bg-indigo-700 dark:bg-indigo-400' : 'bg-orange-700 dark:bg-orange-400',
-        minuteHand: isEnglish ? 'bg-purple-700 dark:bg-purple-400' : 'bg-amber-700 dark:bg-amber-400',
-        secondHand: isEnglish ? 'bg-pink-500 dark:bg-pink-400' : 'bg-yellow-500 dark:bg-yellow-400',
-        hourColor: isEnglish ? 'text-indigo-700 dark:text-indigo-400' : 'text-orange-700 dark:text-orange-400',
-        minuteColor: isEnglish ? 'text-purple-600 dark:text-purple-400' : 'text-amber-600 dark:text-amber-400',
-        secondColor: isEnglish ? 'text-pink-600 dark:text-pink-400' : 'text-yellow-600 dark:text-yellow-400',
-        ampmColor: isEnglish ? 'text-indigo-500 dark:text-indigo-500' : 'text-orange-500 dark:text-orange-500',
-        pulseColor: isEnglish ? 'text-indigo-600 dark:text-indigo-500' : 'text-orange-600 dark:text-orange-500',
-        pulseColor2: isEnglish ? 'text-purple-600 dark:text-purple-500' : 'text-amber-600 dark:text-amber-500'
-    };
-
-    return (
-        <Card className={`p-6 bg-gradient-to-br ${theme.container} border-2`}>
-            <h3 className={`text-xs font-black ${theme.text} mb-4 text-center uppercase tracking-widest`}>
-                {isEnglish ? 'English Calendar' : 'বাংলা পঞ্জিকা'}
-            </h3>
-            <div className="flex items-center justify-between gap-6 flex-wrap">
-                <AnalogClock
-                    hourAngle={timeValues.hourAngle}
-                    minuteAngle={timeValues.minuteAngle}
-                    secondAngle={timeValues.secondAngle}
-                    theme={theme}
-                />
-                <DigitalClock
-                    digitalTime={digitalTime}
-                    dateInfo={dateInfo}
-                    bengaliDate={bengaliDate}
-                    variant={variant}
-                    theme={theme}
-                />
-            </div>
-        </Card>
-    );
-});
-
-ClockCard.displayName = 'ClockCard';
-
-// ==================== COMPONENT ====================
 const Clock = ({ showGita = false }) => {
-    const { members, dailyInfo, loadingDaily: loadingInfo } = useData();
+    const { dailyInfo } = useData();
     const { user } = useAuth();
     const [time, setTime] = useState(new Date());
-    const [today, setToday] = useState(new Date()); // Updates only once per day
-    const [particles, setParticles] = useState([]);
-    const [showParticles, setShowParticles] = useState(false);
-
-    const gitaVerse = dailyInfo?.gita || null;
-    const occasionData = dailyInfo?.occasion || null;
-    const dateEffect = dailyInfo?.effects || null;
-
+    const [today, setToday] = useState(new Date());
     const timerRef = useRef(null);
 
-    // Optimized time update - updates 'time' every second, but 'today' only at midnight
     useEffect(() => {
-        const tick = () => {
+        timerRef.current = setInterval(() => {
             const now = new Date();
             setTime(now);
-
-            // Comparison based on date string to avoid object reference issues
-            if (now.toDateString() !== today.toDateString()) {
+            if (now.getDate() !== today.getDate()) {
                 setToday(now);
             }
-        };
+        }, 1000);
 
-        timerRef.current = setInterval(tick, 1000);
-        return () => clearInterval(timerRef.current);
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
     }, [today]);
 
-    // Memoize time values - updates every second
+    // Angles for analog clock
     const timeValues = useMemo(() => {
-        const hours = time.getHours();
-        const minutes = time.getMinutes();
         const seconds = time.getSeconds();
-
+        const minutes = time.getMinutes();
+        const hours = time.getHours() % 12;
         return {
-            hours,
-            minutes,
-            seconds,
-            secondAngle: (seconds * 6) - 90,
-            minuteAngle: (minutes * 6 + seconds * 0.1) - 90,
-            hourAngle: ((hours % 12) * 30 + minutes * 0.5) - 90
+            secondAngle: seconds * 6,
+            minuteAngle: (minutes * 6) + (seconds * 0.1),
+            hourAngle: (hours * 30) + (minutes * 0.5)
         };
     }, [time]);
 
-    // Memoize formatted time - updates every second
     const digitalTime = useMemo(() => {
-        const h = time.getHours();
-        const m = time.getMinutes().toString().padStart(2, '0');
-        const s = time.getSeconds().toString().padStart(2, '0');
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        const displayHour = h % 12 || 12;
+        let hours = time.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
         return {
-            hour: displayHour.toString().padStart(2, '0'),
-            minute: m,
-            second: s,
+            hour: String(hours).padStart(2, '0'),
+            minute: String(time.getMinutes()).padStart(2, '0'),
+            second: String(time.getSeconds()).padStart(2, '0'),
             ampm
         };
     }, [time]);
 
-    // Memoize date info - UPDATES ONLY ONCE PER DAY
     const dateInfo = useMemo(() => {
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
         return {
             day: days[today.getDay()],
             date: today.getDate(),
             month: months[today.getMonth()],
-            year: today.getFullYear(),
-            monthIndex: today.getMonth() + 1,
-            dayOfMonth: today.getDate(),
-            key: `${today.getMonth() + 1}-${today.getDate()}`,
-            formattedDate: `${months[today.getMonth()]} ${today.getDate()}, ${today.getFullYear()}`
+            year: today.getFullYear()
         };
     }, [today]);
 
-    // Memoize Bengali date - UPDATES ONLY ONCE PER DAY
     const bengaliDate = useMemo(() => formatBengaliDate(today), [today]);
 
-
-
-    // Check for birthdays - UPDATES ONLY ONCE PER DAY
-    const birthdayMembers = useMemo(() => {
-        if (!members || members.length === 0) return [];
-
-        const todayMonth = today.getMonth() + 1; // 1-12
-        const todayDay = today.getDate();
-
-        return members.filter(member => {
-            if (!member.dateOfBirth || typeof member.dateOfBirth !== 'string') return false;
-
-            // Safer string-based comparison to avoid timezone shifts
-            // Format assumed: YYYY-MM-DD
-            const parts = member.dateOfBirth.split('-');
-            if (parts.length < 3) return false;
-
-            const dobMonth = parseInt(parts[1], 10);
-            const dobDay = parseInt(parts[2], 10);
-
-            return dobMonth === todayMonth && dobDay === todayDay;
-        });
-    }, [members, today]);
-
-    // Memoize today's importance - UPDATES ONLY ONCE PER DAY
-
-
-    // Memoize date effect - UPDATES ONLY ONCE PER DAY
-    const combinedDateEffect = useMemo(() => {
-        if (birthdayMembers.length > 0 && user) {
-            const isMyBirthday = birthdayMembers.some(
-                member => member._id === user.id || member._id === user._id
-            );
-
-            if (isMyBirthday) {
-                return {
-                    particles: ['🎂', '🎈', '🎁', '🎉', '🎊', '🍰'],
-                    color: '#ec4899',
-                    count: 30
-                };
-            }
-        }
-        return dateEffect;
-    }, [dateEffect, birthdayMembers, user]);
-
-    // Generate particles effect
-    useEffect(() => {
-        if (!combinedDateEffect) {
-            const timer = setTimeout(() => {
-                setShowParticles(false);
-                setParticles([]);
-            }, 0);
-            return () => clearTimeout(timer);
-        }
-
-        const generated = Array.from({ length: combinedDateEffect.count || 20 }, (_, i) => ({
-            id: `${Date.now()}-${i}`,
-            emoji: combinedDateEffect.particles?.[Math.floor(Math.random() * combinedDateEffect.particles.length)] || '✨',
-            left: Math.random() * 100,
-            delay: Math.random() * 1.5,
-            duration: 3 + Math.random() * 4,
-            size: 16 + Math.random() * 20,
-            swing: (Math.random() - 0.5) * 60,
-        }));
-
-        setParticles(generated);
-        setShowParticles(true);
-
-        const timeoutId = setTimeout(() => {
-            setShowParticles(false);
-        }, 10000);
-
-        return () => clearTimeout(timeoutId);
-    }, [dateInfo.key, combinedDateEffect]);
-
-
-    // Fetch Daily Info is now handled by DataContext
-
-    // Render particle effect
-    const renderParticles = useCallback(() => {
-        if (!showParticles || particles.length === 0) return null;
-
-        return (
-            <>
-                <style>{styles.particleFall}</style>
-                <div
-                    className="fixed inset-0 pointer-events-none overflow-hidden"
-                    style={{ zIndex: 9999 }}
-                    aria-hidden="true"
-                >
-                    {particles.map((p) => (
-                        <div
-                            key={p.id}
-                            style={{
-                                position: 'absolute',
-                                left: `${p.left}%`,
-                                top: '-80px',
-                                fontSize: `${p.size}px`,
-                                animation: `particleFall ${p.duration}s ease-in-out ${p.delay}s forwards`,
-                                // @ts-ignore - CSS custom property
-                                '--swing': `${p.swing}px`,
-                                willChange: 'transform, opacity',
-                                lineHeight: 1,
-                                userSelect: 'none',
-                            }}
-                        >
-                            {p.emoji}
-                        </div>
-                    ))}
-                </div>
-            </>
-        );
-    }, [showParticles, particles]);
-
-
-
+    const analogTheme = {
+        border: 'border-indigo-500/20 dark:border-indigo-400/20',
+        centerDot: 'bg-indigo-600 dark:bg-indigo-400',
+        mainMarker: 'bg-indigo-600 dark:bg-indigo-400',
+        secondaryMarker: 'bg-slate-300 dark:bg-slate-700',
+        hourHand: 'bg-slate-800 dark:bg-slate-200',
+        minuteHand: 'bg-indigo-600 dark:bg-indigo-400',
+        secondHand: 'bg-rose-500 dark:bg-rose-400'
+    };
 
     return (
-        <div className="space-y-6 relative">
-            {renderParticles()}
+        <Card className="p-4 sm:p-5 bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/5 backdrop-blur-xl shadow-sm rounded-2xl md:rounded-[1.5rem]">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
+                
+                {/* Live Digital Clock Section */}
+                <div className="flex items-center gap-3.5 sm:gap-4 w-full lg:w-auto justify-between lg:justify-start">
+                    <div className="hidden sm:block">
+                        <AnalogClock
+                            hourAngle={timeValues.hourAngle}
+                            minuteAngle={timeValues.minuteAngle}
+                            secondAngle={timeValues.secondAngle}
+                            theme={analogTheme}
+                        />
+                    </div>
+                    
+                    <div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                            <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Live Station Time</span>
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight">
+                                {digitalTime.hour}
+                            </span>
+                            <span className="text-xl sm:text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 animate-pulse">:</span>
+                            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight">
+                                {digitalTime.minute}
+                            </span>
+                            <span className="text-xl sm:text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 animate-pulse">:</span>
+                            <span className="text-lg sm:text-xl font-extrabold text-rose-600 dark:text-rose-400 tabular-nums">
+                                {digitalTime.second}
+                            </span>
+                            <span className="ml-1.5 px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold uppercase border border-indigo-500/20">
+                                {digitalTime.ampm}
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
+                <div className="h-px w-full lg:h-12 lg:w-px bg-slate-200/80 dark:bg-white/10" />
 
+                {/* Dual Calendars: English & Bengali in sleek responsive badges */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto lg:flex-1 lg:max-w-2xl">
+                    {/* Gregorian Calendar */}
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 flex items-center gap-3">
+                        <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-500/20 shrink-0">
+                            <CalendarIcon size={16} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                                {dateInfo.day}
+                            </div>
+                            <p className="text-xs font-extrabold text-slate-700 dark:text-slate-300 tracking-tight truncate">
+                                {dateInfo.month} {dateInfo.date}, {dateInfo.year}
+                            </p>
+                        </div>
+                    </div>
 
+                    {/* Bengali Calendar */}
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-white/5 flex items-center gap-3">
+                        <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-500/20 shrink-0">
+                            <Sparkles size={16} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                                {bengaliDate.day}
+                            </div>
+                            <p className="text-xs font-extrabold text-slate-700 dark:text-slate-300 tracking-tight truncate">
+                                {bengaliDate.date} {bengaliDate.month}, {bengaliDate.year}
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <ClockCard
-                    variant="english"
-                    timeValues={timeValues}
-                    digitalTime={digitalTime}
-                    dateInfo={dateInfo}
-                    bengaliDate={bengaliDate}
-                />
-                <ClockCard
-                    variant="bengali"
-                    timeValues={timeValues}
-                    digitalTime={digitalTime}
-                    dateInfo={dateInfo}
-                    bengaliDate={bengaliDate}
-                />
             </div>
-
-
-
-        </div>
+        </Card>
     );
 };
 
 export default Clock;
-

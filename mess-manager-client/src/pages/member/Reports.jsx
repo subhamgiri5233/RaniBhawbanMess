@@ -76,86 +76,103 @@ const MemberCard = memo(({ m, offM, dRate, dHead, dMinLimit, isCurrentUser }) =>
     // For Receivable (rem < 0), if it's already 'clear', it stays 0.
     if (m.paymentStatus === 'clear') rem = 0;
 
+    const handleDownloadPdf = () => {
+        generateBillPDF({
+            name: m.memberName,
+            meals: m.regularMeals || 0,
+            mealCharge: dRate,
+            mealCost: dMCost,
+            guestMeals: m.guestMeals || 0,
+            fixedCost: dHead,
+            marketContribution: effectiveContribution,
+            deposit: m.submittedAmount || 0,
+            balance: rem
+        }, { month: 'Current Month' });
+    };
+
     return (
         <div className={cn(
-            "p-6 sm:p-8 rounded-[1.5rem] border transition-all duration-300 group relative overflow-hidden",
+            "p-6 sm:p-8 rounded-2xl md:rounded-[1.5rem] border transition-all duration-300 group relative overflow-hidden",
             isCurrentUser
-                ? "bg-indigo-300 dark:bg-slate-900 shadow-2xl shadow-primary-500/20 border-primary-500/40 ring-1 ring-primary-500/20"
-                : "bg-indigo-300/40 dark:bg-slate-900/40 border-indigo-300/30 dark:border-white/5 hover:border-primary-500/20 backdrop-blur-md"
+                ? "bg-white/95 dark:bg-slate-900/95 shadow-xl border-indigo-500/50 ring-2 ring-indigo-500/20"
+                : "bg-white/80 dark:bg-slate-900/80 border-slate-200/80 dark:border-white/5 hover:border-indigo-500/30 backdrop-blur-xl shadow-sm"
         )}>
-            {isCurrentUser && (
-                <div className="absolute top-0 right-0 p-6">
-                    <span className="px-3 py-1 bg-primary-500 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg shadow-primary-500/30">Primary Identity</span>
-                </div>
-            )}
-
             <div className="absolute -right-10 -bottom-10 opacity-[0.02] dark:opacity-[0.04] group-hover:rotate-12 transition-transform duration-700 pointer-events-none">
                 <UserRound size={180} />
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-8 relative z-10">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-6 mb-6 relative z-10">
                 <div className="flex items-center gap-4">
                     <div className={cn(
-                        "w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-white font-black text-xl shadow-2xl transition-transform group-hover:scale-105",
-                        isCurrentUser ? "bg-gradient-to-br from-primary-500 to-indigo-600 shadow-primary-500/30" : "bg-slate-800 dark:bg-slate-700 shadow-none"
+                        "w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-white font-extrabold text-xl shadow-md transition-transform group-hover:scale-105",
+                        isCurrentUser ? "bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-indigo-500/30" : "bg-slate-800 dark:bg-slate-700 shadow-none"
                     )}>
                         {(m.memberName || '?').charAt(0)}
                     </div>
                     <div>
-                        <div className="text-xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-1">{m.memberName}</div>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className="text-xl font-extrabold text-slate-900 dark:text-white leading-tight tracking-tight">
+                                {m.memberName}
+                            </span>
+                            {isCurrentUser && (
+                                <span className="px-2.5 py-0.5 bg-indigo-600 text-white text-[9px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">
+                                    You
+                                </span>
+                            )}
+                        </div>
                         <div className="flex items-center gap-3">
-                            <div className="flex text-[10px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-widest items-center gap-1.5">
-                                <Calendar size={12} className="text-primary-500/50" /> {m.marketDays || 0} Procurement Units
+                            <div className="flex text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest items-center gap-1.5">
+                                <Calendar size={12} className="text-indigo-500" /> {m.marketDays || 0} Procurement Units
                             </div>
                             {m.marketDates?.length > 0 && (
-                                <div className="px-2 py-0.5 bg-indigo-300/40 dark:bg-slate-800 rounded-lg text-[8px] font-mono text-indigo-700 dark:text-slate-400 border border-indigo-400/20">
+                                <div className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-[8px] font-mono text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
                                     DATES: {m.marketDates.map(d => d.split('-')[2]).join(', ')}
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-3">
+                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0">
                     <StatusBadge status={m.paymentStatus} />
                     {m.role === 'admin' && (
-                        <span className="px-2 py-0.5 bg-indigo-300/40 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[8px] font-black uppercase tracking-[0.15em] rounded-lg border border-indigo-500/20">
+                        <span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[8px] font-extrabold uppercase tracking-wider rounded-lg border border-indigo-500/20">
                             Governance Administrator
                         </span>
                     )}
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="p-4 bg-indigo-300/40 dark:bg-black/20 border border-indigo-300/30 dark:border-white/5 rounded-2xl group/sub shadow-sm transition-all hover:shadow-md">
-                    <div className="text-[9px] font-black text-slate-500 mb-2 uppercase tracking-widest leading-none">Standard Meal Cost</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                <div className="p-4 bg-slate-50/80 dark:bg-black/20 border border-slate-200/70 dark:border-white/5 rounded-2xl group/sub shadow-sm transition-all hover:shadow-md">
+                    <div className="text-[9px] font-extrabold text-slate-500 mb-2 uppercase tracking-widest leading-none">Standard Meal Cost</div>
                     <div className="flex flex-col gap-1">
-                        <div className="text-lg font-black text-slate-900 dark:text-white leading-none">₹{Math.round(dMCost)}</div>
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter opacity-60">{chargedRegMeals} × {dRate.toFixed(1)}</span>
+                        <div className="text-lg font-extrabold text-slate-900 dark:text-white leading-none">₹{Math.round(dMCost)}</div>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{chargedRegMeals} × {dRate.toFixed(1)}</span>
                     </div>
                 </div>
-                <div className="p-4 bg-indigo-300/40 dark:bg-black/20 border border-indigo-300/30 dark:border-white/5 rounded-2xl group/sub shadow-sm"><div className="text-[9px] font-black text-slate-500 mb-2 uppercase tracking-widest leading-none">Guest Adjustment</div><div className="text-lg font-black text-slate-900 dark:text-white leading-none">₹{Math.round(dGCost)}</div></div>
-                <div className="p-4 bg-indigo-300/40 dark:bg-black/20 border border-indigo-300/30 dark:border-white/5 rounded-2xl group/sub shadow-sm"><div className="text-[9px] font-black text-slate-500 mb-2 uppercase tracking-widest leading-none">Shared Liability</div><div className="text-lg font-black text-slate-900 dark:text-white leading-none">₹{Math.round(dHead)}</div></div>
+                <div className="p-4 bg-slate-50/80 dark:bg-black/20 border border-slate-200/70 dark:border-white/5 rounded-2xl group/sub shadow-sm"><div className="text-[9px] font-extrabold text-slate-500 mb-2 uppercase tracking-widest leading-none">Guest Adjustment</div><div className="text-lg font-extrabold text-slate-900 dark:text-white leading-none">₹{Math.round(dGCost)}</div></div>
+                <div className="p-4 bg-slate-50/80 dark:bg-black/20 border border-slate-200/70 dark:border-white/5 rounded-2xl group/sub shadow-sm"><div className="text-[9px] font-extrabold text-slate-500 mb-2 uppercase tracking-widest leading-none">Shared Liability</div><div className="text-lg font-extrabold text-slate-900 dark:text-white leading-none">₹{Math.round(dHead)}</div></div>
                 <div className={cn(
                     "p-4 rounded-2xl border transition-all shadow-sm",
-                    rem > 0 ? "bg-rose-300/40 dark:bg-rose-900/10 border-rose-300 dark:border-rose-900/20 shadow-rose-500/5 text-rose-700" : "bg-emerald-300/40 dark:bg-emerald-900/10 border-emerald-300 dark:border-emerald-900/20 shadow-emerald-500/5 text-emerald-700"
+                    rem > 0 ? "bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400"
                 )}>
-                    <div className={cn("text-[9px] font-black uppercase mb-2 tracking-widest leading-none", rem > 0 ? "text-rose-500" : "text-emerald-500")}>Outstanding</div>
-                    <div className={cn("text-xl font-black tabular-nums tracking-tighter leading-none", rem > 0 ? "text-rose-700" : "text-emerald-700 dark:text-emerald-400")}>
+                    <div className={cn("text-[9px] font-extrabold uppercase mb-2 tracking-widest leading-none", rem > 0 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400")}>Outstanding</div>
+                    <div className="text-xl font-extrabold tabular-nums tracking-tighter leading-none">
                         {rem === 0 ? '₹ 0.00' : `₹ ${Math.abs(rem).toLocaleString()}`}
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-y-4 py-5 border-t border-slate-100 dark:border-white/5">
+            <div className="flex flex-wrap items-center justify-between gap-y-4 py-4 border-t border-slate-100 dark:border-white/5">
                 <div className="flex items-center gap-3">
                     <div className="relative group/meal">
                         <div className={cn(
-                            "px-3 py-1.5 border rounded-2xl flex items-center gap-2 transition-all text-[11px] font-black uppercase tracking-widest",
+                            "px-3 py-1.5 border rounded-2xl flex items-center gap-2 transition-all text-[10px] font-extrabold uppercase tracking-wider",
                             isMinApplied
-                                ? "bg-rose-300/40 dark:bg-rose-500/5 border-rose-300 dark:border-rose-500/20 text-rose-700 dark:text-rose-400 shadow-sm"
-                                : "bg-indigo-300/40 dark:bg-primary-500/5 border-indigo-300/30 dark:border-primary-500/20 text-indigo-800 dark:text-primary-300 shadow-sm"
+                                ? "bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400 shadow-sm"
+                                : "bg-indigo-500/10 border-indigo-500/20 text-indigo-700 dark:text-indigo-300 shadow-sm"
                         )}>
-                            <Utensils size={12} className={isMinApplied ? "text-rose-500" : "text-primary-500"} />
+                            <Utensils size={12} className={isMinApplied ? "text-rose-500" : "text-indigo-500"} />
                             <span>{m.regularMeals} Active Meals</span>
                         </div>
                         {isMinApplied && (
@@ -310,24 +327,24 @@ const Reports = () => {
         <div className="flex flex-col gap-6">
             
             {/* Power Banner */}
-            <div className="relative overflow-hidden bg-indigo-300/40 dark:bg-slate-900 shadow-sm p-8 rounded-[1.5rem] border border-indigo-300/30 dark:border-white/5 backdrop-blur-xl group mb-8 transition-all hover:shadow-xl hover:shadow-primary-500/5">
+            <div className="relative overflow-hidden bg-white/80 dark:bg-slate-900/80 shadow-sm p-6 sm:p-8 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 backdrop-blur-xl group mb-6 transition-all hover:shadow-md">
                 <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
                 </div>
 
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 mb-2">
-                            <Activity size={14} className="text-primary-500 animate-pulse" />
-                            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.3em]">Institutional Grade Reporting</span>
+                            <Activity size={14} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
+                            <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.25em]">Institutional Grade Reporting</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
                             Member Reports
-                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-300/40 dark:bg-primary-950/50 text-[10px] font-black text-indigo-800 dark:text-primary-400 border border-indigo-300 dark:border-primary-900/50 uppercase tracking-widest">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 uppercase tracking-wider">
                                 {monthStr}
                             </span>
                         </h1>
-                        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
+                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
                             Comprehensive financial ledger and dietary consumption trace
                         </p>
                     </div>
@@ -336,50 +353,48 @@ const Reports = () => {
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                    <RefreshCw size={36} className="animate-spin mb-4 text-indigo-500" />
-                    <p className="font-black text-xs uppercase tracking-widest">Syncing Database...</p>
+                    <RefreshCw size={32} className="animate-spin mb-3 text-indigo-600" />
+                    <p className="font-extrabold text-xs uppercase tracking-widest">Syncing Database...</p>
                 </div>
             ) : error ? (
-                <div className="p-8 rounded-[1.5rem] bg-rose-300/40 dark:bg-rose-950/20 text-center flex flex-col items-center gap-4 border border-rose-300/30 dark:border-rose-900/30">
+                <div className="p-8 rounded-2xl bg-rose-500/10 text-center flex flex-col items-center gap-3 border border-rose-500/20">
                     <AlertCircle className="text-rose-500" size={32} />
-                    <h3 className="font-black text-rose-600 dark:text-rose-400 uppercase tracking-tight">Sync Failed</h3>
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1">{error}</p>
+                    <h3 className="font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-tight">Sync Failed</h3>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{error}</p>
                 </div>
             ) : data && (
                 <>
                     <div>
-                        <Card className="p-0 overflow-hidden border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-900 shadow-xl">
-                            <div className="p-4 sm:p-5 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-black/30 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-emerald-300/40 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl shadow-inner border border-emerald-400/20"><Coins size={18} /></div>
-                                    <div>
-                                        <h2 className="text-[11px] sm:text-xs font-black text-slate-700 dark:text-emerald-200 uppercase tracking-tight">Financial Audit Trace</h2>
-                                    </div>
+                        <Card className="p-0 overflow-hidden shadow-sm">
+                            <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/5 bg-slate-50/60 dark:bg-slate-900/50 flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20"><Coins size={16} /></div>
+                                    <h2 className="text-xs font-extrabold text-slate-800 dark:text-emerald-300 uppercase tracking-wider">Financial Audit Trace</h2>
                                 </div>
-                                <span className="text-[9px] font-black text-indigo-600 dark:text-slate-500 uppercase tracking-widest bg-indigo-300/50 dark:bg-black/60 px-2 py-1 rounded border border-indigo-400/30 dark:border-white/10 shadow-inner">Min {stats.minLimit} Meals</span>
+                                <span className="text-[9px] font-extrabold text-indigo-600 dark:text-slate-400 uppercase tracking-wider bg-indigo-500/10 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-indigo-500/20 dark:border-white/10">Min {stats.minLimit} Meals</span>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-indigo-200/50 dark:divide-white/5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-white/5">
                                 {[
-                                    { label: 'Total Market', val: stats.mkt > 0 ? `₹${stats.mkt.toLocaleString()}` : '₹00', color: 'text-blue-600' },
-                                    { label: 'Rice Cost', val: stats.rice > 0 ? `₹${stats.rice.toLocaleString()}` : '₹00', color: 'text-amber-600' },
-                                    { label: 'Guest Meals', val: stats.gstM > 0 ? stats.gstM : '00', color: 'text-rose-600' },
-                                    { label: 'Total Meals', val: stats.totalM > 0 ? stats.totalM : '00', color: 'text-indigo-600' },
-                                    { label: 'Meal Cost', val: stats.rate > 0 ? `₹${Number(stats.rate).toFixed(2)}` : '₹00', color: 'text-emerald-600' }
+                                    { label: 'Total Market', val: stats.mkt > 0 ? `₹${stats.mkt.toLocaleString()}` : '₹00', color: 'text-indigo-600 dark:text-indigo-400' },
+                                    { label: 'Rice Cost', val: stats.rice > 0 ? `₹${stats.rice.toLocaleString()}` : '₹00', color: 'text-amber-600 dark:text-amber-400' },
+                                    { label: 'Guest Meals', val: stats.gstM > 0 ? stats.gstM : '00', color: 'text-purple-600 dark:text-purple-400' },
+                                    { label: 'Total Meals', val: stats.totalM > 0 ? stats.totalM : '00', color: 'text-blue-600 dark:text-blue-400' },
+                                    { label: 'Meal Cost', val: stats.rate > 0 ? `₹${Number(stats.rate).toFixed(2)}` : '₹00', color: 'text-emerald-600 dark:text-emerald-400' }
                                 ].map((stat, i) => (
-                                    <div key={i} className="p-4 sm:p-6 text-center hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-colors">
-                                        <div className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">{stat.label}</div>
-                                        <div className={`text-xl font-black ${stat.color}`}>{stat.val}</div>
+                                    <div key={i} className="p-4 sm:p-5 text-center hover:bg-slate-50/80 dark:hover:bg-white/5 transition-colors">
+                                        <div className="text-[9px] font-extrabold uppercase text-slate-400 tracking-widest mb-1">{stat.label}</div>
+                                        <div className={`text-xl font-extrabold ${stat.color}`}>{stat.val}</div>
                                     </div>
                                 ))}
                             </div>
                         </Card>
                     </div>
 
-                    <Card className="p-0 overflow-hidden border-indigo-300/30 dark:border-white/10 bg-indigo-300/40 dark:bg-slate-900 mt-6 shadow-xl">
-                        <div className="p-4 sm:p-5 border-b border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-black/30 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-300/40 dark:bg-white/5 text-indigo-700 dark:text-slate-100 rounded-lg border border-indigo-400/20"><HomeIcon size={18} /></div>
-                                <h2 className="text-[11px] sm:text-xs font-black text-slate-700 dark:text-slate-100 uppercase tracking-tight">Fixed Operational Bills</h2>
+                    <Card className="p-0 overflow-hidden mt-6 shadow-sm">
+                        <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/5 bg-slate-50/60 dark:bg-slate-900/50 flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20"><HomeIcon size={16} /></div>
+                                <h2 className="text-xs font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Fixed Operational Bills</h2>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 sm:p-6">
@@ -390,36 +405,36 @@ const Reports = () => {
                                     electric: { icon: Zap, label: 'Electric', color: 'text-yellow-600' },
                                     gas: { icon: Flame, label: 'Gas', color: 'text-rose-500' },
                                     paper: { icon: Newspaper, label: 'Paper', color: 'text-orange-500' },
-                                    didi: { icon: UserRound, label: 'Didi', color: 'purple-500' },
+                                    didi: { icon: UserRound, label: 'Didi', color: 'text-purple-500' },
                                     houseRent: { icon: HomeIcon, label: 'House Rent', color: 'text-indigo-500' },
                                     spices: { icon: Coffee, label: 'Spices', color: 'text-amber-600' },
                                     others: { icon: FileText, label: 'Others', color: 'text-slate-500' }
                                 };
                                 const item = config[key] || { icon: FileText, label: key.charAt(0).toUpperCase() + key.slice(1), color: 'text-slate-400' };
                                 return (
-                                    <div key={key} className="bg-indigo-300/40 dark:bg-black/40 p-4 rounded-2xl border border-indigo-400/30 dark:border-white/10 shadow-inner transition-all">
+                                    <div key={key} className="bg-slate-50/80 dark:bg-slate-800/40 p-3.5 rounded-2xl border border-slate-200/60 dark:border-white/10 shadow-sm transition-all">
                                         <div className="flex items-center justify-between mb-1">
-                                            <item.icon size={16} className={item.color} />
-                                            <span className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">{item.label}</span>
+                                            <item.icon size={15} className={item.color} />
+                                            <span className="text-[10px] font-extrabold uppercase text-slate-400 dark:text-slate-500 tracking-wider">{item.label}</span>
                                         </div>
-                                        <div className="text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">
+                                        <div className="text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
                                             ₹{val > 0 ? Number(val).toLocaleString() : '00'}
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
-                        <div className="p-4 bg-indigo-300/40 dark:bg-black/40 border-t border-indigo-300/30 dark:border-white/10 flex items-center justify-center gap-8">
-                            <div className="flex items-center gap-2"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Per Head:</span><span className="text-base font-black text-emerald-600 dark:text-emerald-400">₹{Math.round(stats.head)}</span></div>
-                            <div className="w-px h-6 bg-indigo-300/30 dark:bg-white/10" /><div className="flex items-center gap-2"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Shared:</span><span className="text-base font-black text-indigo-600 dark:text-indigo-400">₹{Math.round(stats.shared)}</span></div>
+                        <div className="p-4 bg-slate-50/80 dark:bg-slate-900/60 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-center gap-8">
+                            <div className="flex items-center gap-2"><span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Per Head:</span><span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">₹{Math.round(stats.head)}</span></div>
+                            <div className="w-px h-5 bg-slate-200 dark:bg-white/10" /><div className="flex items-center gap-2"><span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Total Shared:</span><span className="text-base font-extrabold text-indigo-600 dark:text-indigo-400">₹{Math.round(stats.shared)}</span></div>
                         </div>
                     </Card>
 
                     <div className="mt-8 space-y-6">
                         <div className="flex items-center justify-between px-2">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-300/40 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 rounded-xl"><Users size={18} /></div>
-                                <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Monthly Invoice List</h3>
+                                <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20"><Users size={18} /></div>
+                                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-tight">Monthly Invoice List</h3>
                             </div>
                         </div>
 

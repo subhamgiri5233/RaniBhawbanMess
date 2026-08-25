@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
       colors: {
         // Sophisticated Neutral Scale
         zinc: {
@@ -50,8 +53,9 @@ export default {
         '4xl': '2rem',
       },
       boxShadow: {
-        'premium': '0 10px 40px -10px rgba(0,0,0,0.05)',
-        'premium-dark': '0 10px 40px -10px rgba(0,0,0,0.4)',
+        'premium': '0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
+        'premium-hover': '0 12px 32px -4px rgba(79, 70, 229, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04)',
+        'premium-dark': '0 10px 40px -10px rgba(0,0,0,0.5)',
       }
     },
   },

@@ -3,11 +3,11 @@ import { cn } from "../../lib/utils";
 
 const Button = memo(({ children, className, variant = 'primary', size = 'md', ...props }) => {
     const variants = {
-        primary: 'bg-indigo-600 font-black uppercase tracking-wider text-white hover:bg-indigo-700 shadow-xl shadow-indigo-600/20 active:bg-indigo-800',
-        secondary: 'bg-emerald-600 font-black uppercase tracking-wider text-white hover:bg-emerald-700 shadow-xl shadow-emerald-600/20 active:bg-emerald-800',
-        outline: 'border-2 border-indigo-200 dark:border-white/10 bg-transparent hover:bg-indigo-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 font-bold',
-        ghost: 'bg-transparent hover:bg-indigo-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 font-bold',
-        danger: 'bg-rose-500 font-black uppercase tracking-wider text-white hover:bg-rose-600 shadow-xl shadow-rose-500/20 active:bg-rose-700',
+        primary: 'bg-gradient-to-r from-indigo-600 to-indigo-700 font-extrabold uppercase tracking-wider text-white hover:from-indigo-500 hover:to-indigo-600 shadow-md shadow-indigo-600/25 active:from-indigo-700 active:to-indigo-800 border border-indigo-500/30',
+        secondary: 'bg-gradient-to-r from-emerald-600 to-emerald-700 font-extrabold uppercase tracking-wider text-white hover:from-emerald-500 hover:to-emerald-600 shadow-md shadow-emerald-600/25 active:from-emerald-700 active:to-emerald-800 border border-emerald-500/30',
+        outline: 'border border-slate-200 dark:border-white/10 bg-white/60 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 font-bold backdrop-blur-md shadow-sm',
+        ghost: 'bg-transparent hover:bg-slate-100/80 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 font-bold',
+        danger: 'bg-gradient-to-r from-rose-500 to-rose-600 font-extrabold uppercase tracking-wider text-white hover:from-rose-400 hover:to-rose-500 shadow-md shadow-rose-500/25 active:from-rose-600 active:to-rose-700 border border-rose-400/30',
     };
 
     const sizes = {

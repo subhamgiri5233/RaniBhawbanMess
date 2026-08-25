@@ -147,146 +147,122 @@ const AddExpense = () => {
     }, [expenses, globalMonth, user, isAdmin, activeTab]);
 
     return (
-        <div className="space-y-8 pb-12">
-            <div className="relative overflow-hidden rb-card p-6 sm:p-10 group">
-                <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:20px_20px] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-                </div>
-
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Sparkles size={14} className="text-primary-500 animate-pulse" />
-                            <span className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-[0.3em]">Institutional Grade Audit</span>
-                        </div>
-                        <h1 className="text-3xl sm:text-6xl rb-header">
-                            {isAdmin ? 'Financial Terminal' : 'Market Terminal'}
-                        </h1>
-                        <p className="text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2">
-                            <div className="w-4 h-[1px] bg-indigo-500 dark:bg-indigo-700"></div>
+        <div className="space-y-6 sm:space-y-8 pb-12">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 border-l-4 border-l-indigo-600 shadow-sm p-6 sm:p-8 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 backdrop-blur-xl transition-colors">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <Sparkles size={14} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
+                        <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Financial Audit Ledger</span>
+                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
+                        {isAdmin ? 'Financial Terminal' : 'Market Terminal'}
+                    </h1>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2 mt-1">
                             {isAdmin ? 'Manage Mess Vault & Member Records' : 'Log Daily Procurement Logs'}
                         </p>
                     </div>
 
                     {isAdmin && (
-                        <div className="flex items-center gap-1.5 p-1.5 bg-indigo-300/40 dark:bg-slate-800/50 border border-indigo-300/30 dark:border-white/5 rounded-[1.5rem] backdrop-blur-sm self-start lg:self-center">
+                        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/5 rounded-2xl backdrop-blur-sm self-start lg:self-center">
                             <button
                                 className={cn(
-                                    "px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                                    "px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-200 flex items-center gap-2",
                                     activeTab === 'expense'
-                                        ? "bg-indigo-300/40 dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-[0_8px_20px_rgba(99,102,241,0.15)] scale-[1.02] border border-indigo-400/20"
-                                        : "text-indigo-500/60 hover:text-indigo-600 dark:hover:text-slate-300"
+                                        ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/80 dark:border-white/10"
+                                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
                                 )}
                                 onClick={() => setActiveTab('expense')}
                             >
-                                <PlusCircle size={14} className={activeTab === 'expense' ? "text-primary-500" : "opacity-40"} />
+                                <PlusCircle size={15} className={activeTab === 'expense' ? "text-indigo-600 dark:text-indigo-400" : "opacity-40"} />
                                 Expense Entry
                             </button>
                             <button
                                 className={cn(
-                                    "px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                                    "px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-200 flex items-center gap-2",
                                     activeTab === 'deposit'
-                                        ? "bg-emerald-300/40 dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-[0_8px_20px_rgba(16,185,129,0.15)] scale-[1.02] border border-emerald-400/20"
-                                        : "text-indigo-500/60 hover:text-indigo-600 dark:hover:text-slate-300"
+                                        ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/80 dark:border-white/10"
+                                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
                                 )}
                                 onClick={() => setActiveTab('deposit')}
                             >
-                                <Receipt size={14} className={activeTab === 'deposit' ? "text-emerald-500" : "opacity-40"} />
+                                <Receipt size={15} className={activeTab === 'deposit' ? "text-emerald-600 dark:text-emerald-400" : "opacity-40"} />
                                 Manage Deposits
                             </button>
                         </div>
                     )}
                 </div>
 
-            </div>
-
-            <div className="grid grid-cols-1 gap-12 items-start">
-                <div className="space-y-8">
+            <div className="grid grid-cols-1 gap-8 items-start">
+                <div className="space-y-6">
                     {(!isAdmin || activeTab === 'expense') ? (
                         <div key="expense-form">
-                                <Card className="rb-card rb-shadow-indigo p-6 sm:p-10 relative group overflow-hidden">
-                                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-primary-500/20 transition-all"></div>
-                                    <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                                        <ShoppingBag size={140} strokeWidth={1} />
-                                    </div>
+                                <Card className="p-6 sm:p-8 relative group overflow-hidden shadow-sm">
                                     <div className="relative z-10">
-                                        <div className="flex items-center gap-4 mb-10">
-                                            <div className="p-3 bg-primary-300/40 dark:bg-primary-950/40 rounded-2xl shadow-inner border border-primary-400/20">
-                                                <PlusCircle size={24} className="text-primary-600 dark:text-primary-400" />
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="p-2.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-500/20">
+                                                <PlusCircle size={20} />
                                             </div>
                                             <div>
-                                                <h2 className="text-2xl rb-header mb-1">
+                                                <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
                                                     {isAdmin ? 'Expense Entry' : 'Market Purchase Log'}
                                                 </h2>
-                                                <div className="p-4 rounded-2xl bg-indigo-300/40 text-indigo-600 dark:text-indigo-400 dark:bg-indigo-500/20 group-hover:scale-110 transition-transform shadow-inner border border-indigo-400/20">
-                                                    <Utensils size={24} />
-                                                </div>
+                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                                    Submit verified mess expenditure
+                                                </p>
                                             </div>
                                         </div>
-                                        <form onSubmit={handleExpenseSubmit} className="space-y-8">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                                                <Input label="Transaction Date" type="date" value={transactionDate} onChange={e => { const newDate = e.target.value; setTransactionDate(newDate); const newMonth = newDate.substring(0, 7); if (newMonth !== globalMonth) setGlobalMonth(newMonth); }} className="bg-indigo-300/40 dark:bg-slate-950/50 border-indigo-300/30" required />
-                                                <Input label="Item Description" value={title} onChange={e => setTitle(e.target.value)} className="bg-indigo-300/40 dark:bg-slate-950/50 border-indigo-300/30" required />
+                                        <form onSubmit={handleExpenseSubmit} className="space-y-4 sm:space-y-5">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <Input label="Transaction Date" type="date" value={transactionDate} onChange={e => { const newDate = e.target.value; setTransactionDate(newDate); const newMonth = newDate.substring(0, 7); if (newMonth !== globalMonth) setGlobalMonth(newMonth); }} required />
+                                                <Input label="Item Description" placeholder="e.g. Mustard oil, Onion 5kg, LPG Cylinder..." value={title} onChange={e => setTitle(e.target.value)} required />
                                             </div>
-                                            <div className="relative pt-2">
-                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 mb-3 block">Total Amount (₹)</label>
-                                                <div className="relative group/amt">
-                                                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-black text-slate-400 group-focus-within/amt:text-primary-500 transition-colors">₹</div>
-                                                    <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full pl-16 pr-8 py-8 bg-indigo-300/40 dark:bg-slate-950/80 border-2 border-indigo-300/30 dark:border-white/5 rounded-3xl text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tighter focus:ring-8 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-800" required />
+                                            <div>
+                                                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-0.5 mb-1.5 block">Total Amount (₹) <span className="text-rose-500">*</span></label>
+                                                <div className="relative">
+                                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-extrabold text-slate-400">₹</div>
+                                                    <input type="number" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="w-full pl-8 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-extrabold text-slate-900 dark:text-slate-100 tracking-tight focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400/80" required />
                                                 </div>
                                             </div>
-                                            <div className="space-y-4">
-                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 block">Fund Category Allocation</label>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-0.5 block">Fund Category Allocation</label>
                                                 {isAdmin ? (
-                                                    <div className="relative group/carousel-admin">
-                                                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-indigo-300/40 dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-admin:opacity-100 transition-opacity"></div>
-                                                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-indigo-300/40 dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel-admin:opacity-100 transition-opacity"></div>
-
-                                                        <div className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 custom-scrollbar scroll-smooth w-full">
-                                                            {[
-                                                                { id: 'spices', n: 'Spices', i: Flame, c: 'orange' },
-                                                                { id: 'rice', n: 'Rice', i: ShoppingBag, c: 'emerald' },
-                                                                { id: 'others', n: 'Other', i: Package, c: 'indigo' }
-                                                            ].map(cat => (
-                                                                <button
-                                                                    key={cat.id}
-                                                                    type="button"
-                                                                    onClick={() => setCategory(cat.id)}
-                                                                    className={cn(
-                                                                        "flex-shrink-0 min-w-[120px] p-6 rounded-[1.5rem] border-2 transition-all flex flex-col items-center gap-4 group/cat relative overflow-hidden snap-center",
-                                                                        category === cat.id
-                                                                            ? cn(
-                                                                                "border-primary-500 dark:border-primary-400 bg-indigo-300/40 dark:bg-primary-950/40 scale-[1.05] shadow-2xl shadow-primary-500/20",
-                                                                                cat.c === 'orange' && "ring-orange-500/10",
-                                                                                cat.c === 'emerald' && "ring-emerald-500/10",
-                                                                                cat.c === 'indigo' && "ring-indigo-500/10"
-                                                                            )
-                                                                            : "border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-slate-950/50 text-slate-400 hover:border-indigo-300 hover:bg-indigo-300/40 dark:hover:bg-slate-900 shadow-sm"
-                                                                    )}
-                                                                >
-                                                                    <cat.i size={24} className={cn("transition-all duration-500", category === cat.id ? (cat.c === 'orange' ? "text-orange-500" : cat.c === 'emerald' ? "text-emerald-500" : "text-indigo-500") : "text-slate-300 opacity-40 group-hover/cat:scale-125 group-hover/cat:opacity-100")} />
-                                                                    <span className={cn("text-[11px] font-black uppercase tracking-[0.2em]", category === cat.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400 group-hover:text-slate-600")}>{cat.n}</span>
-
-                                                                </button>
-                                                            ))}
-                                                        </div>
+                                                    <div className="grid grid-cols-3 gap-3 w-full">
+                                                        {[
+                                                            { id: 'spices', n: 'Spices & Oil', i: Flame },
+                                                            { id: 'rice', n: 'Rice & Grains', i: ShoppingBag },
+                                                            { id: 'others', n: 'Other Spends', i: Package }
+                                                        ].map(cat => (
+                                                            <button
+                                                                key={cat.id}
+                                                                type="button"
+                                                                onClick={() => setCategory(cat.id)}
+                                                                className={cn(
+                                                                    "p-3 rounded-xl border transition-all flex flex-col items-center gap-1.5",
+                                                                    category === cat.id
+                                                                        ? "border-indigo-600 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 shadow-sm"
+                                                                        : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 hover:border-indigo-400"
+                                                                )}
+                                                            >
+                                                                <cat.i size={18} className={category === cat.id ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400"} />
+                                                                <span className="text-[10px] font-extrabold uppercase tracking-wider">{cat.n}</span>
+                                                            </button>
+                                                        ))}
                                                     </div>
                                                 ) : (
-                                                    <div className="p-6 rounded-[1.5rem] bg-gradient-to-r from-indigo-300/40 to-blue-300/40 dark:from-indigo-950/20 dark:to-blue-950/20 border border-indigo-300/30 dark:border-indigo-900/30 flex items-center justify-between group/market shadow-sm">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="p-3 bg-indigo-300/40 rounded-2xl group-hover/market:rotate-12 transition-transform shadow-inner border border-indigo-400/20"><Sparkles size={20} className="text-primary-600 dark:text-indigo-400" /></div>
+                                                    <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between shadow-sm">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm text-indigo-600"><Sparkles size={16} /></div>
                                                             <div>
-                                                                <p className="text-[11px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest mb-1">Authenticated Category</p>
-                                                                <p className="text-sm font-black text-indigo-950 dark:text-slate-100 uppercase tracking-tighter leading-none">🛒 Mess Market Collection Fund</p>
+                                                                <p className="text-[9px] font-extrabold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider">Fund Bucket</p>
+                                                                <p className="text-xs font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-tight">🛒 Mess Market Collection</p>
                                                             </div>
                                                         </div>
-                                                        <div className="p-2 bg-indigo-300/40 rounded-lg border border-indigo-400/20"><Info size={16} className="text-indigo-500 animate-pulse" /></div>
+                                                        <div className="p-1.5 text-indigo-500"><Info size={15} /></div>
                                                     </div>
                                                 )}
                                             </div>
-                                            <Button type="submit" className="w-full py-8 rounded-3xl bg-gradient-to-r from-slate-900 via-primary-600 to-indigo-700 hover:from-black hover:to-indigo-800 text-white shadow-2xl shadow-primary-500/30 active:scale-[0.98] transition-all font-black uppercase tracking-[0.2em] text-[10px] sm:text-xs overflow-hidden relative group">
-                                                <div className="relative z-10 flex items-center justify-center gap-3">Finalize Transaction <ArrowRight size={18} /></div>
-                                                <div className="absolute inset-0 bg-indigo-300/40 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
+                                            <Button type="submit" className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm active:scale-[0.98] transition-all font-extrabold uppercase tracking-wider text-xs flex items-center justify-center gap-2 border-0">
+                                                Finalize Transaction <ArrowRight size={15} />
                                             </Button>
                                         </form>
                                     </div>
@@ -294,85 +270,66 @@ const AddExpense = () => {
                             </div>
                         ) : (
                             <div key="deposit-form">
-                                <Card className="rb-card rb-shadow-emerald p-6 sm:p-10 relative group overflow-hidden">
-                                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
-                                    <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                                        <Receipt size={140} strokeWidth={1} />
-                                    </div>
+                                <Card className="p-6 sm:p-8 relative group overflow-hidden shadow-sm">
                                     <div className="relative z-10">
-                                        <div className="flex items-center gap-4 mb-10">
-                                            <div className="p-3 bg-emerald-300/40 dark:bg-emerald-950/40 rounded-2xl shadow-inner border border-emerald-400/20">
-                                                <TrendingUp size={24} className="text-emerald-700 dark:text-emerald-400" />
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="p-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
+                                                <TrendingUp size={20} />
                                             </div>
                                             <div>
-                                                <h2 className="text-2xl rb-header mb-1">Deposit Registry</h2>
-                                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Internal Member Credit Interface</p>
+                                                <h2 className="text-xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">Deposit Registry</h2>
+                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Internal Member Credit Interface</p>
                                             </div>
                                         </div>
-                                        <form onSubmit={handleDepositSubmit} className="space-y-8">
-                                            <div className="space-y-3">
-                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 flex items-center gap-1.5"><User size={10} /> Select Member Account</label>
-                                                <div className="relative group/sel">
-                                                    <select className="w-full p-6 bg-indigo-300/40 dark:bg-slate-950/80 border-2 border-indigo-300/30 dark:border-white/5 rounded-3xl focus:ring-8 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none text-slate-900 dark:text-slate-100 font-black tracking-tight transition-all appearance-none cursor-pointer" value={selectedMemberId} onChange={e => setSelectedMemberId(e.target.value)} required >
-                                                        <option value="">AWAITING SELECTION...</option>
-                                                        {members.filter(m => m.role === 'member').map(m => (
-                                                            <option key={m.id || m._id} value={m.id || m._id} className="dark:bg-slate-900">{m.name.toUpperCase()} (AVL: ₹{getMemberGeneralDeposit(m)})</option>
-                                                        ))}
-                                                    </select>
-                                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within/sel:rotate-180 transition-transform"><ArrowRight size={20} className="rotate-90" /></div>
-                                                </div>
+                                        <form onSubmit={handleDepositSubmit} className="space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-1 flex items-center gap-1.5"><User size={12} /> Select Member Account</label>
+                                                <select className="w-full p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-900 dark:text-slate-100 font-extrabold tracking-tight transition-all cursor-pointer text-xs uppercase" value={selectedMemberId} onChange={e => setSelectedMemberId(e.target.value)} required >
+                                                    <option value="">AWAITING SELECTION...</option>
+                                                    {members.filter(m => m.role === 'member').map(m => (
+                                                        <option key={m.id || m._id} value={m.id || m._id} className="dark:bg-slate-900">{m.name.toUpperCase()} (AVL: ₹{getMemberGeneralDeposit(m)})</option>
+                                                    ))}
+                                                </select>
                                             </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                                                <Input label="Execution Date" type="date" value={transactionDate} onChange={e => { const newDate = e.target.value; setTransactionDate(newDate); const newMonth = newDate.substring(0, 7); if (newMonth !== globalMonth) setGlobalMonth(newMonth); }} className="bg-indigo-300/40 dark:bg-slate-950/50 border-indigo-300/30" required />
-                                                <div className="relative group/amt">
-                                                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 mb-2.5 block">Credit Amount (₹)</label>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                                                <Input label="Execution Date" type="date" value={transactionDate} onChange={e => { const newDate = e.target.value; setTransactionDate(newDate); const newMonth = newDate.substring(0, 7); if (newMonth !== globalMonth) setGlobalMonth(newMonth); }} required />
+                                                <div>
+                                                    <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-1 mb-1.5 block">Credit Amount (₹)</label>
                                                     <div className="relative">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-black text-slate-400 group-focus-within/amt:text-emerald-500 transition-colors">₹</div>
-                                                        <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder="0.00" className="w-full pl-10 pr-4 py-4 bg-indigo-300/40 dark:bg-slate-950/50 border-2 border-indigo-300/30 dark:border-white/5 rounded-2xl text-xl font-black text-slate-900 dark:text-slate-100 tracking-tighter focus:ring-8 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-800" required />
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-extrabold text-slate-400">₹</div>
+                                                        <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder="0.00" className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-extrabold text-slate-900 dark:text-slate-100 tracking-tight focus:ring-2 focus:ring-emerald-500 outline-none transition-all placeholder:text-slate-400" required />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="space-y-4">
-                                                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1 flex items-center gap-1.5"><Info size={10} /> Allocation Purpose</label>
-                                                <div className="relative group/carousel">
-                                                    <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-indigo-300/40 dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity"></div>
-                                                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-indigo-300/40 dark:from-slate-900 to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity"></div>
-
-                                                    <div className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 custom-scrollbar scroll-smooth w-full">
-                                                        {[
-                                                            { id: 'deposit', n: 'Deposit', i: Wallet, c: 'emerald' },
-                                                            { id: 'market', n: 'Market', i: ShoppingCart, c: 'sky' },
-                                                            { id: 'gas', n: 'Gas', i: Flame, c: 'rose' },
-                                                            { id: 'wifi', n: 'WiFi', i: Wifi, c: 'blue' },
-                                                            { id: 'electric', n: 'Electric', i: Zap, c: 'amber' }
-                                                        ].map(opt => (
-                                                            <button
-                                                                key={opt.id}
-                                                                type="button"
-                                                                onClick={() => setPaymentPurpose(opt.id)}
-                                                                className={cn(
-                                                                    "flex-shrink-0 min-w-[100px] p-5 rounded-[1.5rem] border-2 transition-all flex flex-col items-center gap-3 group/opt relative overflow-hidden snap-center",
-                                                                    paymentPurpose === opt.id
-                                                                        ? cn(
-                                                                            "border-indigo-500 dark:border-indigo-400 bg-indigo-300/40 dark:bg-indigo-950/40 scale-[1.05] shadow-2xl shadow-indigo-500/20",
-                                                                            opt.c === 'sky' && "ring-indigo-500/10",
-                                                                            opt.c === 'rose' && "ring-indigo-500/10",
-                                                                            opt.c === 'blue' && "ring-indigo-500/10"
-                                                                        )
-                                                                        : "border-indigo-300/30 dark:border-white/5 bg-indigo-300/40 dark:bg-slate-950/50 text-slate-400 hover:border-indigo-300 hover:bg-indigo-300/40 dark:hover:bg-slate-900 shadow-sm"
-                                                                )}
-                                                            >
-                                                                <opt.i size={20} className={cn("transition-all duration-500", paymentPurpose === opt.id ? "text-indigo-500" : "text-slate-300 opacity-40 group-hover/opt:scale-125 group-hover/opt:opacity-100")} />
-                                                                <span className={cn("text-[10px] font-black uppercase tracking-[0.1em]", paymentPurpose === opt.id ? "text-slate-900 dark:text-slate-100" : "text-slate-400 group-hover:text-slate-600")}>{opt.n}</span>
-
-                                                                </button>
-                                                        ))}
-                                                    </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-1 flex items-center gap-1.5"><Info size={12} /> Allocation Purpose</label>
+                                                <div className="flex overflow-x-auto gap-2.5 pb-2 custom-scrollbar w-full">
+                                                    {[
+                                                        { id: 'deposit', n: 'Deposit', i: Wallet },
+                                                        { id: 'market', n: 'Market', i: ShoppingCart },
+                                                        { id: 'gas', n: 'Gas', i: Flame },
+                                                        { id: 'wifi', n: 'WiFi', i: Wifi },
+                                                        { id: 'electric', n: 'Electric', i: Zap }
+                                                    ].map(opt => (
+                                                        <button
+                                                            key={opt.id}
+                                                            type="button"
+                                                            onClick={() => setPaymentPurpose(opt.id)}
+                                                            className={cn(
+                                                                "flex-1 min-w-[80px] p-3 rounded-xl border transition-all flex flex-col items-center gap-1.5",
+                                                                paymentPurpose === opt.id
+                                                                    ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 shadow-sm"
+                                                                    : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 hover:border-emerald-400"
+                                                            )}
+                                                        >
+                                                            <opt.i size={16} className={paymentPurpose === opt.id ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"} />
+                                                            <span className="text-[10px] font-extrabold uppercase tracking-wider">{opt.n}</span>
+                                                        </button>
+                                                    ))}
                                                 </div>
                                             </div>
-                                            <Button type="submit" className="w-full py-8 rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-600 to-teal-700 hover:from-black hover:to-teal-800 text-white shadow-2xl shadow-emerald-500/30 active:scale-[0.98] transition-all font-black uppercase tracking-[0.2em] text-[10px] sm:text-xs overflow-hidden relative group">
-                                                <div className="relative z-10 flex items-center justify-center gap-3">Update Balance <ArrowRight size={18} /></div>
-                                                <div className="absolute inset-0 bg-indigo-300/40 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
+                                            <Button type="submit" className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-500/25 active:scale-[0.98] transition-all font-extrabold uppercase tracking-wider text-xs flex items-center justify-center gap-2">
+                                                Update Balance <ArrowRight size={16} />
                                             </Button>
                                         </form>
                                     </div>
@@ -384,39 +341,39 @@ const AddExpense = () => {
             </div>
 
             {historyItems.length > 0 && (
-                <div className="space-y-8 mt-12">
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                            <History size={16} />
+                <div className="space-y-4 mt-8">
+                    <div className="flex items-center gap-2.5 px-1">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                            <History size={15} />
                         </div>
-                        <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-widest">
+                        <h3 className="text-xs font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wider">
                             {isAdmin && activeTab === 'deposit' ? 'Recent Deposits' : 'Your Recent Entries'}
                         </h3>
-                        <span className="text-[10px] font-black bg-indigo-500/10 text-indigo-600 px-2 py-1 rounded-lg">
+                        <span className="text-[10px] font-extrabold bg-indigo-500/10 text-indigo-600 px-2 py-0.5 rounded-md">
                             {historyItems.length} Records
                         </span>
                     </div>
 
-                    <Card className="rb-card p-0 overflow-hidden border-indigo-300/30 dark:border-white/5 bg-indigo-300/10 dark:bg-slate-900/40 backdrop-blur-md">
-                        <div className="overflow-x-auto">
+                    <Card className="p-0 overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto custom-scrollbar">
                             <table className="w-full text-left border-collapse">
-                                <thead className="bg-indigo-300/40 dark:bg-slate-900/80 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-800 dark:text-slate-500 border-b border-indigo-300/20 dark:border-white/5">
+                                <thead className="bg-slate-50/95 dark:bg-slate-900/95 text-[10px] font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-b border-slate-200/80 dark:border-white/5">
                                     <tr>
-                                        <th className="p-4">Date</th>
-                                        <th className="p-4">Description</th>
-                                        <th className="p-4">Category</th>
-                                        <th className="p-4 text-right">Amount</th>
-                                        <th className="p-4 text-right">Action</th>
+                                        <th className="p-3.5">Date</th>
+                                        <th className="p-3.5">Description</th>
+                                        <th className="p-3.5">Category</th>
+                                        <th className="p-3.5 text-right">Amount</th>
+                                        <th className="p-3.5 text-right">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-indigo-300/10 dark:divide-white/5">
+                                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                                     {historyItems.map(expense => (
-                                        <tr key={expense._id || expense.id} className="group transition-colors hover:bg-white/40 dark:hover:bg-white/5">
-                                            <td className="p-4 text-xs font-bold text-slate-500 tabular-nums">
+                                        <tr key={expense._id || expense.id} className="group transition-colors hover:bg-slate-50/80 dark:hover:bg-white/5">
+                                            <td className="p-3.5 text-xs font-bold text-slate-500 tabular-nums">
                                                 {expense.date}
                                             </td>
-                                            <td className="p-4">
-                                                <p className="text-sm font-black text-slate-800 dark:text-slate-200">
+                                            <td className="p-3.5">
+                                                <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
                                                     {expense.description || expense.title}
                                                 </p>
                                                 {isAdmin && activeTab === 'deposit' && (
@@ -425,18 +382,17 @@ const AddExpense = () => {
                                                     </p>
                                                 )}
                                             </td>
-                                            <td className="p-4">
+                                            <td className="p-3.5">
                                                 <span className={cn(
-                                                    "text-[9px] px-2 py-0.5 rounded-lg font-black uppercase tracking-widest border flex items-center gap-1 w-fit",
-                                                    expense.category === 'market' && "bg-blue-300/20 text-blue-600 border-blue-400/20",
-                                                    expense.category === 'spices' && "bg-orange-300/20 text-orange-600 border-orange-400/20",
-                                                    expense.category === 'rice' && "bg-emerald-300/20 text-emerald-600 border-emerald-400/20",
-                                                    expense.category === 'deposit' && "bg-emerald-300/20 text-emerald-600 border-emerald-400/20",
-                                                    expense.category === 'wifi' && "bg-blue-300/20 text-blue-600 border-blue-400/20",
-                                                    expense.category === 'gas' && "bg-rose-300/20 text-rose-600 border-rose-400/20",
-                                                    expense.category === 'electric' && "bg-amber-300/20 text-amber-600 border-amber-400/20",
-                                                    (expense.category === 'others' || expense.category === 'other') && "bg-slate-300/20 text-slate-600 border-slate-400/20",
-                                                    "bg-slate-300/20 text-slate-600 border-slate-400/20"
+                                                    "text-[9px] px-2 py-0.5 rounded-lg font-extrabold uppercase tracking-wider border flex items-center gap-1 w-fit",
+                                                    expense.category === 'market' && "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+                                                    expense.category === 'spices' && "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20",
+                                                    expense.category === 'rice' && "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+                                                    expense.category === 'deposit' && "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+                                                    expense.category === 'wifi' && "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+                                                    expense.category === 'gas' && "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20",
+                                                    expense.category === 'electric' && "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
+                                                    (expense.category === 'others' || expense.category === 'other') && "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
                                                 )}>
                                                     {expense.category === 'market' && '🛒 Market'}
                                                     {expense.category === 'spices' && '🌶️ Spices'}

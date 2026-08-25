@@ -1,112 +1,222 @@
-import { useState, useEffect, memo } from 'react';
-import { Sparkles, ArrowRight, ChevronRight } from 'lucide-react';
+import { useState, memo } from 'react';
+import { ArrowRight, Sparkles, Utensils, ShoppingBag, ShieldCheck, Wallet, ChevronRight, Check, Calendar, TrendingUp, Clock } from 'lucide-react';
 import Button from '../ui/Button';
 
-const TypewriterText = ({ text, delay = 0 }) => {
-    const [displayText, setDisplayText] = useState('');
-    
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            let i = 0;
-            const timer = setInterval(() => {
-                setDisplayText(text.slice(0, i));
-                i++;
-                if (i > text.length) clearInterval(timer);
-            }, 30);
-            return () => clearInterval(timer);
-        }, delay);
-        return () => clearTimeout(timeout);
-    }, [text, delay]);
-
-    return (
-        <span className="relative">
-            {displayText}
-            <span 
-                className="inline-block w-1 h-5 bg-indigo-500 ml-1 mb-[-4px] animate-pulse"
-            />
-        </span>
-    );
-};
-
 const Hero = ({ onLoginClick }) => {
-    const heroBadge = {
-        initial: { opacity: 0, scale: 0.5, rotateZ: -90 },
-        animate: { opacity: 1, scale: 1, rotateZ: 0 },
-        transition: { duration: 1, ease: [0.34, 1.56, 0.64, 1], delay: 0.3 }
-    };
-
-    const heroText = {
-        initial: { opacity: 0, y: 40, rotateX: 20, scale: 0.95, z: -60 },
-        animate: { opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0 },
-        transition: { duration: 1.6, ease: [0.19, 1, 0.22, 1], type: "spring", stiffness: 35, damping: 20 }
-    };
-
-
+    // Interactive demo state for the right-side live simulator card
+    const [demoLunch, setDemoLunch] = useState(true);
+    const [demoDinner, setDemoDinner] = useState(true);
 
     return (
-        <section className="max-w-[1600px] mx-auto px-6 mb-24 relative">
-            <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-                <div className="w-full">
-                    <div
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-300/40 dark:bg-indigo-500/20 border border-indigo-400/30 dark:border-white/10 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-8 backdrop-blur-md"
-                    >
-                        <div 
-                            className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
-                        />
-                        Rani Bhawban Terminal v4.0
+        <section className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 mb-24 pt-2 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                
+                {/* Left Column: Polished Hero Copy (6 cols) */}
+                <div className="lg:col-span-6 flex flex-col items-start text-left">
+                    {/* Announcement Badge */}
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold mb-6 backdrop-blur-md">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>Rani Bhawban Mess Management System</span>
                     </div>
                     
-                    <h1
-                        className="text-5xl md:text-8xl font-[950] text-slate-900 dark:text-white mb-8 tracking-[-0.07em] uppercase leading-[0.85]"
-                    >
-                        Mess handled.
-                        <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-800 dark:from-indigo-400 dark:via-primary-400 dark:to-indigo-300">
-                            Stress cancelled.
+                    {/* Professional Modern Headline */}
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-black text-white mb-5 tracking-tight leading-[1.15]">
+                        Smart dining & hostel ledger,{' '}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400">
+                            built for absolute transparency.
                         </span>
                     </h1>
 
-                    <div
-                        className="mx-auto max-w-2xl text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 font-medium leading-relaxed min-h-[4.5rem]"
-                    >
-                        <TypewriterText 
-                            delay={1500}
-                            text="The ultimate administrative backbone for Rani Bhawban Mess. Automate meal tracking, manage precise financial accounting, and generate audit-ready reports with institutional transparency."
-                        />
-                    </div>
+                    {/* Subtitle */}
+                    <p className="text-slate-400 text-sm sm:text-base mb-8 leading-relaxed max-w-xl font-normal">
+                        Streamline daily meal logging, manage market duty rotations, calculate dynamic meal rates, and generate audit-ready Bengali PDF statements with zero margin for error.
+                    </p>
 
-                    <div
-                        className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8"
-                    >
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto">
                         <Button
                             onClick={onLoginClick}
                             size="lg"
-                            className="w-full sm:w-auto px-10 py-5 text-lg font-black uppercase tracking-widest rounded-3xl shadow-2xl shadow-indigo-500/20 bg-indigo-600 hover:bg-indigo-700 text-white transition-all relative overflow-hidden group"
+                            className="px-7 py-3.5 text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-600/30 bg-indigo-600 hover:bg-indigo-500 text-white transition-all transform active:scale-95 flex items-center justify-center gap-2"
                         >
-                            <div 
-                                className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"
-                                style={{
-                                    backgroundSize: '200% 100%',
-                                    backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
-                                }}
-                            />
-                            <div className="relative z-10 flex items-center justify-center">
-                                Launch Terminal <ArrowRight className="ml-2" size={20} />
-                            </div>
+                            Terminal Login <ArrowRight size={16} />
                         </Button>
                         <a
                             href="#features"
-                            className="w-full sm:w-auto px-8 py-5 text-slate-400 font-bold hover:text-indigo-400 transition-colors flex items-center justify-center group"
+                            className="px-5 py-3.5 text-xs font-extrabold uppercase tracking-wider text-slate-400 hover:text-white rounded-xl border border-slate-700/60 hover:border-slate-500 bg-slate-900/40 backdrop-blur-md transition-all flex items-center justify-center gap-1.5"
                         >
-                            See features <ChevronRight className="ml-1 group-hover:translate-x-1 transition-transform" size={20} />
+                            Explore Features <ChevronRight size={15} />
                         </a>
                     </div>
+
+                    {/* Key Assurance Badges */}
+                    <div className="flex flex-wrap items-center gap-y-2 gap-x-5 mt-10 pt-6 border-t border-white/10 text-slate-400 text-xs font-medium">
+                        <div className="flex items-center gap-1.5">
+                            <Check size={14} className="text-emerald-400" />
+                            <span>100% Calculation Accuracy</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <Check size={14} className="text-emerald-400" />
+                            <span>Single-Device Secure Auth</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <Check size={14} className="text-emerald-400" />
+                            <span>Instant Bengali PDF Reports</span>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Right Column: High-End Live Interactive Terminal Preview Card (6 cols) */}
+                <div className="lg:col-span-6 relative">
+                    {/* Soft ambient glow */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/15 to-emerald-500/15 rounded-3xl blur-2xl opacity-60 pointer-events-none" />
+                    
+                    <div className="relative rounded-2xl bg-slate-900/90 border border-slate-700/80 shadow-2xl backdrop-blur-2xl p-5 sm:p-6 space-y-5">
+                        
+                        {/* Terminal Header */}
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                            <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
+                                <div>
+                                    <h3 className="text-sm font-extrabold text-white">Rani Bhawban Terminal</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Live System Station • August 2026</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-extrabold text-emerald-400 uppercase">
+                                Active Node
+                            </div>
+                        </div>
+
+                        {/* Top 3 Real-time Metric Matrix */}
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                    <Utensils size={12} className="text-indigo-400" />
+                                    <span>Meals Today</span>
+                                </div>
+                                <div className="text-lg sm:text-xl font-black text-white">
+                                    {(demoLunch ? 38 : 0) + (demoDinner ? 36 : 0)}
+                                </div>
+                                <span className="text-[9px] text-emerald-400 font-bold">● Kitchen synced</span>
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                    <TrendingUp size={12} className="text-emerald-400" />
+                                    <span>Meal Rate</span>
+                                </div>
+                                <div className="text-lg sm:text-xl font-black text-emerald-400">
+                                    ₹48.50
+                                </div>
+                                <span className="text-[9px] text-slate-400 font-bold">Autonomous</span>
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase mb-1">
+                                    <Wallet size={12} className="text-amber-400" />
+                                    <span>Vault Liquidity</span>
+                                </div>
+                                <div className="text-lg sm:text-xl font-black text-white">
+                                    ₹24,800
+                                </div>
+                                <span className="text-[9px] text-indigo-400 font-bold">Audit verified</span>
+                            </div>
+                        </div>
+
+                        {/* Interactive Meal Toggle Simulation */}
+                        <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/20 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Sparkles size={14} className="text-indigo-400" />
+                                    <span className="text-xs font-black text-white uppercase tracking-wider">Interactive Meal Log Simulator</span>
+                                </div>
+                                <span className="text-[9px] font-extrabold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 uppercase">
+                                    Click To Test
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* Lunch Toggle Button */}
+                                <button
+                                    onClick={() => setDemoLunch(!demoLunch)}
+                                    className={`p-3 rounded-xl border flex items-center justify-between transition-all select-none ${
+                                        demoLunch 
+                                            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' 
+                                            : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
+                                    }`}
+                                >
+                                    <div className="text-left">
+                                        <div className="text-xs font-extrabold">Lunch Meal</div>
+                                        <div className="text-[9px] opacity-70">12:30 PM Shift</div>
+                                    </div>
+                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
+                                        demoLunch ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-400'
+                                    }`}>
+                                        {demoLunch ? 'Active (1)' : 'Off (0)'}
+                                    </span>
+                                </button>
+
+                                {/* Dinner Toggle Button */}
+                                <button
+                                    onClick={() => setDemoDinner(!demoDinner)}
+                                    className={`p-3 rounded-xl border flex items-center justify-between transition-all select-none ${
+                                        demoDinner 
+                                            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' 
+                                            : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
+                                    }`}
+                                >
+                                    <div className="text-left">
+                                        <div className="text-xs font-extrabold">Dinner Meal</div>
+                                        <div className="text-[9px] opacity-70">08:30 PM Shift</div>
+                                    </div>
+                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
+                                        demoDinner ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-400'
+                                    }`}>
+                                        {demoDinner ? 'Active (1)' : 'Off (0)'}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Duty Schedule & Recent Verified Ledger Item */}
+                        <div className="space-y-2 pt-1">
+                            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-700/40">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+                                        <ShoppingBag size={15} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-extrabold text-white">Today's Market Duty</div>
+                                        <div className="text-[10px] text-slate-400">Assigned: Subham Giri</div>
+                                    </div>
+                                </div>
+                                <span className="text-[9px] font-bold uppercase text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                                    Approved
+                                </span>
+                            </div>
+
+                            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-700/40">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                                        <ShieldCheck size={15} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-extrabold text-white">Monthly Statement Engine</div>
+                                        <div className="text-[10px] text-slate-400">Bengali PDF Report Ready</div>
+                                    </div>
+                                </div>
+                                <span className="text-[9px] font-bold uppercase text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                    Generated
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
         </section>
     );
 };
 
 export default memo(Hero);
-
-

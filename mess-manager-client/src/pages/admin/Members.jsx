@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, memo } from 'react';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { useData } from '../../context/DataContext';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -16,53 +16,53 @@ import { MESS_CONFIG } from '../../config';
 const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
     return (
         <tr
-            className="hover:bg-indigo-300/40 dark:hover:bg-white/5 transition-all group border-b border-indigo-300/30 last:border-0"
+            className="hover:bg-slate-50/80 dark:hover:bg-white/5 transition-all group border-b border-slate-100 dark:border-white/5 last:border-0"
         >
-            <td className="p-4 sm:p-6">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-all shrink-0">
+            <td className="p-4 sm:p-5">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white text-sm font-extrabold shadow-sm shrink-0">
                         {member.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <div className="font-black text-slate-900 dark:text-slate-100 tracking-tight text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors uppercase">{member.name}</div>
-                        <div className="flex items-center gap-1.5 mt-1">
-                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">UID:</span>
-                            <span className="text-[10px] font-black text-primary-700 dark:text-primary-400 tracking-widest bg-primary-300/40 dark:bg-primary-500/10 px-2 py-0.5 rounded-md border border-primary-400/20">
+                        <div className="font-extrabold text-slate-900 dark:text-slate-100 tracking-tight text-sm uppercase">{member.name}</div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">UID:</span>
+                            <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 tracking-wider bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
                                 {member.userId}
                             </span>
                         </div>
                     </div>
                 </div>
             </td>
-            <td className="p-4 sm:p-6">
-                <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
-                        <Mail size={14} className="text-slate-400" />
+            <td className="p-4 sm:p-5">
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+                        <Mail size={13} className="text-slate-400" />
                         {member.email}
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                    <div className="flex items-center gap-2 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                         <Phone size={12} className="text-slate-400" />
                         {member.mobile}
                     </div>
                 </div>
             </td>
-            <td className="p-4 sm:p-6">
-                <div className="flex flex-col gap-2">
+            <td className="p-4 sm:p-5">
+                <div className="flex flex-col gap-1.5">
                     {member.dateOfBirth && (() => {
                         const { isToday, daysLeft } = getBirthdayStatus(member.dateOfBirth);
                         return (
-                            <div className="flex flex-col gap-1.5">
+                            <div className="flex flex-col gap-1">
                                 <div className={cn(
-                                    "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg w-fit",
+                                    "flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg w-fit",
                                     isToday
-                                        ? "text-rose-700 dark:text-rose-400 bg-rose-300/40 dark:bg-rose-500/10 border border-rose-300/30 dark:border-rose-500/20 animate-pulse shadow-sm shadow-rose-500/20"
-                                        : "text-pink-700 dark:text-pink-400 bg-pink-300/40 dark:bg-pink-500/10 border border-pink-400/20"
+                                        ? "text-rose-700 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 animate-pulse shadow-sm"
+                                        : "text-indigo-700 dark:text-indigo-300 bg-indigo-500/10 border border-indigo-500/20"
                                 )}>
-                                    <Cake size={10} className={isToday ? "animate-bounce" : ""} />
-                                    {isToday ? `Today is ${member.name}'s Birthday!` : format(new Date(member.dateOfBirth), 'dd MMM')}
+                                    <Cake size={11} className={isToday ? "animate-bounce" : ""} />
+                                    {isToday ? `Birthday Today!` : format(new Date(member.dateOfBirth), 'dd MMM')}
                                 </div>
                                 {!isToday && daysLeft > 0 && (
-                                    <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter ml-1">
+                                    <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase ml-0.5">
                                         <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                                         {daysLeft} Days Left
                                     </div>
@@ -72,51 +72,51 @@ const MemberRow = memo(({ member, index, onEdit, onDelete }) => {
                     })()}
                 </div>
             </td>
-            <td className="p-4 sm:p-6">
+            <td className="p-4 sm:p-5">
                 <div className="flex flex-col gap-1">
                     {(() => {
                         const status = member.notificationPermission || 'default';
                         if (status === 'granted') {
                             return (
-                                <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest bg-emerald-300/40 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-400/20 w-fit">
+                                <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 w-fit">
                                     <BellRing size={12} className="animate-pulse" />
                                     Active
                                 </div>
                             );
                         } else if (status === 'denied') {
                             return (
-                                <div className="flex items-center gap-1.5 text-[10px] font-black text-rose-600 dark:text-rose-400 bg-rose-300/40 dark:bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-400/20 w-fit">
+                                <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20 w-fit">
                                     <BellOff size={12} />
                                     Blocked
                                 </div>
                             );
                         } else {
                             return (
-                                <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 dark:text-slate-500 bg-indigo-300/20 dark:bg-slate-800/50 px-2.5 py-1 rounded-lg border border-indigo-300/30 dark:border-slate-800 w-fit">
+                                <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 w-fit">
                                     <Bell size={12} />
                                     Not Set
                                 </div>
                             );
                         }
                     })()}
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter ml-1">Push Notifs</p>
+                    <p className="text-[8px] font-extrabold text-slate-400 uppercase tracking-wider ml-1">Push Notifs</p>
                 </div>
             </td>
-            <td className="p-6 text-right">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+            <td className="p-4 sm:p-5 text-right">
+                <div className="flex items-center justify-end gap-1.5">
                     <button
                         onClick={() => onEdit(member)}
-                        className="p-2.5 bg-indigo-300/40 dark:bg-indigo-950/30 text-indigo-600 hover:bg-indigo-500 hover:text-white rounded-xl transition-all shadow-lg shadow-indigo-500/10 border border-indigo-400/20"
+                        className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white rounded-xl transition-all border border-indigo-500/20"
                         title="Edit Member"
                     >
-                        <Pencil size={16} />
+                        <Pencil size={15} />
                     </button>
                     <button
                         onClick={() => onDelete(member)}
-                        className="p-2.5 bg-red-300/40 dark:bg-red-950/30 text-red-600 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-lg shadow-red-500/10"
+                        className="p-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white rounded-xl transition-all border border-rose-500/20"
                         title="Remove Member"
                     >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                     </button>
                 </div>
             </td>
@@ -134,14 +134,21 @@ const Members = () => {
     const [editForm, setEditForm] = useState({ name: '', email: '', userId: '', mobile: '', dateOfBirth: '', password: '' });
     const [showEditPassword, setShowEditPassword] = useState(false);
 
+    const filteredMembers = useMemo(() => {
+        if (!Array.isArray(members)) return [];
+        if (!search.trim()) return members;
+        const q = search.toLowerCase().trim();
+        return members.filter(m => 
+            (m.name && m.name.toLowerCase().includes(q)) ||
+            (m.email && m.email.toLowerCase().includes(q)) ||
+            (m.userId && m.userId.toLowerCase().includes(q)) ||
+            (m.mobile && m.mobile.toLowerCase().includes(q))
+        );
+    }, [members, search]);
+
     const headerRef = useRef(null);
     const tableRef = useRef(null);
     const formRef = useRef(null);
-
-    const filteredMembers = members.filter(m =>
-        m.name?.toLowerCase().includes(search.toLowerCase()) ||
-        m.email?.toLowerCase().includes(search.toLowerCase())
-    );
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -270,41 +277,35 @@ const Members = () => {
 
 
     return (
-        <div
-            className="space-y-8 pb-12"
-        >
-            {/* Header with clean light mode / dark mode variants */}
-            <div className="relative overflow-hidden rb-card p-6 sm:p-10 group border-l-8 border-l-indigo-600">
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/5 rounded-full -ml-24 -mb-24 blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-
-                <div className="relative flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div className="text-center md:text-left">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-300/30 dark:bg-white/10 backdrop-blur-md rounded-full border border-indigo-200/50 dark:border-white/10 mb-4">
+        <div className="space-y-6 sm:space-y-8 pb-12">
+            {/* Header */}
+            <div className="bg-white/80 dark:bg-slate-900/80 border-l-4 border-l-indigo-600 shadow-sm p-6 sm:p-8 rounded-2xl md:rounded-[1.5rem] border border-slate-200/80 dark:border-white/5 backdrop-blur-xl transition-colors">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 mb-3">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span className="text-[10px] font-black text-indigo-900 dark:text-white uppercase tracking-widest">Active System</span>
+                            <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Active System</span>
                         </div>
-                        <h1 className="text-4xl md:text-6xl rb-header mb-3">
+                        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                             Mess <span className="text-indigo-600 dark:text-indigo-400">Members</span>
                         </h1>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-bold max-w-md mx-auto md:mx-0">
-                            Comprehensive directory of mess members. Manage profiles, track deposits, and oversee memberships.
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-bold mt-1 max-w-md">
+                            Comprehensive directory of mess members. Manage profiles, track records, and oversee memberships.
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button
                             onClick={sendTestNotification}
-                            className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-6 py-5 rounded-[1.5rem] flex items-center gap-2 group transition-all active:scale-95"
+                            className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all active:scale-95 text-xs font-extrabold uppercase tracking-wider"
                         >
-                            <BellRing size={18} className="text-indigo-500 group-hover:rotate-12 transition-transform" />
-                            <span className="font-black uppercase tracking-widest text-[10px]">Test All</span>
+                            <BellRing size={15} className="text-indigo-600 dark:text-indigo-400" />
+                            <span>Test All</span>
                         </Button>
                         <Button
                             onClick={() => setShowAddForm(!showAddForm)}
-                            className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all px-8 py-7 rounded-[1.5rem] font-black uppercase tracking-widest text-xs border-0 group/btn"
+                            className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-500/25 active:scale-95 transition-all px-5 py-2.5 rounded-xl font-extrabold uppercase tracking-wider text-xs border-0 flex items-center gap-2"
                         >
-                            <UserPlus size={18} className="mr-2 group-hover:rotate-12 transition-transform" />
+                            <UserPlus size={15} />
                             Add Member
                         </Button>
                     </div>
@@ -313,133 +314,129 @@ const Members = () => {
 
             {/* Add Member Form */}
             {showAddForm && (
-                <div
-                    className="overflow-hidden"
-                >
-                        <Card className="rb-card rb-shadow-blue p-8 mb-4">
-                            <form onSubmit={handleSubmit} className="space-y-10">
-                                <div className="flex items-center gap-5 pb-8 border-b border-indigo-300/30 dark:border-white/5">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-primary-500 flex items-center justify-center shadow-xl shadow-primary-500/20 rotate-3">
-                                        <UserPlus className="text-white" size={26} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl rb-header">Create Member Profile</h3>
-                                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Official Mess Directory</p>
-                                    </div>
-                                </div>
+                <Card className="p-6 sm:p-8 shadow-sm border border-slate-200/80 dark:border-white/5">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="flex items-center gap-3 pb-5 border-b border-slate-100 dark:border-white/5">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/20">
+                                <UserPlus size={20} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">Create Member Profile</h3>
+                                <p className="text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Official Mess Directory</p>
+                            </div>
+                        </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-6">
-                                    <Input
-                                        label="Full Name"
-                                        icon={User}
-                                        value={newMember.name}
-                                        onChange={e => setNewMember({ ...newMember, name: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="User ID"
-                                        icon={Shield}
-                                        value={newMember.userId}
-                                        onChange={e => setNewMember({ ...newMember, userId: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="Mobile"
-                                        icon={Phone}
-                                        value={newMember.mobile}
-                                        onChange={e => setNewMember({ ...newMember, mobile: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="Email"
-                                        icon={Mail}
-                                        type="email"
-                                        value={newMember.email}
-                                        onChange={e => setNewMember({ ...newMember, email: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="Password"
-                                        icon={Shield}
-                                        value={newMember.password}
-                                        onChange={e => setNewMember({ ...newMember, password: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="Date of Birth"
-                                        icon={Cake}
-                                        type="date"
-                                        value={newMember.dateOfBirth}
-                                        onChange={e => setNewMember({ ...newMember, dateOfBirth: e.target.value })}
-                                        required
-                                    />
-                                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            <Input
+                                label="Full Name"
+                                icon={User}
+                                value={newMember.name}
+                                onChange={e => setNewMember({ ...newMember, name: e.target.value })}
+                                required
+                            />
+                            <Input
+                                label="User ID"
+                                icon={Shield}
+                                value={newMember.userId}
+                                onChange={e => setNewMember({ ...newMember, userId: e.target.value })}
+                                required
+                            />
+                            <Input
+                                label="Mobile"
+                                icon={Phone}
+                                value={newMember.mobile}
+                                onChange={e => setNewMember({ ...newMember, mobile: e.target.value })}
+                                required
+                            />
+                            <Input
+                                label="Email"
+                                icon={Mail}
+                                type="email"
+                                value={newMember.email}
+                                onChange={e => setNewMember({ ...newMember, email: e.target.value })}
+                                required
+                            />
+                            <Input
+                                label="Password"
+                                icon={Shield}
+                                value={newMember.password}
+                                onChange={e => setNewMember({ ...newMember, password: e.target.value })}
+                                required
+                            />
+                            <Input
+                                label="Date of Birth"
+                                icon={Cake}
+                                type="date"
+                                value={newMember.dateOfBirth}
+                                onChange={e => setNewMember({ ...newMember, dateOfBirth: e.target.value })}
+                                required
+                            />
+                        </div>
 
-                                <div className="flex justify-end gap-4 pt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowAddForm(false)}
-                                        className="px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] text-indigo-600 hover:bg-indigo-300/40 dark:hover:bg-slate-800 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <Button
-                                        type="submit"
-                                        className="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/20 active:scale-95 transition-all rounded-2xl font-black uppercase tracking-widest text-[10px]"
-                                    >
-                                        Create Profile
-                                    </Button>
-                                </div>
-                            </form>
-                        </Card>
-                    </div>
-                )}
+                        <div className="flex justify-end gap-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowAddForm(false)}
+                                className="px-5 py-2.5 rounded-xl font-extrabold uppercase tracking-wider text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <Button
+                                type="submit"
+                                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/25 active:scale-95 transition-all rounded-xl font-extrabold uppercase tracking-wider text-xs"
+                            >
+                                Create Profile
+                            </Button>
+                        </div>
+                    </form>
+                </Card>
+            )}
 
             {/* Members Table Card */}
-            <Card className="rb-card p-0 overflow-hidden mb-8">
+            <Card className="p-0 overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/5">
                 {/* Search Bar section */}
-                <div className="p-8 bg-indigo-300/40 dark:bg-slate-950/20 shadow-inner">
+                <div className="p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-white/5">
                     <Input
-                        label="Search members by name or email..."
+                        label="Search members by name, email, or UID..."
                         icon={Search}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="mt-0 bg-indigo-300/40 dark:bg-slate-900 shadow-sm"
+                        className="mt-0"
                     />
                 </div>
 
                 {/* Table section */}
-                <div className="overflow-auto max-h-[600px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+                <div className="overflow-auto max-h-[600px] custom-scrollbar">
                     <table className="w-full text-left border-collapse relative">
-                        <thead className="sticky top-0 z-10 bg-indigo-300/40 dark:bg-slate-900 shadow-sm">
-                            <tr className="border-b border-slate-200 dark:border-slate-800">
-                                <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Identity</th>
-                                <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Contact</th>
-                                <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Birthday</th>
-                                <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Notif</th>
-                                <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">Actions</th>
+                        <thead className="sticky top-0 z-10 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm">
+                            <tr className="border-b border-slate-200/80 dark:border-white/5">
+                                <th className="p-4 sm:p-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Identity</th>
+                                <th className="p-4 sm:p-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Contact</th>
+                                <th className="p-4 sm:p-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Birthday</th>
+                                <th className="p-4 sm:p-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Notif</th>
+                                <th className="p-4 sm:p-5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-indigo-300/30 dark:divide-slate-800">
-                                {filteredMembers.map((member, index) => (
-                                    <MemberRow 
-                                        key={member._id || member.id}
-                                        member={member}
-                                        index={index}
-                                        onEdit={startEditing}
-                                        onDelete={handleDelete}
-                                    />
-                                ))}
+                        <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                            {filteredMembers.map((member, index) => (
+                                <MemberRow 
+                                    key={member._id || member.id}
+                                    member={member}
+                                    index={index}
+                                    onEdit={startEditing}
+                                    onDelete={handleDelete}
+                                />
+                            ))}
                             {filteredMembers.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="p-24 text-center">
-                                        <div className="flex flex-col items-center gap-4">
-                                            <div className="w-20 h-20 rounded-[1.5rem] bg-indigo-300/40 dark:bg-slate-900 flex items-center justify-center border border-dashed border-indigo-400/30 dark:border-slate-800">
-                                                <Search size={32} className="text-slate-300 dark:text-slate-700" />
+                                    <td colSpan={5} className="p-16 text-center">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                                <Search size={24} />
                                             </div>
                                             <div>
-                                                <p className="text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest text-xs">No records found</p>
-                                                <p className="text-slate-400 dark:text-slate-600 text-xs mt-1">Try a different search term</p>
+                                                <p className="text-slate-600 dark:text-slate-400 font-extrabold uppercase tracking-wider text-xs">No records found</p>
+                                                <p className="text-slate-400 dark:text-slate-500 text-xs mt-0.5">Try a different search term</p>
                                             </div>
                                         </div>
                                     </td>
@@ -451,13 +448,11 @@ const Members = () => {
 
                 {/* Footer with member count */}
                 {filteredMembers.length > 0 && (
-                    <div className="p-6 bg-indigo-300/40 dark:bg-slate-900/50 border-t border-indigo-300/30 dark:border-slate-800 flex items-center justify-center gap-6">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-white/5 flex items-center justify-center">
                         <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-indigo-300/40 dark:bg-indigo-900/30 rounded-lg border border-indigo-400/20">
-                                <Info size={14} className="text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                                Total Members: <span className="text-indigo-600 dark:text-indigo-400">{filteredMembers.length}</span>
+                            <Info size={14} className="text-indigo-600 dark:text-indigo-400" />
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                Total Members: <span className="text-indigo-600 dark:text-indigo-400 font-black">{filteredMembers.length}</span>
                             </p>
                         </div>
                     </div>
@@ -466,136 +461,135 @@ const Members = () => {
 
             {/* Edit Member Modal */}
             {editingMember && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-indigo-950/60 backdrop-blur-sm">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
                     <div
-                        className="bg-indigo-300/40 dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-8 max-w-2xl w-full shadow-3xl shadow-indigo-950/40 border border-indigo-300/30 dark:border-indigo-800/30 overflow-hidden flex flex-col max-h-[90vh] backdrop-blur-xl"
+                        className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-200/80 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh]"
                     >
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-indigo-300/30 dark:border-indigo-800/30 mb-6 md:mb-8 flex-shrink-0">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-xl shadow-indigo-500/20 rotate-3 shrink-0">
-                                        <Pencil className="text-white" size={26} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl md:text-2xl font-black text-indigo-900 dark:text-indigo-100 tracking-tight">Edit Member</h3>
-                                        <p className="text-indigo-500 text-[10px] font-black uppercase tracking-widest mt-1 tracking-tighter">{editingMember.name}</p>
-                                    </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-white/10 mb-6 flex-shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/20 shrink-0">
+                                    <Pencil size={18} />
                                 </div>
-                                <button
-                                    onClick={() => downloadMemberProfile(editingMember)}
-                                    className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-300/30 dark:bg-slate-800 hover:bg-indigo-300/40 dark:hover:bg-indigo-500/10 text-indigo-700 dark:text-slate-300 hover:text-indigo-800 dark:hover:text-indigo-400 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-indigo-300/30 dark:border-slate-800"
-                                >
-                                    <Download size={14} />
-                                    Download Profile
-                                </button>
+                                <div>
+                                    <h3 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Edit Member</h3>
+                                    <p className="text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold uppercase tracking-wider">{editingMember.name}</p>
+                                </div>
                             </div>
+                            <button
+                                onClick={() => downloadMemberProfile(editingMember)}
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/10 text-slate-700 dark:text-slate-300 hover:text-indigo-600 rounded-xl transition-all font-extrabold text-xs uppercase tracking-wider border border-slate-200 dark:border-slate-700"
+                            >
+                                <Download size={14} />
+                                Download Profile
+                            </button>
+                        </div>
 
-                            <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto pr-2 -mr-2 scrollbar-hide space-y-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 pt-2">
+                        <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Input
+                                    label="Full Name"
+                                    icon={User}
+                                    value={editForm.name}
+                                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                    required
+                                />
+                                <Input
+                                    label="Email"
+                                    icon={Mail}
+                                    type="email"
+                                    value={editForm.email}
+                                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                                    required
+                                />
+                                <Input
+                                    label="User ID"
+                                    icon={Shield}
+                                    value={editForm.userId}
+                                    onChange={e => setEditForm({ ...editForm, userId: e.target.value })}
+                                    required
+                                />
+                                <Input
+                                    label="Mobile Number"
+                                    icon={Phone}
+                                    value={editForm.mobile}
+                                    onChange={e => setEditForm({ ...editForm, mobile: e.target.value })}
+                                    required
+                                />
+                                <Input
+                                    label="Date of Birth"
+                                    icon={Cake}
+                                    type="date"
+                                    value={editForm.dateOfBirth}
+                                    onChange={e => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
+                                    required
+                                />
+                                <div className="relative group/pass">
                                     <Input
-                                        label="Full Name"
-                                        icon={User}
-                                        value={editForm.name}
-                                        onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="Email"
-                                        icon={Mail}
-                                        type="email"
-                                        value={editForm.email}
-                                        onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="User ID"
+                                        label="Access Password"
                                         icon={Shield}
-                                        value={editForm.userId}
-                                        onChange={e => setEditForm({ ...editForm, userId: e.target.value })}
+                                        type={showEditPassword ? "text" : "password"}
+                                        value={editForm.password}
+                                        onChange={e => setEditForm({ ...editForm, password: e.target.value })}
                                         required
                                     />
-                                    <Input
-                                        label="Mobile Number"
-                                        icon={Phone}
-                                        value={editForm.mobile}
-                                        onChange={e => setEditForm({ ...editForm, mobile: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="Date of Birth"
-                                        icon={Cake}
-                                        type="date"
-                                        value={editForm.dateOfBirth}
-                                        onChange={e => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
-                                        required
-                                    />
-                                    <div className="relative group/pass">
-                                        <Input
-                                            label="Access Password"
-                                            icon={Shield}
-                                            type={showEditPassword ? "text" : "password"}
-                                            value={editForm.password}
-                                            onChange={e => setEditForm({ ...editForm, password: e.target.value })}
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowEditPassword(!showEditPassword)}
-                                            className="absolute right-4 top-[24px] translate-y-1 text-slate-400 hover:text-indigo-500 transition-colors z-20"
-                                            title={showEditPassword ? "Hide password" : "Show password"}
-                                        >
-                                            {showEditPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                        </button>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowEditPassword(!showEditPassword)}
+                                        className="absolute right-4 top-[32px] text-slate-400 hover:text-indigo-500 transition-colors z-20"
+                                        title={showEditPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showEditPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
                                 </div>
-                            </form>
-
-                            <div className="flex gap-4 pt-6 mt-6 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
-                                <button
-                                    type="button"
-                                    onClick={() => setEditingMember(null)}
-                                    className="flex-1 py-4 bg-indigo-300/40 dark:bg-slate-800 text-indigo-700 dark:text-slate-300 rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <Button
-                                    onClick={handleEditSubmit}
-                                    className="flex-[2] py-4 bg-indigo-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 shadow-xl shadow-indigo-600/20 active:scale-95 transition-all"
-                                >
-                                    Update Profile
-                                </Button>
                             </div>
+                        </form>
 
+                        <div className="flex gap-3 pt-5 mt-4 border-t border-slate-100 dark:border-white/10 flex-shrink-0">
+                            <button
+                                type="button"
+                                onClick={() => setEditingMember(null)}
+                                className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-extrabold uppercase tracking-wider text-xs hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <Button
+                                onClick={handleEditSubmit}
+                                className="flex-[2] py-2.5 bg-indigo-600 text-white rounded-xl font-extrabold uppercase tracking-wider text-xs hover:bg-indigo-700 shadow-md shadow-indigo-500/20 active:scale-95 transition-all"
+                            >
+                                Update Profile
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}
 
             {/* Delete Confirmation Modal */}
             {confirmDelete && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
                     <div
-                        className="bg-indigo-300/40 dark:bg-slate-900 rounded-[1.5rem] p-8 max-sm w-full shadow-2xl border border-indigo-300/30 dark:border-slate-800 backdrop-blur-xl"
+                        className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-200/80 dark:border-white/10 text-center"
                     >
-                            <div className="w-16 h-16 bg-red-300/40 dark:bg-red-900/30 rounded-2xl flex items-center justify-center text-red-600 mb-6 mx-auto">
-                                <Trash2 size={32} />
-                            </div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white text-center mb-2 uppercase tracking-tight">Remove Member?</h3>
-                            <p className="text-slate-500 dark:text-slate-400 text-center text-sm font-medium mb-8">
-                                Are you sure you want to remove <span className="font-black text-slate-900 dark:text-white">{confirmDelete.name}</span>? This action can't be undone.
-                            </p>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setConfirmDelete(null)}
-                                    className="flex-1 py-4 bg-indigo-300/40 dark:bg-slate-800 text-indigo-700 dark:text-slate-300 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-300/60 dark:hover:bg-slate-700 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={confirmMemberRemoval}
-                                    className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all"
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                        <div className="w-12 h-12 bg-rose-500/10 text-rose-600 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-rose-500/20">
+                            <Trash2 size={24} />
+                        </div>
+                        <h3 className="text-lg font-extrabold text-slate-900 dark:text-white uppercase tracking-tight mb-2">Remove Member?</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-6">
+                            Are you sure you want to remove <span className="font-extrabold text-slate-900 dark:text-white">{confirmDelete.name}</span>? This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setConfirmDelete(null)}
+                                className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-extrabold uppercase tracking-wider text-xs hover:bg-slate-200 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmMemberRemoval}
+                                className="flex-1 py-2.5 bg-rose-600 text-white rounded-xl font-extrabold uppercase tracking-wider text-xs hover:bg-rose-700 shadow-md shadow-rose-500/20 active:scale-95 transition-all"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
