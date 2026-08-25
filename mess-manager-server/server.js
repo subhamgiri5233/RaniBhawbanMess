@@ -9,6 +9,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
+app.set('trust proxy', 1); // Crucial for reverse proxies (Render, Vercel, Nginx)
 app.use(compression()); // Compress all responses
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mess-manager';
@@ -48,43 +49,45 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Rate Limiting
+// Rate Limiting - Generous for production and multi-user environments
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // Increased to 1000 for high-performance dashboard stability
+    max: 5000, // Generous limit for concurrent dashboard polling
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
-        const remainingMs = req.rateLimit.resetTime - new Date();
+        const remainingMs = req.rateLimit?.resetTime ? req.rateLimit.resetTime - new Date() : 60000;
         const remainingMins = Math.ceil(remainingMs / (60 * 1000));
         res.status(options.statusCode).json({
             success: false,
-            message: `Too many requests from this IP, please try again after ${remainingMins} minute${remainingMins > 1 ? 's' : ''}.`
+            message: `Too many requests from this network, please try again after ${remainingMins} minute${remainingMins > 1 ? 's' : ''}.`
         });
     }
 });
 app.use('/api/', limiter);
 
-// Special rate limit for auth routes (stricter)
+// Rate limit for auth routes: skips successful logins so legitimate members are NEVER blocked
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20, // 20 login attempts per 15 min
+    max: 100, // 100 attempts per 15 min per IP (accommodates shared mess Wi-Fi)
+    skipSuccessfulRequests: true, // Legitimate logins do NOT consume the limit
+    standardHeaders: true,
+    legacyHeaders: false,
     handler: (req, res, next, options) => {
-        const remainingMs = req.rateLimit.resetTime - new Date();
+        const remainingMs = req.rateLimit?.resetTime ? req.rateLimit.resetTime - new Date() : 60000;
         const remainingMins = Math.ceil(remainingMs / (60 * 1000));
         res.status(options.statusCode).json({
             success: false,
-            message: `Too many login attempts, please try again after ${remainingMins} minute${remainingMins > 1 ? 's' : ''}.`
+            message: `Too many invalid login attempts, please try again after ${remainingMins} minute${remainingMins > 1 ? 's' : ''}.`
         });
     }
 });
 
 // Body parsers (reduced limits for security)
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ limit: '1mb', extended: true }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
 // NoSQL Injection Protection (custom, compatible with Express 5)
-// express-mongo-sanitize is not compatible with Express 5's read-only req.query
 const sanitizeObject = (obj) => {
     if (typeof obj !== 'object' || obj === null) return obj;
     for (const key of Object.keys(obj)) {
@@ -103,16 +106,18 @@ app.use((req, res, next) => {
     next();
 });
 
-// Database Connection
-mongoose.connect(MONGO_URI)
+// Database Connection with High Concurrency Pool Configuration
+mongoose.connect(MONGO_URI, {
+    maxPoolSize: 50, // Maintain up to 50 socket connections for high concurrent users
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+})
     .then(async () => {
-        console.log('✅ MongoDB Connected');
+        console.log('✅ MongoDB Connected with High Concurrency Pool (max: 50)');
         // Initialize default settings after DB is connected
         const { initializeDefaultSettings } = require('./routes/settings');
         await initializeDefaultSettings();
         console.log('✅ Default settings initialized');
-
-
     })
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 

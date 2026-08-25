@@ -66,7 +66,7 @@ const BottomNav = ({ onOpenSidebar }) => {
         { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
         { to: '/member-expenses', label: 'Expenses', icon: Receipt },
         // Center button handled separately
-        { to: '/reports', label: 'Management', icon: UserCheck },
+        { to: '/reports', label: 'Monthly Summary', icon: ClipboardList },
     ];
 
     const mainLinks = isAdmin ? adminMainLinks : memberMainLinks;
@@ -155,17 +155,20 @@ const BottomNav = ({ onOpenSidebar }) => {
                                     : "text-slate-400 hover:text-slate-200 font-bold opacity-80"
                             )}
                         >
-                            {({ isActive }) => (
-                                <>
-                                    <div className={cn(
-                                        "p-1 rounded-lg transition-all",
-                                        isActive && "bg-indigo-500/20 shadow-sm"
-                                    )}>
-                                        <LayoutDashboard size={16} />
-                                    </div>
-                                    <span className="text-[8px] uppercase tracking-wider">{mainLinks[0].label}</span>
-                                </>
-                            )}
+                            {({ isActive }) => {
+                                const TabIcon = mainLinks[0].icon;
+                                return (
+                                    <>
+                                        <div className={cn(
+                                            "p-1 rounded-lg transition-all",
+                                            isActive && "bg-indigo-500/20 shadow-sm"
+                                        )}>
+                                            <TabIcon size={16} />
+                                        </div>
+                                        <span className="text-[8px] uppercase tracking-wider">{mainLinks[0].label}</span>
+                                    </>
+                                );
+                            }}
                         </NavLink>
 
                         {/* Tab 2: Expenses */}
@@ -178,17 +181,20 @@ const BottomNav = ({ onOpenSidebar }) => {
                                     : "text-slate-400 hover:text-slate-200 font-bold opacity-80"
                             )}
                         >
-                            {({ isActive }) => (
-                                <>
-                                    <div className={cn(
-                                        "p-1 rounded-lg transition-all",
-                                        isActive && "bg-indigo-500/20 shadow-sm"
-                                    )}>
-                                        <Receipt size={16} />
-                                    </div>
-                                    <span className="text-[8px] uppercase tracking-wider">{mainLinks[1].label}</span>
-                                </>
-                            )}
+                            {({ isActive }) => {
+                                const TabIcon = mainLinks[1].icon;
+                                return (
+                                    <>
+                                        <div className={cn(
+                                            "p-1 rounded-lg transition-all",
+                                            isActive && "bg-indigo-500/20 shadow-sm"
+                                        )}>
+                                            <TabIcon size={16} />
+                                        </div>
+                                        <span className="text-[8px] uppercase tracking-wider">{mainLinks[1].label}</span>
+                                    </>
+                                );
+                            }}
                         </NavLink>
 
                         {/* Center Action Button: Quick Add Action */}
@@ -210,7 +216,7 @@ const BottomNav = ({ onOpenSidebar }) => {
                             </span>
                         </div>
 
-                        {/* Tab 3: Management */}
+                        {/* Tab 3: Management (Admin) / Monthly Summary (Member) */}
                         <NavLink
                             to={mainLinks[2].to}
                             className={({ isActive }) => cn(
@@ -220,17 +226,20 @@ const BottomNav = ({ onOpenSidebar }) => {
                                     : "text-slate-400 hover:text-slate-200 font-bold opacity-80"
                             )}
                         >
-                            {({ isActive }) => (
-                                <>
-                                    <div className={cn(
-                                        "p-1 rounded-lg transition-all",
-                                        isActive && "bg-indigo-500/20 shadow-sm"
-                                    )}>
-                                        <UserCheck size={16} />
-                                    </div>
-                                    <span className="text-[8px] uppercase tracking-tight font-bold whitespace-nowrap text-center">{mainLinks[2].label}</span>
-                                </>
-                            )}
+                            {({ isActive }) => {
+                                const TabIcon = mainLinks[2].icon;
+                                return (
+                                    <>
+                                        <div className={cn(
+                                            "p-1 rounded-lg transition-all",
+                                            isActive && "bg-indigo-500/20 shadow-sm"
+                                        )}>
+                                            <TabIcon size={16} />
+                                        </div>
+                                        <span className="text-[7.5px] sm:text-[8px] uppercase tracking-tight font-bold whitespace-nowrap text-center">{mainLinks[2].label}</span>
+                                    </>
+                                );
+                            }}
                         </NavLink>
 
                         {/* Tab 4: More / Menu Drawer */}
