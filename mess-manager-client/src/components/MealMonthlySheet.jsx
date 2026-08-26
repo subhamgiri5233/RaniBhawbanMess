@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { getDaysInMonth, format, parseISO } from 'date-fns';
-import { Check, X, Info, TrendingUp, Sparkles, Drumstick } from 'lucide-react';
+import { Check, X, Info, TrendingUp, Sparkles, Drumstick, ShoppingBag } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useData } from '../context/DataContext';
 
@@ -155,8 +155,44 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
     );
 });
 
+// Consistent color palette for market duty badges (8 distinct hues)
+const DUTY_COLORS = [
+    { bg: 'bg-indigo-500/20 dark:bg-indigo-500/15',  text: 'text-indigo-700 dark:text-indigo-300',  ring: 'ring-indigo-400/40' },
+    { bg: 'bg-emerald-500/20 dark:bg-emerald-500/15', text: 'text-emerald-700 dark:text-emerald-300', ring: 'ring-emerald-400/40' },
+    { bg: 'bg-rose-500/20 dark:bg-rose-500/15',      text: 'text-rose-700 dark:text-rose-300',      ring: 'ring-rose-400/40' },
+    { bg: 'bg-amber-500/20 dark:bg-amber-500/15',    text: 'text-amber-700 dark:text-amber-300',    ring: 'ring-amber-400/40' },
+    { bg: 'bg-sky-500/20 dark:bg-sky-500/15',        text: 'text-sky-700 dark:text-sky-300',        ring: 'ring-sky-400/40' },
+    { bg: 'bg-purple-500/20 dark:bg-purple-500/15',  text: 'text-purple-700 dark:text-purple-300',  ring: 'ring-purple-400/40' },
+    { bg: 'bg-orange-500/20 dark:bg-orange-500/15',  text: 'text-orange-700 dark:text-orange-300',  ring: 'ring-orange-400/40' },
+    { bg: 'bg-pink-500/20 dark:bg-pink-500/15',      text: 'text-pink-700 dark:text-pink-300',      ring: 'ring-pink-400/40' },
+];
+
+const hashStr = (str) => str.split('').reduce((acc, c) => c.charCodeAt(0) + acc, 0);
+
 const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editableMemberId }) => {
-    const { settings } = useData();
+    const { settings, marketSchedule, globalMonth } = useData();
+
+    // Build date → { name, color } map for the current month (approved/pending entries only)
+    const marketDutyMap = useMemo(() => {
+        const map = {};
+        const monthEntries = marketSchedule[globalMonth] || [];
+        monthEntries.forEach(item => {
+            if (item.status === 'rejected') return;
+            if (!item.date) return;
+            const name = item.memberName ||
+                (members || []).find(m =>
+                    m._id === item.assignedMemberId ||
+                    m.id  === item.assignedMemberId ||
+                    m._id?.toString() === item.assignedMemberId?.toString()
+                )?.name ||
+                (item.assignedMemberId === 'OFF_DAY' ? 'Off' : null);
+            if (!name) return;
+            const colorKey = item.assignedMemberId || name;
+            const color = DUTY_COLORS[hashStr(colorKey) % DUTY_COLORS.length];
+            map[item.date] = { name, color };
+        });
+        return map;
+    }, [marketSchedule, globalMonth, members]);
 
     // Get weekly meat day from system settings (default: Sunday)
     const meatDaysSet = useMemo(() => {
@@ -277,7 +313,48 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
         return (
             <table className="w-full text-[10px] md:text-xs border-collapse bg-transparent transition-colors">
                 <thead>
-                    <tr className="bg-indigo-300/40 dark:bg-slate-900/80 backdrop-blur-md border-b border-indigo-300/30 dark:border-white/5 sticky top-0 z-20">
+                    {/* Market Duty Row */}
+                    <tr className="bg-emerald-500/10 dark:bg-emerald-900/20 border-b border-emerald-400/20 dark:border-emerald-500/10 sticky top-0 z-[21]">
+                        <th className="p-2 border-r border-emerald-400/20 dark:border-emerald-500/10 text-left min-w-[180px] sticky left-0 bg-emerald-500/15 dark:bg-emerald-900/30 z-30">
+                            <div className="flex items-center gap-1.5">
+                                <ShoppingBag size={11} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                <span className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Market Duty</span>
+                            </div>
+                        </th>
+                        {days.map(day => {
+                            const duty = marketDutyMap[day.dateStr];
+                            const isOff = duty?.name === 'Off';
+                            return (
+                                <th
+                                    key={`mkt-${day.dayNum}`}
+                                    className="p-0.5 border-r border-emerald-400/20 dark:border-emerald-500/10 w-10 text-center"
+                                    title={duty ? `Market: ${duty.name}` : 'No market assigned'}
+                                >
+                                    {duty ? (
+                                        <div className={cn(
+                                            "mx-auto px-1 py-0.5 rounded-md text-[7px] font-black uppercase tracking-tight leading-tight truncate max-w-[36px] ring-1",
+                                            isOff
+                                                ? "bg-rose-500/20 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 ring-rose-400/40"
+                                                : `${duty.color.bg} ${duty.color.text} ${duty.color.ring}`
+                                        )}>
+                                            {isOff ? '✕' : (() => {
+                                                const parts = duty.name.trim().split(/\s+/);
+                                                const first = parts[0]?.[0]?.toUpperCase() || '';
+                                                const last = parts.length > 1 ? parts[parts.length - 1][0]?.toUpperCase() : '';
+                                                return last ? `${first}.${last}` : first;
+                                            })()}
+                                        </div>
+                                    ) : (
+                                        <div className="mx-auto w-4 h-[2px] rounded-full bg-emerald-200/40 dark:bg-emerald-700/20" />
+                                    )}
+                                </th>
+                            );
+                        })}
+                        <th className="p-2 min-w-[100px] bg-emerald-500/10 dark:bg-emerald-900/20 border-l border-emerald-400/20 dark:border-emerald-500/10" />
+                    </tr>
+
+                    {/* Day Header Row */}
+                    <tr className="bg-indigo-300/40 dark:bg-slate-900/80 backdrop-blur-md border-b border-indigo-300/30 dark:border-white/5 sticky top-[28px] z-20">
                         <th className="p-4 border-r border-indigo-400/30 dark:border-white/5 text-left min-w-[180px] sticky left-0 bg-indigo-300/60 dark:bg-slate-900 z-30 font-black uppercase tracking-widest text-indigo-800/60 dark:text-slate-400">Member Attendance</th>
                         {days.map(day => {
                             const isToday = day.dateStr === todayStr;
@@ -354,7 +431,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
                 </tbody>
             </table>
         );
-    }, [sortedMembers, days, getStatus, todayStr, memberTotals, handleCellClick, hoveredCell, editableMemberId, meatDaysSet]);
+    }, [sortedMembers, days, getStatus, todayStr, memberTotals, handleCellClick, hoveredCell, editableMemberId, meatDaysSet, marketDutyMap]);
 
     // Pre-calculate popup labels
     const popupLabel = useMemo(() => {
