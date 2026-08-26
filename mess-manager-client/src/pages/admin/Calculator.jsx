@@ -71,7 +71,9 @@ const Calculator = () => {
     const [loadingSummaries, setLoadingSummaries] = useState(false);
     const [savingPDF, setSavingPDF] = useState(false);
 
-    // Fetch values and monthly snapshots from database
+    // Fetch monthly snapshots AND auto-populate bills/meals from live context data.
+    // FIX: All computation is done inline using the values captured by this effect,
+    // eliminating the stale-closure bug caused by calling a plain helper in `finally`.
     useEffect(() => {
         const fetchData = async () => {
             setLoadingSummaries(true);
@@ -83,88 +85,69 @@ const Calculator = () => {
                 console.error('Failed to fetch monthly summaries:', err);
             } finally {
                 setLoadingSummaries(false);
-                autoFetchFromDatabase();
             }
+
+            // --- Auto-populate bills and meal inputs from context data ---
+            // Fetch approved expenses by category
+            const relevantExpenses = (expenses || []).filter(e => e?.status === 'approved');
+
+            // Helper to sum by category
+            const sumCat = (cat) => relevantExpenses
+                .filter(e => e?.category === cat)
+                .reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
+
+            const spicesTotal = sumCat('spices');
+            const othersTotal = sumCat('others');
+            const riceTotal   = sumCat('rice');
+            const marketTotal = sumCat('market');
+            const gasTotal      = sumCat('gas');
+            const paperTotal    = sumCat('paper');
+            const wifiTotal     = sumCat('wifi');
+            const didiTotal     = sumCat('didi');
+            const houseRentTotal = sumCat('houseRent');
+            const electricTotal  = sumCat('electric');
+            const fundTotal      = sumCat('fund');
+
+            // Calculate total adjusted meals (apply per-member minimum)
+            const totalAdjustedMeals = (members || []).reduce((sum, m) => {
+                const memberId = m._id || m.id;
+                const mealCount = (meals || []).filter(meal =>
+                    meal.memberId === memberId ||
+                    meal.memberId === m._id ||
+                    meal.memberId === m.id
+                ).length;
+                return sum + Math.max(MIN_MEALS, mealCount);
+            }, 0);
+
+            // Calculate guest adjustment (total guest meal cost)
+            const guestAdjustment = (guestMeals || []).reduce((sum, g) => {
+                const price = guestMealPrices[g?.guestMealType] || 0;
+                return sum + price;
+            }, 0);
+
+            // FIX: Single setState call per slice — eliminates double-setState race
+            setBills({
+                gas: gasTotal,
+                paper: paperTotal,
+                wifi: wifiTotal,
+                didi: didiTotal,
+                spices: spicesTotal,
+                houseRent: houseRentTotal,
+                electric: electricTotal,
+                fund: fundTotal,
+                others: othersTotal,
+            });
+
+            setMealInputs({
+                totalMarket: marketTotal,
+                rice: riceTotal,
+                guest: guestAdjustment,
+                totalMeal: totalAdjustedMeals || 1,
+            });
         };
+
         fetchData();
     }, [members, expenses, meals, guestMeals, globalMonth]);
-
-    const autoFetchFromDatabase = () => {
-        // Reset to default/zero before fetching
-        const resetBills = {
-            gas: 0, paper: 0, wifi: 0, didi: 0,
-            spices: 0, houseRent: 0, electric: 0, fund: 0, others: 0
-        };
-        const resetMealInputs = {
-            totalMarket: 0, rice: 0, guest: 0, totalMeal: 1
-        };
-
-        // Fetch approved expenses by category
-        const relevantExpenses = (expenses || []).filter(e => e?.status === 'approved');
-
-        // Helper to sum by category
-        const sumCat = (cat) => relevantExpenses.filter(e => e?.category === cat).reduce((sum, e) => sum + (Number(e?.amount) || 0), 0);
-
-        const spicesTotal = sumCat('spices');
-        const othersTotal = sumCat('others');
-        const riceTotal = sumCat('rice');
-        const marketTotal = sumCat('market');
-
-        // New shared categories
-        const gasTotal = sumCat('gas');
-        const paperTotal = sumCat('paper');
-        const wifiTotal = sumCat('wifi');
-        const didiTotal = sumCat('didi');
-        const houseRentTotal = sumCat('houseRent');
-        const electricTotal = sumCat('electric');
-        const fundTotal = sumCat('fund');
-
-        // Calculate total meals
-        // Calculate total meals (Adjusted with minimum)
-        const totalAdjustedMeals = (members || []).reduce((sum, m) => {
-            const memberId = m._id || m.id;
-            const mealCount = (meals || []).filter(meal =>
-                meal.memberId === memberId ||
-                meal.memberId === m._id ||
-                meal.memberId === m.id
-            ).length;
-            return sum + Math.max(MIN_MEALS, mealCount);
-        }, 0);
-
-        // Guest meal price mapping - already defined above at component level
-        // const guestMealPrices = { ... };
-
-        // Calculate guest adjustment (total guest meal cost)
-        const guestAdjustment = (guestMeals || []).reduce((sum, g) => {
-            const price = guestMealPrices[g?.guestMealType] || 0;
-            return sum + price;
-        }, 0);
-
-        // Update bills state - reset first
-        setBills(resetBills);
-        setBills(prev => ({
-            ...prev,
-            gas: gasTotal,
-            wifi: wifiTotal,
-            electric: electricTotal,
-            spices: spicesTotal,
-            fund: fundTotal,
-            others: othersTotal,
-            ...(paperTotal > 0 && { paper: paperTotal }),
-            ...(didiTotal > 0 && { didi: didiTotal }),
-            ...(houseRentTotal > 0 && { houseRent: houseRentTotal })
-        }));
-
-        // Update meal inputs - reset first
-        setMealInputs(resetMealInputs);
-        setMealInputs(prev => ({
-            ...prev,
-            totalMarket: marketTotal,
-            rice: riceTotal,
-            totalMeal: totalAdjustedMeals || 1,
-            guest: guestAdjustment
-        }));
-    };
 
     //    // Initialize individual inputs when members change, auto-fetch from database
     useEffect(() => {
@@ -251,7 +234,10 @@ const Calculator = () => {
 
             return newInputs;
         });
-    }, [members, meals, guestMeals, expenses, globalMonth]);
+    // FIX: Added `monthlySummaries` as a dependency so this effect re-runs once
+    // the deposit snapshot API response arrives, preventing deposits from being
+    // initialized as 0 before the fetch completes.
+    }, [members, meals, guestMeals, expenses, globalMonth, monthlySummaries]);
 
     const handleBillChange = (e) => {
         const val = e.target.value;
