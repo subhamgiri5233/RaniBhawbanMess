@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Calendar, Plus, Trash2, Users, TrendingUp, Sparkles, ArrowRight, UtensilsCrossed, Info, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar, Plus, Trash2, Users, TrendingUp, Sparkles, ArrowRight, UtensilsCrossed, Info, X, ShoppingBag } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import MealMonthlySheet from '../../components/MealMonthlySheet';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -13,7 +13,8 @@ const MemberMeals = () => {
     const { user } = useAuth();
     const {
         members, meals, guestMeals, addMeal, removeMeal,
-        addGuestMeal, removeGuestMeal, globalMonth, setGlobalMonth, settings
+        addGuestMeal, removeGuestMeal, globalMonth, setGlobalMonth, settings,
+        marketSchedule
     } = useData();
 
     // Helper to get setting value
@@ -30,6 +31,41 @@ const MemberMeals = () => {
     const [selectedMealType, setSelectedMealType] = useState('meat');
     const [guestMealTime, setGuestMealTime] = useState('lunch');
     const [guestDate, setGuestDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+
+    // Helper to match member IDs robustly
+    const isSameMember = (assignedId, currentUserId, memberList) => {
+        if (!assignedId || !currentUserId) return false;
+        const aid = String(assignedId);
+        const cuid = String(currentUserId);
+        if (aid === cuid) return true;
+        const byAssigned = memberList?.find(m => String(m._id) === aid || String(m.id) === aid || String(m.userId) === aid);
+        const byCurrent = memberList?.find(m => String(m._id) === cuid || String(m.id) === cuid || String(m.userId) === cuid);
+        if (byAssigned && byCurrent && (
+            byAssigned._id === byCurrent._id ||
+            byAssigned.id === byCurrent.id ||
+            byAssigned.name === byCurrent.name
+        )) return true;
+        return false;
+    };
+
+    // My approved market duty dates for the active month (unlocked for editing all members' meals)
+    const targetMonth = selectedDate?.substring(0, 7) || globalMonth;
+    const myDutyDates = useMemo(() => {
+        const monthSchedule = (marketSchedule && marketSchedule[targetMonth]) || (marketSchedule && marketSchedule[globalMonth]) || [];
+        return monthSchedule
+            .filter(d =>
+                d.status === 'approved' &&
+                d.assignedMemberId !== 'OFF_DAY' &&
+                (
+                    isSameMember(d.assignedMemberId, user?.id, members) ||
+                    isSameMember(d.memberId, user?.id, members)
+                )
+            )
+            .map(d => d.date)
+            .filter(Boolean);
+    }, [marketSchedule, targetMonth, globalMonth, user?.id, members]);
+
+    const myDutyDatesSet = useMemo(() => new Set(myDutyDates), [myDutyDates]);
 
     // Filter to only show the logged-in member
     const currentMember = useMemo(() =>
@@ -53,8 +89,11 @@ const MemberMeals = () => {
 
     // Handle Meal Toggling from Monthly Sheet
     const handleToggleMeal = (memberId, dateStr, type, shouldAdd) => {
-        // Security check: Member can only toggle their own meals
-        if (String(memberId) !== String(user.id)) return;
+        const isOwn = String(memberId) === String(user?.id);
+        const isDutyDay = myDutyDatesSet.has(dateStr);
+
+        // Security check: Member can toggle their own meals, or anyone's meals on their market duty day
+        if (!isOwn && !isDutyDay) return;
 
         if (shouldAdd) {
             addMeal(dateStr, [memberId], type);
@@ -153,12 +192,42 @@ const MemberMeals = () => {
                         PER MONTH
                     </div>
                 </div>
+
+                {/* Market Duty Manager Active Announcement Banner */}
+                {myDutyDates.length > 0 && (
+                    <div className="flex items-start sm:items-center gap-3.5 px-5 py-4 bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-2xl text-emerald-900 dark:text-emerald-200 shadow-sm animate-in fade-in duration-300">
+                        <div className="p-2.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0 mt-0.5 sm:mt-0">
+                            <ShoppingBag size={20} />
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                                    Market Duty Manager Active
+                                </span>
+                                <span className="text-[9px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">
+                                    Meals Unlocked For All Members
+                                </span>
+                            </div>
+                            <p className="text-xs font-medium text-emerald-700/90 dark:text-emerald-300/90 mt-1">
+                                You are on market duty on{' '}
+                                <span className="font-extrabold text-emerald-900 dark:text-emerald-100 underline decoration-emerald-500/50">
+                                    {myDutyDates.map(d => {
+                                        try { return format(parseISO(d), 'MMM dd'); } catch { return d; }
+                                    }).join(', ')}
+                                </span>
+                                . The table columns for these duty dates are unlocked — click any member's cell below to record or change meals!
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 <MealMonthlySheet
                     members={members}
                     meals={meals}
                     selectedDate={selectedDate}
                     onToggleMeal={handleToggleMeal}
                     editableMemberId={user.id}
+                    managerDates={myDutyDates}
                 />
             </div>
 

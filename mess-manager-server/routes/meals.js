@@ -16,10 +16,22 @@ const checkIsDayManager = async (user, date) => {
         // Find any approved market request for this date
         const records = await MarketRequest.find({ date, status: 'approved' });
         if (!records || records.length === 0) return false;
+        
         const uid = String(user.id || user.userId || user._id || '');
+        const userDoc = await User.findById(uid).lean().catch(() => null);
+        const userIds = new Set([uid]);
+        if (userDoc) {
+            if (userDoc._id) userIds.add(String(userDoc._id));
+            if (userDoc.userId) userIds.add(String(userDoc.userId));
+        }
+
         return records.some(record => {
             const rid = String(record.assignedMemberId || record.memberId || '');
-            return rid === uid;
+            if (userIds.has(rid)) return true;
+            if (userDoc && record.memberName && record.memberName.trim().toLowerCase() === userDoc.name.trim().toLowerCase()) {
+                return true;
+            }
+            return false;
         });
     } catch (e) {
         console.error('[Meals] checkIsDayManager error:', e);
@@ -62,9 +74,12 @@ router.post('/', auth, async (req, res) => {
     try {
         const { date, memberId, type, isGuest, guestMealType, mealTime } = req.body;
 
-        // Security: Members can only add their own meals
-        if (req.user.role === 'member' && memberId !== req.user.id) {
-            return res.status(403).json({ error: 'Access denied. You can only record your own meals.' });
+        // Security: Members can only add their own meals UNLESS they are the market manager for this date
+        if (req.user.role === 'member' && String(memberId) !== String(req.user.id)) {
+            const isDayManager = await checkIsDayManager(req.user, date);
+            if (!isDayManager) {
+                return res.status(403).json({ error: 'Access denied. You can only record your own meals.' });
+            }
         }
 
         // Fetch member name from User collection
@@ -164,9 +179,12 @@ router.delete('/', auth, async (req, res) => {
     try {
         const { date, memberId, type, mealId } = req.body;
 
-        // Security: Members can only remove their own meals
-        if (req.user.role === 'member' && memberId !== req.user.id) {
-            return res.status(403).json({ error: 'Access denied. You can only remove your own meals.' });
+        // Security: Members can only remove their own meals UNLESS they are the market manager for this date
+        if (req.user.role === 'member' && String(memberId) !== String(req.user.id)) {
+            const isDayManager = await checkIsDayManager(req.user, date);
+            if (!isDayManager) {
+                return res.status(403).json({ error: 'Access denied. You can only remove your own meals.' });
+            }
         }
 
         let result;
