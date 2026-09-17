@@ -16,6 +16,7 @@ const monthlySummarySchema = new mongoose.Schema({
     depositDate: { type: String, default: '' }, // Date when deposit was paid (YYYY-MM-DD)
     note: { type: String, default: '' },
     marketDays: { type: Number, default: 4 }, // Added: Assigned market duty days (default 4)
+    mealOverride: { type: Number, default: null }, // Admin-set total meal count override (null = use actual count)
     paymentHistory: [{
         amount: { type: Number, required: true },
         date: { type: String, required: true },

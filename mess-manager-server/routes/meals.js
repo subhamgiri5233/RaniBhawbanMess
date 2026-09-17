@@ -4,7 +4,24 @@ const Meal = require('../models/Meal');
 const User = require('../models/User');
 const Settings = require('../models/Settings');
 const Trash = require('../models/Trash');
+const MonthlySummary = require('../models/MonthlySummary');
+const MarketRequest = require('../models/MarketRequest');
 const { auth, requireAdmin } = require('../middleware/auth');
+
+// Helper: Check if user is the market manager for a specific date
+const checkIsDayManager = async (user, date) => {
+    if (!user || !date) return false;
+    if (user.role === 'admin') return true;
+    try {
+        const record = await MarketRequest.findOne({ date, status: 'approved' });
+        if (!record) return false;
+        const uid = user.id || user.userId || user._id?.toString();
+        return record.assignedMemberId === uid;
+    } catch (e) {
+        console.error('[Meals] checkIsDayManager error:', e);
+        return false;
+    }
+};
 
 // GET /api/meals - Get all meals (optional: filter by date) - Requires auth
 router.get('/', auth, async (req, res) => {
@@ -83,6 +100,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // POST /api/meals/bulk - Add multiple meals - Requires auth
+// Market managers (approved for that date) can also add meals for all members on their duty day
 router.post('/bulk', auth, async (req, res) => {
     try {
         const { date, memberIds, type } = req.body;
@@ -91,11 +109,15 @@ router.post('/bulk', auth, async (req, res) => {
             return res.status(400).json({ error: 'memberIds must be a non-empty array' });
         }
 
-        // Security: Members can only add their own meals
+        // Security: Members can only add their own meals UNLESS they are the market manager for that date
         if (req.user.role === 'member') {
             const onlySelf = memberIds.every(id => id === req.user.id);
             if (!onlySelf) {
-                return res.status(403).json({ error: 'Access denied. You can only record your own meals.' });
+                // Check if this member is the market manager for the given date
+                const isDayManager = await checkIsDayManager(req.user, date);
+                if (!isDayManager) {
+                    return res.status(403).json({ error: 'Access denied. Only the market manager for this date can record meals for all members.' });
+                }
             }
         }
 
@@ -219,6 +241,55 @@ router.delete('/clear-all-meals', auth, requireAdmin, async (req, res) => {
             message: 'All meals cleared successfully',
             deletedCount: result.deletedCount
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// -----------------------------------------------------------------------
+// PUT /api/meals/override - Admin sets a member's total meal count for a month
+// Stores a mealOverride value in MonthlySummary (non-destructive)
+// -----------------------------------------------------------------------
+router.put('/override', auth, requireAdmin, async (req, res) => {
+    try {
+        const { memberId, month, totalMeals } = req.body;
+
+        if (!memberId || !month) {
+            return res.status(400).json({ error: 'memberId and month are required' });
+        }
+
+        // totalMeals = null removes the override; otherwise must be a non-negative integer
+        const overrideValue = totalMeals === null || totalMeals === undefined ? null : Number(totalMeals);
+        if (overrideValue !== null && (isNaN(overrideValue) || overrideValue < 0)) {
+            return res.status(400).json({ error: 'totalMeals must be a non-negative number or null' });
+        }
+
+        // Fetch member name for upsert
+        const member = await User.findById(memberId).lean().select('name');
+        if (!member) {
+            return res.status(404).json({ error: 'Member not found' });
+        }
+
+        const updated = await MonthlySummary.findOneAndUpdate(
+            { month, memberId },
+            { $set: { mealOverride: overrideValue, memberName: member.name, month, memberId } },
+            { upsert: true, new: true }
+        );
+
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/meals/overrides/:month - Get all meal overrides for a month (admin/member)
+router.get('/overrides/:month', auth, async (req, res) => {
+    try {
+        const { month } = req.params;
+        const records = await MonthlySummary.find({ month, mealOverride: { $ne: null } })
+            .select('memberId memberName mealOverride month')
+            .lean();
+        res.json(records);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

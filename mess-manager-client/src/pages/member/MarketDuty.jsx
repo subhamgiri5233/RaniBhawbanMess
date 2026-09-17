@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/ui/Card';
-import { ShoppingCart, Calendar as CalendarIcon, Check, ChevronLeft, ChevronRight, Lock, X, Info, Utensils, Sparkles, TrendingUp, Inbox, User, Trash2 } from 'lucide-react';
+import { ShoppingCart, Calendar as CalendarIcon, Check, ChevronLeft, ChevronRight, Lock, X, Info, Utensils, Sparkles, TrendingUp, Inbox, User, Trash2, ClipboardList, Sun, Moon } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
 import { cn } from '../../lib/utils';
 import Modal from '../../components/ui/Modal';
@@ -34,13 +34,20 @@ const MarketDuty = () => {
     const {
         marketSchedule, allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, clearMarketDate, members, managerAllocation,
-        refreshMarket, globalMonth, setGlobalMonth, marketDutyLimits
+        refreshMarket, globalMonth, setGlobalMonth, marketDutyLimits,
+        addMeal, removeMeal, meals, refreshMeals
     } = useData();
     const { user, isLoading } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedModalDate, setSelectedModalDate] = useState(null);
     const [pendingActionIds, setPendingActionIds] = useState(new Set());
+
+    // Meal recording modal state
+    const [isMealModalOpen, setIsMealModalOpen] = useState(false);
+    const [mealDutyDate, setMealDutyDate] = useState(null); // date string YYYY-MM-DD
+    const [mealSelections, setMealSelections] = useState({}); // { memberId: { lunch: bool, dinner: bool } }
+    const [mealSaving, setMealSaving] = useState(false);
 
     // Sync currentDate with globalMonth
     useEffect(() => {
@@ -159,6 +166,75 @@ const MarketDuty = () => {
         (isSameMember(d.assignedMemberId, user.id, members) || isSameMember(d.memberId, user.id, members)) && 
         d.status === 'approved'
     ).length;
+
+    // My approved duty days this month (can be multiple)
+    const myApprovedDutyDays = useMemo(() => {
+        return currentMonthSchedule.filter(d =>
+            d.status === 'approved' &&
+            d.assignedMemberId !== 'OFF_DAY' &&
+            isSameMember(d.assignedMemberId, user.id, members)
+        );
+    }, [currentMonthSchedule, user.id, members]);
+
+    // Open meal recording modal for a specific duty date
+    const openMealModal = (dateStr) => {
+        setMealDutyDate(dateStr);
+        // Pre-populate with already-recorded meals for that date
+        const dateStr_ = dateStr;
+        const initialSelections = {};
+        members.forEach(m => {
+            const mId = m._id || m.id;
+            const hasLunch = (meals || []).some(ml => ml.date === dateStr_ && ml.memberId === mId && ml.type === 'lunch' && !ml.isGuest);
+            const hasDinner = (meals || []).some(ml => ml.date === dateStr_ && ml.memberId === mId && ml.type === 'dinner' && !ml.isGuest);
+            initialSelections[mId] = { lunch: hasLunch, dinner: hasDinner };
+        });
+        setMealSelections(initialSelections);
+        setIsMealModalOpen(true);
+    };
+
+    const toggleMealSelection = (memberId, type) => {
+        setMealSelections(prev => ({
+            ...prev,
+            [memberId]: { ...prev[memberId], [type]: !prev[memberId]?.[type] }
+        }));
+    };
+
+    const handleSaveMeals = async () => {
+        if (!mealDutyDate) return;
+        setMealSaving(true);
+        try {
+            // Gather which members have lunch / dinner selected
+            const lunchIds = members
+                .filter(m => mealSelections[m._id || m.id]?.lunch)
+                .map(m => m._id || m.id);
+            const dinnerIds = members
+                .filter(m => mealSelections[m._id || m.id]?.dinner)
+                .map(m => m._id || m.id);
+
+            // Remove deselected meals first (existing ones that are now unchecked)
+            for (const m of members) {
+                const mId = m._id || m.id;
+                const sel = mealSelections[mId] || {};
+                const hasLunch = (meals || []).some(ml => ml.date === mealDutyDate && ml.memberId === mId && ml.type === 'lunch' && !ml.isGuest);
+                const hasDinner = (meals || []).some(ml => ml.date === mealDutyDate && ml.memberId === mId && ml.type === 'dinner' && !ml.isGuest);
+                if (hasLunch && !sel.lunch) await removeMeal(mealDutyDate, mId, 'lunch');
+                if (hasDinner && !sel.dinner) await removeMeal(mealDutyDate, mId, 'dinner');
+            }
+
+            // Add newly selected meals
+            const newLunchIds = lunchIds.filter(id => !(meals || []).some(ml => ml.date === mealDutyDate && ml.memberId === id && ml.type === 'lunch' && !ml.isGuest));
+            const newDinnerIds = dinnerIds.filter(id => !(meals || []).some(ml => ml.date === mealDutyDate && ml.memberId === id && ml.type === 'dinner' && !ml.isGuest));
+
+            if (newLunchIds.length > 0) await addMeal(mealDutyDate, newLunchIds, 'lunch');
+            if (newDinnerIds.length > 0) await addMeal(mealDutyDate, newDinnerIds, 'dinner');
+
+            await refreshMeals();
+            setIsMealModalOpen(false);
+        } catch (err) {
+            alert('Failed to save meals: ' + (err?.message || err));
+        }
+        setMealSaving(false);
+    };
 
     // Pending Requests for Manager
     const pendingRequests = currentMonthSchedule.filter(d => d.status === 'pending');
@@ -504,6 +580,48 @@ const MarketDuty = () => {
                 </div>
             </Card>
 
+            {/* Market Manager: Record Meals for Duty Day */}
+            {!isAdmin && myApprovedDutyDays.length > 0 && (
+                <Card className="p-6 md:p-8 border-l-4 border-emerald-500 bg-emerald-500/5 dark:bg-emerald-900/10 shadow-sm relative overflow-hidden">
+                    <div className="flex items-center gap-2.5 mb-5">
+                        <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                            <ClipboardList size={18} className="text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-extrabold text-emerald-900 dark:text-emerald-400 uppercase tracking-wider text-xs">Your Duty Day — Record Meals</h3>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">As the market manager, you can record meals for all members on your duty day(s)</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {myApprovedDutyDays.map(duty => (
+                            <button
+                                key={duty._id || duty.id}
+                                onClick={() => openMealModal(duty.date)}
+                                className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-white/5 hover:border-emerald-400 dark:hover:border-emerald-500 group transition-all active:scale-95"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-extrabold text-base border border-emerald-500/20">
+                                        <CalendarIcon size={18} />
+                                    </div>
+                                    <div className="text-left">
+                                        <span className="font-extrabold block text-slate-800 dark:text-slate-100 text-sm tracking-tight">
+                                            {format(new Date(duty.date), 'dd MMM yyyy')}
+                                        </span>
+                                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold uppercase tracking-wider">
+                                            Your Market Day
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold uppercase tracking-wider rounded-xl border border-emerald-500/20 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                                    <ClipboardList size={13} />
+                                    <span>Record</span>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </Card>
+            )}
+
             <div
                 className="bg-white/80 dark:bg-slate-900/80 rounded-2xl md:rounded-[1.5rem] p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 shadow-sm border border-slate-200/80 dark:border-white/5 relative overflow-hidden group border-l-4 border-l-indigo-600"
             >
@@ -709,6 +827,127 @@ const MarketDuty = () => {
                     })}
                 </div>
             </Modal>
+
+            {/* Meal Recording Modal — for market manager */}
+            {isMealModalOpen && mealDutyDate && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div
+                        onClick={() => !mealSaving && setIsMealModalOpen(false)}
+                        className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
+                    />
+                    <div className="relative w-full max-w-2xl my-auto z-10">
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh]">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/5 bg-emerald-500/5 flex-shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl border border-emerald-500/20">
+                                        <ClipboardList size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-50 tracking-tight">
+                                            Record Meals — {format(new Date(mealDutyDate), 'dd MMM yyyy')}
+                                        </h3>
+                                        <p className="text-xs font-bold text-slate-400 mt-0.5">Toggle lunch/dinner for each member on your duty day</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setIsMealModalOpen(false)}
+                                    disabled={mealSaving}
+                                    className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-500 rounded-full transition-all active:scale-95"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            {/* Member List */}
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+                                {/* Column Headers */}
+                                <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-4 pb-2 border-b border-slate-100 dark:border-white/5">
+                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Member</span>
+                                    <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider w-16 text-center flex items-center justify-center gap-1">
+                                        <Sun size={11} /> Lunch
+                                    </span>
+                                    <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider w-16 text-center flex items-center justify-center gap-1">
+                                        <Moon size={11} /> Dinner
+                                    </span>
+                                </div>
+
+                                {members.map(member => {
+                                    const mId = member._id || member.id;
+                                    const sel = mealSelections[mId] || { lunch: false, dinner: false };
+                                    return (
+                                        <div
+                                            key={mId}
+                                            className="grid grid-cols-[1fr_auto_auto] gap-3 items-center px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 transition-all"
+                                        >
+                                            {/* Name */}
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-extrabold text-sm border border-indigo-500/20 shrink-0">
+                                                    {member.name?.charAt(0).toUpperCase()}
+                                                </div>
+                                                <span className="font-extrabold text-slate-800 dark:text-slate-100 text-sm truncate">{member.name}</span>
+                                            </div>
+
+                                            {/* Lunch Toggle */}
+                                            <button
+                                                onClick={() => toggleMealSelection(mId, 'lunch')}
+                                                className={cn(
+                                                    "w-16 h-9 rounded-xl border-2 transition-all flex items-center justify-center font-extrabold text-xs active:scale-90",
+                                                    sel.lunch
+                                                        ? "bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30"
+                                                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-white/10 text-slate-400 hover:border-emerald-400"
+                                                )}
+                                            >
+                                                {sel.lunch ? <Check size={15} /> : <X size={15} />}
+                                            </button>
+
+                                            {/* Dinner Toggle */}
+                                            <button
+                                                onClick={() => toggleMealSelection(mId, 'dinner')}
+                                                className={cn(
+                                                    "w-16 h-9 rounded-xl border-2 transition-all flex items-center justify-center font-extrabold text-xs active:scale-90",
+                                                    sel.dinner
+                                                        ? "bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-600/30"
+                                                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-white/10 text-slate-400 hover:border-indigo-400"
+                                                )}
+                                            >
+                                                {sel.dinner ? <Check size={15} /> : <X size={15} />}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Footer */}
+                            <div className="flex items-center gap-3 p-6 border-t border-slate-100 dark:border-white/5 flex-shrink-0">
+                                <button
+                                    onClick={() => setIsMealModalOpen(false)}
+                                    disabled={mealSaving}
+                                    className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold text-xs uppercase tracking-wider rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveMeals}
+                                    disabled={mealSaving}
+                                    className="flex-[2] py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-60"
+                                >
+                                    {mealSaving ? (
+                                        <span className="flex items-center gap-2">
+                                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                            Saving...
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-2">
+                                            <Check size={15} /> Save Meals
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

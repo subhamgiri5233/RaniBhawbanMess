@@ -40,6 +40,7 @@ export const DataProvider = ({ children }) => {
     const [marketDutyLimits, setMarketDutyLimits] = useState({});
     const [managerAllocation, setManagerAllocation] = useState({});
     const [cookingDuties, setCookingDuties] = useState([]);
+    const [mealOverrides, setMealOverrides] = useState({}); // { memberId: totalMeals } for globalMonth
     const [loadingDaily, setLoadingDaily] = useState(true);
 
     // Global Month Filter
@@ -112,6 +113,16 @@ export const DataProvider = ({ children }) => {
             } catch (e) { console.error('Market duty limits fetch failed', e); }
         })();
 
+        // Fetch meal overrides for the chosen month
+        (async () => {
+            try {
+                const res = await api.get(`/meals/overrides/${globalMonth}`);
+                const overrideMap = {};
+                res.data.forEach(r => { overrideMap[r.memberId] = r.mealOverride; });
+                setMealOverrides(overrideMap);
+            } catch (e) { console.error('Meal overrides fetch failed', e); }
+        })();
+
     }, [globalMonth]);
 
     // Fetch Initial Data
@@ -158,6 +169,14 @@ export const DataProvider = ({ children }) => {
     }, [globalMonth]);
     const refreshGuestMeals = useCallback(async () => {
         try { const r = await api.get(`/guest-meals?month=${globalMonth}`); setGuestMeals(r.data); } catch (e) { console.error('refreshGuestMeals failed', e); }
+    }, [globalMonth]);
+    const refreshMealOverrides = useCallback(async (month) => {
+        try {
+            const res = await api.get(`/meals/overrides/${month || globalMonth}`);
+            const map = {};
+            res.data.forEach(r => { map[r.memberId] = r.mealOverride; });
+            setMealOverrides(map);
+        } catch (e) { console.error('refreshMealOverrides failed', e); }
     }, [globalMonth]);
 
     // Admin Actions
@@ -576,6 +595,27 @@ export const DataProvider = ({ children }) => {
         }
     }, [refreshData]);
 
+    // Admin: set/clear meal override for a member+month
+    const setMealOverride = useCallback(async (memberId, month, totalMeals) => {
+        try {
+            await api.put('/meals/override', { memberId, month, totalMeals });
+            // Update local state immediately
+            setMealOverrides(prev => {
+                const updated = { ...prev };
+                if (totalMeals === null || totalMeals === undefined) {
+                    delete updated[memberId];
+                } else {
+                    updated[memberId] = Number(totalMeals);
+                }
+                return updated;
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Set meal override failed', error);
+            return { success: false, error: error.response?.data?.error || 'Failed to set meal override' };
+        }
+    }, []);
+
     const updateSystemSetting = useCallback(async (key, value) => {
         try {
             await api.put(`/settings/${key}`, { value });
@@ -657,6 +697,7 @@ export const DataProvider = ({ children }) => {
         marketDutyLimits,
         managerAllocation,
         cookingDuties,
+        mealOverrides,
         clearMonthlyData,
         getMonthlyDataPreview,
         addMember,
@@ -682,6 +723,8 @@ export const DataProvider = ({ children }) => {
         refreshGuestMeals,
         refreshMarket,
         refreshData,
+        refreshMealOverrides,
+        setMealOverride,
         dailyInfo,
         settings,
         updateSystemSetting,
@@ -695,7 +738,7 @@ export const DataProvider = ({ children }) => {
         removeGuestMeal, addExpense, updateExpense, deleteExpense,
         allocateMarketDay, approveMarketRequest,
         rejectMarketRequest, clearMarketDate, setManagerForMonth, markCookingFinished, getCookingDuty,
-        updateSystemSetting, loadingDaily,
+        updateSystemSetting, loadingDaily, mealOverrides, refreshMealOverrides, setMealOverride,
     ]);
 
     return (
