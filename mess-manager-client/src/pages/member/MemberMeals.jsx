@@ -35,22 +35,37 @@ const MemberMeals = () => {
     // Helper to match member IDs robustly
     const isSameMember = (id1, id2, memberList) => {
         if (!id1 || !id2) return false;
-        const str1 = String(id1);
-        const str2 = String(id2);
+        const str1 = String(id1).trim().toLowerCase();
+        const str2 = String(id2).trim().toLowerCase();
         if (str1 === str2) return true;
 
-        const m1 = memberList?.find(m => m._id?.toString() === str1 || m.id?.toString() === str1 || m.userId === str1);
-        const m2 = memberList?.find(m => m._id?.toString() === str2 || m.id?.toString() === str2 || m.userId === str2);
+        const m1 = memberList?.find(m => 
+            m._id?.toString()?.toLowerCase() === str1 || 
+            m.id?.toString()?.toLowerCase() === str1 || 
+            m.userId?.toString()?.toLowerCase() === str1 ||
+            m.name?.trim()?.toLowerCase() === str1
+        );
+        const m2 = memberList?.find(m => 
+            m._id?.toString()?.toLowerCase() === str2 || 
+            m.id?.toString()?.toLowerCase() === str2 || 
+            m.userId?.toString()?.toLowerCase() === str2 ||
+            m.name?.trim()?.toLowerCase() === str2
+        );
 
         if (m1 && m2) {
             return (m1._id && m2._id && m1._id.toString() === m2._id.toString()) || 
-                   (m1.userId && m2.userId && m1.userId === m2.userId);
+                   (m1.userId && m2.userId && m1.userId === m2.userId) ||
+                   (m1.name && m2.name && m1.name.trim().toLowerCase() === m2.name.trim().toLowerCase());
         }
         if (m1) {
-            return m1._id?.toString() === str2 || m1.userId === str2;
+            return m1._id?.toString()?.toLowerCase() === str2 || 
+                   m1.userId?.toString()?.toLowerCase() === str2 ||
+                   m1.name?.trim()?.toLowerCase() === str2;
         }
         if (m2) {
-            return m2._id?.toString() === str1 || m2.userId === str1;
+            return m2._id?.toString()?.toLowerCase() === str1 || 
+                   m2.userId?.toString()?.toLowerCase() === str1 ||
+                   m2.name?.trim()?.toLowerCase() === str1;
         }
         return false;
     };
@@ -59,18 +74,34 @@ const MemberMeals = () => {
     const targetMonth = selectedDate?.substring(0, 7) || globalMonth;
     const myDutyDates = useMemo(() => {
         const monthSchedule = (marketSchedule && marketSchedule[targetMonth]) || (marketSchedule && marketSchedule[globalMonth]) || [];
+        const currentUserId = user?.id?.toString() || user?._id?.toString() || user?.userId?.toString();
+        const currentUserName = (user?.name || '').trim().toLowerCase();
+
         return monthSchedule
-            .filter(d =>
-                d.status === 'approved' &&
-                d.assignedMemberId !== 'OFF_DAY' &&
-                (
-                    isSameMember(d.assignedMemberId, user?.id, members) ||
-                    isSameMember(d.memberId, user?.id, members)
-                )
-            )
+            .filter(d => {
+                if (d.status === 'rejected') return false;
+                if (d.assignedMemberId === 'OFF_DAY') return false;
+
+                const assignedStr = (d.assignedMemberId || '').toString();
+                const memberStr = (d.memberId || '').toString();
+                const dMemberName = (d.memberName || '').trim().toLowerCase();
+
+                // Direct ID or helper match
+                if (isSameMember(assignedStr, user?.id, members) || isSameMember(memberStr, user?.id, members)) return true;
+                if (user?.userId && (isSameMember(assignedStr, user.userId, members) || isSameMember(memberStr, user.userId, members))) return true;
+
+                // String comparison with user ID/userId
+                if (currentUserId && (assignedStr === currentUserId || memberStr === currentUserId)) return true;
+
+                // Name comparison fallback
+                if (currentUserName && dMemberName && (currentUserName === dMemberName || currentUserName.includes(dMemberName) || dMemberName.includes(currentUserName))) return true;
+                if (currentUserName && assignedStr && (assignedStr.toLowerCase() === currentUserName || currentUserName.includes(assignedStr.toLowerCase()))) return true;
+
+                return false;
+            })
             .map(d => d.date)
             .filter(Boolean);
-    }, [marketSchedule, targetMonth, globalMonth, user?.id, members]);
+    }, [marketSchedule, targetMonth, globalMonth, user, members]);
 
     const myDutyDatesSet = useMemo(() => new Set(myDutyDates), [myDutyDates]);
 

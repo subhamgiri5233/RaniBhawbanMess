@@ -13,6 +13,7 @@ const MealCell = React.memo(({
     onMouseLeave,
     isHoveredRowDay,
     isEditable,
+    isDutyDay,
     isMeatDay,
     lunchStatus,
     lunchNum,
@@ -32,9 +33,10 @@ const MealCell = React.memo(({
                 "p-1 border-r border-indigo-300/20 dark:border-white/5 text-center transition-all relative group/cell",
                 isEditable ? "cursor-pointer" : "cursor-not-allowed opacity-30 grayscale-[0.2]",
                 isToday && "bg-primary-500/10 dark:bg-primary-500/5",
-                !isToday && isHoveredRowDay && "bg-indigo-300/30 dark:bg-slate-800/20",
-                !isToday && isMeatDay && "bg-orange-500/[0.04] dark:bg-orange-500/[0.03]",
-                !isToday && !isMeatDay && format(parseISO(day.dateStr), 'i') === '7' && "bg-rose-500/[0.03] dark:bg-rose-500/[0.02]"
+                isDutyDay && !isToday && "bg-emerald-500/[0.08] dark:bg-emerald-500/[0.08]",
+                !isToday && !isDutyDay && isHoveredRowDay && "bg-indigo-300/30 dark:bg-slate-800/20",
+                !isToday && !isDutyDay && isMeatDay && "bg-orange-500/[0.04] dark:bg-orange-500/[0.03]",
+                !isToday && !isDutyDay && !isMeatDay && format(parseISO(day.dateStr), 'i') === '7' && "bg-rose-500/[0.03] dark:bg-rose-500/[0.02]"
             )}
             onMouseEnter={() => onMouseEnter({ dateStr: day.dateStr, dayNum: day.dayNum, memberId })}
             onMouseLeave={onMouseLeave}
@@ -50,9 +52,11 @@ const MealCell = React.memo(({
                             ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/25"
                             : (!lunchStatus && day.dateStr <= todayStr)
                                 ? "bg-rose-500 text-white shadow-sm shadow-rose-500/20"
-                                : "bg-slate-200/50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700"
+                                : isDutyDay && isEditable
+                                    ? "bg-emerald-500/20 dark:bg-emerald-500/25 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 shadow-sm"
+                                    : "bg-slate-200/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700"
                     )}
-                    title={`Lunch: ${lunchStatus ? `Meal #${lunchNum}` : 'Off'}`}
+                    title={isDutyDay ? `Lunch: ${lunchStatus ? `Meal #${lunchNum}` : 'Click to add (Market Duty)'}` : `Lunch: ${lunchStatus ? `Meal #${lunchNum}` : 'Off'}`}
                 >
                     {lunchStatus ? lunchNum : '✕'}
                 </div>
@@ -67,9 +71,11 @@ const MealCell = React.memo(({
                             ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/25"
                             : (!dinnerStatus && day.dateStr <= todayStr)
                                 ? "bg-rose-500 text-white shadow-sm shadow-rose-500/20"
-                                : "bg-slate-200/50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-700"
+                                : isDutyDay && isEditable
+                                    ? "bg-emerald-500/20 dark:bg-emerald-500/25 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 shadow-sm"
+                                    : "bg-slate-200/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700"
                     )}
-                    title={`Dinner: ${dinnerStatus ? `Meal #${dinnerNum}` : 'Off'}`}
+                    title={isDutyDay ? `Dinner: ${dinnerStatus ? `Meal #${dinnerNum}` : 'Click to add (Market Duty)'}` : `Dinner: ${dinnerStatus ? `Meal #${dinnerNum}` : 'Off'}`}
                 >
                     {dinnerStatus ? dinnerNum : '✕'}
                 </div>
@@ -153,6 +159,7 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
                         onMouseLeave={onCellMouseLeave}
                         isHoveredRowDay={hoveredCell?.dayNum === day.dayNum}
                         isEditable={isCellEditable}
+                        isDutyDay={Boolean(managerDatesSet?.has(day.dateStr))}
                         isMeatDay={isMeatDay}
                         lunchStatus={mealData.lunchStatus}
                         lunchNum={mealData.lunchNum}
@@ -169,16 +176,16 @@ const MealRow = React.memo(({ member, days, getStatus, todayStr, total, onCellCl
     );
 });
 
-// Consistent color palette for market duty badges (8 distinct hues)
+// Consistent, high-contrast color palette for market duty badges (8 distinct hues)
 const DUTY_COLORS = [
-    { bg: 'bg-indigo-500/20 dark:bg-indigo-500/15',  text: 'text-indigo-700 dark:text-indigo-300',  ring: 'ring-indigo-400/40' },
-    { bg: 'bg-emerald-500/20 dark:bg-emerald-500/15', text: 'text-emerald-700 dark:text-emerald-300', ring: 'ring-emerald-400/40' },
-    { bg: 'bg-rose-500/20 dark:bg-rose-500/15',      text: 'text-rose-700 dark:text-rose-300',      ring: 'ring-rose-400/40' },
-    { bg: 'bg-amber-500/20 dark:bg-amber-500/15',    text: 'text-amber-700 dark:text-amber-300',    ring: 'ring-amber-400/40' },
-    { bg: 'bg-sky-500/20 dark:bg-sky-500/15',        text: 'text-sky-700 dark:text-sky-300',        ring: 'ring-sky-400/40' },
-    { bg: 'bg-purple-500/20 dark:bg-purple-500/15',  text: 'text-purple-700 dark:text-purple-300',  ring: 'ring-purple-400/40' },
-    { bg: 'bg-orange-500/20 dark:bg-orange-500/15',  text: 'text-orange-700 dark:text-orange-300',  ring: 'ring-orange-400/40' },
-    { bg: 'bg-pink-500/20 dark:bg-pink-500/15',      text: 'text-pink-700 dark:text-pink-300',      ring: 'ring-pink-400/40' },
+    { bg: 'bg-indigo-500/30 dark:bg-indigo-500/25',  text: 'text-indigo-700 dark:text-indigo-200',  ring: 'ring-indigo-400/50' },
+    { bg: 'bg-emerald-500/30 dark:bg-emerald-500/25', text: 'text-emerald-700 dark:text-emerald-200', ring: 'ring-emerald-400/50' },
+    { bg: 'bg-rose-500/30 dark:bg-rose-500/25',      text: 'text-rose-700 dark:text-rose-200',      ring: 'ring-rose-400/50' },
+    { bg: 'bg-amber-500/30 dark:bg-amber-500/25',    text: 'text-amber-800 dark:text-amber-200',    ring: 'ring-amber-400/50' },
+    { bg: 'bg-sky-500/30 dark:bg-sky-500/25',        text: 'text-sky-700 dark:text-sky-200',        ring: 'ring-sky-400/50' },
+    { bg: 'bg-purple-500/30 dark:bg-purple-500/25',  text: 'text-purple-700 dark:text-purple-200',  ring: 'ring-purple-400/50' },
+    { bg: 'bg-orange-500/30 dark:bg-orange-500/25',  text: 'text-orange-700 dark:text-orange-200',  ring: 'ring-orange-400/50' },
+    { bg: 'bg-pink-500/30 dark:bg-pink-500/25',      text: 'text-pink-700 dark:text-pink-200',      ring: 'ring-pink-400/50' },
 ];
 
 const hashStr = (str) => str.split('').reduce((acc, c) => c.charCodeAt(0) + acc, 0);
@@ -341,19 +348,25 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
                         {days.map(day => {
                             const duty = marketDutyMap[day.dateStr];
                             const isOff = duty?.name === 'Off';
+                            const isMyDutyDay = Boolean(managerDatesSet?.has(day.dateStr));
 
                             return (
                                 <th
                                     key={`mkt-${day.dayNum}`}
-                                    className="p-0.5 border-r border-emerald-400/20 dark:border-emerald-500/10 w-10 text-center"
-                                    title={duty ? `Market: ${duty.name}` : 'No market assigned'}
+                                    className={cn(
+                                        "p-0.5 border-r border-emerald-400/20 dark:border-emerald-500/10 w-10 text-center transition-colors",
+                                        isMyDutyDay && "bg-emerald-500/20 dark:bg-emerald-900/40"
+                                    )}
+                                    title={duty ? `Market: ${duty.name}${isMyDutyDay ? ' (Your Market Duty - Meals Unlocked)' : ''}` : 'No market assigned'}
                                 >
                                     {duty ? (
                                         <div className={cn(
-                                            "mx-auto px-1 py-0.5 rounded-md text-[7px] font-black uppercase tracking-tight leading-tight truncate max-w-[36px] ring-1",
+                                            "mx-auto px-1 py-0.5 rounded-md text-[7.5px] font-black uppercase tracking-tight leading-tight truncate max-w-[36px]",
                                             isOff
-                                                ? "bg-rose-500/20 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 ring-rose-400/40"
-                                                : `${duty.color.bg} ${duty.color.text} ${duty.color.ring}`
+                                                ? "bg-rose-500/20 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 ring-1 ring-rose-400/40"
+                                                : isMyDutyDay
+                                                    ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30 ring-1 ring-emerald-300 font-black"
+                                                    : `${duty.color.bg} ${duty.color.text} ${duty.color.ring} ring-1`
                                         )}>
                                             {isOff ? '✕' : (() => {
                                                 const parts = duty.name.trim().split(/\s+/);
@@ -376,6 +389,7 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
                         <th className="p-4 border-r border-indigo-400/30 dark:border-white/5 text-left min-w-[180px] sticky left-0 bg-indigo-300/60 dark:bg-slate-900 z-30 font-black uppercase tracking-widest text-indigo-800/60 dark:text-slate-400">Member Attendance</th>
                         {days.map(day => {
                             const isToday = day.dateStr === todayStr;
+                            const isMyDutyDay = Boolean(managerDatesSet?.has(day.dateStr));
                             const parsedDate = parseISO(day.dateStr);
                             const dayNameFull = format(parsedDate, 'EEEE').toLowerCase();
                             const dayNameShort = format(parsedDate, 'EEE').toLowerCase();
@@ -389,36 +403,49 @@ const MealMonthlySheet = ({ members, meals, selectedDate, onToggleMeal, editable
                                         "p-1 border-r border-indigo-300/30 dark:border-white/5 w-10 font-black transition-all relative",
                                         isToday
                                             ? 'bg-primary-600 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
-                                            : hoveredCell?.dayNum === day.dayNum
-                                                ? 'bg-primary-500 text-white'
-                                                : isMeatDay
-                                                    ? 'bg-orange-500/10 dark:bg-orange-500/5 text-orange-600 dark:text-orange-400'
-                                                    : 'text-indigo-600/60 dark:text-slate-500 bg-indigo-300/30 dark:bg-slate-950/40'
+                                            : isMyDutyDay
+                                                ? 'bg-emerald-500/20 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                                : hoveredCell?.dayNum === day.dayNum
+                                                    ? 'bg-primary-500 text-white'
+                                                    : isMeatDay
+                                                        ? 'bg-orange-500/10 dark:bg-orange-500/5 text-orange-600 dark:text-orange-400'
+                                                        : 'text-indigo-600/60 dark:text-slate-500 bg-indigo-300/30 dark:bg-slate-950/40'
                                     )}
                                 >
                                     <div className="flex flex-col items-center gap-0">
                                         <span className={cn(
                                             "text-[6px] uppercase font-black tracking-tighter mb-[2px]",
-                                            isMeatDay 
-                                                ? "text-orange-500 dark:text-orange-400 opacity-100 font-extrabold" 
-                                                : isSunday 
-                                                    ? "text-rose-500 dark:text-rose-400 opacity-100" 
-                                                    : "opacity-60"
+                                            isToday
+                                                ? "text-white/90 font-extrabold"
+                                                : isMyDutyDay
+                                                    ? "text-emerald-600 dark:text-emerald-400 font-extrabold"
+                                                    : isMeatDay 
+                                                        ? "text-orange-500 dark:text-orange-400 opacity-100 font-extrabold" 
+                                                        : isSunday 
+                                                            ? "text-rose-500 dark:text-rose-400 opacity-100" 
+                                                            : "opacity-60"
                                         )}>
                                             {format(parsedDate, 'EEE')}
                                         </span>
                                         <span className={cn(
                                             "flex items-center justify-center w-5 h-5 rounded-full transition-all text-[9.5px]",
-                                            isMeatDay && !isToday && "bg-orange-500 text-white shadow-lg shadow-orange-500/30 ring-1 ring-orange-400/40",
-                                            !isMeatDay && isSunday && !isToday && "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
+                                            isToday && "bg-white text-primary-700 font-black shadow-sm",
+                                            !isToday && isMyDutyDay && "bg-emerald-500 text-white shadow-md shadow-emerald-500/30 font-black ring-1 ring-emerald-400/50",
+                                            !isToday && !isMyDutyDay && isMeatDay && "bg-orange-500 text-white shadow-lg shadow-orange-500/30 ring-1 ring-orange-400/40",
+                                            !isToday && !isMyDutyDay && !isMeatDay && isSunday && "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
                                         )}>
                                             {day.dayNum}
                                         </span>
-                                        {isToday && (
-                                            <span className="text-[6px] text-white/80 font-black tracking-tighter animate-pulse">
-                                                NOW
+                                        {isToday ? (
+                                            <span className="text-[6px] text-white/90 font-black tracking-tighter animate-pulse">
+                                                {isMyDutyDay ? "TODAY•DUTY" : "NOW"}
                                             </span>
-                                        )}
+                                        ) : isMyDutyDay ? (
+                                            <span className="text-[6px] text-emerald-600 dark:text-emerald-400 font-black tracking-tighter uppercase flex items-center justify-center gap-0.5 mt-0.5">
+                                                <ShoppingBag size={7} className="shrink-0" />
+                                                DUTY
+                                            </span>
+                                        ) : null}
                                     </div>
                                     {isToday && (
                                         <div className="absolute inset-0 border-x-2 border-primary-400/30 pointer-events-none"></div>
