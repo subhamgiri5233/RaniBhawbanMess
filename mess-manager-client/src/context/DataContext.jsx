@@ -548,7 +548,7 @@ export const DataProvider = ({ children }) => {
                 removedItem = prev.find(m => m._id === mealId || m.id === mealId);
                 return prev.filter(m => m._id !== mealId && m.id !== mealId);
             }
-            const idx = prev.findIndex(m => m.date === date && (m.memberId === memberId || m.memberId === String(memberId)) && m.type === type);
+            const idx = prev.findIndex(m => m.date === date && String(m.memberId) === String(memberId) && m.type === type);
             if (idx === -1) return prev;
             removedItem = prev[idx];
             return [...prev.slice(0, idx), ...prev.slice(idx + 1)];

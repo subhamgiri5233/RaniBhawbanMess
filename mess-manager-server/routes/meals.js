@@ -13,22 +13,34 @@ const checkIsDayManager = async (user, date) => {
     if (!user || !date) return false;
     if (user.role === 'admin') return true;
     try {
-        // Find any approved market request for this date
-        const records = await MarketRequest.find({ date, status: 'approved' });
+        // Find any active market duty for this date
+        const records = await MarketRequest.find({ 
+            date, 
+            status: { $ne: 'rejected' },
+            assignedMemberId: { $ne: 'OFF_DAY' }
+        }).lean();
         if (!records || records.length === 0) return false;
         
         const uid = String(user.id || user.userId || user._id || '');
-        const userDoc = await User.findById(uid).lean().catch(() => null);
+        const userDoc = (await User.findById(uid).lean().catch(() => null)) ||
+                        (await User.findOne({ userId: uid }).lean().catch(() => null));
+        
         const userIds = new Set([uid]);
+        if (user.userId) userIds.add(String(user.userId));
         if (userDoc) {
             if (userDoc._id) userIds.add(String(userDoc._id));
             if (userDoc.userId) userIds.add(String(userDoc.userId));
         }
 
+        const userName = (user.name || userDoc?.name || '').trim().toLowerCase();
+
         return records.some(record => {
             const rid = String(record.assignedMemberId || record.memberId || '');
             if (userIds.has(rid)) return true;
-            if (userDoc && record.memberName && record.memberName.trim().toLowerCase() === userDoc.name.trim().toLowerCase()) {
+            if (userName && record.memberName && record.memberName.trim().toLowerCase() === userName) {
+                return true;
+            }
+            if (userName && rid && rid.toLowerCase() === userName) {
                 return true;
             }
             return false;
@@ -75,7 +87,7 @@ router.post('/', auth, async (req, res) => {
         const { date, memberId, type, isGuest, guestMealType, mealTime } = req.body;
 
         // Security: Members can only add their own meals UNLESS they are the market manager for this date
-        if (req.user.role === 'member' && String(memberId) !== String(req.user.id)) {
+        if (req.user.role === 'member' && String(memberId) !== String(req.user.id) && (!req.user.userId || String(memberId) !== String(req.user.userId))) {
             const isDayManager = await checkIsDayManager(req.user, date);
             if (!isDayManager) {
                 return res.status(403).json({ error: 'Access denied. You can only record your own meals.' });
@@ -130,7 +142,10 @@ router.post('/bulk', auth, async (req, res) => {
 
         // Security: Members can only add their own meals UNLESS they are the market manager for that date
         if (req.user.role === 'member') {
-            const onlySelf = memberIds.every(id => id === req.user.id);
+            const onlySelf = memberIds.every(id => 
+                String(id) === String(req.user.id) || 
+                (req.user.userId && String(id) === String(req.user.userId))
+            );
             if (!onlySelf) {
                 // Check if this member is the market manager for the given date
                 const isDayManager = await checkIsDayManager(req.user, date);
@@ -180,7 +195,7 @@ router.delete('/', auth, async (req, res) => {
         const { date, memberId, type, mealId } = req.body;
 
         // Security: Members can only remove their own meals UNLESS they are the market manager for this date
-        if (req.user.role === 'member' && String(memberId) !== String(req.user.id)) {
+        if (req.user.role === 'member' && String(memberId) !== String(req.user.id) && (!req.user.userId || String(memberId) !== String(req.user.userId))) {
             const isDayManager = await checkIsDayManager(req.user, date);
             if (!isDayManager) {
                 return res.status(403).json({ error: 'Access denied. You can only remove your own meals.' });
