@@ -13,10 +13,14 @@ const checkIsDayManager = async (user, date) => {
     if (!user || !date) return false;
     if (user.role === 'admin') return true;
     try {
-        const record = await MarketRequest.findOne({ date, status: 'approved' });
-        if (!record) return false;
-        const uid = user.id || user.userId || user._id?.toString();
-        return record.assignedMemberId === uid;
+        // Find any approved market request for this date
+        const records = await MarketRequest.find({ date, status: 'approved' });
+        if (!records || records.length === 0) return false;
+        const uid = String(user.id || user.userId || user._id || '');
+        return records.some(record => {
+            const rid = String(record.assignedMemberId || record.memberId || '');
+            return rid === uid;
+        });
     } catch (e) {
         console.error('[Meals] checkIsDayManager error:', e);
         return false;

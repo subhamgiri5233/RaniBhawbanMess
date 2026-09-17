@@ -172,7 +172,10 @@ const MarketDuty = () => {
         return currentMonthSchedule.filter(d =>
             d.status === 'approved' &&
             d.assignedMemberId !== 'OFF_DAY' &&
-            isSameMember(d.assignedMemberId, user.id, members)
+            (
+                isSameMember(d.assignedMemberId, user.id, members) ||
+                isSameMember(d.memberId, user.id, members)
+            )
         );
     }, [currentMonthSchedule, user.id, members]);
 
