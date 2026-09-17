@@ -20,7 +20,7 @@ import { MESS_CONFIG } from '../../config';
 const Calculator = () => {
     const { user } = useAuth();
     const {
-        members, expenses, meals, guestMeals, globalMonth, settings
+        members, expenses, meals, guestMeals, globalMonth, settings, mealOverrides
     } = useData();
 
     // Dynamic Settings with Fallbacks
@@ -108,14 +108,18 @@ const Calculator = () => {
             const electricTotal  = sumCat('electric');
             const fundTotal      = sumCat('fund');
 
-            // Calculate total adjusted meals (apply per-member minimum)
+            // Calculate total adjusted meals (apply per-member minimum, respect admin overrides)
             const totalAdjustedMeals = (members || []).reduce((sum, m) => {
                 const memberId = m._id || m.id;
-                const mealCount = (meals || []).filter(meal =>
+                const actualCount = (meals || []).filter(meal =>
                     meal.memberId === memberId ||
                     meal.memberId === m._id ||
                     meal.memberId === m.id
                 ).length;
+                // Use admin override if set, otherwise use actual count
+                const mealCount = (mealOverrides && mealOverrides[memberId] !== undefined)
+                    ? mealOverrides[memberId]
+                    : actualCount;
                 return sum + Math.max(MIN_MEALS, mealCount);
             }, 0);
 
@@ -147,7 +151,7 @@ const Calculator = () => {
         };
 
         fetchData();
-    }, [members, expenses, meals, guestMeals, globalMonth]);
+    }, [members, expenses, meals, guestMeals, globalMonth, mealOverrides]);
 
     //    // Initialize individual inputs when members change, auto-fetch from database
     useEffect(() => {
@@ -167,13 +171,16 @@ const Calculator = () => {
                 const memberId = m._id || m.id;
                 if (!memberId) return;
 
-                // Calculate meal count for this member - check both _id and id
+                // Calculate meal count for this member - use admin override if set
                 const memberMeals = (meals || []).filter(meal =>
                     meal?.memberId === memberId ||
                     meal?.memberId === m._id ||
                     meal?.memberId === m.id
                 );
-                const mealCount = memberMeals.length;
+                const actualMealCount = memberMeals.length;
+                const mealCount = (mealOverrides && mealOverrides[memberId] !== undefined)
+                    ? mealOverrides[memberId]
+                    : actualMealCount;
 
                 // Calculate guest meal count and cost for this member
                 const memberGuestMeals = (guestMeals || []).filter(g =>
@@ -237,7 +244,7 @@ const Calculator = () => {
     // FIX: Added `monthlySummaries` as a dependency so this effect re-runs once
     // the deposit snapshot API response arrives, preventing deposits from being
     // initialized as 0 before the fetch completes.
-    }, [members, meals, guestMeals, expenses, globalMonth, monthlySummaries]);
+    }, [members, meals, guestMeals, expenses, globalMonth, monthlySummaries, mealOverrides]);
 
     const handleBillChange = (e) => {
         const val = e.target.value;
