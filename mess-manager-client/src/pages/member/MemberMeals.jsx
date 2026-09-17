@@ -33,18 +33,25 @@ const MemberMeals = () => {
     const [guestDate, setGuestDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
     // Helper to match member IDs robustly
-    const isSameMember = (assignedId, currentUserId, memberList) => {
-        if (!assignedId || !currentUserId) return false;
-        const aid = String(assignedId);
-        const cuid = String(currentUserId);
-        if (aid === cuid) return true;
-        const byAssigned = memberList?.find(m => String(m._id) === aid || String(m.id) === aid || String(m.userId) === aid);
-        const byCurrent = memberList?.find(m => String(m._id) === cuid || String(m.id) === cuid || String(m.userId) === cuid);
-        if (byAssigned && byCurrent && (
-            byAssigned._id === byCurrent._id ||
-            byAssigned.id === byCurrent.id ||
-            byAssigned.name === byCurrent.name
-        )) return true;
+    const isSameMember = (id1, id2, memberList) => {
+        if (!id1 || !id2) return false;
+        const str1 = String(id1);
+        const str2 = String(id2);
+        if (str1 === str2) return true;
+
+        const m1 = memberList?.find(m => m._id?.toString() === str1 || m.id?.toString() === str1 || m.userId === str1);
+        const m2 = memberList?.find(m => m._id?.toString() === str2 || m.id?.toString() === str2 || m.userId === str2);
+
+        if (m1 && m2) {
+            return (m1._id && m2._id && m1._id.toString() === m2._id.toString()) || 
+                   (m1.userId && m2.userId && m1.userId === m2.userId);
+        }
+        if (m1) {
+            return m1._id?.toString() === str2 || m1.userId === str2;
+        }
+        if (m2) {
+            return m2._id?.toString() === str1 || m2.userId === str1;
+        }
         return false;
     };
 
